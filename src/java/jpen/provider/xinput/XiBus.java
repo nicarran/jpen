@@ -75,8 +75,7 @@ class XiBus {
 	@Override
 	protected void finalize() {
 		if(cellIndex!=-1)
-			if(destroy(cellIndex)<0)
-				throw new Error(getError());
+			destroy(cellIndex);
 	}
 	static native int destroy(int cellIndex);
 
