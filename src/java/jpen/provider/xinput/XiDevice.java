@@ -31,7 +31,7 @@ class XiDevice{
 	}
 
 	enum EventType{
-	  BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY;
+		BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY;
 	}
 
 	final int cellIndex;
@@ -63,7 +63,9 @@ class XiDevice{
 
 	@Override
 	protected void finalize() {
-		destroy(cellIndex);
+		if(cellIndex!=-1)
+			if(destroy(cellIndex)<0)
+				throw new Error(getError());
 	}
 	private static native int destroy(int cellIndex);
 	private static native String getError();
