@@ -63,13 +63,16 @@ extern void type##_setError(char *error);\
 extern void type##_appendError(char *error)
 
 	#define m_implementRow(type) \
+\
 	struct type##Row type##_row;\
 struct type##Cell * type##_getPCell(int cellIndex){\
 	return type##_row.pCells+cellIndex;\
 }\
+\
 struct type * type##_getP(int cellIndex){\
 	return  type##_getPCell(cellIndex)->pContent;\
 }\
+\
 int type##_create(void){\
 	if(type##_row.size==0){\
 		type##_row.firstUsedCell=-1;\
@@ -77,11 +80,11 @@ int type##_create(void){\
 	}\
 	struct type *pNew=calloc(1, sizeof(struct type));\
 	if(!pNew){\
-		type##_row.error="Insuficient memory to create new "#type ".";\
+		type##_setError("Insuficient memory to create new "#type ".");\
 		return -1;\
 	}\
 	if(type##_preCreate(pNew)){\
-		type##_row.error="Initialization of created "#type" failed.";\
+		type##_setError("Initialization of created "#type" failed.");\
 		free(pNew);\
 		return -1;\
 	}\
@@ -90,10 +93,10 @@ int type##_create(void){\
 	if(cellIndex==-1){\
 		reusing=0;\
 		struct type##Cell *pNewCells=realloc(type##_row.pCells,\
-					                                     (type##_row.size+1)*sizeof(struct type##Cell));\
-if(!pNewCells){\
+																							 (type##_row.size+1)*sizeof(struct type##Cell));\
+	if(!pNewCells){\
+			type##_setError("Insuficient memory to reallocate for "#type".");\
 			free(pNew);\
-			type##_row.error="Insuficient memory to reallocate for "#type".";\
 			return -1;\
 		}\
 		type##_row.pCells=pNewCells;\
@@ -115,18 +118,19 @@ if(!pNewCells){\
 	type##_row.usedSize++;\
 	return cellIndex;\
 }\
+\
 int type##_destroy(int cellIndex){\
 	if(cellIndex<0 || cellIndex>=type##_row.size){\
-		type##_row.error="cellIndex out of range.";\
+		type##_setError("cellIndex out of range.");\
 		return -1;\
 	}\
 	struct type##Cell *pCell=type##_getPCell(cellIndex);\
 	if(pCell->pContent==NULL){\
-		type##_row.error="Cell content already destroyed.";\
+		type##_setError("Cell content already destroyed.");\
 		return -1;\
 	}\
 	if(type##_preDestroy(pCell->pContent)){\
-		type##_row.error="Finalization of " #type " failed.";\
+		type##_setError("preDestroy failed.");\
 		return -1;\
 	}\
 	if(pCell->prevCell==-1 && pCell->nextCell==-1 ){\
@@ -152,11 +156,13 @@ int type##_destroy(int cellIndex){\
 	type##_row.usedSize--;\
 	return 0;\
 }\
+\
 void type##_setError(char *error){\
 	printf("--- jni: "#type": %s \n", error);\
 	m_newstr(type##_row.error, #type ": ");\
 	type##_appendError(error);\
 }\
+\
 void type##_appendError(char *toAppend){\
 	m_concat(type##_row.error, toAppend);\
 }
