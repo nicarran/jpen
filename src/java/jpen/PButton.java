@@ -21,9 +21,12 @@
 package jpen;
 
 public class PButton
-	extends TypedValuedClass<PButton.Type, Boolean> {
+			extends TypedValuedClass<PButton.Type, Boolean>
+	implements java.io.Serializable {
+	public static final long serialVersionUID=1l;
+
 	public enum Type{
-	  LEFT, CENTER, RIGHT;
+		LEFT, CENTER, RIGHT;
 	}
 
 	public PButton(int typeNumber, Boolean value) {

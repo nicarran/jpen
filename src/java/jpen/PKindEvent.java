@@ -23,7 +23,10 @@ package jpen;
 import jpen.event.PenListener;
 
 public class PKindEvent
-	extends PenEvent {
+	extends PenEvent
+	implements java.io.Serializable {
+	public static final long serialVersionUID=1l;
+
 	public final PKind kind;
 
 	PKindEvent(Pen pen, PKind kind) {
@@ -40,6 +43,6 @@ public class PKindEvent
 
 	@Override
 	public String toString(){
-	  return "[PKindEvent: time="+time+", kind="+kind+"]";
+		return "[PKindEvent: time="+time+", kind="+kind+"]";
 	}
 }

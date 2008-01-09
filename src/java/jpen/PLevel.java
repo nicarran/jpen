@@ -25,13 +25,16 @@ import java.awt.Dimension;
 import java.awt.geom.Point2D;
 
 public class PLevel
-	extends TypedValuedClass<PLevel.Type, Float> {
+	extends TypedValuedClass<PLevel.Type, Float>
+	implements java.io.Serializable {
+	public static final long serialVersionUID=1l;
+
 	public enum Type{
-	  X(true),  Y(true),  PRESSURE(false);
-	  public final boolean isMovement;
-	  Type(boolean isMovement) {
-		  this.isMovement=isMovement;
-	  }
+		X(true),  Y(true),  PRESSURE(false);
+		public final boolean isMovement;
+		Type(boolean isMovement) {
+			this.isMovement=isMovement;
+		}
 	}
 
 	public static class Range {

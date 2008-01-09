@@ -97,7 +97,7 @@ public class PenState {
 
 	private void setExtButtonValue(PButton button) {
 		if(button.value)
-			extButtonTypeNumberToValue.put(button.typeNumber, getExtButtonValue(button.typeNumber));
+			extButtonTypeNumberToValue.put(button.typeNumber, getExtButtonValue(button.typeNumber)+1);
 		else
 			extButtonTypeNumberToValue.put(button.typeNumber, 0);
 	}

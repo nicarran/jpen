@@ -23,7 +23,10 @@ package jpen;
 import jpen.event.PenListener;
 
 public class PButtonEvent
-	extends PenEvent {
+	extends PenEvent
+	implements java.io.Serializable {
+	public static final long serialVersionUID=1l;
+
 	public final PButton button;
 
 	PButtonEvent(Pen pen, PButton button) {

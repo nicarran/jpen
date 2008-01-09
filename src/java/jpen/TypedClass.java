@@ -20,7 +20,9 @@
 * }] */
 package jpen;
 
-public abstract class TypedClass<T extends Enum<T>> {
+public abstract class TypedClass<T extends Enum<T>>
+	implements java.io.Serializable {
+	public static final long serialVersionUID=1l;
 	public final int typeNumber;
 
 	TypedClass(int typeNumber) {

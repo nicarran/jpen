@@ -23,7 +23,10 @@ package jpen;
 import jpen.event.PenListener;
 
 public class PScrollEvent
-	extends PenEvent {
+			extends PenEvent
+	implements java.io.Serializable {
+	public static final long serialVersionUID=1l;
+
 	public final PScroll scroll;
 
 	PScrollEvent(Pen pen, PScroll scroll) {
@@ -39,6 +42,6 @@ public class PScrollEvent
 
 	@Override
 	public String toString(){
-	  return "[PScrollEvent: time="+time+", scroll="+scroll+"]";
+		return "[PScrollEvent: time="+time+", scroll="+scroll+"]";
 	}
 }

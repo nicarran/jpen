@@ -41,40 +41,40 @@ class MouseDevice
 	extends AbstractPenDevice {
 	private final MouseAdapter myMouseAdapter=new MouseAdapter() {
 
-		    @Override
-		    public void mouseMoved(MouseEvent ev) {
-			    scheduleMove(ev.getX(), ev.getY());
-		    }
+				@Override
+				public void mouseMoved(MouseEvent ev) {
+					scheduleMove(ev.getX(), ev.getY());
+				}
 
-		    @Override
-		    public void mouseDragged(MouseEvent ev) {
-			    scheduleMove(ev.getX(), ev.getY());
-		    }
+				@Override
+				public void mouseDragged(MouseEvent ev) {
+					scheduleMove(ev.getX(), ev.getY());
+				}
 
-		    @Override
-		    public void mousePressed(MouseEvent ev) {
-			    mouseButtonChanged(ev, true);
-		    }
+				@Override
+				public void mousePressed(MouseEvent ev) {
+					mouseButtonChanged(ev, true);
+				}
 
-		    @Override
-		    public void mouseReleased(MouseEvent ev) {
-			    mouseButtonChanged(ev, false);
-		    }
+				@Override
+				public void mouseReleased(MouseEvent ev) {
+					mouseButtonChanged(ev, false);
+				}
 
-		    @Override
-		    public void mouseWheelMoved(MouseWheelEvent ev) {
-			    int value=ev.getWheelRotation();
-			    PScroll.Type type=PScroll.Type.DOWN;
-			    if(value<0) {
-				    type=PScroll.Type.UP;
-				    value=-value;
-			    }
-			    if(ev.getScrollType()==ev.WHEEL_UNIT_SCROLL && ev.getScrollAmount()>0) // > 0 : is because windows bug workaround, sometimes it is 0.
-				    value*=ev.getScrollAmount();
-			    getPen().scheduleScrollEvent(new PScroll(type.ordinal(), value));
-		    }
+				@Override
+				public void mouseWheelMoved(MouseWheelEvent ev) {
+					int value=ev.getWheelRotation();
+					PScroll.Type type=PScroll.Type.DOWN;
+					if(value<0) {
+						type=PScroll.Type.UP;
+						value=-value;
+					}
+					if(ev.getScrollType()==ev.WHEEL_UNIT_SCROLL && ev.getScrollAmount()>0) // > 0 : is because windows bug workaround, sometimes it is 0.
+						value*=ev.getScrollAmount();
+					getPen().scheduleScrollEvent(new PScroll(type.ordinal(), value));
+				}
 
-	    };
+			};
 
 	MouseDevice(PenProvider provider) {
 		super(provider);
@@ -82,7 +82,7 @@ class MouseDevice
 	}
 
 	@Override
-	public boolean isDigitizer() {
+	public boolean isDigitizer(){
 		return false;
 	}
 

@@ -38,9 +38,9 @@ public class Pen extends PenState {
 
 	/** Tail of event queue. */
 	private PenEvent lastDispatchedEvent=new PenEvent(this) {
-		                                     @Override
-		                                     void dispatch() { }}
-	                                     ;
+																				 @Override
+																				 void dispatch() { }}
+																			 ;
 	/** Head of event queue. */
 	private PenEvent lastScheduledEvent=lastDispatchedEvent;
 	public final PenState lastScheduledState=new PenState();
@@ -87,13 +87,12 @@ public class Pen extends PenState {
 		}
 
 		private boolean waitNewEvents() throws InterruptedException {
-			if(lastDispatchedEvent.next==null) {
-				waitingNewEvents=true;
-				wait();
-				waitingNewEvents=false;
-				return true;
-			}
-			return false;
+			if(lastDispatchedEvent.next!=null)
+				return false;
+			waitingNewEvents=true;
+			wait();
+			waitingNewEvents=false;
+			return true;
 		}
 
 		void processNewEvents() {
@@ -169,8 +168,8 @@ public class Pen extends PenState {
 		boolean filter(PenDevice device) {
 			if(!device.isDigitizer()) {
 				if(lastDevice!=null &&
-				        lastDevice!=device &&
-				        System.currentTimeMillis()-lastEvent.time<=THRESHOLD_PERIOD)
+								lastDevice!=device &&
+								System.currentTimeMillis()-lastEvent.time<=THRESHOLD_PERIOD)
 					return true;
 				if(!filteredFirstInSecuence) {
 					filteredFirstInSecuence=true;
@@ -203,20 +202,19 @@ public class Pen extends PenState {
 				scheduledLevels.add(level);
 				lastScheduledState.setLevelValue(level);
 			}
-			if(!scheduledLevels.isEmpty()) {
-				int newKindTypeNumber=device.getKindTypeNumber();
-				if(lastScheduledState.getKindTypeNumber()!=newKindTypeNumber) {
-					lastScheduledState.setKindTypeNumber(newKindTypeNumber);
-					schedule(new PKindEvent(this, new PKind(newKindTypeNumber)));
-				}
-				PLevelEvent levelEvent=new PLevelEvent(this,
-				                                       scheduledLevels.toArray(new PLevel[scheduledLevels.size()]));
-				phantomLevelFilter.setLastEvent(levelEvent);
-				schedule(levelEvent);
-				scheduledLevels.clear();
-				return true;
+			if(scheduledLevels.isEmpty())
+				return false;
+			int newKindTypeNumber=device.getKindTypeNumber();
+			if(lastScheduledState.getKindTypeNumber()!=newKindTypeNumber) {
+				lastScheduledState.setKindTypeNumber(newKindTypeNumber);
+				schedule(new PKindEvent(this, new PKind(newKindTypeNumber)));
 			}
-			return false;
+			PLevelEvent levelEvent=new PLevelEvent(this,
+																						 scheduledLevels.toArray(new PLevel[scheduledLevels.size()]));
+			phantomLevelFilter.setLastEvent(levelEvent);
+			schedule(levelEvent);
+			scheduledLevels.clear();
+			return true;
 		}
 	}
 

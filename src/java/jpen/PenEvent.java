@@ -23,10 +23,13 @@ package jpen;
 import jpen.event.PenListener;
 import java.util.Arrays;
 
-public abstract class PenEvent {
+public abstract class PenEvent
+	implements java.io.Serializable {
+	public static final long serialVersionUID=1l;
+
 	long time=-1;
 	volatile PenEvent next;
-	public final Pen pen;
+	public final transient Pen pen;
 
 	PenEvent(Pen pen) {
 		this.pen=pen;

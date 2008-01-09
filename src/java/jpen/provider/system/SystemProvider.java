@@ -54,4 +54,5 @@ public class SystemProvider
 	}
 
 	@Override
-	public void penManagerPaused(boolean paused) {}}
+	public void penManagerPaused(boolean paused) {}
+}

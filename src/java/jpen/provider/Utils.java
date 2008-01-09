@@ -60,7 +60,11 @@ public final class Utils {
 
 	private static final String getJniLibName() {
 		return getModuleProperties().getString("module.id")+"-"+
-		       getModuleProperties().getString("module.version");
+					 getModuleProperties().getString("module.version");
+	}
+
+	public static final String getDistVersion(){
+		return getModuleProperties().getString("module.distVersion");
 	}
 
 	public static final void loadLibrary() {

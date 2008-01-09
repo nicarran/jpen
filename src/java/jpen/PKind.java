@@ -21,16 +21,18 @@
 package jpen;
 
 public class PKind
-	extends TypedClass<PKind.Type> {
+			extends TypedClass<PKind.Type>
+	implements java.io.Serializable {
+	public static final long serialVersionUID=1l;
 
 	public enum Type{
-	  CURSOR, STYLUS, ERASER;
+		CURSOR, STYLUS, ERASER;
 
-	  public static final PKind.Type valueOf(int kindTypeNumber) {
-		if(kindTypeNumber>=values().length)
-			return null;
-		return values()[kindTypeNumber];
-	}
+		public static final PKind.Type valueOf(int kindTypeNumber) {
+			if(kindTypeNumber>=values().length)
+				return null;
+			return values()[kindTypeNumber];
+		}
 	}
 
 	public PKind(int typeNumber) {

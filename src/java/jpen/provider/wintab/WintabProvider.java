@@ -70,7 +70,7 @@ public class WintabProvider
 				if(robot==null)
 					robot=new Robot();
 				return new WintabProvider(pm, this, wintabAccess, robot);
-			} catch(Exception ex) {
+			} catch(Throwable ex) {
 				throw new ConstructionException(ex);
 			}
 		}
@@ -86,11 +86,11 @@ public class WintabProvider
 			switch(levelType) {
 			case X:
 				levelRangeMults[levelType.ordinal()]=
-				  Toolkit.getDefaultToolkit().getScreenSize().width;
+					Toolkit.getDefaultToolkit().getScreenSize().width;
 				break;
 			case Y:
 				levelRangeMults[levelType.ordinal()]=
-				  Toolkit.getDefaultToolkit().getScreenSize().height;
+					Toolkit.getDefaultToolkit().getScreenSize().height;
 				break;
 			default:
 				levelRangeMults[levelType.ordinal()]=1;
@@ -98,40 +98,40 @@ public class WintabProvider
 		}
 
 		thread=new Thread() {
-			       public synchronized void run() {
-				       try {
-					       while(true) {
-						       processQuedEvents();
-						       wait(PERIOD);
-						       while(paused)
-							       wait();
-					       }
-				       } catch(InterruptedException ex) { throw new Error(ex);}
-			       }
-		       }
-		       ;
+						 public synchronized void run() {
+							 try {
+								 while(true) {
+									 processQuedEvents();
+									 wait(PERIOD);
+									 while(paused)
+										 wait();
+								 }
+							 } catch(InterruptedException ex) { throw new Error(ex);}
+						 }
+					 }
+					 ;
 		thread.setDaemon(true);
 		thread.setPriority(Thread.MAX_PRIORITY);
 		thread.start();
 
 		// Defensive mechanism:
 		penManager.component.addMouseMotionListener(new MouseMotionAdapter() {
-			    @Override
-			    public void mouseMoved(MouseEvent ev) {
-				    setPaused(false);
-			    }
-			    @Override
-			    public void mouseDragged(MouseEvent ev) {
-				    setPaused(false);
-			    }
-		    }
-		                                           );
+					@Override
+					public void mouseMoved(MouseEvent ev) {
+						setPaused(false);
+					}
+					@Override
+					public void mouseDragged(MouseEvent ev) {
+						setPaused(false);
+					}
+				}
+																							 );
 	}
 
 	void moveMouseToLastScheduledLocation(Point2D.Float componentLocation) {
 		robot.mouseMove(
-		  (int)(componentLocation.x+getPenManager().pen.lastScheduledState.getLevelValue(PLevel.Type.X)),
-		  (int)(componentLocation.y+getPenManager().pen.lastScheduledState.getLevelValue(PLevel.Type.Y))
+			(int)(componentLocation.x+getPenManager().pen.lastScheduledState.getLevelValue(PLevel.Type.X)),
+			(int)(componentLocation.y+getPenManager().pen.lastScheduledState.getLevelValue(PLevel.Type.Y))
 		);
 	}
 

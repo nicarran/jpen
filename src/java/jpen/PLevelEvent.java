@@ -24,7 +24,10 @@ import java.util.Arrays;
 import jpen.event.PenListener;
 
 public class PLevelEvent
-	extends PenEvent {
+			extends PenEvent
+	implements java.io.Serializable {
+	public static final long serialVersionUID=1l;
+
 	public final PLevel[] levels;
 
 	PLevelEvent(Pen pen, PLevel[] levels) {

@@ -21,9 +21,12 @@
 package jpen;
 
 public class PScroll
-	extends TypedValuedClass<PScroll.Type, Integer> {
+	extends TypedValuedClass<PScroll.Type, Integer>
+	implements java.io.Serializable {
+	public static final long serialVersionUID=1l;
+
 	public enum Type {
-	  UP, DOWN;
+		UP, DOWN;
 	}
 
 	public PScroll(int typeNumber, int value) {
