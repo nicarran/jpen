@@ -42,6 +42,7 @@ import jpen.PLevel;
 import jpen.PLevelEvent;
 import jpen.provider.AbstractPenDevice;
 import jpen.provider.Utils;
+import jpen.provider.VirtualScreenBounds;
 import jpen.PScroll;
 import jpen.PScrollEvent;
 import static jpen.provider.xinput.XiDevice.*;
@@ -49,33 +50,17 @@ import static jpen.provider.xinput.XiDevice.*;
 class XinputDevice extends AbstractPenDevice {
 	public final XiDevice device;
 	private final PLevel.Range[] levelRanges;
-	private final float[] rangedValueMults;
+	private final XinputProvider xinputProvider;
 	private final Point2D.Float componentLocation=new Point2D.Float();
 	private final Dimension componentSize=new Dimension();
 
-	XinputDevice(PenProvider provider, XiDevice device) {
-		super(provider);
+	XinputDevice(XinputProvider xinputProvider, XiDevice device) {
+		super(xinputProvider);
 		this.device=device;
+		this.xinputProvider=xinputProvider;
 		levelRanges=new PLevel.Range[PLevel.Type.values().length];
-		rangedValueMults=new float[PLevel.Type.values().length];
-		for(PLevel.Type levelType: PLevel.Type.values()) {
+		for(PLevel.Type levelType: PLevel.Type.values())
 			levelRanges[levelType.ordinal()]=device.getLevelRange(levelType);
-			switch(levelType) {
-			case X:
-				rangedValueMults[levelType.ordinal()]=
-				  Toolkit.getDefaultToolkit().getScreenSize().width;
-				break;
-			case Y:
-				rangedValueMults[levelType.ordinal()]=
-				  Toolkit.getDefaultToolkit().getScreenSize().height;
-				break;
-			case PRESSURE:
-				rangedValueMults[levelType.ordinal()]=1;
-				break;
-			default:
-				throw new AssertionError();
-			}
-		}
 		setKindTypeNumber(getDefaultKindTypeNumber());
 		setEnabled(true);
 	}
@@ -91,7 +76,7 @@ class XinputDevice extends AbstractPenDevice {
 	}
 
 	void processQuedEvents() {
-	  if(!getEnabled())
+		if(!getEnabled())
 			return;
 		while(device.nextEvent()) {
 			EventType eventType=device.getLastEventType();
@@ -123,7 +108,7 @@ class XinputDevice extends AbstractPenDevice {
 		Utils.getLocationOnScreen(getComponent(), componentLocation);
 		for(PLevel.Type levelType:PLevel.Type.values()) {
 			float value=PLevel.getCoordinateValueInsideComponent(
-																				  getComponent().getSize(componentSize), componentLocation,  levelType, getMultRangedValue(levelType));
+																					getComponent().getSize(componentSize), componentLocation,  levelType, getMultRangedValue(levelType));
 			if(value<0) {
 				changedLevels.clear();
 				return;
@@ -144,7 +129,9 @@ class XinputDevice extends AbstractPenDevice {
 	}
 
 	private final float getMultRangedValue(PLevel.Type levelType) {
-		return getRangedValue(levelType)*rangedValueMults[levelType.ordinal()];
+		return xinputProvider.screenBounds.getLevelRangeOffset(levelType)+
+		getRangedValue(levelType)
+		*xinputProvider.screenBounds.getLevelRangeMult(levelType);
 	}
 
 	@Override

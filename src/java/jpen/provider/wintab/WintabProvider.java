@@ -23,12 +23,18 @@ package jpen.provider.wintab;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Set;
 import jpen.Pen;
@@ -38,14 +44,16 @@ import jpen.PenProvider;
 import jpen.PLevel;
 import jpen.provider.AbstractPenProvider;
 import jpen.provider.Utils;
+import jpen.provider.VirtualScreenBounds;
 
 public class WintabProvider
 	extends AbstractPenProvider {
+	private static final Logger L=Logger.getLogger(WintabProvider.class.getName());
 	public static final int PERIOD=10;
 	final WintabAccess wintabAccess;
 	private final Map<Integer, WintabDevice> cursorToDevice=new HashMap<Integer, WintabDevice>();
 	private final PLevel.Range[] levelRanges=new PLevel.Range[PLevel.Type.values().length];
-	private final float[] levelRangeMults=new float[PLevel.Type.values().length];
+	final VirtualScreenBounds screenBounds=new VirtualScreenBounds();
 	private final Thread thread;
 	private boolean paused=true;
 	private final Robot robot;
@@ -76,26 +84,16 @@ public class WintabProvider
 		}
 	}
 
+
+
 	private WintabProvider(PenManager penManager, Constructor constructor, WintabAccess wintabAccess, Robot robot) {
 		super(penManager, constructor);
+		L.fine("start");
 		this.wintabAccess=wintabAccess;
 		this.robot=robot;
 
-		for(PLevel.Type levelType: PLevel.Type.values()) {
+		for(PLevel.Type levelType: PLevel.Type.values())
 			levelRanges[levelType.ordinal()]=wintabAccess.getLevelRange(levelType);
-			switch(levelType) {
-			case X:
-				levelRangeMults[levelType.ordinal()]=
-					Toolkit.getDefaultToolkit().getScreenSize().width;
-				break;
-			case Y:
-				levelRangeMults[levelType.ordinal()]=
-					Toolkit.getDefaultToolkit().getScreenSize().height;
-				break;
-			default:
-				levelRangeMults[levelType.ordinal()]=1;
-			}
-		}
 
 		thread=new Thread() {
 						 public synchronized void run() {
@@ -103,8 +101,11 @@ public class WintabProvider
 								 while(true) {
 									 processQuedEvents();
 									 wait(PERIOD);
-									 while(paused)
+									 while(paused){
+										 L.fine("going to wait...");
 										 wait();
+										 L.fine("notified");
+									 }
 								 }
 							 } catch(InterruptedException ex) { throw new Error(ex);}
 						 }
@@ -126,6 +127,7 @@ public class WintabProvider
 					}
 				}
 																							 );
+		L.fine("end");
 	}
 
 	void moveMouseToLastScheduledLocation(Point2D.Float componentLocation) {
@@ -139,15 +141,15 @@ public class WintabProvider
 		return levelRanges[type.ordinal()];
 	}
 
-	float getLevelRangeMult(PLevel.Type type) {
-		return levelRangeMults[type.ordinal()];
-	}
-
 	private void processQuedEvents() {
+		L.fine("start");
 		while(wintabAccess.nextPacket()) {
 			WintabDevice device=getDevice(wintabAccess.getCursor());
+			L.fine("device: ");
+			L.fine(device.getName());
 			device.scheduleEvents();
 		}
+		L.fine("end");
 	}
 
 	private WintabDevice getDevice(int cursor) {
@@ -167,13 +169,20 @@ public class WintabProvider
 	}
 
 	void setPaused(boolean paused) {
+		L.fine("start");
 		if(paused==this.paused)
 			return;
 		this.paused=paused;
 		wintabAccess.setEnabled(!paused);
-		if(!paused)
+		if(!paused){
+			L.fine("false paused value");
+			screenBounds.reset();
 			synchronized(thread) {
+				L.fine("going to notify all...");
 				thread.notifyAll();
+				L.fine("done notifying ");
 			}
+		}
+		L.fine("end");
 	}
 }

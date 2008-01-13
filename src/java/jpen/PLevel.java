@@ -23,10 +23,13 @@ package jpen;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.geom.Point2D;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PLevel
-	extends TypedValuedClass<PLevel.Type, Float>
+			extends TypedValuedClass<PLevel.Type, Float>
 	implements java.io.Serializable {
+	private static final Logger L=Logger.getLogger(PLevel.class.getName());
 	public static final long serialVersionUID=1l;
 
 	public enum Type{
@@ -69,6 +72,9 @@ public class PLevel
 	}
 
 	public static final float getCoordinateValueInsideComponent( Dimension componentSize, Point2D.Float componentLocation, PLevel.Type coordinate, float coordinateValue) {
+		if(L.isLoggable(Level.FINE)){
+			L.fine("componentSize="+componentSize+", componentLocation="+componentLocation+", coordinate="+coordinate+", coordinateValue="+coordinateValue);
+		}
 		switch(coordinate) {
 		case X:
 			coordinateValue-=componentLocation.x;

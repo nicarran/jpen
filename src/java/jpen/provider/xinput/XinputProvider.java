@@ -24,17 +24,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import jpen.provider.AbstractPenProvider;
+import java.util.logging.Logger;
 import jpen.PenDevice;
 import jpen.PenManager;
 import jpen.PenProvider;
+import jpen.provider.AbstractPenProvider;
 import jpen.provider.Utils;
+import jpen.provider.VirtualScreenBounds;
 
 public class XinputProvider
 	extends AbstractPenProvider {
+	private static final Logger L=Logger.getLogger(XinputProvider.class.getName());
 	public static final int PERIOD=10;
 	private final  Thread thread;
 	private final XinputDevice[] xipDevices;
+	final VirtualScreenBounds screenBounds=new VirtualScreenBounds();
 
 	public static class Constructor
 		implements PenProvider.Constructor {
@@ -60,6 +64,7 @@ public class XinputProvider
 
 	private XinputProvider(PenManager penManager, Constructor constructor) throws Exception {
 		super(penManager, constructor);
+		L.fine("start");
 
 		XiBus bus=new XiBus();
 
@@ -76,21 +81,22 @@ public class XinputProvider
 		xipDevices=devices.toArray(new XinputDevice[devices.size()]);
 
 		thread=new Thread() {
-			       public synchronized void run() {
-				       try {
-					       while(true) {
-						       processQuedEvents();
-						       wait(PERIOD);
-						       while(getPenManager().getPaused())
-							       wait();
-					       }
-				       } catch(InterruptedException ex) { throw new Error(ex);}
-			       }
-		       }
-		       ;
+						 public synchronized void run() {
+							 try {
+								 while(true) {
+									 processQuedEvents();
+									 wait(PERIOD);
+									 while(getPenManager().getPaused())
+										 wait();
+								 }
+							 } catch(InterruptedException ex) { throw new Error(ex);}
+						 }
+					 }
+					 ;
 		thread.setDaemon(true);
 		thread.setPriority(Thread.MAX_PRIORITY);
 		thread.start();
+		L.fine("end");
 	}
 
 	private void processQuedEvents() {
@@ -100,9 +106,11 @@ public class XinputProvider
 
 	@Override
 	public void penManagerPaused(boolean paused) {
-		if(!paused)
+		if(!paused){
+			screenBounds.reset();
 			synchronized(thread) {
 				thread.notifyAll();
 			}
+		}
 	}
 }

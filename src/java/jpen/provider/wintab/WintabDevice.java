@@ -23,11 +23,14 @@ package jpen.provider.wintab;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.geom.Point2D;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.Map;
 import jpen.PButton;
 import jpen.PButtonEvent;
@@ -40,6 +43,7 @@ import jpen.provider.Utils;
 
 class WintabDevice
 	extends AbstractPenDevice {
+	private static final Logger L=Logger.getLogger(WintabDevice.class.getName());
 	final WintabProvider wintabProvider;
 	public final int cursor;
 	private int lastButtonsValues;
@@ -48,10 +52,12 @@ class WintabDevice
 
 	WintabDevice(WintabProvider wintabProvider, int cursor) {
 		super(wintabProvider);
+		L.fine("start");
 		this.wintabProvider=wintabProvider;
 		this.cursor=cursor;
 		setKindTypeNumber(getDefaultKindTypeNumber());
 		setEnabled(true);
+		L.fine("end");
 	}
 
 	private int getDefaultKindTypeNumber() {
@@ -72,8 +78,12 @@ class WintabDevice
 	}
 
 	void scheduleEvents() {
-		if(!getEnabled())
+		if(!getEnabled()){
+			L.fine("disabled");
 			return;
+		}
+		if(L.isLoggable(Level.FINE))
+			L.fine(wintabProvider.wintabAccess.toString());
 		scheduleLevelEvent();
 		scheduleButtonEvents();
 	}
@@ -110,10 +120,20 @@ class WintabDevice
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();
 	private void scheduleLevelEvent() {
 		Utils.getLocationOnScreen(getComponent(), componentLocation);
+		if(L.isLoggable(Level.FINE)){
+			L.fine("componentLocation: "+componentLocation);
+			Point p=getComponent().getLocationOnScreen();
+			if(!componentLocation.equals(p))
+				L.fine("UUUPS! something is wrong with the component location calc, getLocationOnScreen(): "+p);
+		}
 		for(PLevel.Type levelType:PLevel.Type.values()) {
 			float value=PLevel.getCoordinateValueInsideComponent(
-			              getComponent().getSize(componentSize), componentLocation,  levelType,  getMultRangedValue(levelType));
+										getComponent().getSize(componentSize), componentLocation,  levelType,  getMultRangedValue(levelType));
+			if(L.isLoggable(Level.FINE)){
+				L.fine("levelType="+levelType+", value="+value);
+			}
 			if(value<0) {
+				L.fine("negative value... pausing...");
 				wintabProvider.setPaused(true);
 				changedLevels.clear();
 				return;
@@ -128,11 +148,16 @@ class WintabDevice
 
 	private float getRangedValue(PLevel.Type type) {
 		float rangedValue=wintabProvider.getLevelRange(type).getRangedValue(
-		                    wintabProvider.wintabAccess.getValue(type));
+												wintabProvider.wintabAccess.getValue(type));
+		if(L.isLoggable(Level.FINE))
+			L.fine("type="+type+", rangedValue="+rangedValue);
 		return type.equals(PLevel.Type.Y)? 1f-rangedValue: rangedValue;
 	}
 
 	private float getMultRangedValue(PLevel.Type type) {
-		return getRangedValue(type)*wintabProvider.getLevelRangeMult(type);
+		if(L.isLoggable(Level.FINE))
+			L.fine("type="+type+", levelRangeMult="+wintabProvider.screenBounds.getLevelRangeMult(type));
+		return wintabProvider.screenBounds.getLevelRangeOffset(type)+
+					 getRangedValue(type)*wintabProvider.screenBounds.getLevelRangeMult(type);
 	}
 }

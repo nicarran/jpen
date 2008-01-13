@@ -38,6 +38,7 @@ public class Pen extends PenState {
 
 	/** Tail of event queue. */
 	private PenEvent lastDispatchedEvent=new PenEvent(this) {
+																				 public static final long serialVersionUID=1l;
 																				 @Override
 																				 void dispatch() { }}
 																			 ;

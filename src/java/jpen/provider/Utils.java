@@ -28,9 +28,11 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.ResourceBundle;
 
 public final class Utils {
+	private static final Logger L=Logger.getLogger(Utils.class.getName());
 	private static ResourceBundle moduleProperties;
 
 	public static final void getLocationOnScreen(Component c, Point2D.Float location) {
@@ -41,7 +43,9 @@ public final class Utils {
 					Point p=parentComponent.getLocationOnScreen();
 					location.x+=p.x;
 					location.y+=p.y;
-				} catch(IllegalComponentStateException ex) {}
+				} catch(IllegalComponentStateException ex) {
+					L.info("Applet was not ready to get location on screen");
+				}
 				return;
 			}
 			location.x+=parentComponent.getX();
