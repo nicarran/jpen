@@ -24,18 +24,31 @@ import java.awt.geom.Rectangle2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.util.logging.Logger;
 import jpen.PLevel;
 
 public final class VirtualScreenBounds{
+	private static final Logger L=Logger.getLogger(VirtualScreenBounds.class.getName());
+	private static VirtualScreenBounds INSTANCE;
 	private final Rectangle2D.Float r=new Rectangle2D.Float();
+
 	{
-		// first time calc is expensive, so I do it now:
+		// first time calc is expensive... I do it once in a background thread
 		new Thread(){
 			@Override
 			public void run(){
 				reset();
+				L.fine("first calculation done.");
 			}
 		}.start();
+	}
+
+	private VirtualScreenBounds(){}
+
+	public static VirtualScreenBounds getInstance(){
+		if(INSTANCE==null)
+			INSTANCE=new VirtualScreenBounds();
+		return INSTANCE;
 	}
 
 	public synchronized void reset(){
@@ -46,8 +59,7 @@ public final class VirtualScreenBounds{
 	static void calc(Rectangle2D r){
 		for (GraphicsDevice gd: GraphicsEnvironment.
 						getLocalGraphicsEnvironment().getScreenDevices())
-			for(GraphicsConfiguration gc: gd.getConfigurations())
-				r.add(gc.getBounds());
+			r.add(gd.getDefaultConfiguration().getBounds());
 	}
 
 	public float getLevelRangeMult(PLevel.Type type) {

@@ -111,11 +111,15 @@ class WintabAccess {
 
 	public static native long getCursorId(int cursor);
 
+	public static native int getCursorMode(int cursor);
+
 	public String getDeviceName() {
 		return getDeviceName(cellIndex);
 	}
 
 	private static native String getDeviceName(int cellIndex);
+
+	public static native boolean getDefCtxSysMode();
 
 	@Override
 	protected void finalize() {
@@ -151,6 +155,7 @@ class WintabAccess {
 		sb.append(", id="+getCursorId(getCursor()));
 		sb.append(", buttons=");
 		sb.append(getButtons());
+		sb.append(", defCtxSysMode="+getDefCtxSysMode());
 		sb.append("]");
 		return sb.toString();
 	}

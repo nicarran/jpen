@@ -132,7 +132,7 @@ class WintabDevice
 			if(L.isLoggable(Level.FINE)){
 				L.fine("levelType="+levelType+", value="+value);
 			}
-			if(value<0) {
+			if(value<0){
 				L.fine("negative value... pausing...");
 				wintabProvider.setPaused(true);
 				changedLevels.clear();
@@ -141,8 +141,7 @@ class WintabDevice
 			changedLevels.add(new PLevel(levelType.ordinal(), value));
 		}
 
-		if(getPen().scheduleLevelEvent(this, changedLevels))
-			wintabProvider.moveMouseToLastScheduledLocation(componentLocation);
+		getPen().scheduleLevelEvent(this, changedLevels);
 		changedLevels.clear();
 	}
 

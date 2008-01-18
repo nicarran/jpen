@@ -154,7 +154,9 @@ JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorsCount
  */
 JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorActive
 (JNIEnv *pEnv, jclass class, jint cursor) {
-	return Access_getCursorActive(cursor)? JNI_TRUE:JNI_FALSE;
+	BOOL r;
+	WTInfo( WTI_CURSORS + cursor, CSR_ACTIVE, &r );
+	return r? JNI_TRUE:JNI_FALSE;
 }
 
 /*
@@ -184,6 +186,18 @@ JNIEXPORT jlong JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorId
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getCursorMode
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorMode
+(JNIEnv *pEnv, jclass class, jint cursor){
+	UINT r;
+	WTInfo( WTI_CURSORS + cursor, CSR_MODE, &r);
+	return r;
+}
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
  * Method:    getDeviceName
  * Signature: (I)Ljava/lang/String;
  */
@@ -192,6 +206,18 @@ JNIEXPORT jstring JNICALL Java_jpen_provider_wintab_WintabAccess_getDeviceName
 	TCHAR r[256];
 	WTInfo(WTI_DEVICES+Access_getP(cellIndex)->device, DVC_NAME, &r);
 	return (*pEnv)->NewStringUTF(pEnv, r);
+}
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getDefCtxSysMode
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getDefCtxSysMode
+(JNIEnv *pEnv, jclass class){
+	BOOL r;
+	WTInfo(WTI_DEFCONTEXT, CTX_SYSMODE, &r);
+	return r? JNI_TRUE:JNI_FALSE;
 }
 
 /*
@@ -216,7 +242,7 @@ JNIEXPORT jintArray JNICALL Java_jpen_provider_wintab_WintabAccess_getButtonMap
 	jint buttonMap[32];
 	int i=32;
 	while(--i>=0)
-	  buttonMap[i]=r[i];
+		buttonMap[i]=r[i];
 	jintArray array=(*pEnv)->NewIntArray(pEnv, 32);
 	if(!r)
 		return NULL;

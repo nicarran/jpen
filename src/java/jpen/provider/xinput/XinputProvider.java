@@ -38,7 +38,7 @@ public class XinputProvider
 	public static final int PERIOD=10;
 	private final  Thread thread;
 	private final XinputDevice[] xipDevices;
-	final VirtualScreenBounds screenBounds=new VirtualScreenBounds();
+	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 
 	public static class Constructor
 		implements PenProvider.Constructor {

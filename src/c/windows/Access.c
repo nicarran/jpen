@@ -34,7 +34,10 @@ int Access_preCreate(SAccess *pAccess) {
 
 	pAccess->device=logCtx.lcDevice;
 
-	strcpy(logCtx.lcName, "nicarran.pointer Access");
+	strcpy(logCtx.lcName, "JPen Access");
+	logCtx.lcOptions |= CXO_SYSTEM;
+	logCtx.lcOutOrgX = logCtx.lcOutOrgY = 0;
+	logCtx.lcSysMode=FALSE;
 	logCtx.lcPktData = PACKETDATA;
 	logCtx.lcPktMode = PACKETMODE;
 	logCtx.lcMoveMask = PACKETDATA;
@@ -44,15 +47,23 @@ int Access_preCreate(SAccess *pAccess) {
 		Access_setError("Couldn't open default context.");
 		return errorState;
 	}
+
+	// Set queue size
+	int queueSize=MAX_WINTAB_QUEUE_SIZE;
+	for(; queueSize>=MIN_WINTAB_QUEUE_SIZE; queueSize-=16)
+		if(WTQueueSizeSet(pAccess->ctx, queueSize))
+			break;
+	//printf("C: wintab queue size: %i \n",WTQueueSizeGet(pAccess->ctx)); // D
+
 	return cleanState;
 }
 
 /* must match E_Valuators enumeration */
 static UINT axisIndexes[]={
-                            DVC_X,
-                            DVC_Y,
-                            DVC_NPRESSURE,
-                          };
+														DVC_X,
+														DVC_Y,
+														DVC_NPRESSURE,
+													};
 
 void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange) {
 	AXIS axis;
@@ -74,6 +85,9 @@ void Access_setEnabled(SAccess *pAccess, int enabled) {
 	if(enabled==Access_getEnabled(pAccess))
 		return;
 	WTEnable(pAccess->ctx, enabled);
+	// flush queue
+	WTPacketsGet( pAccess->ctx, MAX_WINTAB_QUEUE_SIZE, NULL);
+	WTOverlap(pAccess->ctx, enabled);
 }
 
 int Access_preDestroy(SAccess *pAccess) {
@@ -83,18 +97,30 @@ int Access_preDestroy(SAccess *pAccess) {
 	return cleanState;
 }
 
-int Access_nextPacket(SAccess *pAccess) {
-	PACKET p;
-	if (WTPacketsGet(pAccess->ctx, 1, &p)) {
-		pAccess->valuatorValues[E_Valuators_x]= p.pkX;
-		pAccess->valuatorValues[E_Valuators_y]= p.pkY;
-		// ToDo: p.pkOrientation.orAzimuth, p.pkOrientation.orAltitude, p.pkZ
-		pAccess->valuatorValues[E_Valuators_press]= p.pkNormalPressure;
-		pAccess->cursor=p.pkCursor;
-		pAccess->buttons=p.pkButtons;
-		return 1;
+static int Access_queueIsEmpty(SAccess *pAccess){
+	return pAccess->queueSize==pAccess->queueConsumableIndex;
+}
+
+static void Access_fillPacketQueue(SAccess *pAccess){
+	if(Access_queueIsEmpty(pAccess)){
+		pAccess->queueConsumableIndex=0;
+		pAccess->queueSize=WTPacketsGet(pAccess->ctx, QUEUE_SIZE, pAccess->queue);
+		//printf("C: new queueSize: %i\n", pAccess->queueSize);
 	}
-	return 0;
+}
+
+int Access_nextPacket(SAccess *pAccess) {
+	Access_fillPacketQueue(pAccess);
+	if(Access_queueIsEmpty(pAccess))
+		return 0;
+	PACKET p=pAccess->queue[pAccess->queueConsumableIndex++];
+	pAccess->valuatorValues[E_Valuators_x]= p.pkX;
+	pAccess->valuatorValues[E_Valuators_y]= p.pkY;
+	// ToDo: p.pkOrientation.orAzimuth, p.pkOrientation.orAltitude, p.pkZ
+	pAccess->valuatorValues[E_Valuators_press]= p.pkNormalPressure;
+	pAccess->cursor=p.pkCursor;
+	pAccess->buttons=p.pkButtons;
+	return 1;
 }
 
 UINT Access_getFirstCursor(SAccess *pAccess) {
@@ -106,12 +132,6 @@ UINT Access_getFirstCursor(SAccess *pAccess) {
 UINT Access_getCursorsCount(SAccess *pAccess) {
 	UINT r;
 	WTInfo(WTI_DEVICES+pAccess->device, DVC_NCSRTYPES, &r);
-	return r;
-}
-
-BOOL Access_getCursorActive(int cursor) {
-	BOOL r;
-	WTInfo( WTI_CURSORS + cursor, CSR_ACTIVE, &r );
 	return r;
 }
 

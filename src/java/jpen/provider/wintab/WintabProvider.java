@@ -21,7 +21,9 @@
 package jpen.provider.wintab;
 
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.GraphicsConfiguration;
@@ -53,14 +55,20 @@ public class WintabProvider
 	final WintabAccess wintabAccess;
 	private final Map<Integer, WintabDevice> cursorToDevice=new HashMap<Integer, WintabDevice>();
 	private final PLevel.Range[] levelRanges=new PLevel.Range[PLevel.Type.values().length];
-	final VirtualScreenBounds screenBounds=new VirtualScreenBounds();
+	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 	private final Thread thread;
 	private boolean paused=true;
-	private final Robot robot;
+	/*volatile float mouseX, mouseY;
+	private final MouseMotionListener mouseListener=new MouseMotionAdapter(){
+				@Override
+				public void mouseMoved(MouseEvent ev){
+					mouseX=ev.getX();
+					mouseY=ev.getY();
+				}
+			};*/
 
 	public static class Constructor
 		implements PenProvider.Constructor {
-		private static Robot robot;
 		@Override
 		public String getName() {
 			return "Wintab";
@@ -75,9 +83,7 @@ public class WintabProvider
 			try {
 				Utils.loadLibrary();
 				WintabAccess wintabAccess=new WintabAccess();
-				if(robot==null)
-					robot=new Robot();
-				return new WintabProvider(pm, this, wintabAccess, robot);
+				return new WintabProvider(pm, this, wintabAccess);
 			} catch(Throwable ex) {
 				throw new ConstructionException(ex);
 			}
@@ -86,11 +92,10 @@ public class WintabProvider
 
 
 
-	private WintabProvider(PenManager penManager, Constructor constructor, WintabAccess wintabAccess, Robot robot) {
+	private WintabProvider(PenManager penManager, Constructor constructor, WintabAccess wintabAccess) {
 		super(penManager, constructor);
 		L.fine("start");
 		this.wintabAccess=wintabAccess;
-		this.robot=robot;
 
 		for(PLevel.Type levelType: PLevel.Type.values())
 			levelRanges[levelType.ordinal()]=wintabAccess.getLevelRange(levelType);
@@ -115,26 +120,7 @@ public class WintabProvider
 		thread.setPriority(Thread.MAX_PRIORITY);
 		thread.start();
 
-		// Defensive mechanism:
-		penManager.component.addMouseMotionListener(new MouseMotionAdapter() {
-					@Override
-					public void mouseMoved(MouseEvent ev) {
-						setPaused(false);
-					}
-					@Override
-					public void mouseDragged(MouseEvent ev) {
-						setPaused(false);
-					}
-				}
-																							 );
 		L.fine("end");
-	}
-
-	void moveMouseToLastScheduledLocation(Point2D.Float componentLocation) {
-		robot.mouseMove(
-			(int)(componentLocation.x+getPenManager().pen.lastScheduledState.getLevelValue(PLevel.Type.X)),
-			(int)(componentLocation.y+getPenManager().pen.lastScheduledState.getLevelValue(PLevel.Type.Y))
-		);
 	}
 
 	PLevel.Range getLevelRange(PLevel.Type type) {
@@ -173,8 +159,8 @@ public class WintabProvider
 		if(paused==this.paused)
 			return;
 		this.paused=paused;
-		wintabAccess.setEnabled(!paused);
 		if(!paused){
+			//getPenManager().component.addMouseMotionListener(mouseListener);
 			L.fine("false paused value");
 			screenBounds.reset();
 			synchronized(thread) {
@@ -182,7 +168,12 @@ public class WintabProvider
 				thread.notifyAll();
 				L.fine("done notifying ");
 			}
-		}
+		}/*
+		else{
+			getPenManager().component.removeMouseMotionListener(mouseListener);
+			mouseX=mouseY=-1;
+	}*/
+		wintabAccess.setEnabled(!paused);
 		L.fine("end");
 	}
 }
