@@ -35,8 +35,12 @@ public class PKindEvent
 	}
 
 	@Override
+	void copyTo(PenState penState){
+		penState.setKindTypeNumber(kind.typeNumber);
+	}
+
+	@Override
 	void dispatch() {
-		pen.setKindTypeNumber(kind.typeNumber);
 		for(PenListener l:pen.getListenersArray())
 			l.penKindEvent(this);
 	}

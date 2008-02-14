@@ -35,6 +35,9 @@ public final class VirtualScreenBounds{
 	{
 		// first time calc is expensive... I do it once in a background thread
 		new Thread(){
+			{
+				setName("jpen-VirtualScreenBounds");
+			}
 			@Override
 			public void run(){
 				reset();

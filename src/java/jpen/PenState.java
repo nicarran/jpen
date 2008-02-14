@@ -23,12 +23,77 @@ package jpen;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PenState {
+public class PenState
+	implements java.io.Serializable {
+	public static final long serialVersionUID=1l;
+
+	static class Levels implements java.io.Serializable {
+		public static final long serialVersionUID=1l;
+		private final float[] values=new float[PLevel.Type.values().length];
+		private final Map<Integer, Float> extTypeNumberToValue=new HashMap<Integer, Float>();
+
+		public void setValues(PenState.Levels levels){
+			for(int i=values.length; --i>=0;)
+				values[i]=levels.values[i];
+			extTypeNumberToValue.clear();
+			extTypeNumberToValue.putAll(levels.extTypeNumberToValue);
+		}
+
+		public void setValues(PLevelEvent ev){
+			for(PLevel level:ev.levels)
+				setValue(level);
+		}
+
+		public void setValues(PenState penState){
+			setValues(penState.levels);
+		}
+
+		public float getValue(PLevel.Type levelType) {
+			return getValue(levelType.ordinal());
+		}
+
+		public float getValue(int levelTypeNumber) {
+			if(levelTypeNumber>=values.length)
+				return getExtValue(levelTypeNumber);
+			return values[levelTypeNumber];
+		}
+
+		private float getExtValue(int extLevelTypeNumber) {
+			Float value=extTypeNumberToValue.get(extLevelTypeNumber);
+			return value==null? 0f: value;
+		}
+
+		void setValue(PLevel level) {
+			setValue(level.typeNumber, level.value);
+		}
+
+		public void setValue(PLevel.Type levelType, float value){
+			setValue(levelType.ordinal(), value);
+		}
+
+		public final void setValue(int levelTypeNumber, float value){
+			if(levelTypeNumber>=values.length) {
+				setExtValue(levelTypeNumber, value);
+				return;
+			}
+			values[levelTypeNumber]=value;
+		}
+
+		private final void setExtValue(int levelTypeNumber, float value){
+			extTypeNumberToValue.put(levelTypeNumber, value);
+		}
+	}
+
 	private int kindTypeNumber;
-	private final float[] levelValues=new float[PLevel.Type.values().length];
-	private final Map<Integer, Float> extLevelTypeNumberToValue=new HashMap<Integer, Float>();
+	final Levels levels=new Levels();
 	private final int[] buttonValues=new int[PButton.Type.values().length];
 	private final Map<Integer, Integer> extButtonTypeNumberToValue=new HashMap<Integer, Integer>();
+
+	public PenState(){}
+
+	public PenState(PenState penState){
+		setValues(penState);
+	}
 
 	public int getKindTypeNumber() {
 		return kindTypeNumber;
@@ -43,30 +108,11 @@ public class PenState {
 	}
 
 	public float getLevelValue(PLevel.Type levelType) {
-		return getLevelValue(levelType.ordinal());
+		return levels.getValue(levelType);
 	}
 
 	public float getLevelValue(int levelTypeNumber) {
-		if(levelTypeNumber>=levelValues.length)
-			return getExtLevelValue(levelTypeNumber);
-		return levelValues[levelTypeNumber];
-	}
-
-	private float getExtLevelValue(int extLevelTypeNumber) {
-		Float levelValue=extLevelTypeNumberToValue.get(extLevelTypeNumber);
-		return levelValue==null? 0f: levelValue;
-	}
-
-	void setLevelValue(PLevel level) {
-		if(level.typeNumber>=levelValues.length) {
-			setExtLevelValue(level);
-			return;
-		}
-		levelValues[level.typeNumber]=level.value;
-	}
-
-	private void setExtLevelValue(PLevel level) {
-		extLevelTypeNumberToValue.put(level.typeNumber, level.value);
+		return levels.getValue(levelTypeNumber);
 	}
 
 	public boolean getButtonValue(PButton.Type buttonType) {
@@ -100,5 +146,20 @@ public class PenState {
 			extButtonTypeNumberToValue.put(button.typeNumber, getExtButtonValue(button.typeNumber)+1);
 		else
 			extButtonTypeNumberToValue.put(button.typeNumber, 0);
+	}
+
+	public void setValues(PenEvent ev){
+		ev.copyTo(this);
+	}
+
+	public void setValues(PenState penState){
+		levels.setValues(penState.levels);
+
+		for(int i=buttonValues.length; --i>=0;)
+			buttonValues[i]=penState.buttonValues[i];
+		extButtonTypeNumberToValue.clear();
+		extButtonTypeNumberToValue.putAll(penState.extButtonTypeNumberToValue);
+
+		kindTypeNumber=penState.kindTypeNumber;
 	}
 }

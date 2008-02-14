@@ -34,6 +34,7 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Logger;
@@ -58,14 +59,58 @@ public class WintabProvider
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 	private final Thread thread;
 	private boolean paused=true;
-	/*volatile float mouseX, mouseY;
-	private final MouseMotionListener mouseListener=new MouseMotionAdapter(){
-				@Override
-				public void mouseMoved(MouseEvent ev){
-					mouseX=ev.getX();
-					mouseY=ev.getY();
-				}
-			};*/
+	//final MouseLocator mouseLocator;
+
+	/*
+	class MouseLocator
+		extends MouseMotionAdapter{
+		private final float[] coords=new float[PLevel.Type.values().length];
+		private final boolean[] comparedCoords=new boolean[PLevel.Type.values().length];
+		private boolean isMouseMode=false;
+
+		{
+			getPenManager().component.addMouseMotionListener(this);
+		}
+
+		private void reset(){
+			comparedCoords[PLevel.Type.X.ordinal()]=false;
+			comparedCoords[PLevel.Type.Y.ordinal()]=false;
+			isMouseMode=false;
+		}
+
+		@SuppressWarnings("fallthrough")
+		float getCorrectedLocation(PLevel.Type levelType, float penLocation){
+			switch(levelType){
+			case X:
+			case Y:
+				if(getIsMouseMode(levelType, penLocation))
+					return getCoord(levelType);
+			default:
+				return penLocation;
+			}
+		}
+
+		private boolean getIsMouseMode(PLevel.Type levelType, float penLocation){
+			if(!comparedCoords[levelType.ordinal()]){
+				isMouseMode= isMouseMode ||
+										 Math.abs(penLocation-getCoord(levelType))>3;
+				if(isMouseMode)
+					L.fine("mouse mode detected");
+				comparedCoords[levelType.ordinal()]=true;
+			}
+			return isMouseMode;
+		}
+
+		synchronized float getCoord(PLevel.Type levelType){
+			return coords[levelType.ordinal()];
+		}
+
+		@Override
+		public synchronized void mouseMoved(MouseEvent ev){
+			coords[PLevel.Type.X.ordinal()]= ev.getX();
+			coords[PLevel.Type.Y.ordinal()]= ev.getY();
+		}
+}*/
 
 	public static class Constructor
 		implements PenProvider.Constructor {
@@ -96,11 +141,12 @@ public class WintabProvider
 		super(penManager, constructor);
 		L.fine("start");
 		this.wintabAccess=wintabAccess;
+		//this.mouseLocator=new MouseLocator();
 
 		for(PLevel.Type levelType: PLevel.Type.values())
 			levelRanges[levelType.ordinal()]=wintabAccess.getLevelRange(levelType);
 
-		thread=new Thread() {
+		thread=new Thread("jpen-WintabProvider") {
 						 public synchronized void run() {
 							 try {
 								 while(true) {
@@ -128,14 +174,14 @@ public class WintabProvider
 	}
 
 	private void processQuedEvents() {
-		L.fine("start");
+		L.finer("start");
 		while(wintabAccess.nextPacket()) {
 			WintabDevice device=getDevice(wintabAccess.getCursor());
-			L.fine("device: ");
+			L.finer("device: ");
 			L.fine(device.getName());
 			device.scheduleEvents();
 		}
-		L.fine("end");
+		L.finer("end");
 	}
 
 	private WintabDevice getDevice(int cursor) {
@@ -160,19 +206,15 @@ public class WintabProvider
 			return;
 		this.paused=paused;
 		if(!paused){
-			//getPenManager().component.addMouseMotionListener(mouseListener);
 			L.fine("false paused value");
+			//mouseLocator.reset();
 			screenBounds.reset();
 			synchronized(thread) {
 				L.fine("going to notify all...");
 				thread.notifyAll();
 				L.fine("done notifying ");
 			}
-		}/*
-		else{
-			getPenManager().component.removeMouseMotionListener(mouseListener);
-			mouseX=mouseY=-1;
-	}*/
+		}
 		wintabAccess.setEnabled(!paused);
 		L.fine("end");
 	}

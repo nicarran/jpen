@@ -37,11 +37,14 @@ public class Pen extends PenState {
 	private MyThread thread;
 
 	/** Tail of event queue. */
-	private PenEvent lastDispatchedEvent=new PenEvent(this) {
-																				 public static final long serialVersionUID=1l;
-																				 @Override
-																				 void dispatch() { }}
-																			 ;
+	PenEvent lastDispatchedEvent=new PenEvent(this) {
+																 public static final long serialVersionUID=1l;
+																 @Override
+																 void dispatch() { }
+																 @Override
+																 void copyTo(PenState penState){}
+															 }
+															 ;
 	/** Head of event queue. */
 	private PenEvent lastScheduledEvent=lastDispatchedEvent;
 	public final PenState lastScheduledState=new PenState();
@@ -57,6 +60,9 @@ public class Pen extends PenState {
 		PenEvent event;
 		boolean waitedNewEvents;
 		volatile boolean waitingNewEvents;
+		{
+			setName("jpen-Pen");
+		}
 
 		public synchronized void run() {
 			try {
@@ -65,10 +71,12 @@ public class Pen extends PenState {
 					beforeTime=System.currentTimeMillis();
 					if(waitedNewEvents)
 						waitTime=0;
-					else
-						yield();
+					//else
+					//yield();
 					while((event=lastDispatchedEvent.next)!=null) {
+						event.copyTo(Pen.this);
 						event.dispatch();
+						lastDispatchedEvent.next=null;
 						lastDispatchedEvent=event;
 					}
 					for(PenListener l:getListenersArray())
@@ -201,7 +209,7 @@ public class Pen extends PenState {
 				if(level.value==lastScheduledState.getLevelValue(level.typeNumber))
 					continue;
 				scheduledLevels.add(level);
-				lastScheduledState.setLevelValue(level);
+				lastScheduledState.levels.setValue(level);
 			}
 			if(scheduledLevels.isEmpty())
 				return false;

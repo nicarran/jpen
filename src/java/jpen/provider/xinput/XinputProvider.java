@@ -80,7 +80,7 @@ public class XinputProvider
 
 		xipDevices=devices.toArray(new XinputDevice[devices.size()]);
 
-		thread=new Thread() {
+		thread=new Thread("jpen-XinputProvider") {
 						 public synchronized void run() {
 							 try {
 								 while(true) {

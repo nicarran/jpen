@@ -28,7 +28,7 @@ public abstract class PenEvent
 	public static final long serialVersionUID=1l;
 
 	long time=-1;
-	volatile PenEvent next;
+	PenEvent next;
 	public final transient Pen pen;
 
 	PenEvent(Pen pen) {
@@ -38,6 +38,8 @@ public abstract class PenEvent
 	public long getTime() {
 		return time;
 	}
+
+	abstract void copyTo(PenState penState);
 
 	abstract void dispatch();
 

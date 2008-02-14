@@ -35,6 +35,9 @@ public class PScrollEvent
 	}
 
 	@Override
+	void copyTo(PenState penState){}
+
+	@Override
 	void dispatch() {
 		for(PenListener l:pen.getListenersArray())
 			l.penScrollEvent(this);

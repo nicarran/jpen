@@ -25,7 +25,7 @@ public abstract class TypedValuedClass<T extends Enum<T>, V>
 	implements java.io.Serializable {
 	public static final long serialVersionUID=1l;
 
-	public final V value;
+	public V value;
 
 	TypedValuedClass(int typeNumber, V value) {
 		super(typeNumber);

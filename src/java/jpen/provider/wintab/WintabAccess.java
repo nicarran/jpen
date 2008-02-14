@@ -121,6 +121,12 @@ class WintabAccess {
 
 	public static native boolean getDefCtxSysMode();
 
+	public boolean getDDCtxSysMode(){
+		return getDDCtxSysMode(cellIndex);
+	}
+
+	private static native boolean getDDCtxSysMode(int cellIndex);
+
 	@Override
 	protected void finalize() {
 		if(cellIndex!=-1)
@@ -130,6 +136,12 @@ class WintabAccess {
 	private static native int destroy(int cellIndex);
 
 	public static native int[] getButtonMap(int cursor);
+
+	public int getStatus(){
+		return getStatus(cellIndex);
+	}
+
+	public static native int getStatus(int cellIndex);
 
 	@Override
 	public String toString() {
@@ -156,6 +168,8 @@ class WintabAccess {
 		sb.append(", buttons=");
 		sb.append(getButtons());
 		sb.append(", defCtxSysMode="+getDefCtxSysMode());
+		sb.append(", DDCtxSysMode="+getDDCtxSysMode());
+		sb.append(", status="+getStatus());
 		sb.append("]");
 		return sb.toString();
 	}

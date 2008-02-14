@@ -36,9 +36,12 @@ public class PLevelEvent
 	}
 
 	@Override
+	void copyTo(PenState penState){
+		penState.levels.setValues(this);
+	}
+
+	@Override
 	void dispatch() {
-		for(PLevel level:levels)
-			pen.setLevelValue(level);
 		for(PenListener l:pen.getListenersArray())
 			l.penLevelEvent(this);
 	}

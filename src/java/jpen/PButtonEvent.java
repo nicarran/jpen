@@ -35,8 +35,12 @@ public class PButtonEvent
 	}
 
 	@Override
+	void copyTo(PenState penState){
+		penState.setButtonValue(button);
+	}
+
+	@Override
 	void dispatch() {
-		pen.setButtonValue(button);
 		for(PenListener l:pen.getListenersArray())
 			l.penButtonEvent(this);
 	}

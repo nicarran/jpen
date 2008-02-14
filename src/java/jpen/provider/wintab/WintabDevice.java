@@ -129,6 +129,7 @@ class WintabDevice
 		for(PLevel.Type levelType:PLevel.Type.values()) {
 			float value=PLevel.getCoordinateValueInsideComponent(
 										getComponent().getSize(componentSize), componentLocation,  levelType,  getMultRangedValue(levelType));
+			//value=wintabProvider.mouseLocator.getCorrectedLocation(levelType, value);
 			if(L.isLoggable(Level.FINE)){
 				L.fine("levelType="+levelType+", value="+value);
 			}
