@@ -71,8 +71,8 @@ public class Pen extends PenState {
 					beforeTime=System.currentTimeMillis();
 					if(waitedNewEvents)
 						waitTime=0;
-					//else
-					//yield();
+					else
+						yield();
 					while((event=lastDispatchedEvent.next)!=null) {
 						event.copyTo(Pen.this);
 						event.dispatch();
