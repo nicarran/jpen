@@ -222,6 +222,28 @@ JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getDefCtxSysMo
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getDDCtxSysMode
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getDDCtxSysMode
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	BOOL r;
+	WTInfo(WTI_DDCTXS+Access_getP(cellIndex)->device, CTX_SYSMODE, &r);
+	return r? JNI_TRUE:JNI_FALSE;
+}
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getStatus
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getStatus
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Access_getP(cellIndex)->status;
+}
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
  * Method:    destroy
  * Signature: (I)I
  */

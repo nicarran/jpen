@@ -27,7 +27,7 @@
 //#ifdef USE_X_LIB
 //#include "INCLUDE/WINTABX.h"
 //#endif
-#define PACKETDATA	(PK_X | PK_Y | PK_NORMAL_PRESSURE | PK_CURSOR | PK_BUTTONS ) // PK_BUTTONS | PK_ORIENTATION | PK_NORMAL_PRESSURE... )
+#define PACKETDATA	(PK_STATUS | PK_X | PK_Y | PK_NORMAL_PRESSURE | PK_CURSOR | PK_BUTTONS ) // PK_BUTTONS | PK_ORIENTATION | PK_NORMAL_PRESSURE... )
 #define PACKETMODE	0
 #include "INCLUDE/PKTDEF.h"
 
@@ -73,6 +73,7 @@ struct Access {
 	int queueConsumableIndex;
 	UINT cursor;
 	DWORD buttons;
+	UINT status;
 };
 m_declareRow(Access);
 extern int Access_nextPacket(SAccess *pAccess);

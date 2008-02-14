@@ -36,12 +36,11 @@ int Access_preCreate(SAccess *pAccess) {
 
 	strcpy(logCtx.lcName, "JPen Access");
 	logCtx.lcOptions |= CXO_SYSTEM;
-	logCtx.lcOutOrgX = logCtx.lcOutOrgY = 0;
-	logCtx.lcSysMode=FALSE;
 	logCtx.lcPktData = PACKETDATA;
 	logCtx.lcPktMode = PACKETMODE;
 	logCtx.lcMoveMask = PACKETDATA;
 	logCtx.lcBtnUpMask = logCtx.lcBtnDnMask;
+	logCtx.lcSysMode=FALSE;
 	pAccess->ctx=WTOpen(hWnd, &logCtx, FALSE);
 	if(!pAccess->ctx) {
 		Access_setError("Couldn't open default context.");
@@ -120,6 +119,7 @@ int Access_nextPacket(SAccess *pAccess) {
 	pAccess->valuatorValues[E_Valuators_press]= p.pkNormalPressure;
 	pAccess->cursor=p.pkCursor;
 	pAccess->buttons=p.pkButtons;
+	pAccess->status=p.pkStatus;
 	return 1;
 }
 
