@@ -173,6 +173,14 @@ JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getDefCtxSysMo
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getDDCtxSysMode
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getDDCtxSysMode
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
  * Method:    destroy
  * Signature: (I)I
  */
@@ -185,6 +193,14 @@ JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_destroy
  * Signature: (I)[I
  */
 JNIEXPORT jintArray JNICALL Java_jpen_provider_wintab_WintabAccess_getButtonMap
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getStatus
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getStatus
   (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus
