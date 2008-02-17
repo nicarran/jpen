@@ -36,7 +36,7 @@ public class PKindEvent
 
 	@Override
 	void copyTo(PenState penState){
-		penState.setKindTypeNumber(kind.typeNumber);
+		penState.setKind(PKind.valueOf(kind.typeNumber));
 	}
 
 	@Override

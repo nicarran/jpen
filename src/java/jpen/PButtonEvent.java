@@ -36,7 +36,7 @@ public class PButtonEvent
 
 	@Override
 	void copyTo(PenState penState){
-		penState.setButtonValue(button);
+		penState.setButtonValue(button.typeNumber, button.value);
 	}
 
 	@Override

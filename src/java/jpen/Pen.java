@@ -209,14 +209,15 @@ public class Pen extends PenState {
 				if(level.value==lastScheduledState.getLevelValue(level.typeNumber))
 					continue;
 				scheduledLevels.add(level);
-				lastScheduledState.levels.setValue(level);
+				lastScheduledState.levels.setValue(level.typeNumber, level.value);
 			}
 			if(scheduledLevels.isEmpty())
 				return false;
 			int newKindTypeNumber=device.getKindTypeNumber();
-			if(lastScheduledState.getKindTypeNumber()!=newKindTypeNumber) {
-				lastScheduledState.setKindTypeNumber(newKindTypeNumber);
-				schedule(new PKindEvent(this, new PKind(newKindTypeNumber)));
+			if(lastScheduledState.getKind().typeNumber!=newKindTypeNumber) {
+				PKind newKind=PKind.valueOf(newKindTypeNumber);
+				lastScheduledState.setKind(newKind);
+				schedule(new PKindEvent(this, newKind));
 			}
 			PLevelEvent levelEvent=new PLevelEvent(this,
 																						 scheduledLevels.toArray(new PLevel[scheduledLevels.size()]));
@@ -230,7 +231,7 @@ public class Pen extends PenState {
 	private final Object buttonsLock=new Object();
 	public void scheduleButtonEvent(PButton button) {
 		synchronized(buttonsLock) {
-			if(lastScheduledState.setButtonValue(button))
+			if(lastScheduledState.setButtonValue(button.typeNumber, button.value))
 				schedule(new PButtonEvent(this, button));
 		}
 	}

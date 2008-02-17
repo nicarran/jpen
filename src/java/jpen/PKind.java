@@ -20,6 +20,9 @@
 * }] */
 package jpen;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PKind
 			extends TypedClass<PKind.Type>
 	implements java.io.Serializable {
@@ -35,8 +38,24 @@ public class PKind
 		}
 	}
 
+	/**
+	@deprecated Use {@link #valueOf(int)} instead. (080216)
+	*/
+	@Deprecated
 	public PKind(int typeNumber) {
 		super(typeNumber);
+	}
+
+	public static final List<PKind> VALUES=new ArrayList<PKind>(Type.values().length);
+
+	public static PKind valueOf(int typeNumber){
+		while(VALUES.size()<=typeNumber)
+			VALUES.add(new PKind(VALUES.size()));
+		return VALUES.get(typeNumber);
+	}
+
+	public static PKind valueOf(Type type){
+		return valueOf(type.ordinal());
 	}
 
 	@Override

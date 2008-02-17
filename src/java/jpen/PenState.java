@@ -32,27 +32,19 @@ public class PenState
 		private final float[] values=new float[PLevel.Type.values().length];
 		private final Map<Integer, Float> extTypeNumberToValue=new HashMap<Integer, Float>();
 
-		public void setValues(PenState.Levels levels){
+		void setValues(PenState.Levels levels){
 			for(int i=values.length; --i>=0;)
 				values[i]=levels.values[i];
 			extTypeNumberToValue.clear();
 			extTypeNumberToValue.putAll(levels.extTypeNumberToValue);
 		}
 
-		public void setValues(PLevelEvent ev){
+		void setValues(PLevelEvent ev){
 			for(PLevel level:ev.levels)
-				setValue(level);
+				setValue(level.typeNumber, level.value);
 		}
 
-		public void setValues(PenState penState){
-			setValues(penState.levels);
-		}
-
-		public float getValue(PLevel.Type levelType) {
-			return getValue(levelType.ordinal());
-		}
-
-		public float getValue(int levelTypeNumber) {
+		float getValue(int levelTypeNumber) {
 			if(levelTypeNumber>=values.length)
 				return getExtValue(levelTypeNumber);
 			return values[levelTypeNumber];
@@ -63,15 +55,7 @@ public class PenState
 			return value==null? 0f: value;
 		}
 
-		void setValue(PLevel level) {
-			setValue(level.typeNumber, level.value);
-		}
-
-		public void setValue(PLevel.Type levelType, float value){
-			setValue(levelType.ordinal(), value);
-		}
-
-		public final void setValue(int levelTypeNumber, float value){
+		final void setValue(int levelTypeNumber, float value){
 			if(levelTypeNumber>=values.length) {
 				setExtValue(levelTypeNumber, value);
 				return;
@@ -84,35 +68,44 @@ public class PenState
 		}
 	}
 
-	private int kindTypeNumber;
+	private PKind kind=PKind.valueOf(PKind.Type.CURSOR);
 	final Levels levels=new Levels();
 	private final int[] buttonValues=new int[PButton.Type.values().length];
 	private final Map<Integer, Integer> extButtonTypeNumberToValue=new HashMap<Integer, Integer>();
-
+	/**
+	@deprecated Use a {@link PenStateCopy} instead. (080216)
+	*/
+	@Deprecated
 	public PenState(){}
 
+	/**
+	@deprecated Use a {@link PenStateCopy} instead. (080216)
+	*/
+	@Deprecated
 	public PenState(PenState penState){
 		setValues(penState);
 	}
 
-	public int getKindTypeNumber() {
-		return kindTypeNumber;
-	}
-
-	public PKind.Type getKindType() {
-		return PKind.Type.valueOf(kindTypeNumber);
-	}
-
-	void setKindTypeNumber(int kindTypeNumber) {
-		this.kindTypeNumber=kindTypeNumber;
-	}
-
 	public float getLevelValue(PLevel.Type levelType) {
-		return levels.getValue(levelType);
+		return levels.getValue(levelType.ordinal());
 	}
 
 	public float getLevelValue(int levelTypeNumber) {
 		return levels.getValue(levelTypeNumber);
+	}
+
+	void setLevelValue(int levelTypeNumber, float value){
+		levels.setValue(levelTypeNumber, value);
+	}
+
+	public PKind getKind(){
+		return kind;
+	}
+
+	void setKind(PKind kind) {
+		//boolean oldValue=this.kindTypeNumber;
+		this.kind=kind;
+		//return oldValue=kindTypeNumber;
 	}
 
 	public boolean getButtonValue(PButton.Type buttonType) {
@@ -128,30 +121,37 @@ public class PenState
 		return buttonValue==null? 0: buttonValue;
 	}
 
-	boolean setButtonValue(PButton button) {
-		boolean oldValue=getButtonValue(button.typeNumber);
-		if(button.typeNumber>=buttonValues.length)
-			setExtButtonValue(button);
+	boolean setButtonValue(int buttonTypeNumber, boolean value) {
+		boolean oldValue=getButtonValue(buttonTypeNumber);
+		if(buttonTypeNumber>=buttonValues.length)
+			setExtButtonValue(buttonTypeNumber, value);
 		else {
-			if(button.value)
-				buttonValues[button.typeNumber]++;
+			if(value)
+				buttonValues[buttonTypeNumber]++;
 			else
-				buttonValues[button.typeNumber]=0;
+				buttonValues[buttonTypeNumber]=0;
 		}
-		return oldValue!=getButtonValue(button.typeNumber);
+		return oldValue!=getButtonValue(buttonTypeNumber);
 	}
 
-	private void setExtButtonValue(PButton button) {
-		if(button.value)
-			extButtonTypeNumberToValue.put(button.typeNumber, getExtButtonValue(button.typeNumber)+1);
+	private void setExtButtonValue(int buttonTypeNumber, boolean value) {
+		if(value)
+			extButtonTypeNumberToValue.put(buttonTypeNumber, getExtButtonValue(buttonTypeNumber)+1);
 		else
-			extButtonTypeNumberToValue.put(button.typeNumber, 0);
+			extButtonTypeNumberToValue.put(buttonTypeNumber, 0);
 	}
 
+	/**
+	@deprecated Use a {@link PenStateCopy} instead. (080216)
+	*/
+	@Deprecated
 	public void setValues(PenEvent ev){
 		ev.copyTo(this);
 	}
 
+	/**
+	@deprecated Use a {@link PenStateCopy} instead. (080216)
+	*/
 	public void setValues(PenState penState){
 		levels.setValues(penState.levels);
 
@@ -160,6 +160,22 @@ public class PenState
 		extButtonTypeNumberToValue.clear();
 		extButtonTypeNumberToValue.putAll(penState.extButtonTypeNumberToValue);
 
-		kindTypeNumber=penState.kindTypeNumber;
+		kind=penState.kind;
+	}
+
+	/**
+	@deprecated Use {@link #getKind()}. (080216)
+	*/
+	@Deprecated
+	public PKind.Type getKindType() {
+		return kind.getType();
+	}
+
+	/**
+	@deprecated Use {@link #getKind()}. (080216)
+	*/
+	@Deprecated
+	public int getKindTypeNumber() {
+		return kind.typeNumber;
 	}
 }
