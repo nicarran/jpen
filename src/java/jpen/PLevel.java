@@ -33,7 +33,15 @@ public class PLevel
 	public static final long serialVersionUID=1l;
 
 	public enum Type{
-		X(true, false),  Y(true, false),  PRESSURE(false, false), TILT_X(false, true), TILT_Y(false, true);
+		X(true, false),  Y(true, false),  PRESSURE(false, false),
+		/**
+		Tilt along the X axis in radians.
+		*/
+		TILT_X(false, true),
+		/**
+		Tilt along the Y axis in radians.
+		*/
+		TILT_Y(false, true);
 		public final boolean isMovement;
 		public final boolean isTilt;
 		Type(boolean isMovement, boolean isTilt) {
