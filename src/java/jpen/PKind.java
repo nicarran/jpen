@@ -38,11 +38,7 @@ public class PKind
 		}
 	}
 
-	/**
-	@deprecated Use {@link #valueOf(int)} instead. (080216)
-	*/
-	@Deprecated
-	public PKind(int typeNumber) {
+	private PKind(int typeNumber) {
 		super(typeNumber);
 	}
 

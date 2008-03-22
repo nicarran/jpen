@@ -44,6 +44,7 @@ class WintabAccess {
 	private static native String getError();
 
 	int getValue(PLevel.Type levelType) {
+		// tilt data is really azimuth and altitude and must be transformed! 
 		return getValue(cellIndex, levelType.ordinal());
 	}
 
@@ -142,6 +143,12 @@ class WintabAccess {
 	}
 
 	public static native int getStatus(int cellIndex);
+	
+	public boolean getTiltExtSupported() {
+		return getTiltExtSupported(cellIndex);
+	}
+
+	private static native boolean getTiltExtSupported(int cellIndex);
 
 	@Override
 	public String toString() {

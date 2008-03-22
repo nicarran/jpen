@@ -59,7 +59,7 @@ class XinputDevice extends AbstractPenDevice {
 		this.device=device;
 		this.xinputProvider=xinputProvider;
 		levelRanges=new PLevel.Range[PLevel.Type.values().length];
-		for(PLevel.Type levelType: PLevel.Type.values())
+		for(PLevel.Type levelType: PLevel.Type.values()) 
 			levelRanges[levelType.ordinal()]=device.getLevelRange(levelType);
 		setKindTypeNumber(getDefaultKindTypeNumber());
 		setEnabled(true);
@@ -108,8 +108,8 @@ class XinputDevice extends AbstractPenDevice {
 		Utils.getLocationOnScreen(getComponent(), componentLocation);
 		for(PLevel.Type levelType:PLevel.Type.values()) {
 			float value=PLevel.getCoordinateValueInsideComponent(
-																					getComponent().getSize(componentSize), componentLocation,  levelType, getMultRangedValue(levelType));
-			if(value<0) {
+			              getComponent().getSize(componentSize), componentLocation,  levelType, getMultRangedValue(levelType));
+			if(levelType.isMovement && value<0) {
 				changedLevels.clear();
 				return;
 			}
@@ -122,16 +122,22 @@ class XinputDevice extends AbstractPenDevice {
 	void scheduleButtonEvent(int number, boolean state) {
 		getPen().scheduleButtonEvent(new PButton(number-1, state));
 	}
-
-	private final float getRangedValue(PLevel.Type levelType) {
-		PLevel.Range range=levelRanges[levelType.ordinal()];
-		return range.getRangedValue(device.getValue(levelType));
-	}
+	
+	private static final float RADS_PER_DEG=(float)(Math.PI/180);
 
 	private final float getMultRangedValue(PLevel.Type levelType) {
-		return xinputProvider.screenBounds.getLevelRangeOffset(levelType)+
-		getRangedValue(levelType)
-		*xinputProvider.screenBounds.getLevelRangeMult(levelType);
+		float devValue=device.getValue(levelType);
+		
+		if(levelType.isTilt)
+			return devValue*RADS_PER_DEG;
+		
+		devValue=levelRanges[levelType.ordinal()].getRangedValue(devValue);
+		
+		if(levelType.isMovement)
+			devValue=xinputProvider.screenBounds.getLevelRangeOffset(levelType)+
+		       devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType); 
+		
+		return devValue; 
 	}
 
 	@Override

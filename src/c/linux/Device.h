@@ -35,8 +35,8 @@ enum {
 	E_Valuators_x,
 	E_Valuators_y,
 	E_Valuators_press,
-	//TODO: tiltx
-	//TODO: tilty
+	E_Valuators_tiltx,
+	E_Valuators_tilty,
 	E_Valuators_size,
 };
 struct Device {

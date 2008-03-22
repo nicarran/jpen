@@ -72,19 +72,8 @@ public class PenState
 	final Levels levels=new Levels();
 	private final int[] buttonValues=new int[PButton.Type.values().length];
 	private final Map<Integer, Integer> extButtonTypeNumberToValue=new HashMap<Integer, Integer>();
-	/**
-	@deprecated Use a {@link PenStateCopy} instead. (080216)
-	*/
-	@Deprecated
-	public PenState(){}
-
-	/**
-	@deprecated Use a {@link PenStateCopy} instead. (080216)
-	*/
-	@Deprecated
-	public PenState(PenState penState){
-		setValues(penState);
-	}
+	
+	PenState(){}
 
 	public float getLevelValue(PLevel.Type levelType) {
 		return levels.getValue(levelType.ordinal());
@@ -141,18 +130,7 @@ public class PenState
 			extButtonTypeNumberToValue.put(buttonTypeNumber, 0);
 	}
 
-	/**
-	@deprecated Use a {@link PenStateCopy} instead. (080216)
-	*/
-	@Deprecated
-	public void setValues(PenEvent ev){
-		ev.copyTo(this);
-	}
-
-	/**
-	@deprecated Use a {@link PenStateCopy} instead. (080216)
-	*/
-	public void setValues(PenState penState){
+	void setValues(PenState penState){
 		levels.setValues(penState.levels);
 
 		for(int i=buttonValues.length; --i>=0;)
@@ -163,19 +141,4 @@ public class PenState
 		kind=penState.kind;
 	}
 
-	/**
-	@deprecated Use {@link #getKind()}. (080216)
-	*/
-	@Deprecated
-	public PKind.Type getKindType() {
-		return kind.getType();
-	}
-
-	/**
-	@deprecated Use {@link #getKind()}. (080216)
-	*/
-	@Deprecated
-	public int getKindTypeNumber() {
-		return kind.typeNumber;
-	}
 }

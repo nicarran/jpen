@@ -22,6 +22,24 @@
 
 m_implementRow(Access);
 
+/* Taken from PKTDEF.H example. */
+#ifdef PACKETTILT
+static UINT ScanExts(UINT wTag) {
+	UINT i;
+	UINT wScanTag;
+
+	/* scan for wTag's info category. */
+	for (i = 0; WTInfo(WTI_EXTENSIONS + i, EXT_TAG, &wScanTag); i++) {
+		if (wTag == wScanTag) {
+			/* return category offset from WTI_EXTENSIONS. */
+			return i;
+		}
+	}
+	/* return error code. */
+	return 0xFFFF;
+}
+#endif
+
 int Access_preCreate(SAccess *pAccess) {
 	HWND hWnd=GetDesktopWindow();
 	if(!hWnd) {
@@ -38,116 +56,154 @@ int Access_preCreate(SAccess *pAccess) {
 	logCtx.lcOptions |= CXO_SYSTEM;
 	logCtx.lcPktData = PACKETDATA;
 	logCtx.lcPktMode = PACKETMODE;
-	logCtx.lcMoveMask = PACKETDATA;
-	logCtx.lcBtnUpMask = logCtx.lcBtnDnMask;
-	logCtx.lcSysMode=FALSE;
-	pAccess->ctx=WTOpen(hWnd, &logCtx, FALSE);
-	if(!pAccess->ctx) {
-		Access_setError("Couldn't open default context.");
-		return errorState;
+
+	pAccess->tiltExtSupported=false;
+#ifdef PACKETTILT
+	UINT categoryTILT = ScanExts(WTX_TILT);
+	pAccess->tiltExtSupported=categoryTILT!=0xFFFF;
+	if(pAccess->tiltExtSupported) {
+		WTPKT maskTILT;
+		WTInfo(WTI_EXTENSIONS + categoryTILT, EXT_MASK, &maskTILT);
+		logCtx.lcPktData |= maskTILT;
+#if PACKETTILT == PKEXT_RELATIVE
+		logCtx.lcPktMode |= maskTILT;
+#endif
+#endif
+
+		logCtx.lcMoveMask = PACKETDATA;// use lcPktData?
+		logCtx.lcBtnUpMask = logCtx.lcBtnDnMask;
+		logCtx.lcSysMode=FALSE;
+		pAccess->ctx=WTOpen(hWnd, &logCtx, FALSE);
+		if(!pAccess->ctx) {
+			Access_setError("Couldn't open default context.");
+			return errorState;
+		}
+
+		// Set queue size
+		int queueSize=MAX_WINTAB_QUEUE_SIZE;
+		for(; queueSize>=MIN_WINTAB_QUEUE_SIZE; queueSize-=16)
+			if(WTQueueSizeSet(pAccess->ctx, queueSize))
+				break;
+		//printf("C: wintab queue size: %i \n",WTQueueSizeGet(pAccess->ctx)); // D
+
+		return cleanState;
 	}
 
-	// Set queue size
-	int queueSize=MAX_WINTAB_QUEUE_SIZE;
-	for(; queueSize>=MIN_WINTAB_QUEUE_SIZE; queueSize-=16)
-		if(WTQueueSizeSet(pAccess->ctx, queueSize))
+	static UINT axisIndexes[]={
+	      DVC_X,
+	      DVC_Y,
+	      DVC_NPRESSURE,
+	    };
+
+	void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange) {
+		AXIS axis;
+		if(valuator<(sizeof axisIndexes )/sizeof(UINT)) {
+			WTInfo(WTI_DEVICES+pAccess->device, axisIndexes[valuator], &axis);
+			pRange[0]=axis.axMin;
+			pRange[1]=axis.axMax;
+			return;
+		}
+		
+		// E_Valuators_orAzimuth, y E_Valuators_orAltitude
+		/*AXIS axises[3];
+		WTInfo(WTI_DEVICES+pAccess->device, DVC_ORIENTATION, &axises);*/
+		// UUPS: I commented this (above) out.  wacom->Intuos3 does not give me real capabilities here... it gives:
+		// azimuth: 0 - 3600
+		// altitude: 0 - 900
+		// -> I dont know how to get the "real" tablet limits using wintab : (
+		/*switch(valuator){
+		case	E_Valuators_orAzimuth:
+			axis=axises[0];
 			break;
-	//printf("C: wintab queue size: %i \n",WTQueueSizeGet(pAccess->ctx)); // D
-
-	return cleanState;
-}
-
-/* must match E_Valuators enumeration */
-static UINT axisIndexes[]={
-														DVC_X,
-														DVC_Y,
-														DVC_NPRESSURE,
-													};
-
-void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange) {
-	AXIS axis;
-	WTInfo(WTI_DEVICES+pAccess->device, axisIndexes[valuator], &axis);
-	pRange[0]=axis.axMin;
-	pRange[1]=axis.axMax;
-}
-
-int Access_getEnabled(SAccess *pAccess) {
-	LOGCONTEXT logCtx;
-	if(!WTGet(pAccess->ctx, &logCtx)) {
-		Access_setError("Couldnt get LOGCONTEXT info.");
-		return errorState;
+		case E_Valuators_orAltitude:
+			axis=axises[1];
+			break;
+		}
+		pRange[0]=axis.axMin;
+		pRange[1]=axis.axMax;*/
+		
+		pRange[0]=pRange[1]=0; 
 	}
-	return !(logCtx.lcStatus&CXS_DISABLED);
-}
 
-void Access_setEnabled(SAccess *pAccess, int enabled) {
-	if(enabled==Access_getEnabled(pAccess))
-		return;
-	WTEnable(pAccess->ctx, enabled);
-	// flush queue
-	WTPacketsGet( pAccess->ctx, MAX_WINTAB_QUEUE_SIZE, NULL);
-	WTOverlap(pAccess->ctx, enabled);
-}
-
-int Access_preDestroy(SAccess *pAccess) {
-	if(pAccess->ctx)
-		WTClose(pAccess->ctx);
-	pAccess->ctx=NULL;
-	return cleanState;
-}
-
-static int Access_queueIsEmpty(SAccess *pAccess){
-	return pAccess->queueSize==pAccess->queueConsumableIndex;
-}
-
-static void Access_fillPacketQueue(SAccess *pAccess){
-	if(Access_queueIsEmpty(pAccess)){
-		pAccess->queueConsumableIndex=0;
-		pAccess->queueSize=WTPacketsGet(pAccess->ctx, QUEUE_SIZE, pAccess->queue);
-		//printf("C: new queueSize: %i\n", pAccess->queueSize);
+	int Access_getEnabled(SAccess *pAccess) {
+		LOGCONTEXT logCtx;
+		if(!WTGet(pAccess->ctx, &logCtx)) {
+			Access_setError("Couldnt get LOGCONTEXT info.");
+			return errorState;
+		}
+		return !(logCtx.lcStatus&CXS_DISABLED);
 	}
-}
 
-int Access_nextPacket(SAccess *pAccess) {
-	Access_fillPacketQueue(pAccess);
-	if(Access_queueIsEmpty(pAccess))
-		return 0;
-	PACKET p=pAccess->queue[pAccess->queueConsumableIndex++];
-	pAccess->valuatorValues[E_Valuators_x]= p.pkX;
-	pAccess->valuatorValues[E_Valuators_y]= p.pkY;
-	// ToDo: p.pkOrientation.orAzimuth, p.pkOrientation.orAltitude, p.pkZ
-	pAccess->valuatorValues[E_Valuators_press]= p.pkNormalPressure;
-	pAccess->cursor=p.pkCursor;
-	pAccess->buttons=p.pkButtons;
-	pAccess->status=p.pkStatus;
-	return 1;
-}
+	void Access_setEnabled(SAccess *pAccess, int enabled) {
+		if(enabled==Access_getEnabled(pAccess))
+			return;
+		WTEnable(pAccess->ctx, enabled);
+		// flush queue
+		WTPacketsGet( pAccess->ctx, MAX_WINTAB_QUEUE_SIZE, NULL);
+		WTOverlap(pAccess->ctx, enabled);
+	}
 
-UINT Access_getFirstCursor(SAccess *pAccess) {
-	UINT r;
-	WTInfo(WTI_DEVICES+pAccess->device, DVC_FIRSTCSR, &r);
-	return r;
-}
+	int Access_preDestroy(SAccess *pAccess) {
+		if(pAccess->ctx)
+			WTClose(pAccess->ctx);
+		pAccess->ctx=NULL;
+		return cleanState;
+	}
 
-UINT Access_getCursorsCount(SAccess *pAccess) {
-	UINT r;
-	WTInfo(WTI_DEVICES+pAccess->device, DVC_NCSRTYPES, &r);
-	return r;
-}
+	static int Access_queueIsEmpty(SAccess *pAccess) {
+		return pAccess->queueSize==pAccess->queueConsumableIndex;
+	}
 
-int Access_getCsrType(int cursor) {
-	UINT cursorType = 0;
-	if (WTInfo( WTI_CURSORS + cursor, CSR_TYPE, &cursorType ) != sizeof(cursorType))
+	static void Access_fillPacketQueue(SAccess *pAccess) {
+		if(Access_queueIsEmpty(pAccess)) {
+			pAccess->queueConsumableIndex=0;
+			pAccess->queueSize=WTPacketsGet(pAccess->ctx, QUEUE_SIZE, pAccess->queue);
+			//printf("C: new queueSize: %i\n", pAccess->queueSize);
+		}
+	}
+
+	int Access_nextPacket(SAccess *pAccess) {
+		Access_fillPacketQueue(pAccess);
+		if(Access_queueIsEmpty(pAccess))
+			return 0;
+		PACKET p=pAccess->queue[pAccess->queueConsumableIndex++];
+		pAccess->valuatorValues[E_Valuators_x]= p.pkX;
+		pAccess->valuatorValues[E_Valuators_y]= p.pkY;
+		// ToDo: p.pkOrientation.orAzimuth, p.pkOrientation.orAltitude, p.pkZ
+		pAccess->valuatorValues[E_Valuators_press]= p.pkNormalPressure;
+		pAccess->valuatorValues[E_Valuators_orAzimuth]=p.pkOrientation.orAzimuth;
+		pAccess->valuatorValues[E_Valuators_orAltitude]=p.pkOrientation.orAltitude;
+		pAccess->cursor=p.pkCursor;
+		pAccess->buttons=p.pkButtons;
+		pAccess->status=p.pkStatus;
+		return 1;
+	}
+
+	UINT Access_getFirstCursor(SAccess *pAccess) {
+		UINT r;
+		WTInfo(WTI_DEVICES+pAccess->device, DVC_FIRSTCSR, &r);
+		return r;
+	}
+
+	UINT Access_getCursorsCount(SAccess *pAccess) {
+		UINT r;
+		WTInfo(WTI_DEVICES+pAccess->device, DVC_NCSRTYPES, &r);
+		return r;
+	}
+
+	int Access_getCsrType(int cursor) {
+		UINT cursorType = 0;
+		if (WTInfo( WTI_CURSORS + cursor, CSR_TYPE, &cursorType ) != sizeof(cursorType))
+			return E_csrTypes_undef;
+
+		switch (cursorType & CSR_TYPE_GENERAL_MASK) {
+		case CSR_TYPE_GENERAL_PENTIP:
+			return E_csrTypes_penTip;
+		case CSR_TYPE_GENERAL_PUCK:
+			return E_csrTypes_puck;
+		case CSR_TYPE_GENERAL_PENERASER:
+			return E_csrTypes_penEraser;
+		}
+
 		return E_csrTypes_undef;
-
-	switch (cursorType & CSR_TYPE_GENERAL_MASK) {
-	case CSR_TYPE_GENERAL_PENTIP:
-		return E_csrTypes_penTip;
-	case CSR_TYPE_GENERAL_PUCK:
-		return E_csrTypes_puck;
-	case CSR_TYPE_GENERAL_PENERASER:
-		return E_csrTypes_penEraser;
 	}
-
-	return E_csrTypes_undef;
-}

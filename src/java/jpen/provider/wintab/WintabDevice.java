@@ -40,6 +40,7 @@ import jpen.PLevel;
 import jpen.PLevelEvent;
 import jpen.provider.AbstractPenDevice;
 import jpen.provider.Utils;
+import static java.lang.Math.*;
 
 class WintabDevice
 	extends AbstractPenDevice {
@@ -78,7 +79,7 @@ class WintabDevice
 	}
 
 	void scheduleEvents() {
-		if(!getEnabled()){
+		if(!getEnabled()) {
 			L.fine("disabled");
 			return;
 		}
@@ -120,7 +121,7 @@ class WintabDevice
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();
 	private void scheduleLevelEvent() {
 		Utils.getLocationOnScreen(getComponent(), componentLocation);
-		if(L.isLoggable(Level.FINE)){
+		if(L.isLoggable(Level.FINE)) {
 			L.fine("componentLocation: "+componentLocation);
 			Point p=getComponent().getLocationOnScreen();
 			if(!componentLocation.equals(p))
@@ -128,12 +129,12 @@ class WintabDevice
 		}
 		for(PLevel.Type levelType:PLevel.Type.values()) {
 			float value=PLevel.getCoordinateValueInsideComponent(
-										getComponent().getSize(componentSize), componentLocation,  levelType,  getMultRangedValue(levelType));
+			              getComponent().getSize(componentSize), componentLocation,  levelType,  getMultRangedValue(levelType));
 			//value=wintabProvider.mouseLocator.getCorrectedLocation(levelType, value);
-			if(L.isLoggable(Level.FINE)){
+			if(L.isLoggable(Level.FINE)) {
 				L.fine("levelType="+levelType+", value="+value);
 			}
-			if(value<0){
+			if(levelType.isMovement && value<0) {
 				L.fine("negative value... pausing...");
 				wintabProvider.setPaused(true);
 				changedLevels.clear();
@@ -146,18 +147,42 @@ class WintabDevice
 		changedLevels.clear();
 	}
 
-	private float getRangedValue(PLevel.Type type) {
-		float rangedValue=wintabProvider.getLevelRange(type).getRangedValue(
-												wintabProvider.wintabAccess.getValue(type));
-		if(L.isLoggable(Level.FINE))
-			L.fine("type="+type+", rangedValue="+rangedValue);
-		return type.equals(PLevel.Type.Y)? 1f-rangedValue: rangedValue;
-	}
+	private static final double PI_over_2=Math.PI/2;
+	private static final double PI_over_2_over_900=PI_over_2/900; // (/10) and (/90)
 
 	private float getMultRangedValue(PLevel.Type type) {
-		if(L.isLoggable(Level.FINE))
-			L.fine("type="+type+", levelRangeMult="+wintabProvider.screenBounds.getLevelRangeMult(type));
-		return wintabProvider.screenBounds.getLevelRangeOffset(type)+
-					 getRangedValue(type)*wintabProvider.screenBounds.getLevelRangeMult(type);
+		if(type.isTilt) {
+			// see tiltOnWintab.xoj
+			int altitude=wintabProvider.wintabAccess.getValue(PLevel.Type.TILT_Y);
+			if(altitude<0)
+				altitude=-altitude; // when using the eraser the altitude is upside down
+			if(altitude==900) // altitude values are given (in deg) multiplied by 10. Always 900 when tilt no supported by tablet.
+				return 0;
+			double betha=
+			  altitude*PI_over_2_over_900;
+			double theta=
+			  wintabProvider.wintabAccess.getValue(PLevel.Type.TILT_X)*PI_over_2_over_900
+			  -PI_over_2; 
+			switch(type) {
+			case TILT_X:
+				return (float)atan(cos(theta)/tan(betha));
+			case TILT_Y:
+				return (float)atan(sin(theta)/tan(betha));
+			default:
+				throw new AssertionError();
+			}
+		}
+
+		float rangedValue=wintabProvider.getLevelRange(type).getRangedValue(
+		      wintabProvider.wintabAccess.getValue(type));
+		
+		if(type.isMovement){
+			if(type.equals(PLevel.Type.Y))
+				rangedValue=1f-rangedValue;
+			rangedValue=wintabProvider.screenBounds.getLevelRangeOffset(type)+
+		       rangedValue*wintabProvider.screenBounds.getLevelRangeMult(type);
+		}
+		
+		return rangedValue;
 	}
 }

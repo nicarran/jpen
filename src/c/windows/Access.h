@@ -27,8 +27,9 @@
 //#ifdef USE_X_LIB
 //#include "INCLUDE/WINTABX.h"
 //#endif
-#define PACKETDATA	(PK_STATUS | PK_X | PK_Y | PK_NORMAL_PRESSURE | PK_CURSOR | PK_BUTTONS ) // PK_BUTTONS | PK_ORIENTATION | PK_NORMAL_PRESSURE... )
+#define PACKETDATA	(PK_STATUS | PK_X | PK_Y | PK_NORMAL_PRESSURE | PK_CURSOR | PK_BUTTONS | PK_ORIENTATION)
 #define PACKETMODE	0
+// #define PACKETTILT PKEXT_ABSOLUTE // TILT extension is not widely implemented (wacom), so I disable it and use pkOrientation to get tilt data 
 #include "INCLUDE/PKTDEF.h"
 
 //vvv Taken from csrmaskex wacom example.
@@ -54,8 +55,11 @@ enum{
 	E_Valuators_x,
 	E_Valuators_y,
 	E_Valuators_press,
+	E_Valuators_orAzimuth,
+	E_Valuators_orAltitude,
 	E_Valuators_size,
 };
+
 enum{
 	E_csrTypes_undef,
 	E_csrTypes_penTip,
@@ -74,6 +78,7 @@ struct Access {
 	UINT cursor;
 	DWORD buttons;
 	UINT status;
+	int tiltExtSupported; // not used if not def PACKETTILT (see above)
 };
 m_declareRow(Access);
 extern int Access_nextPacket(SAccess *pAccess);

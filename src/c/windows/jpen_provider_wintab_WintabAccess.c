@@ -244,6 +244,16 @@ JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getStatus
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getTiltExtSupported
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getTiltExtSupported
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Access_getP(cellIndex)->tiltExtSupported?JNI_TRUE:JNI_FALSE;
+}
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
  * Method:    destroy
  * Signature: (I)I
  */

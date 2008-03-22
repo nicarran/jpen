@@ -33,10 +33,12 @@ public class PLevel
 	public static final long serialVersionUID=1l;
 
 	public enum Type{
-		X(true),  Y(true),  PRESSURE(false);
+		X(true, false),  Y(true, false),  PRESSURE(false, false), TILT_X(false, true), TILT_Y(false, true);
 		public final boolean isMovement;
-		Type(boolean isMovement) {
+		public final boolean isTilt;
+		Type(boolean isMovement, boolean isTilt) {
 			this.isMovement=isMovement;
+			this.isTilt=isTilt;
 		}
 	}
 
