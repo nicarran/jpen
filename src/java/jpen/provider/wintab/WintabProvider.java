@@ -147,21 +147,21 @@ public class WintabProvider
 			levelRanges[levelType.ordinal()]=wintabAccess.getLevelRange(levelType);
 
 		thread=new Thread("jpen-WintabProvider") {
-						 public synchronized void run() {
-							 try {
-								 while(true) {
-									 processQuedEvents();
-									 wait(PERIOD);
-									 while(paused){
-										 L.fine("going to wait...");
-										 wait();
-										 L.fine("notified");
-									 }
-								 }
-							 } catch(InterruptedException ex) { throw new Error(ex);}
-						 }
-					 }
-					 ;
+			       public synchronized void run() {
+				       try {
+					       while(true) {
+						       processQuedEvents();
+						       wait(PERIOD);
+						       while(paused){
+							       L.fine("going to wait...");
+							       wait();
+							       L.fine("notified");
+						       }
+					       }
+				       } catch(InterruptedException ex) { throw new Error(ex);}
+			       }
+		       }
+		       ;
 		thread.setDaemon(true);
 		thread.setPriority(Thread.MAX_PRIORITY);
 		thread.start();
@@ -200,6 +200,11 @@ public class WintabProvider
 		setPaused(paused);
 	}
 
+	private void clearEventQueues(){
+		while(wintabAccess.nextPacket())
+			;
+	}
+
 	void setPaused(boolean paused) {
 		L.fine("start");
 		if(paused==this.paused)
@@ -209,6 +214,7 @@ public class WintabProvider
 			L.fine("false paused value");
 			//mouseLocator.reset();
 			screenBounds.reset();
+			clearEventQueues();
 			synchronized(thread) {
 				L.fine("going to notify all...");
 				thread.notifyAll();

@@ -32,6 +32,7 @@ import jpen.event.PenListener;
 
 public class Pen extends PenState {
 
+	private static final Logger L=Logger.getLogger(Pen.class.getName());
 	public static final int DEFAULT_FREQUENCY=60;
 	private int frequency;
 	private MyThread thread;
@@ -173,17 +174,28 @@ public class Pen extends PenState {
 		private PenDevice lastDevice; // last device NOT filtered
 		private PLevelEvent lastEvent; // last event scheduled
 		boolean filteredFirstInSecuence;
+		private long time;
+		private long firstInSecuenceTime;
 
 		boolean filter(PenDevice device) {
 			if(!device.isDigitizer()) {
+				time=System.currentTimeMillis();
 				if(lastDevice!=null &&
 								lastDevice!=device &&
-								System.currentTimeMillis()-lastEvent.time<=THRESHOLD_PERIOD)
+								time-lastEvent.time<=THRESHOLD_PERIOD
+								)
 					return true;
 				if(!filteredFirstInSecuence) {
+					L.fine("filtered first in sequence to prioritize digitized input in race");
 					filteredFirstInSecuence=true;
+					firstInSecuenceTime=System.currentTimeMillis();
 					return true;
 				}
+				if(time-firstInSecuenceTime<=THRESHOLD_PERIOD){
+					L.fine("filtering after the first for a period to allow digitized input to come and win in race");
+					return true;
+				}
+				L.fine("digitized input going as event");
 			} else
 				filteredFirstInSecuence=false;
 			lastDevice=device;

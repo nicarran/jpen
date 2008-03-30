@@ -48,6 +48,7 @@ import jpen.PScrollEvent;
 import static jpen.provider.xinput.XiDevice.*;
 
 class XinputDevice extends AbstractPenDevice {
+	private static final Logger L=Logger.getLogger(XinputDevice.class.getName());
 	public final XiDevice device;
 	private final PLevel.Range[] levelRanges;
 	private final XinputProvider xinputProvider;
@@ -59,7 +60,7 @@ class XinputDevice extends AbstractPenDevice {
 		this.device=device;
 		this.xinputProvider=xinputProvider;
 		levelRanges=new PLevel.Range[PLevel.Type.values().length];
-		for(PLevel.Type levelType: PLevel.Type.values()) 
+		for(PLevel.Type levelType: PLevel.Type.values())
 			levelRanges[levelType.ordinal()]=device.getLevelRange(levelType);
 		setKindTypeNumber(getDefaultKindTypeNumber());
 		setEnabled(true);
@@ -73,6 +74,11 @@ class XinputDevice extends AbstractPenDevice {
 		else if(getName().indexOf("tylus")!=-1)
 			return PKind.Type.STYLUS.ordinal();
 		return PKind.Type.CURSOR.ordinal();
+	}
+
+	void clearEventQueue(){
+		while(device.nextEvent())
+			;
 	}
 
 	void processQuedEvents() {
@@ -120,24 +126,26 @@ class XinputDevice extends AbstractPenDevice {
 	}
 
 	void scheduleButtonEvent(int number, boolean state) {
+		if(L.isLoggable(Level.FINE))
+			L.fine("scheduling button event: number="+number+", state="+state);
 		getPen().scheduleButtonEvent(new PButton(number-1, state));
 	}
-	
+
 	private static final float RADS_PER_DEG=(float)(Math.PI/180);
 
 	private final float getMultRangedValue(PLevel.Type levelType) {
 		float devValue=device.getValue(levelType);
-		
+
 		if(levelType.isTilt)
 			return devValue*RADS_PER_DEG;
-		
+
 		devValue=levelRanges[levelType.ordinal()].getRangedValue(devValue);
-		
+
 		if(levelType.isMovement)
 			devValue=xinputProvider.screenBounds.getLevelRangeOffset(levelType)+
-		       devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType); 
-		
-		return devValue; 
+			         devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);
+
+		return devValue;
 	}
 
 	@Override

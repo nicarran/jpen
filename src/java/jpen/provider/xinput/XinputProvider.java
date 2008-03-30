@@ -103,11 +103,17 @@ public class XinputProvider
 		for(int i=xipDevices.length; --i>=0;)
 			xipDevices[i].processQuedEvents();
 	}
+	
+	private void clearEventQueues(){
+		for(int i=xipDevices.length; --i>=0;)
+			xipDevices[i].clearEventQueue();
+	}
 
 	@Override
 	public void penManagerPaused(boolean paused) {
 		if(!paused){
 			screenBounds.reset();
+			clearEventQueues();
 			synchronized(thread) {
 				thread.notifyAll();
 			}
