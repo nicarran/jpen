@@ -24,17 +24,27 @@ public abstract class TypedClass<T extends Enum<T>>
 	implements java.io.Serializable {
 	public static final long serialVersionUID=1l;
 	public final int typeNumber;
+	private final T[] types;
 
 	TypedClass(int typeNumber) {
 		if(typeNumber<0)
 			throw new IllegalArgumentException();
 		this.typeNumber=typeNumber;
+		types=createTypes();
 	}
 
-	abstract T[] getTypes();
+	abstract T[] createTypes();
 
-	public T getType() {
-		T[] types=getTypes();
+	/**
+	@return The enum type matching the {@link #typeNumber}. This method returns {@code null} when the {@link #typeNumber} does not match any enum type ordinal.<p>
+	Although all the JPen (internal) providers use only enum type ordinals as {@link #typeNumber}s, prepare your code for a {@code null} return value.<p>
+	When you get a {@code null} you can use the {@link #typeNumber} directly as instructed by the 3rd party provider. 
+	*/
+	public final T getType() {
+		return getType(typeNumber);
+	}
+	
+	private final T getType(int typeNumber){
 		if(typeNumber>=types.length)
 			return null;
 		return types[typeNumber];

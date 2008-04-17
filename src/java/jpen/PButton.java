@@ -34,7 +34,7 @@ public class PButton
 	}
 
 	@Override
-	Type[] getTypes() {
+	Type[] createTypes() {
 		return Type.values();
 	}
 }

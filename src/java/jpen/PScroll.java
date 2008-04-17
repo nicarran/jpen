@@ -34,7 +34,7 @@ public class PScroll
 	}
 
 	@Override
-	Type[] getTypes() {
+	Type[] createTypes() {
 		return Type.values();
 	}
 }

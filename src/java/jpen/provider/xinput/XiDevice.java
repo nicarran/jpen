@@ -32,6 +32,7 @@ class XiDevice{
 
 	enum EventType{
 		BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY;
+		private static final EventType[] VALUES=EventType.values();
 	}
 
 	final int cellIndex;
@@ -81,7 +82,7 @@ class XiDevice{
 		int lastEventTypeOrdinal=getLastEventType(cellIndex);
 		if(lastEventTypeOrdinal<0)
 			return null;
-		return EventType.values()[lastEventTypeOrdinal];
+		return EventType.VALUES[lastEventTypeOrdinal];
 	}
 
 	private static native int getLastEventType(int cellIndex);

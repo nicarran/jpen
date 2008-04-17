@@ -72,7 +72,7 @@ public class PLevel
 	}
 
 	@Override
-	Type[] getTypes() {
+	Type[] createTypes() {
 		return Type.values();
 	}
 

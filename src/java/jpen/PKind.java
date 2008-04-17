@@ -21,6 +21,7 @@
 package jpen;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class PKind
@@ -29,20 +30,22 @@ public class PKind
 	public static final long serialVersionUID=1l;
 
 	public enum Type{
-		CURSOR, STYLUS, ERASER;
+	  CURSOR, STYLUS, ERASER;
+	  private static final Type[] VALUES=Type.values();
 
-		public static final PKind.Type valueOf(int kindTypeNumber) {
-			if(kindTypeNumber>=values().length)
-				return null;
-			return values()[kindTypeNumber];
-		}
+	  public static final PKind.Type valueOf(int kindTypeNumber) {
+		  if(kindTypeNumber>=VALUES.length)
+			  return null;
+		  return VALUES[kindTypeNumber];
+	  }
 	}
 
 	private PKind(int typeNumber) {
 		super(typeNumber);
 	}
 
-	public static final List<PKind> VALUES=new ArrayList<PKind>(Type.values().length);
+	@Deprecated // will be private
+	public static final List<PKind> VALUES=Collections.unmodifiableList(new ArrayList<PKind>(Type.VALUES.length));
 
 	public static PKind valueOf(int typeNumber){
 		while(VALUES.size()<=typeNumber)
@@ -55,7 +58,7 @@ public class PKind
 	}
 
 	@Override
-	Type[] getTypes() {
+	Type[] createTypes() {
 		return Type.values();
 	}
 }

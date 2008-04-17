@@ -30,7 +30,8 @@ class WintabAccess {
 	/**
 	This must be like E_csrTypes enumeration.
 	*/
-	public enum CursorType{UNDEF, PENTIP, PUCK, PENERASER}
+	public enum CursorType{UNDEF, PENTIP, PUCK, PENERASER;
+	    private static final CursorType[] VALUES=CursorType.values();}
 
 	private final int cellIndex;
 
@@ -44,7 +45,7 @@ class WintabAccess {
 	private static native String getError();
 
 	int getValue(PLevel.Type levelType) {
-		// tilt data is really azimuth and altitude and must be transformed! 
+		// tilt data is really azimuth and altitude and must be transformed!
 		return getValue(cellIndex, levelType.ordinal());
 	}
 
@@ -89,7 +90,7 @@ class WintabAccess {
 	private static native int getButtons(int cellIndex);
 
 	public static CursorType getCursorType(int cursor) {
-		return CursorType.values()[getCursorTypeOrdinal(cursor)];
+		return CursorType.VALUES[getCursorTypeOrdinal(cursor)];
 	}
 
 	private static native int getCursorTypeOrdinal(int cursor);
@@ -143,7 +144,7 @@ class WintabAccess {
 	}
 
 	public static native int getStatus(int cellIndex);
-	
+
 	public boolean getTiltExtSupported() {
 		return getTiltExtSupported(cellIndex);
 	}
