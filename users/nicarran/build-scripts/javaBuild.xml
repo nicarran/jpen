@@ -1,0 +1,468 @@
+<?xml version="1.0"?>
+<project name="javaBuild" default="prepare">
+	<target name="init">
+		<property file="module.properties"/>
+		<property name="module.author" value="Nicolas Carranza"/>
+		<property name="module.authorMail" value="nicarran(at)gmail.com"/>
+		<property name="module.url" value="UNDEFINED"/>
+		<property name="module.javacTarget" value="1.6"/>
+		<property name="module.javacDebug" value="true"/>
+		<property name="module.mainClass" value="UNDEFINED"/>
+		<property name="module.commercialId" value="${module.id}"/>
+		<property name="copyright.licensesDir" value="/home/nicarran/archive/boxes/ant/project/licenses/GPL"/>
+		<property name="copyright.licenseName" value="GNU General Public License"/>
+		<property name="copyright.licenseAbrevName" value="GNU GPL" />
+		<property name="copyright.licenseVersion" value="3" />
+		<tstamp>
+			<format property="copyright.year" pattern="yyyy"/>
+		</tstamp>
+		<available property="copyright.contributorsAvail" file="src/copyright/${module.commercialId}-copyright.txt"></available>
+		<tstamp>
+			<format property="module.distVersion" pattern="yyMMdd"/>
+		</tstamp>
+		<property name="module.distDir" value="product/distributions/${module.distVersion}"/>
+		<property name="module.id-ver" value="${module.id}-${module.version}"/>
+		<property name="module.id-fullVer" value="${module.id-ver}-${module.distVersion}"/>
+				
+		
+		<mkdir dir="dependencies/jars"/>
+		<mkdir dir="dependencies/test-jars"/>
+		<mkdir dir="dependencies/modules"/>
+		<mkdir dir="product"/>
+		<mkdir dir="src/java/${module.packageAsDir}"/>
+		<mkdir dir="src/test/${module.packageAsDir}"/>
+		<mkdir dir="src/resources/${module.packageAsDir}"/>
+		<mkdir dir="src/aux/${module.packageAsDir}"/>
+		<mkdir dir="src/jars"/>
+		<mkdir dir="src/c"/>
+		<mkdir dir="src/copyright"></mkdir>
+		
+		<touch mkdirs="true" file="src/java/META-INF/MANIFEST.MF"/>
+		<touch mkdirs="true" file="src/test/META-INF/MANIFEST.MF"/>
+		
+		<path id="module.depclasspath">
+			<fileset dir="dependencies/jars" includes="*.jar"/>
+			<fileset dir="dependencies/test-jars" includes="*.jar"/>
+			<dirset dir="dependencies/modules">
+				<include name="*/src/java"/>
+				<include name="*/src/aux"/>
+			</dirset>
+		</path>
+		
+		<property name="module.srcclasspath" value="src/java:src/aux:src/test"/>
+		
+		<pathconvert property="module.hasSources" setonempty="false">
+			<path>
+				<fileset dir="src/java" includes="**/*.java"/>
+			</path>
+		</pathconvert>
+		
+		<condition property="disable.javadoc">
+			<or>
+				<isset property="module.is3rdParty"/>
+				<not>
+					<isset property="module.hasSources"/>
+				</not>
+			</or>
+		</condition>
+		
+		<echoproperties destfile="src/resources/${module.packageAsDir}/module.properties" prefix="module"/>
+		
+		<copy file="/home/nicarran/archive/boxes/ant/project/logging.properties" todir="."/>
+	</target>
+	
+	<target name="updateManifest" depends="init" unless="module.is3rdParty">
+		<path id="_lib">
+			<fileset dir="dependencies">
+				<include name="jars/*.jar"/>
+				<include name="modules/*/product/*.jar"/>
+				<exclude name="modules/*/product/*.test.jar"/>
+			</fileset>
+		</path>
+		<pathconvert pathsep=" " dirsep="/" property="_classpath" refid="_lib">
+			<mapper type="flatten"/>
+		</pathconvert>
+		<echo>Manifest classpath: ${_classpath}</echo>
+		<manifest mode="update" file="src/java/META-INF/MANIFEST.MF">
+			<!-- Version 1.2 allows extensions (Class-path tag). In client apps I prefer using the -Djava.ext.dirs dynamic property.-->
+			<attribute name="Manifest-Version" value="1.2"/>
+			<attribute name="Created-By" value="${module.author}"/>
+			<attribute name="Class-path" value="${_classpath}"/>
+			<attribute name="Main-Class" value="${module.mainClass}"/>
+		</manifest>
+		<path id="_lib">
+			<fileset dir="dependencies">
+				<include name="test-jars/*.jar"/>
+			</fileset>
+		</path>
+		<pathconvert pathsep=" " dirsep="/" property="_classpath2" refid="_lib">
+			<mapper type="flatten"/>
+		</pathconvert>
+		<echo>Test Manifest extra classpath: ${_classpath2}</echo>
+		<manifest mode="update" file="src/test/META-INF/MANIFEST.MF">
+			<attribute name="Manifest-Version" value="1.2"/>
+			<attribute name="Created-By" value="${module.author}"/>
+			<attribute name="Class-path" value="${module.package}-${module.version}.jar ${_classpath2}"/>
+		</manifest>
+	</target>
+
+	<!-- This is an antipattern: use tests.
+	<target name="run" depends="init">
+		<java classname="${module.mainClass}">
+			<classpath refid="module.depclasspath"/>
+			<classpath>
+				<pathelement path="src/java:src/aux"/>
+			</classpath>
+		</java>
+	</target> -->
+	
+	<target name="linkSrc" depends="init" description="Makes links to the sources.">
+		<exec executable="ln" os="Linux">
+			<arg value="-s"/>
+			<arg value="-f"/>
+			<arg value="src/java/${module.packageAsDir}"/>
+			<arg value="src-java"/>
+		</exec>
+		<exec executable="ln" os="Linux">
+			<arg value="-s"/>
+			<arg value="-f"/>
+			<arg value="src/test/${module.packageAsDir}"/>
+			<arg value="src-test"/>
+		</exec>
+		<exec executable="ln" os="Linux">
+			<arg value="-s"/>
+			<arg value="-f"/>
+			<arg value="src/resources/${module.packageAsDir}"/>
+			<arg value="src-resources"/>
+		</exec>
+		<exec executable="ln" os="Linux">
+			<arg value="-s"/>
+			<arg value="-f"/>
+			<arg value="src/aux/${module.packageAsDir}"/>
+			<arg value="src-aux"/>
+		</exec>
+		<exec executable="ln" os="Linux">
+			<arg value="-s"/>
+			<arg value="-f"/>
+			<arg value="src/java/META-INF"/>
+			<arg value="src-java:metaInf"/>
+		</exec>
+	</target>
+	
+	<target name="linkTestJars" description="Links the jars required for tests." depends="init">
+		<exec executable="ln" os="Linux">
+			<arg value="-s"/>
+			<arg value="-f"/>
+			<arg value="${module.repositoryDir}/jars/junit.framework-3.8.2.jar"/>
+			<arg value="${module.repositoryDir}/jars/nicarran.junit-1.jar"/>
+			<arg value="dependencies/test-jars"/>
+		</exec>
+	</target>
+	
+	<target name="linkEjbClientJars" description="Links the jar required in a common EJB client." depends="init">
+		<antcall target="_linkEjbClientJars">
+			<param name="_linkEjbClientJars_dest" value="dependencies/jars"/>
+		</antcall>
+	</target>
+	
+	<target name="linkEjbTestJars" description="Links the jar required to test EJBs." depends="init">
+		<antcall target="_linkEjbClientJars">
+			<param name="_linkEjbClientJars_dest" value="dependencies/test-jars"/>
+		</antcall>
+	</target>
+	
+	<target name="_linkEjbClientJars">
+		<exec executable="ln" os="Linux">
+			<arg value="-s"/>
+			<arg value="-f"/>
+			<arg value="${module.repositoryDir}/jars/jboss.allClient-4.0.5.jar"/>
+			<arg value="${module.repositoryDir}/jars/jboss.ejb3Client-4.0.5.jar"/>
+			<arg value="${module.repositoryDir}/jars/jboss.aopJdk50Client-4.0.5.jar"/>
+			<arg value="${module.repositoryDir}/jars/jboss.aspectJdk50Client-4.0.5.jar"/>
+			<arg value="${_linkEjbClientJars_dest}"/>
+		</exec>
+	</target>
+	
+	<target name="linkProcessorJars" depends="init">
+		<exec executable="ln" os="Linux">
+			<arg value="-s"/>
+			<arg value="-f"/>
+			<arg value="${module.repositoryDir}/jars/nicarran.annotation-1.jar"/>
+			<arg value="dependencies/jars"/>
+		</exec>
+	</target>
+	
+	<target name="clean" description="Removes the compiled classes" depends="init, cleanJar">
+		<delete includeemptydirs="true">
+			<fileset dir="src" includes="**/*.class"/>
+			<fileset dir="src/aux/${module.packageAsDir}" includes="**/*"/>
+		</delete>
+	</target>
+	
+	<target name="process" depends="init" description="Process annotations" if="module.annotationProcessors">
+		<echo>module.annotationProcessors: ${module.annotationProcessors}</echo>
+		<pathconvert property="module.depclasspath" refid="module.depclasspath"/>
+		<javac debug="${module.javacDebug}" target="${module.javacTarget}" includeAntRuntime="no" srcdir="${module.srcclasspath}">
+			<classpath refid="module.depclasspath"/>
+			<compilerarg line="${module.annotationProcessors} -proc:only -processorpath &quot;${module.depclasspath}&quot; -s src/aux"/>
+		</javac>
+	</target>
+	
+	<target name="compile" description="Compiles the sources found in src" depends="process">
+		<javac debug="${module.javacDebug}" target="${module.javacTarget}" includeantruntime="no" srcdir="${module.srcclasspath}">
+			<classpath refid="module.depclasspath"/>
+			<compilerarg value="-Xlint:unchecked"/>
+			<compilerarg value="-Xlint:deprecation"/>
+		</javac>
+	</target>
+	
+	<target name="deptree">
+		<exec executable="antProject-deptree" os="Linux"/>
+	</target>
+	
+	<target name="test" description="Does JUnit tests" depends="compile, deptree">
+		<junit haltonfailure="yes" fork="yes" showoutput="yes" forkmode="once">
+			<jvmarg value="-Xmx512M"/>
+						<!--<jvmarg value="-Xms256M"/>-->
+			<jvmarg value="-Djava.util.logging.config.file=logging.properties"/>
+						<!--<jvmarg value="-verbose:gc"/>-->
+						<!--<jvmarg value="-XX:+ShowMessageBoxOnError"/>-->
+						<!--<jvmarg value="-Xincgc"/>-->
+			<jvmarg value="-Dsun.java2d.opengl=True"/>
+			<jvmarg value="-Djava.library.path=deptree/jars"/>
+			<formatter type="plain" usefile="false"/>
+			<classpath>
+				<pathelement path="${module.srcclasspath}"/>
+				<fileset dir="deptree/jars" includes="*.jar"/>
+			</classpath>
+			<batchtest>
+				<fileset dir="src/test" includes="**/demo/*Test.class" excludes="**/*Tests.class"/>
+			</batchtest>
+		</junit>
+	</target>
+	
+	<target name="profile" description="profiles using jrat" depends="init, compile">
+		<fail message="You must define module.profileClass in the module.properties file.">
+			<condition>
+				<not>
+					<isset property="module.profileClass"/>
+				</not>
+			</condition>
+		</fail>
+		<mkdir dir="profilerOutput"/>
+		<property name="_profilerOutputFile" value="profilerOutput/profile-${DSTAMP}-${TSTAMP}.xml"/>
+		<echo file="profile.properties">output=xml
+file=${_profilerOutputFile}
+				</echo>
+		<java classname="${module.profileClass}" fork="yes">
+			<jvmarg value="-verbose:gc"/>
+			<jvmarg value="-Djava.library.path=deptree/jars"/>
+						<!--<jvmarg value="-javaagent:/home/nicarran/archive/boxes/jrat/distribution/shiftone-jrat.jar"/>-->
+			<jvmarg value="-javaagent:/home/nicarran/archive/boxes/jip/distribution/profile/profile.jar"/>
+						<!--<jvmarg value="-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n"/>-->
+			<jvmarg value="-Dprofile.properties=profile.properties"/>
+			<classpath>
+				<pathelement path="${module.srcclasspath}"/>
+				<fileset dir="deptree/test-deptree/jars" includes="*.jar"/>
+			</classpath>
+		</java>
+		<java jar="/home/nicarran/archive/boxes/jip/distribution/client/jipViewer.jar" fork="yes">
+			<arg value="${_profilerOutputFile}"/>
+		</java>
+	</target>
+	
+	<target name="prepWinTest" depends="deptree">
+		<property name="_winTestDir" value="product/win-test"/>
+		<fail message="You must link the windows test dir to ${_winTestDir}.">
+			<condition>
+				<not>
+					<available file="${_winTestDir}" type="dir"/>
+				</not>
+			</condition>
+		</fail>
+		<delete>
+			<fileset dir="${_winTestDir}" includes="*.jar"/>
+		</delete>
+		<copy todir="${_winTestDir}">
+			<fileset dir="deptree/jars" includes="*.*"/>
+			<fileset dir="deptree/test-deptree/jars" includes="*.*"/>
+			<fileset dir="product" includes="*.test.jar, *.dll"/>
+		</copy>
+		<pathconvert targetos="windows" property="_winClasspath">
+			<path>
+				<fileset dir="${_winTestDir}" includes="*.jar"/>
+			</path>
+			<mapper type="flatten"/>
+		</pathconvert>
+		<echo file="${_winTestDir}/runTest.bat">java -cp "${_winClasspath}" junit.textui.TestRunner %1 %2 %3
+				</echo>
+		<pathconvert pathsep=" " dirsep="." property="_winAvailableTests">
+			<path>
+				<fileset dir="src/test" includes="**/*Test.class"/>
+				<fileset dir="src/test" includes="**/*Tests.class"/>
+			</path>
+			<map from="${basedir}/src/test/" to=""/>
+			<mapper type="glob" from="*.class" to="*"/>
+		</pathconvert>
+		<echo file="${_winTestDir}/availableTests.txt">${_winAvailableTests}
+				</echo>
+	</target>
+	
+	<target name="cleanJar" depends="init" description="sets the product jar to empty content" unless="module.is3rdParty">
+		<delete>
+			<fileset dir="product">
+				<include name="${module.package}-${module.version}.jar"/>
+				<include name="${module.package}-${module.version}.test.jar"/>
+			</fileset>
+		</delete>
+		<jar destfile="product/${module.package}-${module.version}.jar"/>
+		<jar destfile="product/${module.package}-${module.version}.test.jar"/>
+	</target>
+	
+	<target name="jar" description="Constructs the main jar." depends="cleanJar, updateManifest, compile" unless="module.is3rdParty">
+		<jar destfile="product/${module.package}-${module.version}.jar" manifest="src/java/META-INF/MANIFEST.MF">
+			<fileset dir="src/java" includes="META-INF/**/*.xml"/>
+			<fileset dir="src/java" includes="**/*.class"/>
+			<fileset dir="src/aux" includes="**/*.class"/>
+			<fileset dir="src/resources">
+				<include name="**/*.properties"/>
+				<include name="**/*.png"/>
+				<include name="**/*.props"/>
+				<include name="${module.packageAsDir}/**/*"/>
+			</fileset>
+		</jar>
+				<zip keepcompression="true" duplicate="preserve"
+								destfile="product/${module.package}-${module.version}.jar.tmp">
+			<zipgroupfileset dir="product" includes="${module.package}-${module.version}.jar" />
+			<zipgroupfileset dir="src/jars" includes="*.jar" />
+		</zip>
+				<move file="product/${module.package}-${module.version}.jar.tmp"
+								tofile="product/${module.package}-${module.version}.jar" />
+		<jar destfile="product/${module.package}-${module.version}.test.jar" manifest="src/test/META-INF/MANIFEST.MF">
+			<fileset dir="src/test" includes="**/*" excludes="**/*.java"/>
+		</jar>
+	</target>
+	
+		<target name="javadoc" description="Prepares and generates Javadoc" depends="init, copyright" unless="disable.javadoc">
+		<delete dir="product/javadoc"/>
+		<mkdir dir="product/javadoc"/>
+		<javadoc WindowTitle="${module.package}-${module.version}" DocTitle="${module.commercialId} (ver.${module.version})" destdir="product/javadoc" classpathref="module.depclasspath" linksource="yes" stylesheetfile="/home/nicarran/archive/boxes/latex2html/latex2html.css" bottom="&lt;div class=&quot;bottom&quot;&gt; Copyright &#169; ${copyright.year} ${module.author} and individual contributors. &lt;a href=&quot;${module.url}&quot;&gt;${module.commercialId}&lt;/a&gt; is licensed under the &lt;a href=&quot;http://www.gnu.org/licenses/lgpl.html&quot;&gt;GNU LGPL&lt;/a&gt;. &lt;/div&gt;">
+			<packageset dir="src/java"/>
+			<packageset dir="src/aux"/>
+		</javadoc>
+	</target>
+		
+	
+	<target name="licenses" depends="init">
+		<copy todir="src/copyright">
+			<fileset dir="${copyright.licensesDir}" includes="*"></fileset>
+		</copy>
+	</target>
+	
+	<target name="contributors" unless="copyright.contributorsAvail" depends="init">
+		<!-- [{ -->
+		<echo file="src/copyright/${module.commercialId}-copyright.txt">${module.commercialId} is Copyright ${copyright.year} ${module.author} and individual contributors,
+and is licensed under the ${copyright.licenseAbrevName}.
+
+You should have received a copy of the ${copyright.licenseName}
+along with ${module.commercialId}.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+
+A summary of the individual contributors is given below.
+Any omission should be sent to &lt;${module.authorMail}&gt;.
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+
+For more information about ${module.commercialId}, see &lt;${module.url}&gt;.
+</echo><!-- }] -->
+	</target>
+	
+	<target name="copyrightSrcs" depends="init">
+		<echo file="copyright.tmp">/* % [{
+% (C) Copyright ${copyright.year} ${module.author} and individual contributors.
+% See the ${module.commercialId}-copyright.txt file in the ${module.commercialId} distribution for a full
+% listing of individual contributors.
+%
+% This file is part of ${module.commercialId}.
+%
+% ${module.commercialId} is free software: you can redistribute it and/or modify
+% it under the terms of the ${copyright.licenseName} as published by
+% the Free Software Foundation, either version ${copyright.licenseVersion} of the License,
+% or (at your option) any later version.
+%
+% ${module.commercialId} is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% ${copyright.licenseName} for more details.
+%
+% You should have received a copy of the ${copyright.licenseName}
+% along with ${module.commercialId}.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+% }] */
+</echo>
+				<mapper id="out" type="glob"
+								from="*"
+								to="*.tmp-cr"/>
+		<apply executable="cat">
+			<arg value="copyright.tmp"/>
+			<srcfile/>
+			<fileset dir="." includes="src/**/*.java src/**/*.c src/**/*.h">
+				<not>
+					<contains text="(C) Copyright"></contains>
+				</not>
+			</fileset>
+			<redirector>
+				<outputmapper refid="out"/>
+			</redirector>
+		</apply>
+		<move todir="." includeemptydirs="false">
+			<fileset dir="." includes="src/**/*.tmp-cr"/>
+			<mapper type="glob" from="*.tmp-cr" to="*"/>
+		</move>
+		<delete file="copyright.tmp"/>
+	</target>
+	
+	<target name="copyright" depends="licenses, contributors, copyrightSrcs"/>
+	
+	<target name="distPrep" depends="init">
+		<delete dir="${module.distDir}" quiet="true"/>
+		<mkdir dir="${module.distDir}"/>
+	</target>
+	
+	<target name="distJavadoc" depends="javadoc">
+		<zip destfile="${module.distDir}/${module.id-fullVer}-javadoc.zip">
+			<zipfileset dir="product/javadoc" prefix="${module.id-fullVer}"/>
+			<zipfileset dir="src/copyright" prefix="${module.id-fullVer}"/>
+				</zip>
+	</target>
+	
+	<target name="distSrc" depends="init">
+		<zip destfile="${module.distDir}/${module.id-fullVer}-src.zip">
+			<zipfileset dir="src/java" prefix="${module.id-fullVer}/java" includes="**/*.java"/>
+						<zipfileset dir="src/resources" prefix="${module.id-fullVer}/resources" includes="**/*.properties, **/*.java"/>
+			<zipfileset dir="src/copyright" prefix="${module.id-fullVer}"/>
+			<zipfileset dir="src/c" prefix="${module.id-fullVer}/c" includes="**/*.h, **/*.c"/>
+				</zip>
+	</target>
+		
+	<target name="distLib" depends="jar">
+		<zip destfile="${module.distDir}/${module.id-fullVer}-lib.zip">
+			<zipfileset dir="product" prefix="${module.id-fullVer}" includes="*.jar *.dll *.so" excludes="*test*"/>
+			<zipfileset dir="src/copyright" prefix="${module.id-fullVer}"/>
+				</zip>
+		</target>
+	
+	<target name="dist" depends="distPrep, distJavadoc, distSrc, distLib"/>
+	
+	<target name="distUpload" depends="init">
+				<ftp server="upload.sourceforge.net"
+								remotedir="incoming"
+								userid="anonymous"
+								password="nicarran@gmail.com">
+			<fileset dir="${module.distDir}"/>
+		</ftp>
+	</target>
+	
+	<target name="all" depends="jar, javadoc"/>
+	
+	<target name="prepare" depends="linkSrc, jar"/>
+</project>
