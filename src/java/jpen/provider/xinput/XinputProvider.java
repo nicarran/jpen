@@ -56,8 +56,8 @@ public class XinputProvider
 			try {
 				Utils.loadLibrary();
 				return new XinputProvider(pm, this);
-			} catch(Exception ex) {
-				throw new ConstructionException(ex);
+			} catch(Throwable t) {
+				throw new ConstructionException(t);
 			}
 		}
 	}

@@ -44,13 +44,17 @@ public class PKind
 		super(typeNumber);
 	}
 
-	@Deprecated // will be private
-	public static final List<PKind> VALUES=Collections.unmodifiableList(new ArrayList<PKind>(Type.VALUES.length));
+	private static final List<PKind> VALUES_L=new ArrayList<PKind>(Type.VALUES.length);
+	/**
+	@deprecated Use {@link #valueOf(int)}.
+	*/
+	@Deprecated 
+	public static final List<PKind> VALUES=Collections.unmodifiableList(VALUES_L);
 
 	public static PKind valueOf(int typeNumber){
-		while(VALUES.size()<=typeNumber)
-			VALUES.add(new PKind(VALUES.size()));
-		return VALUES.get(typeNumber);
+		while(VALUES_L.size()<=typeNumber)
+			VALUES_L.add(new PKind(VALUES_L.size()));
+		return VALUES_L.get(typeNumber);
 	}
 
 	public static PKind valueOf(Type type){

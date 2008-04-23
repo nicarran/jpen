@@ -129,8 +129,8 @@ public class WintabProvider
 				Utils.loadLibrary();
 				WintabAccess wintabAccess=new WintabAccess();
 				return new WintabProvider(pm, this, wintabAccess);
-			} catch(Throwable ex) {
-				throw new ConstructionException(ex);
+			} catch(Throwable t) {
+				throw new ConstructionException(t);
 			}
 		}
 	}
