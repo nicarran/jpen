@@ -99,3 +99,13 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiDevice_getLastEventButton
 (JNIEnv *pEnv, jclass class, jint cellIndex) {
 	return Device_getP(cellIndex)->lastEventButton;
 }
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    refreshLevelRanges
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_jpen_provider_xinput_XiDevice_refreshLevelRanges
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	Device_refreshValuatorRanges(Device_getP(cellIndex));
+}

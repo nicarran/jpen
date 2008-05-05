@@ -68,6 +68,7 @@ enum{
 };
 struct Access {
 	int cellIndex;
+	LOGCONTEXT lc;
 	HCTX ctx;
 	UINT device;
 	int enabled;
@@ -82,6 +83,7 @@ struct Access {
 };
 m_declareRow(Access);
 extern int Access_nextPacket(SAccess *pAccess);
+extern int Access_refreshLc(SAccess *pAccess);
 extern int Access_getEnabled(SAccess *pAccess);
 extern void Access_setEnabled(SAccess *pAccess, int enabled);
 extern void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange);

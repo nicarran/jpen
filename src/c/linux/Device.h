@@ -57,6 +57,7 @@ struct Device {
 m_declareRow(Device);
 extern int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex);
 extern int Device_nextEvent(struct Device *pDevice );
+extern void Device_refreshValuatorRanges(struct Device *pDevice);
 
 #endif
 

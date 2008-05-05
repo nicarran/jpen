@@ -23,7 +23,7 @@
 		<property name="module.distDir" value="product/distributions/${module.distVersion}"/>
 		<property name="module.id-ver" value="${module.id}-${module.version}"/>
 		<property name="module.id-fullVer" value="${module.id-ver}-${module.distVersion}"/>
-				
+		
 		
 		<mkdir dir="dependencies/jars"/>
 		<mkdir dir="dependencies/test-jars"/>
@@ -236,7 +236,7 @@
 				<fileset dir="deptree/jars" includes="*.jar"/>
 			</classpath>
 			<batchtest>
-				<fileset dir="src/test" includes="**/demo/*Test.class" excludes="**/*Tests.class"/>
+				<fileset dir="src/test" includes="**/*Test.class" excludes="**/*Tests.class"/>
 			</batchtest>
 		</junit>
 	</target>
@@ -296,6 +296,14 @@ file=${_profilerOutputFile}
 		</pathconvert>
 		<echo file="${_winTestDir}/runTest.bat">java -cp "${_winClasspath}" junit.textui.TestRunner %1 %2 %3
 				</echo>
+		<pathconvert targetos="unix" property="_unixClasspath">
+			<path>
+				<fileset dir="${_winTestDir}" includes="*.jar"/>
+			</path>
+			<mapper type="flatten"/>
+		</pathconvert>
+		<echo file="${_winTestDir}/runTest.sh">java -cp "${_unixClasspath}" junit.textui.TestRunner $1
+				</echo>
 		<pathconvert pathsep=" " dirsep="." property="_winAvailableTests">
 			<path>
 				<fileset dir="src/test" includes="**/*Test.class"/>
@@ -306,6 +314,8 @@ file=${_profilerOutputFile}
 		</pathconvert>
 		<echo file="${_winTestDir}/availableTests.txt">${_winAvailableTests}
 				</echo>
+				
+		<zip destfile="${_winTestDir}/tests.zip" basedir="${_winTestDir}" excludes="**/tests.zip"/>
 	</target>
 	
 	<target name="cleanJar" depends="init" description="sets the product jar to empty content" unless="module.is3rdParty">
@@ -331,19 +341,17 @@ file=${_profilerOutputFile}
 				<include name="${module.packageAsDir}/**/*"/>
 			</fileset>
 		</jar>
-				<zip keepcompression="true" duplicate="preserve"
-								destfile="product/${module.package}-${module.version}.jar.tmp">
+		<zip keepcompression="true" duplicate="preserve" destfile="product/${module.package}-${module.version}.jar.tmp">
 			<zipgroupfileset dir="product" includes="${module.package}-${module.version}.jar" />
 			<zipgroupfileset dir="src/jars" includes="*.jar" />
 		</zip>
-				<move file="product/${module.package}-${module.version}.jar.tmp"
-								tofile="product/${module.package}-${module.version}.jar" />
+		<move file="product/${module.package}-${module.version}.jar.tmp" tofile="product/${module.package}-${module.version}.jar" />
 		<jar destfile="product/${module.package}-${module.version}.test.jar" manifest="src/test/META-INF/MANIFEST.MF">
 			<fileset dir="src/test" includes="**/*" excludes="**/*.java"/>
 		</jar>
 	</target>
 	
-		<target name="javadoc" description="Prepares and generates Javadoc" depends="init, copyright" unless="disable.javadoc">
+	<target name="javadoc" description="Prepares and generates Javadoc" depends="init, copyright" unless="disable.javadoc">
 		<delete dir="product/javadoc"/>
 		<mkdir dir="product/javadoc"/>
 		<javadoc WindowTitle="${module.package}-${module.version}" DocTitle="${module.commercialId} (ver.${module.version})" destdir="product/javadoc" classpathref="module.depclasspath" linksource="yes" stylesheetfile="/home/nicarran/archive/boxes/latex2html/latex2html.css" bottom="&lt;div class=&quot;bottom&quot;&gt; Copyright &#169; ${copyright.year} ${module.author} and individual contributors. &lt;a href=&quot;${module.url}&quot;&gt;${module.commercialId}&lt;/a&gt; is licensed under the &lt;a href=&quot;http://www.gnu.org/licenses/lgpl.html&quot;&gt;GNU LGPL&lt;/a&gt;. &lt;/div&gt;">
@@ -351,7 +359,7 @@ file=${_profilerOutputFile}
 			<packageset dir="src/aux"/>
 		</javadoc>
 	</target>
-		
+	
 	
 	<target name="licenses" depends="init">
 		<copy todir="src/copyright">
@@ -399,9 +407,7 @@ For more information about ${module.commercialId}, see &lt;${module.url}&gt;.
 % along with ${module.commercialId}.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 % }] */
 </echo>
-				<mapper id="out" type="glob"
-								from="*"
-								to="*.tmp-cr"/>
+		<mapper id="out" type="glob" from="*" to="*.tmp-cr"/>
 		<apply executable="cat">
 			<arg value="copyright.tmp"/>
 			<srcfile/>
@@ -432,32 +438,29 @@ For more information about ${module.commercialId}, see &lt;${module.url}&gt;.
 		<zip destfile="${module.distDir}/${module.id-fullVer}-javadoc.zip">
 			<zipfileset dir="product/javadoc" prefix="${module.id-fullVer}"/>
 			<zipfileset dir="src/copyright" prefix="${module.id-fullVer}"/>
-				</zip>
+		</zip>
 	</target>
 	
 	<target name="distSrc" depends="init">
 		<zip destfile="${module.distDir}/${module.id-fullVer}-src.zip">
 			<zipfileset dir="src/java" prefix="${module.id-fullVer}/java" includes="**/*.java"/>
-						<zipfileset dir="src/resources" prefix="${module.id-fullVer}/resources" includes="**/*.properties, **/*.java"/>
+			<zipfileset dir="src/resources" prefix="${module.id-fullVer}/resources" includes="**/*.properties, **/*.java"/>
 			<zipfileset dir="src/copyright" prefix="${module.id-fullVer}"/>
 			<zipfileset dir="src/c" prefix="${module.id-fullVer}/c" includes="**/*.h, **/*.c"/>
-				</zip>
+		</zip>
 	</target>
-		
+	
 	<target name="distLib" depends="jar">
 		<zip destfile="${module.distDir}/${module.id-fullVer}-lib.zip">
 			<zipfileset dir="product" prefix="${module.id-fullVer}" includes="*.jar *.dll *.so" excludes="*test*"/>
 			<zipfileset dir="src/copyright" prefix="${module.id-fullVer}"/>
-				</zip>
-		</target>
+		</zip>
+	</target>
 	
 	<target name="dist" depends="distPrep, distJavadoc, distSrc, distLib"/>
 	
 	<target name="distUpload" depends="init">
-				<ftp server="upload.sourceforge.net"
-								remotedir="incoming"
-								userid="anonymous"
-								password="nicarran@gmail.com">
+		<ftp server="upload.sourceforge.net" remotedir="incoming" userid="anonymous" password="nicarran@gmail.com">
 			<fileset dir="${module.distDir}"/>
 		</ftp>
 	</target>

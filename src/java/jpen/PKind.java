@@ -31,7 +31,7 @@ public class PKind
 
 	public enum Type{
 	  CURSOR, STYLUS, ERASER;
-	  private static final Type[] VALUES=Type.values();
+	  private static final Type[] VALUES=values();
 
 	  public static final PKind.Type valueOf(int kindTypeNumber) {
 		  if(kindTypeNumber>=VALUES.length)
@@ -62,7 +62,7 @@ public class PKind
 	}
 
 	@Override
-	Type[] createTypes() {
-		return Type.values();
+	Type[] getTypes() {
+		return Type.VALUES;
 	}
 }

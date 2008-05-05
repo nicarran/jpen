@@ -80,3 +80,13 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_destroy
 (JNIEnv *pEnv, jclass class, jint cellIndex){
   return Bus_destroy(cellIndex);
 }
+
+/*
+ * Class:     jpen_provider_xinput_XiBus
+ * Method:    refreshDeviceInfo
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_refreshDeviceInfo
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Bus_refreshDeviceInfo(Bus_getP(cellIndex));
+}

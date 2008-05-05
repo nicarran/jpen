@@ -27,6 +27,7 @@ public class PScroll
 
 	public enum Type {
 		UP, DOWN;
+		private static final Type[] VALUES=values();
 	}
 
 	public PScroll(int typeNumber, int value) {
@@ -34,7 +35,7 @@ public class PScroll
 	}
 
 	@Override
-	Type[] createTypes() {
-		return Type.values();
+	Type[] getTypes() {
+		return Type.VALUES;
 	}
 }

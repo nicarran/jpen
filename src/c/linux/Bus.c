@@ -49,6 +49,13 @@ int Bus_preCreate(SBus *pBus) {
 		XCloseDisplay(pBus->pDisplay);
 		return errorState;
 	}
+	
+	return Bus_refreshDeviceInfo(pBus);
+}
+
+int Bus_refreshDeviceInfo(SBus *pBus){
+	if(pBus->pDeviceInfo)
+		XFreeDeviceList(pBus->pDeviceInfo);
 	pBus->pDeviceInfo = XListInputDevices(pBus->pDisplay, &pBus->deviceInfoSize);
 	if (!pBus->pDeviceInfo) {
 		Bus_setError("Failed to get input device information; ");

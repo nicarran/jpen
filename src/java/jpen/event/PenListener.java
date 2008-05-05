@@ -27,5 +27,9 @@ public interface PenListener {
 	void penLevelEvent(PLevelEvent ev);
 	void penButtonEvent(PButtonEvent ev);
 	void penScrollEvent(PScrollEvent ev);
+	/**
+	Useful to detect if the listeners are taking too much time processing events ({@code availableMillis<0}) causing a pen lagging (pen events being queued at a higher rate than they are being processed).<p>
+	The pen fires queued events at a given frequency (by default {@link jpen.Pen#DEFAULT_FREQUENCY}) in its own thread. Each cycle, after firing and processing the events, the pen calls jpen.event.PenListener.penTock(long availableMillis), where availableMillis is the time left of the period: {@code availableMillis=period-firingTime }, {@code period=1000/frequency}, and {@code firingTime} is the time spent in firing and processing events in the cycle.
+	*/
 	void penTock(long availableMillis);
 }

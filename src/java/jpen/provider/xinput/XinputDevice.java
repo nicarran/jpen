@@ -75,10 +75,11 @@ class XinputDevice extends AbstractPenDevice {
 			return PKind.Type.STYLUS.ordinal();
 		return PKind.Type.CURSOR.ordinal();
 	}
-
-	void clearEventQueue(){
+	
+	void reset(){
 		while(device.nextEvent())
 			;
+		device.refreshLevelRanges();
 	}
 
 	void processQuedEvents() {
@@ -106,29 +107,29 @@ class XinputDevice extends AbstractPenDevice {
 	}
 
 	private void scheduleScrollEvent(int number) {
-		getPen().scheduleScrollEvent(new PScroll(number==5? PScroll.Type.DOWN.ordinal(): PScroll.Type.UP.ordinal(),1));
+		getPenManager().scheduleScrollEvent(new PScroll(number==5? PScroll.Type.DOWN.ordinal(): PScroll.Type.UP.ordinal(),1));
 	}
 
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();
 	private void scheduleLevelEvent() {
 		Utils.getLocationOnScreen(getComponent(), componentLocation);
 		for(PLevel.Type levelType:PLevel.Type.values()) {
-			float value=PLevel.getCoordinateValueInsideComponent(
+			float value=PLevel.getCoordinateValueForComponent(
 			              getComponent().getSize(componentSize), componentLocation,  levelType, getMultRangedValue(levelType));
-			if(levelType.isMovement && value<0) {
+			/*if(levelType.isMovement && value<0) {
 				changedLevels.clear();
 				return;
-			}
+			}*/
 			changedLevels.add(new PLevel(levelType.ordinal(), value));
 		}
-		getPen().scheduleLevelEvent(this, changedLevels);
+		getPenManager().scheduleLevelEvent(this, changedLevels);
 		changedLevels.clear();
 	}
 
 	void scheduleButtonEvent(int number, boolean state) {
 		if(L.isLoggable(Level.FINE))
 			L.fine("scheduling button event: number="+number+", state="+state);
-		getPen().scheduleButtonEvent(new PButton(number-1, state));
+		getPenManager().scheduleButtonEvent(new PButton(number-1, state));
 	}
 
 	private static final float RADS_PER_DEG=(float)(Math.PI/180);

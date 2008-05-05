@@ -24,16 +24,14 @@ public abstract class TypedClass<T extends Enum<T>>
 	implements java.io.Serializable {
 	public static final long serialVersionUID=1l;
 	public final int typeNumber;
-	private final T[] types;
 
 	TypedClass(int typeNumber) {
 		if(typeNumber<0)
 			throw new IllegalArgumentException();
 		this.typeNumber=typeNumber;
-		types=createTypes();
 	}
 
-	abstract T[] createTypes();
+	abstract T[] getTypes();
 
 	/**
 	@return The enum type matching the {@link #typeNumber}. This method returns {@code null} when the {@link #typeNumber} does not match any enum type ordinal.<p>
@@ -45,9 +43,9 @@ public abstract class TypedClass<T extends Enum<T>>
 	}
 	
 	private final T getType(int typeNumber){
-		if(typeNumber>=types.length)
+		if(typeNumber>=getTypes().length)
 			return null;
-		return types[typeNumber];
+		return getTypes()[typeNumber];
 	}
 
 	@Override

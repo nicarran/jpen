@@ -150,6 +150,13 @@ class WintabAccess {
 	}
 
 	private static native boolean getTiltExtSupported(int cellIndex);
+	
+	
+	public boolean getLcSysMode(){
+		return getLcSysMode(cellIndex);
+	}
+	
+	private static native boolean getLcSysMode(int cellIndex);
 
 	@Override
 	public String toString() {
@@ -177,6 +184,7 @@ class WintabAccess {
 		sb.append(getButtons());
 		sb.append(", defCtxSysMode="+getDefCtxSysMode());
 		sb.append(", DDCtxSysMode="+getDDCtxSysMode());
+		sb.append(", lcSysMode="+getLcSysMode());
 		sb.append(", status="+getStatus());
 		sb.append("]");
 		return sb.toString();

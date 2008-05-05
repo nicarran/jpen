@@ -281,3 +281,15 @@ JNIEXPORT jintArray JNICALL Java_jpen_provider_wintab_WintabAccess_getButtonMap
 	(*pEnv)->SetIntArrayRegion(pEnv, array, 0, 32, buttonMap);
 	return array;
 }
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getLcSysMode
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getLcSysMode
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	SAccess *pAccess=Access_getP(cellIndex);
+	Access_refreshLc(pAccess);
+	return pAccess->lc.lcSysMode? JNI_TRUE: JNI_FALSE;
+}

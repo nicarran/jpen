@@ -70,6 +70,13 @@ class XiBus {
 	}
 
 	private static native int setDevice(int cellIndex, int deviceIndex);
+	
+	public void refreshDeviceInfo(){
+		if(refreshDeviceInfo(cellIndex)!=0)
+			throw new IllegalStateException(getError());
+	}
+	
+	private static native int refreshDeviceInfo(int cellIndex);
 
 
 	@Override
@@ -78,7 +85,7 @@ class XiBus {
 			destroy(cellIndex);
 	}
 	static native int destroy(int cellIndex);
-
+	
 	@Override
 	public String toString() {
 		return "{Bus: device="+device+"}";

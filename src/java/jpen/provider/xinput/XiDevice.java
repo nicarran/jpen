@@ -92,6 +92,12 @@ class XiDevice{
 	}
 
 	private static native int getLastEventButton(int cellIndex);
+	
+	public void refreshLevelRanges(){
+		refreshLevelRanges(cellIndex);
+	}
+	
+	private static native void refreshLevelRanges(int cellIndex);
 
 	@Override
 	public String toString() {

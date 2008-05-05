@@ -33,21 +33,23 @@ public class PLevel
 	public static final long serialVersionUID=1l;
 
 	public enum Type{
-		X(true, false),  Y(true, false),  PRESSURE(false, false),
-		/**
-		Tilt along the X axis in radians.
-		*/
-		TILT_X(false, true),
-		/**
-		Tilt along the Y axis in radians.
-		*/
-		TILT_Y(false, true);
-		public final boolean isMovement;
-		public final boolean isTilt;
-		Type(boolean isMovement, boolean isTilt) {
-			this.isMovement=isMovement;
-			this.isTilt=isTilt;
-		}
+	  X(true, false),  Y(true, false),  PRESSURE(false, false),
+	  /**
+	  Tilt along the X axis in radians.
+	  */
+	  TILT_X(false, true),
+	  /**
+	  Tilt along the Y axis in radians.
+	  */
+	  TILT_Y(false, true);
+	  public final boolean isMovement;
+	  public final boolean isTilt;
+	  Type(boolean isMovement, boolean isTilt) {
+		  this.isMovement=isMovement;
+		  this.isTilt=isTilt;
+	  }
+		
+		private static final Type[] VALUES=values();
 	}
 
 	public static class Range {
@@ -72,15 +74,34 @@ public class PLevel
 	}
 
 	@Override
-	Type[] createTypes() {
-		return Type.values();
+	Type[] getTypes() {
+		return Type.VALUES;
 	}
 
 	public boolean isMovement() {
 		Type type=getType();
 		return type!=null&& type.isMovement;
 	}
+	
+	public static final float getCoordinateValueForComponent( Dimension componentSize, Point2D.Float componentLocation, PLevel.Type coordinate, float coordinateValue) {
+		if(L.isLoggable(Level.FINE)){
+			L.fine("componentSize="+componentSize+", componentLocation="+componentLocation+", coordinate="+coordinate+", coordinateValue="+coordinateValue);
+		}
+		switch(coordinate) {
+		case X:
+			coordinateValue-=componentLocation.x;
+			break;
+		case Y:
+			coordinateValue-=componentLocation.y;
+			break;
+		}
+		return coordinateValue;
+	}
 
+	/**
+	@deprecated No replacement for this method in the new API. There is a similar method: {@link #getCoordinateValueForComponent(Dimension componentSize, Point2D.Float componentLocation, PLevel.Type coordinate, float coordinateValue)}.
+	*/
+	@Deprecated
 	public static final float getCoordinateValueInsideComponent( Dimension componentSize, Point2D.Float componentLocation, PLevel.Type coordinate, float coordinateValue) {
 		if(L.isLoggable(Level.FINE)){
 			L.fine("componentSize="+componentSize+", componentLocation="+componentLocation+", coordinate="+coordinate+", coordinateValue="+coordinateValue);
@@ -88,13 +109,13 @@ public class PLevel
 		switch(coordinate) {
 		case X:
 			coordinateValue-=componentLocation.x;
-			if(coordinateValue>componentSize.width)
-				return -1;
+			//if(coordinateValue>componentSize.width)
+				//return -1;
 			break;
 		case Y:
 			coordinateValue-=componentLocation.y;
-			if(coordinateValue>componentSize.height)
-				return -1;
+			//if(coordinateValue>componentSize.height)
+				//return -1;
 			break;
 		}
 		return coordinateValue;

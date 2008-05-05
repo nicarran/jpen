@@ -47,15 +47,14 @@ int Access_preCreate(SAccess *pAccess) {
 		return errorState;
 	}
 
-	LOGCONTEXT logCtx;
-	WTInfo(WTI_DEFCONTEXT , 0, &logCtx);
+	WTInfo(WTI_DEFCONTEXT , 0, &(pAccess->lc));
 
-	pAccess->device=logCtx.lcDevice;
+	pAccess->device=pAccess->lc.lcDevice;
 
-	strcpy(logCtx.lcName, "JPen Access");
-	logCtx.lcOptions |= CXO_SYSTEM;
-	logCtx.lcPktData = PACKETDATA;
-	logCtx.lcPktMode = PACKETMODE;
+	strcpy(pAccess->lc.lcName, "JPen Access");
+	pAccess->lc.lcOptions |= CXO_SYSTEM;
+	pAccess->lc.lcPktData = PACKETDATA;
+	pAccess->lc.lcPktMode = PACKETMODE;
 
 	pAccess->tiltExtSupported=false;
 #ifdef PACKETTILT
@@ -64,16 +63,16 @@ int Access_preCreate(SAccess *pAccess) {
 	if(pAccess->tiltExtSupported) {
 		WTPKT maskTILT;
 		WTInfo(WTI_EXTENSIONS + categoryTILT, EXT_MASK, &maskTILT);
-		logCtx.lcPktData |= maskTILT;
+		pAccess->lc.lcPktData |= maskTILT;
 #if PACKETTILT == PKEXT_RELATIVE
-		logCtx.lcPktMode |= maskTILT;
+		pAccess->lc.lcPktMode |= maskTILT;
 #endif
 #endif
 
-		logCtx.lcMoveMask = PACKETDATA;// use lcPktData?
-		logCtx.lcBtnUpMask = logCtx.lcBtnDnMask;
-		logCtx.lcSysMode=FALSE;
-		pAccess->ctx=WTOpen(hWnd, &logCtx, FALSE);
+		pAccess->lc.lcMoveMask = PACKETDATA;// use lcPktData?
+		pAccess->lc.lcBtnUpMask = pAccess->lc.lcBtnDnMask;
+		pAccess->lc.lcSysMode=FALSE;
+		pAccess->ctx=WTOpen(hWnd, &(pAccess->lc), FALSE);
 		if(!pAccess->ctx) {
 			Access_setError("Couldn't open default context.");
 			return errorState;
@@ -110,7 +109,7 @@ int Access_preCreate(SAccess *pAccess) {
 		// UUPS: I commented this (above) out.  wacom->Intuos3 does not give me real capabilities here... it gives:
 		// azimuth: 0 - 3600
 		// altitude: 0 - 900
-		// -> I dont know how to get the "real" tablet limits using wintab : (
+		// -> I dont know how to get the "real" tablet limits using wintab : ( 
 		/*switch(valuator){
 		case	E_Valuators_orAzimuth:
 			axis=axises[0];
@@ -124,14 +123,21 @@ int Access_preCreate(SAccess *pAccess) {
 		
 		pRange[0]=pRange[1]=0; 
 	}
-
-	int Access_getEnabled(SAccess *pAccess) {
-		LOGCONTEXT logCtx;
-		if(!WTGet(pAccess->ctx, &logCtx)) {
-			Access_setError("Couldnt get LOGCONTEXT info.");
+	
+	int Access_refreshLc(SAccess *pAccess){
+		if(!WTGet(pAccess->ctx, &(pAccess->lc))) {
+			Access_setError("Couldn't get LOGCONTEXT info.");
 			return errorState;
 		}
-		return !(logCtx.lcStatus&CXS_DISABLED);
+		return cleanState;
+	}
+
+	int Access_getEnabled(SAccess *pAccess) {
+		if(Access_refreshLc(pAccess)){
+			Access_appendError(" Couldn't get status.");
+			return errorState;
+		}
+		return !(pAccess->lc.lcStatus&CXS_DISABLED);
 	}
 
 	void Access_setEnabled(SAccess *pAccess, int enabled) {

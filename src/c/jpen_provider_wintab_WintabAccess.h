@@ -211,6 +211,14 @@ JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getStatus
 JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getTiltExtSupported
   (JNIEnv *, jclass, jint);
 
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getLcSysMode
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getLcSysMode
+  (JNIEnv *, jclass, jint);
+
 #ifdef __cplusplus
 }
 #endif

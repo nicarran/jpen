@@ -37,35 +37,82 @@ import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.ImageIcon;
+import jpen.event.PenListener;
 import jpen.event.PenManagerListener;
 import jpen.provider.system.SystemProvider;
 import jpen.provider.wintab.WintabProvider;
 import jpen.provider.xinput.XinputProvider;
 
-public class PenManager {
+public final class PenManager {
 	public final Pen  pen=new Pen();
 	public final Component component;
 	private final Map<PenProvider.Constructor, PenProvider> constructorToProvider=new HashMap<PenProvider.Constructor, PenProvider>();
 	private final Set<PenProvider.Constructor> constructors=new HashSet<PenProvider.Constructor>();
 	private final Set<PenProvider.Constructor> constructorsA=Collections.unmodifiableSet(constructors);
 	private final Map<PenProvider.Constructor, PenProvider.ConstructionException> constructorToException=new HashMap<PenProvider.Constructor, PenProvider.ConstructionException>();
-	private boolean paused;
+	private volatile boolean paused;
 	private final List<PenManagerListener> listeners=new ArrayList<PenManagerListener>();
+
+	private class Pauser
+				extends MouseAdapter
+		implements PenListener{
+		private boolean isDragging;
+		@Override
+		public synchronized void mouseEntered(MouseEvent ev) {
+			if(isDragging){
+				isDragging=false;
+				pen.removeListener(this);
+			}else
+				setPaused(false);
+		}
+		@Override
+		public synchronized void mouseExited(MouseEvent ev) {
+			if(isDragging)
+				throw new AssertionError();
+			if(pen.hasAnyButtonPressed()){
+				isDragging=true;
+				pen.addListener(this);
+			}else
+				setPaused(true);
+		}
+
+		@Override
+		public 	void penKindEvent(PKindEvent ev){
+		}
+
+		@Override
+		public void penLevelEvent(PLevelEvent ev){
+		}
+
+		@Override
+		public synchronized void penButtonEvent(PButtonEvent ev){
+			if(!ev.button.value)
+				if(!pen.hasAnyButtonPressed()){
+					if(isDragging){
+						setPaused(true); // causes button release schedule but there may be level events still to be processed in the pen event queue (here I'm in the queue processing thread).
+						isDragging=false;
+						pen.removeListener(this);
+					}
+					else
+						throw new AssertionError();
+				}
+		}
+
+		@Override
+		public void penScrollEvent(PScrollEvent ev){
+		}
+
+		@Override
+		public void penTock(long availableMillis){
+		}
+
+	}
+	private final Pauser pauser=new Pauser();
 
 
 	public PenManager(Component component) {
 		this.component=component;
-		component.addMouseListener(new MouseAdapter() {
-			                           @Override
-			                           public void mouseEntered(MouseEvent ev) {
-				                           setPaused(false);
-			                           }
-			                           @Override
-			                           public void mouseExited(MouseEvent ev) {
-				                           setPaused(true);
-			                           }
-		                           }
-		                          );
+		component.addMouseListener(pauser);
 		addProvider(new SystemProvider.Constructor());
 		addProvider(new XinputProvider.Constructor());
 		addProvider(new WintabProvider.Constructor());
@@ -127,6 +174,8 @@ public class PenManager {
 
 	private void setPaused(boolean paused) {
 		this.paused=paused;
+		if(paused)
+			pen.scheduleButtonReleasedEvents();
 		for(PenProvider provider: constructorToProvider.values())
 			provider.penManagerPaused(paused);
 	}
@@ -135,4 +184,24 @@ public class PenManager {
 		return paused;
 	}
 
+	@SuppressWarnings("deprecation")
+	public void scheduleButtonEvent(PButton button) {
+		if(paused)
+			return;
+		pen.scheduleButtonEvent(button);
+	}
+
+	@SuppressWarnings("deprecation")
+	public void scheduleScrollEvent(PScroll scroll) {
+		if(paused)
+			return;
+		pen.scheduleScrollEvent(scroll);
+	}
+
+	@SuppressWarnings("deprecation")
+	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels) {
+		if(paused)
+			return false;
+		return pen.scheduleLevelEvent(device, levels);
+	}
 }

@@ -67,25 +67,9 @@ int Device_preDestroy(SDevice *pDevice) {
 	return 0;
 }
 
-int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex) {
-	pDevice->busCellIndex=pBus->cellIndex;
-	pDevice->index=deviceIndex;
+void Device_refreshValuatorRanges(struct Device *pDevice){
+	SBus *pBus=Bus_getP(pDevice->busCellIndex);
 	XDeviceInfo deviceInfo=pBus->pDeviceInfo[pDevice->index];
-	if(deviceInfo.use!=IsXExtensionDevice) {
-		Device_setError("Not and extension device.");
-		return errorState;
-	}
-	if(XInternAtom(pBus->pDisplay, XI_MOUSE, 0)==deviceInfo.type) {
-		Device_setError("Mouse not supported as device.");
-		return errorState;
-	}
-	pDevice->pXdevice=XOpenDevice(pBus->pDisplay, deviceInfo.id);
-	if(!pDevice->pXdevice) {
-		Device_setError("Couldn't open the device; ");
-		Device_appendError(xerror);
-		return errorState;
-	}
-
 	XAnyClassPtr pAnyClassInfo = deviceInfo.inputclassinfo;
 	int j=deviceInfo.num_classes;
 	while(--j>=0) {
@@ -108,6 +92,28 @@ int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex) {
 			}*/
 		pAnyClassInfo=(XAnyClassPtr)((char*)pAnyClassInfo+pAnyClassInfo->length);
 	}
+}
+
+int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex) {
+	pDevice->busCellIndex=pBus->cellIndex;
+	pDevice->index=deviceIndex;
+	XDeviceInfo deviceInfo=pBus->pDeviceInfo[pDevice->index];
+	if(deviceInfo.use!=IsXExtensionDevice) { // TODO: cover also IsExtensionPointer... new in XInput
+		Device_setError("Not an X extension device.");
+		return errorState;
+	}
+	if(XInternAtom(pBus->pDisplay, XI_MOUSE, 0)==deviceInfo.type) {
+		Device_setError("Mouse not supported as device.");
+		return errorState;
+	}
+	pDevice->pXdevice=XOpenDevice(pBus->pDisplay, deviceInfo.id);
+	if(!pDevice->pXdevice) {
+		Device_setError("Couldn't open the device.");
+		Device_appendError(xerror);
+		return errorState;
+	}
+	
+	Device_refreshValuatorRanges(pDevice);
 	Device_setListening(pDevice, true);
 	return 0;
 }

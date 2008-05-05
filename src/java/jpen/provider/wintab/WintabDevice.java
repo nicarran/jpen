@@ -95,7 +95,7 @@ class WintabDevice
 			return;
 		for(PButton.Type buttonType:PButton.Type.values()) {
 			boolean value=getButtonState(newButtonsValues, getButtonIndex(buttonType));
-			getPen().scheduleButtonEvent(new PButton(buttonType.ordinal(), value));
+			getPenManager().scheduleButtonEvent(new PButton(buttonType.ordinal(), value));
 		}
 		lastButtonsValues=newButtonsValues;
 	}
@@ -128,22 +128,22 @@ class WintabDevice
 				L.fine("UUUPS! something is wrong with the component location calc, getLocationOnScreen(): "+p);
 		}
 		for(PLevel.Type levelType:PLevel.Type.values()) {
-			float value=PLevel.getCoordinateValueInsideComponent(
+			float value=PLevel.getCoordinateValueForComponent(
 			              getComponent().getSize(componentSize), componentLocation,  levelType,  getMultRangedValue(levelType));
 			//value=wintabProvider.mouseLocator.getCorrectedLocation(levelType, value);
 			if(L.isLoggable(Level.FINE)) {
 				L.fine("levelType="+levelType+", value="+value);
 			}
-			if(levelType.isMovement && value<0) {
+			/*if(levelType.isMovement && value<0) {
 				L.fine("negative value... pausing...");
 				wintabProvider.setPaused(true);
 				changedLevels.clear();
 				return;
-			}
+			}*/
 			changedLevels.add(new PLevel(levelType.ordinal(), value));
 		}
 
-		getPen().scheduleLevelEvent(this, changedLevels);
+		getPenManager().scheduleLevelEvent(this, changedLevels);
 		changedLevels.clear();
 	}
 

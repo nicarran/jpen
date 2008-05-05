@@ -24,6 +24,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import jpen.PLevel;
 
@@ -61,8 +62,11 @@ public final class VirtualScreenBounds{
 
 	static void calc(Rectangle2D r){
 		for (GraphicsDevice gd: GraphicsEnvironment.
-						getLocalGraphicsEnvironment().getScreenDevices())
+		        getLocalGraphicsEnvironment().getScreenDevices()){
+			if(L.isLoggable(Level.FINE))
+				L.fine("graphicsDevice: "+gd);
 			r.add(gd.getDefaultConfiguration().getBounds());
+		}
 	}
 
 	public float getLevelRangeMult(PLevel.Type type) {

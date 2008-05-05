@@ -40,44 +40,45 @@ import jpen.PScrollEvent;
 class MouseDevice
 	extends AbstractPenDevice {
 	private final MouseAdapter myMouseAdapter=new MouseAdapter() {
+		    @Override
+		    public void mouseMoved(MouseEvent ev) {
+			    scheduleMove(ev.getX(), ev.getY());
+		    }
 
-				@Override
-				public void mouseMoved(MouseEvent ev) {
-					scheduleMove(ev.getX(), ev.getY());
-				}
+		    @Override
+		    public void mouseDragged(MouseEvent ev) {
+			    scheduleMove(ev.getX(), ev.getY());
+		    }
 
-				@Override
-				public void mouseDragged(MouseEvent ev) {
-					scheduleMove(ev.getX(), ev.getY());
-				}
+		    @Override
+		    public void mousePressed(MouseEvent ev) {
+			    mouseButtonChanged(ev, true);
+		    }
 
-				@Override
-				public void mousePressed(MouseEvent ev) {
-					mouseButtonChanged(ev, true);
-				}
+		    @Override
+		    public void mouseReleased(MouseEvent ev) {
+			    mouseButtonChanged(ev, false);
+		    }
 
-				@Override
-				public void mouseReleased(MouseEvent ev) {
-					mouseButtonChanged(ev, false);
-				}
+		    @Override
+		    public void mouseWheelMoved(MouseWheelEvent ev) {
+			    int value=ev.getWheelRotation();
+			    PScroll.Type type=PScroll.Type.DOWN;
+			    if(value<0) {
+				    type=PScroll.Type.UP;
+				    value=-value;
+			    }
+			    if(ev.getScrollType()==ev.WHEEL_UNIT_SCROLL && ev.getScrollAmount()>0) // > 0 : is because windows bug workaround, sometimes it is 0.
+				    value*=ev.getScrollAmount();
+			    getPenManager().scheduleScrollEvent(new PScroll(type.ordinal(), value));
+		    }
 
-				@Override
-				public void mouseWheelMoved(MouseWheelEvent ev) {
-					int value=ev.getWheelRotation();
-					PScroll.Type type=PScroll.Type.DOWN;
-					if(value<0) {
-						type=PScroll.Type.UP;
-						value=-value;
-					}
-					if(ev.getScrollType()==ev.WHEEL_UNIT_SCROLL && ev.getScrollAmount()>0) // > 0 : is because windows bug workaround, sometimes it is 0.
-						value*=ev.getScrollAmount();
-					getPen().scheduleScrollEvent(new PScroll(type.ordinal(), value));
-				}
+	    };
+	private final SystemProvider systemProvider;
 
-			};
-
-	MouseDevice(PenProvider provider) {
-		super(provider);
+	MouseDevice(SystemProvider systemProvider) {
+		super(systemProvider);
+		this.systemProvider=systemProvider;
 		setEnabled(true);
 	}
 
@@ -119,12 +120,12 @@ class MouseDevice
 	private void scheduleMove(int x, int y) {
 		changedLevelsA[0]=new PLevel(PLevel.Type.X.ordinal(), x);
 		changedLevelsA[1]=new PLevel(PLevel.Type.Y.ordinal(), y);
-		getPen().scheduleLevelEvent(this, changedLevels);
+		getPenManager().scheduleLevelEvent(this, changedLevels);
 	}
 
 	private void mouseButtonChanged(MouseEvent ev, boolean state) {
 		PButton.Type buttonType=getButtonType(ev.getButton());
-		getPen().scheduleButtonEvent(new PButton(buttonType.ordinal(), state));
+		getPenManager().scheduleButtonEvent(new PButton(buttonType.ordinal(), state));
 	}
 
 	private static PButton.Type getButtonType(int buttonNumber) {

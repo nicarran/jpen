@@ -27,14 +27,18 @@ public class PButton
 
 	public enum Type{
 		LEFT, CENTER, RIGHT;
+		
+		static final Type[] VALUES=values();
 	}
 
 	public PButton(int typeNumber, Boolean value) {
 		super(typeNumber, value);
 	}
+	
+	// TODO: valueOf ?
 
 	@Override
-	Type[] createTypes() {
-		return Type.values();
+	Type[] getTypes() {
+		return Type.VALUES;
 	}
 }

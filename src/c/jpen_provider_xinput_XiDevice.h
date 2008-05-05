@@ -91,6 +91,14 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiDevice_getLastEventType
 JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiDevice_getLastEventButton
   (JNIEnv *, jclass, jint);
 
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    refreshLevelRanges
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_jpen_provider_xinput_XiDevice_refreshLevelRanges
+  (JNIEnv *, jclass, jint);
+
 #ifdef __cplusplus
 }
 #endif

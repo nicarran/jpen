@@ -69,6 +69,14 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_setDevice
 
 /*
  * Class:     jpen_provider_xinput_XiBus
+ * Method:    refreshDeviceInfo
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_refreshDeviceInfo
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_xinput_XiBus
  * Method:    destroy
  * Signature: (I)I
  */

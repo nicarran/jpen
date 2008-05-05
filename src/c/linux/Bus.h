@@ -36,5 +36,6 @@ struct Bus {
 };
 m_declareRow(Bus);
 extern int Bus_setDevice(SBus *pBus, int deviceIndex);
+extern int Bus_refreshDeviceInfo(SBus *pBus);
 
 #endif

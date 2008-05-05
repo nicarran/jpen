@@ -71,8 +71,8 @@ public class PenState
 	private PKind kind=PKind.valueOf(PKind.Type.CURSOR);
 	final Levels levels=new Levels();
 	private final int[] buttonValues=new int[PButton.Type.values().length];
-	private final Map<Integer, Integer> extButtonTypeNumberToValue=new HashMap<Integer, Integer>();
-	
+	final Map<Integer, Integer> extButtonTypeNumberToValue=new HashMap<Integer, Integer>();
+
 	PenState(){}
 
 	public float getLevelValue(PLevel.Type levelType) {
@@ -103,6 +103,16 @@ public class PenState
 
 	public boolean getButtonValue(int  buttonTypeNumber) {
 		return (buttonTypeNumber>=buttonValues.length? getExtButtonValue(buttonTypeNumber): buttonValues[buttonTypeNumber]) > 0;
+	}
+
+	boolean hasAnyButtonPressed(){
+		for(int i=buttonValues.length; --i>=0;)
+			if(buttonValues[i]>0)
+				return true;
+		for(Integer extButtonValue: extButtonTypeNumberToValue.values()) //TODO: sync this?
+			if(extButtonValue>0)
+				return true;
+		return false;
 	}
 
 	private int getExtButtonValue(int buttonTypeNumber) {

@@ -39,13 +39,13 @@ public class Pen extends PenState {
 
 	/** Tail of event queue. */
 	PenEvent lastDispatchedEvent=new PenEvent(this) {
-																 public static final long serialVersionUID=1l;
-																 @Override
-																 void dispatch() { }
-																 @Override
-																 void copyTo(PenState penState){}
-															 }
-															 ;
+		    public static final long serialVersionUID=1l;
+		    @Override
+		    void dispatch() { }
+		    @Override
+		    void copyTo(PenState penState){}
+	    }
+	    ;
 	/** Head of event queue. */
 	private PenEvent lastScheduledEvent=lastDispatchedEvent;
 	public final PenState lastScheduledState=new PenState();
@@ -58,8 +58,9 @@ public class Pen extends PenState {
 		long beforeTime;
 		long procTime;
 		long waitTime;
+		long availablePeriod;
 		PenEvent event;
-		boolean waitedNewEvents;
+		volatile boolean waitedNewEvents;
 		volatile boolean waitingNewEvents;
 		{
 			setName("jpen-Pen");
@@ -80,8 +81,9 @@ public class Pen extends PenState {
 						lastDispatchedEvent.next=null;
 						lastDispatchedEvent=event;
 					}
+					availablePeriod=period+waitTime;
 					for(PenListener l:getListenersArray())
-						l.penTock( (period+waitTime) - (System.currentTimeMillis()-beforeTime) );
+						l.penTock( availablePeriod - (System.currentTimeMillis()-beforeTime) );
 
 					procTime=System.currentTimeMillis()-beforeTime;
 
@@ -181,9 +183,9 @@ public class Pen extends PenState {
 			if(!device.isDigitizer()) {
 				time=System.currentTimeMillis();
 				if(lastDevice!=null &&
-								lastDevice!=device &&
-								time-lastEvent.time<=THRESHOLD_PERIOD
-								)
+				        lastDevice!=device &&
+				        time-lastEvent.time<=THRESHOLD_PERIOD
+				  )
 					return true;
 				if(!filteredFirstInSecuence) {
 					L.fine("filtered first in sequence to prioritize digitized input in race");
@@ -213,6 +215,10 @@ public class Pen extends PenState {
 
 	private final PhantomLevelFilter phantomLevelFilter=new PhantomLevelFilter();
 	private final List<PLevel> scheduledLevels=new ArrayList<PLevel>();
+	/**
+	@deprecated Use {@link PenManager#scheduleLevelEvent(PenDevice, Collection)}.
+	*/
+	@Deprecated
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels) {
 		synchronized(scheduledLevels) {
 			if(phantomLevelFilter.filter(device))
@@ -232,7 +238,7 @@ public class Pen extends PenState {
 				schedule(new PKindEvent(this, newKind));
 			}
 			PLevelEvent levelEvent=new PLevelEvent(this,
-																						 scheduledLevels.toArray(new PLevel[scheduledLevels.size()]));
+			    scheduledLevels.toArray(new PLevel[scheduledLevels.size()]));
 			phantomLevelFilter.setLastEvent(levelEvent);
 			schedule(levelEvent);
 			scheduledLevels.clear();
@@ -240,7 +246,18 @@ public class Pen extends PenState {
 		}
 	}
 
+	void scheduleButtonReleasedEvents(){
+		for(int i=PButton.Type.VALUES.length; --i>=0;)
+			scheduleButtonEvent(new PButton(i, false));
+		for(Integer extButtonTypeNumber: lastScheduledState.extButtonTypeNumberToValue.keySet())
+			scheduleButtonEvent(new PButton(extButtonTypeNumber, false));
+	}
+
 	private final Object buttonsLock=new Object();
+	/**
+	@deprecated Use {@link PenManager#scheduleButtonEvent(PButton)}.
+	*/
+	@Deprecated
 	public void scheduleButtonEvent(PButton button) {
 		synchronized(buttonsLock) {
 			if(lastScheduledState.setButtonValue(button.typeNumber, button.value))
@@ -248,6 +265,10 @@ public class Pen extends PenState {
 		}
 	}
 
+	/**
+	@deprecated Use {@link PenManager#scheduleScrollEvent(PScroll)}
+	*/
+	@Deprecated
 	public void scheduleScrollEvent(PScroll scroll) {
 		schedule(new PScrollEvent(this, scroll));
 	}
