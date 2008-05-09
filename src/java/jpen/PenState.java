@@ -72,6 +72,8 @@ public class PenState
 	final Levels levels=new Levels();
 	private final int[] buttonValues=new int[PButton.Type.values().length];
 	final Map<Integer, Integer> extButtonTypeNumberToValue=new HashMap<Integer, Integer>();
+	private int pressedButtonsCount;
+
 
 	PenState(){}
 
@@ -105,14 +107,12 @@ public class PenState
 		return (buttonTypeNumber>=buttonValues.length? getExtButtonValue(buttonTypeNumber): buttonValues[buttonTypeNumber]) > 0;
 	}
 
-	boolean hasAnyButtonPressed(){
-		for(int i=buttonValues.length; --i>=0;)
-			if(buttonValues[i]>0)
-				return true;
-		for(Integer extButtonValue: extButtonTypeNumberToValue.values()) //TODO: sync this?
-			if(extButtonValue>0)
-				return true;
-		return false;
+	int getPressedButtonsCount(){
+		return pressedButtonsCount;
+	}
+
+	boolean hasPressedButtons(){
+		return getPressedButtonsCount()>0;
 	}
 
 	private int getExtButtonValue(int buttonTypeNumber) {
@@ -125,19 +125,32 @@ public class PenState
 		if(buttonTypeNumber>=buttonValues.length)
 			setExtButtonValue(buttonTypeNumber, value);
 		else {
-			if(value)
+			if(value){
+				if(buttonValues[buttonTypeNumber]==0)
+					pressedButtonsCount++;
 				buttonValues[buttonTypeNumber]++;
-			else
+			}
+			else{
+				if(buttonValues[buttonTypeNumber]>0)
+					pressedButtonsCount--;
 				buttonValues[buttonTypeNumber]=0;
+			}
 		}
 		return oldValue!=getButtonValue(buttonTypeNumber);
 	}
 
 	private void setExtButtonValue(int buttonTypeNumber, boolean value) {
-		if(value)
+		int currentValue=getExtButtonValue(buttonTypeNumber);
+		if(value){
+			if(currentValue==0)
+				pressedButtonsCount++;
 			extButtonTypeNumberToValue.put(buttonTypeNumber, getExtButtonValue(buttonTypeNumber)+1);
-		else
+		}
+		else{
+			if(currentValue>0)
+				pressedButtonsCount--;
 			extButtonTypeNumberToValue.put(buttonTypeNumber, 0);
+		}
 	}
 
 	void setValues(PenState penState){

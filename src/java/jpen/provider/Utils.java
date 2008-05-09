@@ -35,24 +35,34 @@ public final class Utils {
 	private static final Logger L=Logger.getLogger(Utils.class.getName());
 	private static ResourceBundle moduleProperties;
 
-	public static final void getLocationOnScreen(Component c, Point2D.Float location) {
-		location.x=location.y=0;
+	/**
+	@return the container window or null if 
+	*/
+	public static final Window getLocationOnScreen(Component c, Point2D.Float location) {
+		if(location!=null)
+			location.x=location.y=0;
 		for(Component parentComponent=c; parentComponent!=null; parentComponent=parentComponent.getParent()) {
 			if(parentComponent instanceof Applet) {
 				try {
 					Point p=parentComponent.getLocationOnScreen();
-					location.x+=p.x;
-					location.y+=p.y;
+					if(location!=null){
+						location.x+=p.x;
+						location.y+=p.y;
+					}
 				} catch(IllegalComponentStateException ex) {
 					L.info("Applet was not ready to get location on screen");
 				}
-				return;
+				return null;
 			}
-			location.x+=parentComponent.getX();
-			location.y+=parentComponent.getY();
+			if(location!=null){
+				location.x+=parentComponent.getX();
+				location.y+=parentComponent.getY();
+			}
 			if(parentComponent instanceof Window)
-				return;
+				return (Window)parentComponent;
 		}
+		//L.info("Only top level containers of type Window or Applet are supported.");
+		return null;
 	}
 
 	private static final ResourceBundle getModuleProperties() {
@@ -64,7 +74,7 @@ public final class Utils {
 
 	private static final String getJniLibName() {
 		return getModuleProperties().getString("module.id")+"-"+
-					 getModuleProperties().getString("module.version");
+		       getModuleProperties().getString("module.version");
 	}
 
 	public static final String getDistVersion(){

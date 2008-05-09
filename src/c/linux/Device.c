@@ -98,7 +98,7 @@ int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex) {
 	pDevice->busCellIndex=pBus->cellIndex;
 	pDevice->index=deviceIndex;
 	XDeviceInfo deviceInfo=pBus->pDeviceInfo[pDevice->index];
-	if(deviceInfo.use!=IsXExtensionDevice) { // TODO: cover also IsExtensionPointer... new in XInput
+	if(deviceInfo.use<IsXExtensionDevice) { // 4 is isXExtensionPointer, 3 is isXExtensionKeyboard; these are a new  (since 2006/07/18) inputproto 1.4.1 (xorg 7.3 includes inputproto 1.4.2.1). (http://gitweb.freedesktop.org/?p=xorg/proto/inputproto.git;a=summary). Warning: sometimes isXExtensionKeyboard is a tablet device : S
 		Device_setError("Not an X extension device.");
 		return errorState;
 	}

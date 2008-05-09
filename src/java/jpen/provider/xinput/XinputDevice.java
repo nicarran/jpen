@@ -60,10 +60,21 @@ class XinputDevice extends AbstractPenDevice {
 		this.device=device;
 		this.xinputProvider=xinputProvider;
 		levelRanges=new PLevel.Range[PLevel.Type.values().length];
-		for(PLevel.Type levelType: PLevel.Type.values())
-			levelRanges[levelType.ordinal()]=device.getLevelRange(levelType);
+		resetLevelRanges();
 		setKindTypeNumber(getDefaultKindTypeNumber());
 		setEnabled(true);
+	}
+
+	void resetLevelRanges(){
+		device.refreshLevelRanges();
+		for(PLevel.Type levelType: PLevel.Type.values())
+			levelRanges[levelType.ordinal()]=device.getLevelRange(levelType);
+	}
+
+	void reset(){
+		while(device.nextEvent())
+			;
+		resetLevelRanges();
 	}
 
 	private int getDefaultKindTypeNumber() {
@@ -74,12 +85,6 @@ class XinputDevice extends AbstractPenDevice {
 		else if(getName().indexOf("tylus")!=-1)
 			return PKind.Type.STYLUS.ordinal();
 		return PKind.Type.CURSOR.ordinal();
-	}
-	
-	void reset(){
-		while(device.nextEvent())
-			;
-		device.refreshLevelRanges();
 	}
 
 	void processQuedEvents() {
@@ -119,7 +124,7 @@ class XinputDevice extends AbstractPenDevice {
 			/*if(levelType.isMovement && value<0) {
 				changedLevels.clear();
 				return;
-			}*/
+		}*/
 			changedLevels.add(new PLevel(levelType.ordinal(), value));
 		}
 		getPenManager().scheduleLevelEvent(this, changedLevels);

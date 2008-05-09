@@ -215,17 +215,35 @@ public class Pen extends PenState {
 
 	private final PhantomLevelFilter phantomLevelFilter=new PhantomLevelFilter();
 	private final List<PLevel> scheduledLevels=new ArrayList<PLevel>();
+	
 	/**
 	@deprecated Use {@link PenManager#scheduleLevelEvent(PenDevice, Collection)}.
 	*/
 	@Deprecated
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels) {
+		return scheduleLevelEvent(device,levels, -Integer.MAX_VALUE, Integer.MAX_VALUE, -Integer.MAX_VALUE, Integer.MAX_VALUE);
+	}
+	
+	final boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, int minX, int maxX, int minY, int maxY) {
 		synchronized(scheduledLevels) {
 			if(phantomLevelFilter.filter(device))
 				return false;
 			for(PLevel level:levels) {
 				if(level.value==lastScheduledState.getLevelValue(level.typeNumber))
 					continue;
+				PLevel.Type levelType=level.getType();
+				if(levelType!=null)
+					switch(levelType){
+					case X:
+						if(level.value<minX || level.value>maxX)
+							continue;
+						break;
+					case Y:
+						if(level.value<minY || level.value>maxY)
+							continue;
+						break;
+					default:
+					}
 				scheduledLevels.add(level);
 				lastScheduledState.levels.setValue(level.typeNumber, level.value);
 			}

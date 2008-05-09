@@ -302,8 +302,8 @@ file=${_profilerOutputFile}
 			</path>
 			<mapper type="flatten"/>
 		</pathconvert>
-		<echo file="${_winTestDir}/runTest.sh">java -cp "${_unixClasspath}" junit.textui.TestRunner $1
-				</echo>
+		<echo file="${_winTestDir}/runTest.sh">export LD_LIBRARY_PATH=.
+java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 		<pathconvert pathsep=" " dirsep="." property="_winAvailableTests">
 			<path>
 				<fileset dir="src/test" includes="**/*Test.class"/>
