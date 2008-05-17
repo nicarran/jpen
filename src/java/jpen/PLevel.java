@@ -82,7 +82,7 @@ public class PLevel
 		
 		@see #evalAzimuthXAndAltitude(double[], double tiltX, double tiltY)
 		*/
-		public static void evalAzimuthXAndAltitude(double[] azimuthXAndAltitude, Pen pen){
+		public static void evalAzimuthXAndAltitude(double[] azimuthXAndAltitude, PenState pen){
 			evalAzimuthXAndAltitude(azimuthXAndAltitude, pen.getLevelValue(TILT_X), pen.getLevelValue(TILT_Y));
 		}
 		
