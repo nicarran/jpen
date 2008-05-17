@@ -202,7 +202,7 @@ public final class PenManager {
 		addProvider(new SystemProvider.Constructor());
 		addProvider(new XinputProvider.Constructor());
 		addProvider(new WintabProvider.Constructor());
-		auser.setPaused(true);
+		pauser.setPaused(true);
 	}
 
 	// TODO: set this public?
