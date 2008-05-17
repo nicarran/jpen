@@ -108,9 +108,15 @@ public class XinputProvider
 		for(int i=xipDevices.length; --i>=0;)
 			xipDevices[i].reset();
 	}
+	
+	private void pauseDevices(boolean paused){
+		for(int i=xipDevices.length; --i>=0;)
+			xipDevices[i].device.setIsListening(!paused);
+	}
 
 	@Override
 	public void penManagerPaused(boolean paused) {
+		pauseDevices(paused);
 		if(!paused){
 			screenBounds.reset();
 			resetDevices();

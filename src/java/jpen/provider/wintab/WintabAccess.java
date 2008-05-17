@@ -20,6 +20,9 @@
 * }] */
 package jpen.provider.wintab;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import jpen.PLevel;
 import jpen.provider.Utils;
 
@@ -31,7 +34,8 @@ class WintabAccess {
 	This must be like E_csrTypes enumeration.
 	*/
 	public enum CursorType{UNDEF, PENTIP, PUCK, PENERASER;
-	    private static final CursorType[] VALUES=CursorType.values();}
+	    public static final List<CursorType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
+	                      }
 
 	private final int cellIndex;
 
@@ -90,7 +94,7 @@ class WintabAccess {
 	private static native int getButtons(int cellIndex);
 
 	public static CursorType getCursorType(int cursor) {
-		return CursorType.VALUES[getCursorTypeOrdinal(cursor)];
+		return CursorType.VALUES.get(getCursorTypeOrdinal(cursor));
 	}
 
 	private static native int getCursorTypeOrdinal(int cursor);
@@ -150,12 +154,12 @@ class WintabAccess {
 	}
 
 	private static native boolean getTiltExtSupported(int cellIndex);
-	
-	
+
+
 	public boolean getLcSysMode(){
 		return getLcSysMode(cellIndex);
 	}
-	
+
 	private static native boolean getLcSysMode(int cellIndex);
 
 	@Override

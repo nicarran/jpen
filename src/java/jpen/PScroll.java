@@ -20,6 +20,10 @@
 * }] */
 package jpen;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class PScroll
 	extends TypedValuedClass<PScroll.Type, Integer>
 	implements java.io.Serializable {
@@ -27,7 +31,7 @@ public class PScroll
 
 	public enum Type {
 		UP, DOWN;
-		private static final Type[] VALUES=values();
+		public static final List<Type> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
 	}
 
 	public PScroll(int typeNumber, int value) {
@@ -35,7 +39,7 @@ public class PScroll
 	}
 
 	@Override
-	Type[] getTypes() {
+	List<Type> getTypes() {
 		return Type.VALUES;
 	}
 }

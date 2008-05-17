@@ -29,6 +29,22 @@ extern "C" {
 #endif
 /*
  * Class:     jpen_provider_xinput_XiDevice
+ * Method:    getIsListening
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_getIsListening
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    setIsListening
+ * Signature: (IZ)V
+ */
+JNIEXPORT void JNICALL Java_jpen_provider_xinput_XiDevice_setIsListening
+  (JNIEnv *, jclass, jint, jboolean);
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
  * Method:    getLevelRangeMin
  * Signature: (II)I
  */

@@ -21,6 +21,7 @@
 package jpen;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,12 +32,16 @@ public class PKind
 
 	public enum Type{
 	  CURSOR, STYLUS, ERASER;
-	  private static final Type[] VALUES=values();
+		public static final List<Type> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
 
+		/**
+		@deprecated Use {@link #VALUES} and return {@code null} if the {@code kindTypeNumber} is out of range;
+		*/
+		@Deprecated
 	  public static final PKind.Type valueOf(int kindTypeNumber) {
-		  if(kindTypeNumber>=VALUES.length)
+		  if(kindTypeNumber<0 || kindTypeNumber>=VALUES.size())
 			  return null;
-		  return VALUES[kindTypeNumber];
+		  return VALUES.get(kindTypeNumber);
 	  }
 	}
 
@@ -44,12 +49,8 @@ public class PKind
 		super(typeNumber);
 	}
 
-	private static final List<PKind> VALUES_L=new ArrayList<PKind>(Type.VALUES.length);
-	/**
-	@deprecated Use {@link #valueOf(int)}.
-	*/
-	@Deprecated 
-	public static final List<PKind> VALUES=Collections.unmodifiableList(VALUES_L);
+	private static final List<PKind> VALUES_L=new ArrayList<PKind>(Type.VALUES.size());
+	private static final List<PKind> VALUES=Collections.unmodifiableList(VALUES_L);
 
 	public static PKind valueOf(int typeNumber){
 		while(VALUES_L.size()<=typeNumber)
@@ -62,7 +63,7 @@ public class PKind
 	}
 
 	@Override
-	Type[] getTypes() {
+	List<Type> getTypes() {
 		return Type.VALUES;
 	}
 }

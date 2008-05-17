@@ -72,7 +72,7 @@ public final class PenManager {
 	  ENABLED;
 	  //  implement NO_LEVELS: dragging enabled but no levels are fired?
 	}
-	private DragOutMode dragOutMode=DragOutMode.DISABLED; // the safe mode by default.
+	private DragOutMode dragOutMode=DragOutMode.ENABLED; 
 
 	private class Pauser
 		extends MouseAdapter{
@@ -94,7 +94,7 @@ public final class PenManager {
 			    }
 		    };
 		private Window componentWindow;
-		private boolean pauseOnWindowDeactivation=false;
+		private boolean pauseOnWindowDeactivation=true;
 		private final WindowListener windowListener=new WindowAdapter(){
 			    @Override
 			    public void windowDeactivated(WindowEvent ev){
@@ -109,15 +109,34 @@ public final class PenManager {
 		{
 			updateComponentWindow();
 		}
+		
+		private boolean waitingMotionToPlay;
 
 		@Override
 		public synchronized void mouseEntered(MouseEvent ev) {
 			if(isDraggingOut)
 				stopDraggingOut();
 			else
-				setPaused(false);
+				setWaitingMotionToPlay(true);
 		}
-
+		
+		private synchronized void setWaitingMotionToPlay(boolean waitingMotionToPlay){
+			if(this.waitingMotionToPlay==waitingMotionToPlay)
+				return;
+			this.waitingMotionToPlay=waitingMotionToPlay;
+			if(waitingMotionToPlay)
+				component.addMouseMotionListener(this);
+			else
+				component.removeMouseMotionListener(this);
+		}
+		
+		@Override
+		public synchronized void mouseMoved(MouseEvent ev){
+			if(!paused)
+				throw new AssertionError();
+			setPaused(false);
+		}
+		
 		private synchronized void stopDraggingOut(){
 			if(!isDraggingOut)
 				return;
@@ -127,18 +146,11 @@ public final class PenManager {
 
 		@Override
 		public synchronized void mouseExited(MouseEvent ev) {
-			if(isDraggingOut)
+			if(isDraggingOut) // TEST
 				throw new AssertionError();
 			startDraggingOut();
 			if(!isDraggingOut)
 				setPaused(true);
-		}
-
-		@Override
-		public synchronized void mouseMoved(MouseEvent ev){
-			if(!paused)
-				throw new AssertionError();
-			setPaused(false);
 		}
 
 		private synchronized void startDraggingOut(){
@@ -157,6 +169,8 @@ public final class PenManager {
 		}
 
 		private void updateComponentWindow(){
+			if(component==null)
+				return;
 			if(componentWindow!=null)
 				componentWindow.removeWindowListener(windowListener); // may be already removed
 			componentWindow=Utils.getLocationOnScreen(component, null);
@@ -167,14 +181,12 @@ public final class PenManager {
 		private synchronized void setPaused(boolean paused) {
 			if(PenManager.this.paused==paused)
 				return;
-			if(pauseOnWindowDeactivation && !paused && componentWindow!=null && !componentWindow.isActive())
-				return;
+			//if(!paused && pauseOnWindowDeactivation && componentWindow!=null && !componentWindow.isActive())
+				//return;
 			PenManager.this.paused=paused;
-			if(paused){
+			setWaitingMotionToPlay(paused);
+			if(paused)
 				pen.scheduleButtonReleasedEvents();
-				component.addMouseMotionListener(this);
-			}else
-				component.removeMouseMotionListener(this);
 			updateComponentWindow();
 			for(PenProvider provider: constructorToProvider.values())
 				provider.penManagerPaused(paused);
@@ -190,7 +202,7 @@ public final class PenManager {
 		addProvider(new SystemProvider.Constructor());
 		addProvider(new XinputProvider.Constructor());
 		addProvider(new WintabProvider.Constructor());
-		pauser.setPaused(true);
+		auser.setPaused(true);
 	}
 
 	// TODO: set this public?

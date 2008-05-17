@@ -28,16 +28,18 @@ int Device_preCreate(SDevice *pDevice) {
 }
 
 static int EventClassAndOffsets[][2]={
-                                       {ButtonClass,_deviceButtonPress},
-                                       {ButtonClass,_deviceButtonRelease},
-                                       {ValuatorClass, _deviceMotionNotify},
-                                     };
+      {ButtonClass,_deviceButtonPress},
+      {ButtonClass,_deviceButtonRelease},
+      {ValuatorClass, _deviceMotionNotify},
+    };
 
-static void Device_setListening(struct Device *pDevice, int listening) {
+void Device_setIsListening(SDevice *pDevice, int isListening) {
+	if(pDevice->isListening==isListening)
+		return;
 	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
-	XEventClass eventClasses[E_EventType_size];
-	int eventClassesSize=0;
-	if(listening) {
+	if(isListening) {
+		XEventClass eventClasses[E_EventType_size];
+		int eventClassesSize=0;
 		int type;
 		int classId, offset;
 		XEventClass eventClass;
@@ -51,17 +53,34 @@ static void Device_setListening(struct Device *pDevice, int listening) {
 				pDevice->eventTypeIds[i]=type;
 			}
 		}
+
+		/* Better grab the device to avoid loosing events
+		XSelectInput(pBus->pDisplay,DefaultRootWindow(pBus->pDisplay),0x00FFFFFF ^ PointerMotionHintMask);
+		XSelectExtensionEvent(pBus->pDisplay,
+		    DefaultRootWindow(pBus->pDisplay),
+		    eventClasses,
+		    eventClassesSize);*/
+
+		XGrabDevice(pBus->pDisplay, pDevice->pXdevice, DefaultRootWindow(pBus->pDisplay),
+		      0,
+		      eventClassesSize,
+		      eventClasses,
+		      GrabModeAsync,
+		      GrabModeAsync,
+		      CurrentTime
+		                 );
+	}else{
+		XUngrabDevice(pBus->pDisplay, pDevice->pXdevice, CurrentTime);
+		XSync(pBus->pDisplay, 1);
 	}
-	XSelectExtensionEvent(pBus->pDisplay,
-	                      DefaultRootWindow(pBus->pDisplay),
-	                      eventClasses,
-	                      eventClassesSize);
+	// TODO: error handling?
+	pDevice->isListening=isListening;
 }
 
 int Device_preDestroy(SDevice *pDevice) {
 	SBus *pBus=Bus_getP(pDevice->busCellIndex);
 	if(pDevice->pXdevice) { // may be uninitialized
-		Device_setListening(pDevice, false);
+		Device_setIsListening(pDevice, false);
 		XCloseDevice(pBus->pDisplay, pDevice->pXdevice);
 	}
 	return 0;
@@ -112,9 +131,9 @@ int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex) {
 		Device_appendError(xerror);
 		return errorState;
 	}
-	
+
 	Device_refreshValuatorRanges(pDevice);
-	Device_setListening(pDevice, true);
+	//Device_setIsListening(pDevice, true);
 	return 0;
 }
 
@@ -142,8 +161,8 @@ int Device_nextEvent(struct Device *pDevice ) {
 	register int i;
 	for(i=0; i<E_EventType_size; i++) {
 		if(XCheckTypedEvent(pBus->pDisplay,
-		                    pDevice->eventTypeIds[i],
-		                    &pDevice->event)) {
+		        pDevice->eventTypeIds[i],
+		        &pDevice->event)) {
 			/*if(pDevice->eventTypeIds[i]==pDevice->event.type) {*/
 			pDevice->lastEventType=i;
 			switch(i) {

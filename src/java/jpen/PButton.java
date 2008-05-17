@@ -20,6 +20,10 @@
 * }] */
 package jpen;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class PButton
 			extends TypedValuedClass<PButton.Type, Boolean>
 	implements java.io.Serializable {
@@ -27,8 +31,7 @@ public class PButton
 
 	public enum Type{
 		LEFT, CENTER, RIGHT;
-		
-		static final Type[] VALUES=values();
+		public static final List<Type> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
 	}
 
 	public PButton(int typeNumber, Boolean value) {
@@ -38,7 +41,7 @@ public class PButton
 	// TODO: valueOf ?
 
 	@Override
-	Type[] getTypes() {
+	List<Type> getTypes() {
 		return Type.VALUES;
 	}
 }

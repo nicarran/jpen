@@ -53,7 +53,7 @@ public abstract class AbstractPenDevice
 	public int getKindTypeNumber() {
 		return kindTypeNumber;
 	}
-
+	
 	@Override
 	public void setKindTypeNumber(int kindTypeNumber) {
 		this.kindTypeNumber=kindTypeNumber;
@@ -88,6 +88,12 @@ public abstract class AbstractPenDevice
 
 	@Override
 	public String toString() {
-		return "[PenDevice: provider="+getProvider()+", name="+getName()+", kind="+PKind.Type.valueOf(getKindTypeNumber())+"("+getKindTypeNumber()+")]";
+		return "[PenDevice: provider="+getProvider()+", name="+getName()+", kind="+getOrNull(PKind.Type.VALUES, getKindTypeNumber())+"("+getKindTypeNumber()+")]";
+	}
+	
+	private static final <T> T getOrNull(List<T> l, int index){
+		if(index<0 || index>=l.size())
+			return null;
+		return l.get(index);
 	}
 }

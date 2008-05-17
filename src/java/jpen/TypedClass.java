@@ -20,6 +20,8 @@
 * }] */
 package jpen;
 
+import java.util.List;
+
 public abstract class TypedClass<T extends Enum<T>>
 	implements java.io.Serializable {
 	public static final long serialVersionUID=1l;
@@ -31,21 +33,21 @@ public abstract class TypedClass<T extends Enum<T>>
 		this.typeNumber=typeNumber;
 	}
 
-	abstract T[] getTypes();
+	abstract List<T> getTypes();
 
 	/**
-	@return The enum type matching the {@link #typeNumber}. This method returns {@code null} when the {@link #typeNumber} does not match any enum type ordinal.<p>
-	Although all the JPen (internal) providers use only enum type ordinals as {@link #typeNumber}s, prepare your code for a {@code null} return value.<p>
-	When you get a {@code null} you can use the {@link #typeNumber} directly as instructed by the 3rd party provider. 
+	WARNING: This method returns {@code null} when the {@link #typeNumber} does not match any of the enum type ordinals. Only 3rd party providers can cause {@code null} return values (JPen (internal) providers do not).  When you get a {@code null} you can use the {@link #typeNumber} directly as instructed by the 3rd party provider. 
+	
+	@return The enum type matching the {@link #typeNumber}, or {@code null} if there is no match.
 	*/
 	public final T getType() {
 		return getType(typeNumber);
 	}
-	
+
 	private final T getType(int typeNumber){
-		if(typeNumber>=getTypes().length)
+		if(typeNumber<0 || typeNumber>=getTypes().size())
 			return null;
-		return getTypes()[typeNumber];
+		return getTypes().get(typeNumber);
 	}
 
 	@Override

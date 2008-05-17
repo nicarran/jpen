@@ -20,9 +20,12 @@
 * }] */
 package jpen.provider.xinput;
 
-import jpen.PLevel;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import jpen.PenDevice;
 import jpen.PenManager;
+import jpen.PLevel;
 import jpen.provider.Utils;
 
 class XiDevice{
@@ -32,7 +35,7 @@ class XiDevice{
 
 	enum EventType{
 		BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY;
-		private static final EventType[] VALUES=EventType.values();
+		public static final List<EventType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
 	}
 
 	final int cellIndex;
@@ -48,6 +51,18 @@ class XiDevice{
 	public String getName() {
 		return bus.getDeviceName(deviceIndex);
 	}
+	
+	public boolean getIsListening(){
+		return getIsListening(cellIndex);
+	}
+	
+	private static native boolean getIsListening(int cellIndex);
+	
+	public void setIsListening(boolean isListening){
+		setIsListening(cellIndex, isListening);
+	}
+	
+	private static native void setIsListening(int cellIndex, boolean isListening);
 
 	public PLevel.Range getLevelRange(PLevel.Type levelType) {
 		return new PLevel.Range(getLevelRangeMin(cellIndex, levelType.ordinal()), getLevelRangeMax(cellIndex, levelType.ordinal()));
@@ -82,7 +97,7 @@ class XiDevice{
 		int lastEventTypeOrdinal=getLastEventType(cellIndex);
 		if(lastEventTypeOrdinal<0)
 			return null;
-		return EventType.VALUES[lastEventTypeOrdinal];
+		return EventType.VALUES.get(lastEventTypeOrdinal);
 	}
 
 	private static native int getLastEventType(int cellIndex);

@@ -265,7 +265,7 @@ public class Pen extends PenState {
 	}
 
 	void scheduleButtonReleasedEvents(){
-		for(int i=PButton.Type.VALUES.length; --i>=0;)
+		for(int i=PButton.Type.VALUES.size(); --i>=0;)
 			scheduleButtonEvent(new PButton(i, false));
 		for(Integer extButtonTypeNumber: lastScheduledState.extButtonTypeNumberToValue.keySet())
 			scheduleButtonEvent(new PButton(extButtonTypeNumber, false));

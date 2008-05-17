@@ -44,7 +44,8 @@ struct Device {
 	int busCellIndex;
 	int index;
 	XDevice *pXdevice;
-
+	int isListening;
+	
 	int valuatorRangeMins[E_Valuators_size];
 	int valuatorRangeMaxs[E_Valuators_size];
 
@@ -56,8 +57,9 @@ struct Device {
 };
 m_declareRow(Device);
 extern int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex);
-extern int Device_nextEvent(struct Device *pDevice );
-extern void Device_refreshValuatorRanges(struct Device *pDevice);
+extern int Device_nextEvent(SDevice *pDevice );
+extern void Device_refreshValuatorRanges(SDevice *pDevice);
+extern void Device_setIsListening(SDevice *pDevice, int isListening);
 
 #endif
 

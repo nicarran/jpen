@@ -21,6 +21,7 @@
 package jpen;
 
 import java.util.Arrays;
+import java.util.Set;
 import jpen.event.PenListener;
 
 public class PLevelEvent
@@ -45,16 +46,21 @@ public class PLevelEvent
 		for(PenListener l:pen.getListenersArray())
 			l.penLevelEvent(this);
 	}
-
-	public boolean isMovement() {
-		for(int i=levels.length; --i>=0;)
-			if(levels[i].isMovement())
+	
+	public boolean containsLevelOfType(Set<PLevel.Type> levelTypes){
+			for(int i=levels.length; --i>=0;)
+			if(levelTypes.contains(levels[i].getType()))
 				return true;
 		return false;
+	}
+	
+	public boolean isMovement() {
+		return containsLevelOfType(PLevel.Type.MOVEMENT_TYPES);
 	}
 
 	@Override
 	public String toString() {
 		return "[PLevelEvent: time="+time+", levels="+Arrays.asList(levels)+"]";
 	}
+	
 }

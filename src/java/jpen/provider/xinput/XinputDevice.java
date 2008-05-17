@@ -142,12 +142,12 @@ class XinputDevice extends AbstractPenDevice {
 	private final float getMultRangedValue(PLevel.Type levelType) {
 		float devValue=device.getValue(levelType);
 
-		if(levelType.isTilt)
+		if(PLevel.Type.TILT_TYPES.contains(levelType))
 			return devValue*RADS_PER_DEG;
 
 		devValue=levelRanges[levelType.ordinal()].getRangedValue(devValue);
 
-		if(levelType.isMovement)
+		if(PLevel.Type.MOVEMENT_TYPES.contains(levelType))
 			devValue=xinputProvider.screenBounds.getLevelRangeOffset(levelType)+
 			         devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);
 

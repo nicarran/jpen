@@ -21,6 +21,26 @@
 #include "../jpen_provider_xinput_XiDevice.h"
 #include "Device.h"
 
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    getIsListening
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_getIsListening
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Device_getP(cellIndex)->isListening? JNI_TRUE: JNI_FALSE;
+}
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    setIsListening
+ * Signature: (IZ)V
+ */
+JNIEXPORT void JNICALL Java_jpen_provider_xinput_XiDevice_setIsListening
+(JNIEnv *pEnv, jclass class, jint cellIndex, jboolean isListening){
+	return Device_setIsListening(Device_getP(cellIndex), isListening == JNI_TRUE? true: false);
+}
+
 /* Class:     jpen_provider_xinput_Device
  * Method:    getLevelRangeMin
  * Signature: (II)I

@@ -151,7 +151,7 @@ class WintabDevice
 	private static final double PI_over_2_over_900=PI_over_2/900; // (/10) and (/90)
 
 	private float getMultRangedValue(PLevel.Type type) {
-		if(type.isTilt) {
+		if(PLevel.Type.TILT_TYPES.contains(type)) {
 			// see tiltOnWintab.xoj
 			int altitude=wintabProvider.wintabAccess.getValue(PLevel.Type.TILT_Y);
 			if(altitude<0)
@@ -176,7 +176,7 @@ class WintabDevice
 		float rangedValue=wintabProvider.getLevelRange(type).getRangedValue(
 		      wintabProvider.wintabAccess.getValue(type));
 		
-		if(type.isMovement){
+		if(PLevel.Type.MOVEMENT_TYPES.contains(type)){
 			if(type.equals(PLevel.Type.Y))
 				rangedValue=1f-rangedValue;
 			rangedValue=wintabProvider.screenBounds.getLevelRangeOffset(type)+
