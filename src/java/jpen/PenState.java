@@ -107,12 +107,12 @@ public class PenState
 		return (buttonTypeNumber>=buttonValues.length? getExtButtonValue(buttonTypeNumber): buttonValues[buttonTypeNumber]) > 0;
 	}
 
-	int getPressedButtonsCount(){
-		return pressedButtonsCount;
+	public boolean hasPressedButtons(){
+		return pressedButtonsCount>0;
 	}
-
-	boolean hasPressedButtons(){
-		return getPressedButtonsCount()>0;
+	
+	public int getPressedButtonsCount(){
+		return pressedButtonsCount;
 	}
 
 	private int getExtButtonValue(int buttonTypeNumber) {
