@@ -114,16 +114,16 @@ public class WintabProvider
 
 	public static class Constructor
 		implements PenProvider.Constructor {
-		@Override
+		//@Override
 		public String getName() {
 			return "Wintab";
 		}
-		@Override
+		//@Override
 		public boolean constructable() {
 			return System.getProperty("os.name").toLowerCase().contains("windows");
 		}
 
-		@Override
+		//@Override
 		public PenProvider construct(PenManager pm) throws ConstructionException {
 			try {
 				Utils.loadLibrary();
@@ -195,7 +195,7 @@ public class WintabProvider
 		return wintabDevice;
 	}
 
-	@Override
+	//@Override
 	public void penManagerPaused(boolean paused) {
 		setPaused(paused);
 	}

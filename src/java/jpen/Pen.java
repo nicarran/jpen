@@ -20,7 +20,6 @@
 * }] */
 package jpen;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;

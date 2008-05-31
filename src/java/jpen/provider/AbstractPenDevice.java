@@ -44,32 +44,32 @@ public abstract class AbstractPenDevice
 		this.provider=provider;
 	}
 
-	@Override
+	//@Override
 	public PenProvider getProvider() {
 		return provider;
 	}
 
-	@Override
+	//@Override
 	public int getKindTypeNumber() {
 		return kindTypeNumber;
 	}
 	
-	@Override
+	//@Override
 	public void setKindTypeNumber(int kindTypeNumber) {
 		this.kindTypeNumber=kindTypeNumber;
 	}
 
-	@Override
+	//@Override
 	public boolean isDigitizer() {
 		return true;
 	}
 
-	@Override
+	//@Override
 	public boolean getEnabled() {
 		return enabled;
 	}
 
-	@Override
+	//@Override
 	public void setEnabled(boolean enabled) {
 		this.enabled=enabled;
 	}

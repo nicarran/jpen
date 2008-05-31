@@ -6,6 +6,9 @@
 		<property name="module.authorMail" value="nicarran(at)gmail.com"/>
 		<property name="module.url" value="UNDEFINED"/>
 		<property name="module.javacTarget" value="1.6"/>
+		<property name="module.javacFork" value="false"/>
+		<property name="module.javacExecutable" value="javac"/>
+		<property name="module.javaExecutable" value="java"/>
 		<property name="module.javacDebug" value="true"/>
 		<property name="module.mainClass" value="UNDEFINED"/>
 		<property name="module.commercialId" value="${module.id}"/>
@@ -86,7 +89,7 @@
 		<manifest mode="update" file="src/java/META-INF/MANIFEST.MF">
 			<!-- Version 1.2 allows extensions (Class-path tag). In client apps I prefer using the -Djava.ext.dirs dynamic property.-->
 			<attribute name="Manifest-Version" value="1.2"/>
-			<attribute name="Created-By" value="${module.author}"/>
+			<attribute name="Created-By" value="${module.author} (See ${module.url})"/>
 			<attribute name="Class-path" value="${_classpath}"/>
 			<attribute name="Main-Class" value="${module.mainClass}"/>
 		</manifest>
@@ -209,7 +212,8 @@
 	</target>
 	
 	<target name="compile" description="Compiles the sources found in src" depends="process">
-		<javac debug="${module.javacDebug}" target="${module.javacTarget}" includeantruntime="no" srcdir="${module.srcclasspath}">
+		<javac debug="${module.javacDebug}" target="${module.javacTarget}" compiler="javac${module.javacTarget}" fork="${module.javacFork}" executable="${module.javacExecutable}" 
+		includeantruntime="no" srcdir="${module.srcclasspath}"  >
 			<classpath refid="module.depclasspath"/>
 			<compilerarg value="-Xlint:unchecked"/>
 			<compilerarg value="-Xlint:deprecation"/>
@@ -221,7 +225,7 @@
 	</target>
 	
 	<target name="test" description="Does JUnit tests" depends="compile, deptree">
-		<junit haltonfailure="yes" fork="yes" showoutput="yes" forkmode="once">
+		<junit haltonfailure="yes" fork="yes" jvm="${module.javaExecutable}" showoutput="yes" forkmode="once">
 			<jvmarg value="-Xmx512M"/>
 						<!--<jvmarg value="-Xms256M"/>-->
 			<jvmarg value="-Djava.util.logging.config.file=logging.properties"/>

@@ -36,7 +36,7 @@ public abstract class TypedClass<T extends Enum<T>>
 	abstract List<T> getTypes();
 
 	/**
-	WARNING: This method returns {@code null} when the {@link #typeNumber} does not match any of the enum type ordinals. Only 3rd party providers can cause {@code null} return values (JPen (internal) providers do not).  When you get a {@code null} you can use the {@link #typeNumber} directly as instructed by the 3rd party provider. 
+	WARNING: This method returns {@code null} when the {@link #typeNumber} does not match any of the enum type ordinals. Always check for a null return value. 
 	
 	@return The enum type matching the {@link #typeNumber}, or {@code null} if there is no match.
 	*/

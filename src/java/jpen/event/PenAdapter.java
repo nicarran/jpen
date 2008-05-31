@@ -27,13 +27,13 @@ import jpen.PButtonEvent;
 
 public class PenAdapter
 	implements PenListener {
-	@Override
+	//@Override
 	public void penKindEvent(PKindEvent ev) {}
-	@Override
+	//@Override
 	public void penLevelEvent(PLevelEvent ev) {}
-	@Override
+	//@Override
 	public void penButtonEvent(PButtonEvent ev) {}
-	@Override
+	//@Override
 	public void penScrollEvent(PScrollEvent ev) {}
-	@Override
+	//@Override
 	public void penTock(long availableMillis) {}}

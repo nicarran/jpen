@@ -40,22 +40,22 @@ public abstract class AbstractPenProvider
 		this.constructor=constructor;
 	}
 
-	@Override
+	//@Override
 	public Collection<? extends PenDevice> getDevices() {
 		return devicesA;
 	}
 
-	@Override
+	//@Override
 	public final PenManager getPenManager() {
 		return penManager;
 	}
 
-	@Override
+	//@Override
 	public final Constructor getConstructor() {
 		return constructor;
 	}
 
-	@Override
+	//@Override
 	public String toString() {
 		return "[PenProvider: constructor.name="+getConstructor().getName()+"]";
 	}

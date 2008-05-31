@@ -42,16 +42,16 @@ public class XinputProvider
 
 	public static class Constructor
 		implements PenProvider.Constructor {
-		@Override
+		//@Override
 		public String getName() {
 			return "XInput";
 		}
-		@Override
+		//@Override
 		public boolean constructable() {
 			return System.getProperty("os.name").toLowerCase().contains("linux");
 		}
 
-		@Override
+		//@Override
 		public PenProvider construct(PenManager pm) throws ConstructionException {
 			try {
 				Utils.loadLibrary();
@@ -114,7 +114,7 @@ public class XinputProvider
 			xipDevices[i].device.setIsListening(!paused);
 	}
 
-	@Override
+	//@Override
 	public void penManagerPaused(boolean paused) {
 		pauseDevices(paused);
 		if(!paused){

@@ -34,15 +34,15 @@ public class SystemProvider
 
 	public static class Constructor
 		implements PenProvider.Constructor {
-		@Override
+		//@Override
 		public String getName() {
 			return "System";
 		}
-		@Override
+		//@Override
 		public boolean constructable() {
 			return true;
 		}
-		@Override
+		//@Override
 		public PenProvider construct(PenManager pm) throws ConstructionException {
 			return new SystemProvider(pm, this);
 		}
@@ -53,6 +53,6 @@ public class SystemProvider
 		devices.add(new MouseDevice(this));
 	}
 
-	@Override
+	//@Override
 	public void penManagerPaused(boolean paused) {}
 }

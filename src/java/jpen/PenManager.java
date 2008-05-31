@@ -24,6 +24,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -72,27 +73,14 @@ public final class PenManager {
 	  ENABLED;
 	  //  implement NO_LEVELS: dragging enabled but no levels are fired?
 	}
-	private DragOutMode dragOutMode=DragOutMode.ENABLED; 
+	private DragOutMode dragOutMode=DragOutMode.ENABLED;
 
 	private class Pauser
-		extends MouseAdapter{
+				extends MouseAdapter
+				implements MouseMotionListener // in jdk 1.5 MouseAdapter does not implement this int.
+	{
 		private boolean isDraggingOut; // state: dragging outside the component
-		private final PenListener penListener=new PenAdapter(){
-			    @Override
-			    public void penButtonEvent(PButtonEvent ev){
-				    synchronized(Pauser.this){
-					    if(!ev.button.value)
-						    if(!pen.hasPressedButtons()){
-							    if(isDraggingOut){
-								    stopDraggingOut();
-								    setPaused(true); // causes button release schedule but there may be level events still to be processed in the pen event queue (here I'm in the queue processing thread).
-							    }
-							    else
-								    throw new AssertionError();
-						    }
-				    }
-			    }
-		    };
+
 		private Window componentWindow;
 		private boolean pauseOnWindowDeactivation=true;
 		private final WindowListener windowListener=new WindowAdapter(){
@@ -105,11 +93,25 @@ public final class PenManager {
 					    }
 			    }
 		    };
-
 		{
 			updateComponentWindow();
 		}
-		
+
+		private final PenListener penListener=new PenAdapter(){
+			    @Override
+			    public void penButtonEvent(PButtonEvent ev){
+				    synchronized(Pauser.this){
+					    if(!ev.button.value)
+						    if(!pen.hasPressedButtons()){
+							    if(isDraggingOut){
+								    stopDraggingOut();
+								    setPaused(true); // causes button release schedule but there may be level events still to be processed in the pen event queue (here I'm in the queue processing thread).
+							    }
+						    }
+				    }
+			    }
+		    };
+
 		private boolean waitingMotionToPlay;
 
 		@Override
@@ -119,7 +121,7 @@ public final class PenManager {
 			else
 				setWaitingMotionToPlay(true);
 		}
-		
+
 		private synchronized void setWaitingMotionToPlay(boolean waitingMotionToPlay){
 			if(this.waitingMotionToPlay==waitingMotionToPlay)
 				return;
@@ -129,14 +131,17 @@ public final class PenManager {
 			else
 				component.removeMouseMotionListener(this);
 		}
-		
-		@Override
+
+		//@Override
 		public synchronized void mouseMoved(MouseEvent ev){
 			if(!paused)
 				throw new AssertionError();
 			setPaused(false);
 		}
-		
+
+		//@Override
+		public void mouseDragged(MouseEvent ev){}
+
 		private synchronized void stopDraggingOut(){
 			if(!isDraggingOut)
 				return;
@@ -182,7 +187,7 @@ public final class PenManager {
 			if(PenManager.this.paused==paused)
 				return;
 			//if(!paused && pauseOnWindowDeactivation && componentWindow!=null && !componentWindow.isActive())
-				//return;
+			//return;
 			PenManager.this.paused=paused;
 			setWaitingMotionToPlay(paused);
 			if(paused)

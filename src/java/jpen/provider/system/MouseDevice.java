@@ -22,7 +22,10 @@ package jpen.provider.system;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.Arrays;
 import java.util.List;
 import jpen.PButton;
@@ -39,17 +42,7 @@ import jpen.PScrollEvent;
 
 class MouseDevice
 	extends AbstractPenDevice {
-	private final MouseAdapter myMouseAdapter=new MouseAdapter() {
-		    @Override
-		    public void mouseMoved(MouseEvent ev) {
-			    scheduleMove(ev.getX(), ev.getY());
-		    }
-
-		    @Override
-		    public void mouseDragged(MouseEvent ev) {
-			    scheduleMove(ev.getX(), ev.getY());
-		    }
-
+	private final MouseListener mouseL=new MouseAdapter() {
 		    @Override
 		    public void mousePressed(MouseEvent ev) {
 			    mouseButtonChanged(ev, true);
@@ -59,8 +52,19 @@ class MouseDevice
 		    public void mouseReleased(MouseEvent ev) {
 			    mouseButtonChanged(ev, false);
 		    }
-
-		    @Override
+	    };
+	private final MouseMotionListener mouseMotionL=new MouseMotionListener(){
+		    //@Override
+		    public void mouseMoved(MouseEvent ev) {
+			    scheduleMove(ev.getX(), ev.getY());
+		    }
+		    //@Override
+		    public void mouseDragged(MouseEvent ev) {
+			    scheduleMove(ev.getX(), ev.getY());
+		    }
+	    };
+	private final MouseWheelListener mouseWheelL=new MouseWheelListener(){
+		    //@Override
 		    public void mouseWheelMoved(MouseWheelEvent ev) {
 			    int value=ev.getWheelRotation();
 			    PScroll.Type type=PScroll.Type.DOWN;
@@ -72,7 +76,6 @@ class MouseDevice
 				    value*=ev.getScrollAmount();
 			    getPenManager().scheduleScrollEvent(new PScroll(type.ordinal(), value));
 		    }
-
 	    };
 	private final SystemProvider systemProvider;
 
@@ -87,7 +90,7 @@ class MouseDevice
 		return false;
 	}
 
-	@Override
+	//@Override
 	public String getName() {
 		return "mouse";
 	}
@@ -104,15 +107,15 @@ class MouseDevice
 	}
 
 	private void listen() {
-		getComponent().addMouseListener(myMouseAdapter);
-		getComponent().addMouseMotionListener(myMouseAdapter);
-		getComponent().addMouseWheelListener(myMouseAdapter);
+		getComponent().addMouseListener(mouseL);
+		getComponent().addMouseMotionListener(mouseMotionL);
+		getComponent().addMouseWheelListener(mouseWheelL);
 	}
 
 	private void unlisten() {
-		getComponent().removeMouseListener(myMouseAdapter);
-		getComponent().removeMouseMotionListener(myMouseAdapter);
-		getComponent().removeMouseWheelListener(myMouseAdapter);
+		getComponent().removeMouseListener(mouseL);
+		getComponent().removeMouseMotionListener(mouseMotionL);
+		getComponent().removeMouseWheelListener(mouseWheelL);
 	}
 
 	private final PLevel[] changedLevelsA=new PLevel[2];

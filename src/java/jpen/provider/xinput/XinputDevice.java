@@ -154,7 +154,7 @@ class XinputDevice extends AbstractPenDevice {
 		return devValue;
 	}
 
-	@Override
+	//@Override
 	public String getName() {
 		return device.getName();
 	}
