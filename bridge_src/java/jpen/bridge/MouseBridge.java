@@ -7,7 +7,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
-public final class MouseBridge extends AbstractBridge 
+final class MouseBridge extends AbstractBridge 
 implements MouseListener, MouseMotionListener, MouseWheelListener
 {
 public MouseBridge(final BridgedPenManager _bpmanager,

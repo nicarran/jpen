@@ -7,7 +7,7 @@ import javax.swing.SwingUtilities;
 
 import jpen.bridge.BridgedPenManager.Bridge;
 
-public abstract class AbstractBridge implements Bridge {
+abstract class AbstractBridge implements Bridge {
 	protected final BridgedPenManager bpmanager;
 	protected final Component component;
 	protected final BridgedPenListener listener;

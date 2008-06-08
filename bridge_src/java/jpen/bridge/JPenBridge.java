@@ -13,7 +13,7 @@ import jpen.PScrollEvent;
 import jpen.PenManager;
 import jpen.event.PenListener;
 
-public final class JPenBridge extends AbstractBridge
+final class JPenBridge extends AbstractBridge
 implements PenListener
 {
 private final PenManager pmanager;

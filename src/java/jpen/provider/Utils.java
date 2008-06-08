@@ -40,7 +40,7 @@ public final class Utils {
 		// Awaken status:
 		System.out.println("JPen status:");
 		System.out.println("-  dist_name ... " + getDistName());
-		System.out.println("-  revision .... " + getDistVersion());
+		System.out.println("-  revision .... " + getDistRevision());
 	}
 	
 	

@@ -51,12 +51,12 @@ is different than the JPen event API in two ways:
 
 <h2>Code Examples using the JPen Bridge</h2>
 
-<p>The key classes that make up the bridge are <tt>PenBridge</tt>, 
+<p>The key classes that make up the bridge are <tt>BridgedPenManager</tt>, 
 <tt>BridgedPenListener</tt>, and <tt>BridgedPenEvent</tt>.
 </p>
 <p>A simple example:
 <pre>
-PenBridge bridge = new PenBridge();
+BridgedPenManager bridge = new BridgedPenManager();
 bridge.setDefaultPressure(0.9f);
 bridge.addBridgedPenListener(canvas, listener);
 // At this point listener is reporting pen or simulated pen events from canvas
