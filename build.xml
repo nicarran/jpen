@@ -1,3 +1,4 @@
+<?xml version="1.0" ?>
 <project name="jpen" default="help" basedir=".">
 	<target name="help">
 <echo>JPen
@@ -11,9 +12,6 @@
 	****************************************************
 	-->
 	
-
-	<property file="conf/build.properties"/>
-
 	<property 	name  ="src-installer" 			
 				value ="src/installer" />
 	
@@ -162,9 +160,20 @@
 			value="${dist_name}"/>
 		
 		<izpack input="${dist-temp}/installer/installer.xml"
-		        output="${dist}/${dist_name}_ext_installer.jar"
+		        output="${dist}/${dist_name}_installer.jar"
 		        installerType="standard"
 		        basedir="${dist-temp}/installer" />
+		<!-- Add extension information to the installer -->
+		<jar update="yes" destfile="${dist}/${dist_name}_installer.jar">
+			<manifest>
+			<attribute name="Extension-Name" value="jpen"/>
+			<attribute name="Specification-Vendor" value="jpen"/>
+			<attribute name="Specification-Version" value="${dist_version}"/>
+			<attribute name="Implementation-Vendor-Id" value="jpen"/>
+			<attribute name="Implementation-Vendor" value="jpen"/>
+			<attribute name="Implementation-Version" value="${dist_version}"/>
+			</manifest>
+		</jar>
 	</target>
 
 	<!--

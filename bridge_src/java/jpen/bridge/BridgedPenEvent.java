@@ -3,7 +3,7 @@ package jpen.bridge;
 import java.util.EnumSet;
 import java.util.EventObject;
 
-import jpen.bridge.PenBridgeManager.Bridge;
+import jpen.bridge.BridgedPenManager.Bridge;
 
 
 // the source object is the component

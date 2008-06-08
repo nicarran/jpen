@@ -1,0 +1,109 @@
+<?xml version="1.0" ?>
+<project name="jpen_bridge" default="help" basedir=".">
+	<target name="help">
+<echo>JPen Bridge
+</echo>
+	</target>
+	
+	
+	<!--
+	****************************************************
+	* BEGIN PROPERTIES 
+	****************************************************
+	-->
+	
+	<property 	name  ="dist" 			
+				value ="dist" />
+	
+	<property 	name  ="dist-temp" 
+				value ="dist/temp" />
+	
+	<property 	name  ="src-java"
+				value ="bridge_src/java" />
+	
+	
+	
+	
+	<path id="core-cp">
+		<fileset dir="bridge_lib">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	
+	<path id="compile-cp">
+		<path refid="core-cp"/>
+	</path>
+	<property name="compile-cp-prop" refid="compile-cp"/>
+	
+
+	<!--
+	****************************************************
+	* END PROPERTIES
+	****************************************************
+	-->
+	
+	<!--
+	****************************************************
+	* BEGIN BUILD 
+	****************************************************
+	-->
+	
+	<target name="clean">
+		<delete dir="${dist}"/>
+		<delete dir="${dist-temp}"/>
+	</target>
+	
+	<!-- Ensures the dist-temp and dist directories are created -->
+	<target name="init-dirs">
+		<mkdir dir="${dist}"/>
+		<mkdir dir="${dist-temp}"/>
+	</target>
+	
+	<target name="copy-all">
+		<copy todir="${dist-temp}">
+			<fileset dir="${src-java}">
+				<exclude name="**/*.java"/>
+				<exclude name="**/*.lnk"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="compile">
+		<!--<echo message="${compile-cp-prop}"/>-->
+		<javac srcdir="${src-java}" destdir="${dist-temp}" classpathref="compile-cp" source="1.5" target="1.5"/>
+	</target>
+	
+	<target name="dist" depends="init-dirs, copy-all, compile">
+		<loadfile 	srcFile="${dist-temp}/dist_name"
+					property="dist_name" />
+		<loadfile 	srcFile="${dist-temp}/revision"
+					property="dist_version" />
+		
+		<copy file="bridge_manifest.template" tofile="${dist}/manifest"/>
+		<replace file="${dist}/manifest" 
+			token="${VERSION}"
+			value="${dist_version}"/>
+		<replace file="${dist}/manifest" 
+			token="${DIST_NAME}"
+			value="${dist_name}"/>
+		
+		<jar basedir="${dist-temp}" destfile="${dist}/${dist_name}_bridge.jar"
+			manifest="${dist}/manifest" 
+			compress="true" level="9">
+		</jar>
+		<delete file="${dist}/manifest"/>
+		<!--<delete dir="${dist-temp}"/>-->
+		<input message="Keystore password:" addproperty="store_pass"/>
+		<input message="JPEN key password:" addproperty="key_pass"/>
+		<signjar jar="${dist}/${dist_name}.jar" alias="jpen" 
+			keypass="${key_pass}" storepass="${store_pass}"/> 
+		
+	</target>
+
+	<!--
+	****************************************************
+	* END BUILD 
+	****************************************************
+	-->
+	
+</project>

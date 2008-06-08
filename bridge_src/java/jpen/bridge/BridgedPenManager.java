@@ -21,7 +21,7 @@ import jpen.PScrollEvent;
 import jpen.PenManager;
 import jpen.event.PenListener;
 
-public final class PenBridgeManager {
+public final class BridgedPenManager {
 	public static enum WheelMode {
 		SCROLL,
 		PRESSURE
@@ -72,7 +72,7 @@ public final class PenBridgeManager {
 	private float wheelPressureMult		= 1.f;
 	
 	
-	public PenBridgeManager() {
+	public BridgedPenManager() {
 	}
 	
 	
@@ -141,60 +141,60 @@ public final class PenBridgeManager {
 	}
 	
 	
-	public PenBridgeManager setLeftButton(final PenButton _leftButton) {
+	public BridgedPenManager setLeftButton(final PenButton _leftButton) {
 		leftButton = _leftButton;
 		return this;
 	}
 	
-	public PenBridgeManager setRightButton(final PenButton _rightButton) {
+	public BridgedPenManager setRightButton(final PenButton _rightButton) {
 		rightButton = _rightButton;
 		return this;
 	}
 	
-	public PenBridgeManager setMiddleButton(final PenButton _middleButton) {
+	public BridgedPenManager setMiddleButton(final PenButton _middleButton) {
 		middleButton = _middleButton;
 		return this;
 	}
 	
 	
-	public PenBridgeManager setWheelMode(final WheelMode _wheelMode) {
+	public BridgedPenManager setWheelMode(final WheelMode _wheelMode) {
 		wheelMode = _wheelMode;
 		return this;
 	}
 	
-	public PenBridgeManager setWheelScrollMultiplier(final float _wheelScrollMult) {
+	public BridgedPenManager setWheelScrollMultiplier(final float _wheelScrollMult) {
 		wheelScrollMult = _wheelScrollMult;
 		return this;
 	}
 	
-	public PenBridgeManager setWheelPressureMultiplier(final float _wheelPressureMult) {
+	public BridgedPenManager setWheelPressureMultiplier(final float _wheelPressureMult) {
 		wheelPressureMult = _wheelPressureMult;
 		return this;
 	}
 	
 	
-	public PenBridgeManager setDefaultMode(final PenMode mode) {
+	public BridgedPenManager setDefaultMode(final PenMode mode) {
 		defaultMode = mode;
 		return this;
 	}
 	
 	
-	public PenBridgeManager setDefaultPressure(final float pressure) {
+	public BridgedPenManager setDefaultPressure(final float pressure) {
 		defaultPressure = pressure;
 		return this;
 	}
 	
-	public PenBridgeManager setDefaultTiltX(final float tiltx) {
+	public BridgedPenManager setDefaultTiltX(final float tiltx) {
 		defaultTiltx = tiltx;
 		return this;
 	}
 	
-	public PenBridgeManager setDefaultTiltY(final float tilty) {
+	public BridgedPenManager setDefaultTiltY(final float tilty) {
 		defaultTilty = tilty;
 		return this;
 	}
 	
-	public PenBridgeManager setDefaultZ(final float z) {
+	public BridgedPenManager setDefaultZ(final float z) {
 		defaultZ = z;
 		return this;
 	}
