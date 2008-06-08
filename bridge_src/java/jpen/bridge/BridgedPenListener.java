@@ -8,4 +8,5 @@ public interface BridgedPenListener extends EventListener {
 	public void penTilted(final BridgedPenEvent e);
 	public void penPressed(final BridgedPenEvent e);
 	public void penButtonPressed(final BridgedPenEvent e);
+	public void penScrolled(final BridgedPenEvent e);
 }

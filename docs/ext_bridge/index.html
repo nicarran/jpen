@@ -38,6 +38,17 @@ That is, a bridge built at revision X will only work with a JRE extension built 
 <a href="http://sourceforge.net/projects/jpen/">http://sourceforge.net/projects/jpen/</a>.
 </p>
 
+<h2>API Differences from JPen</h2>
+
+<p>The bridged event API, <tt>BridgedPenListener</tt> and <tt>BridgedPenEvent</tt>, 
+is different than the JPen event API in two ways:
+<ol>
+<li>The current and previous pen state are always available in the event</li>
+<li>Properties are available via named accessors</li>
+</ol>
+</p>
+
+
 <h2>Code Examples using the JPen Bridge</h2>
 
 <p>The key classes that make up the bridge are <tt>PenBridge</tt>, 
