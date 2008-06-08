@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+</head>
+
+<body>
+<h1>The JPen JRE Extension and JPen Bridge</h1>
+<p><a href="http://resisttheb.org">resisttheborg</a></p>
+
+<p>JPen supports another method of deployment besides a signed applet/JNLP. 
+This method was designed to not require signing, which empirically turns users away.
+It works by inserting a layer of indirection between client programs and JPen called the bridge. 
+The bridge simulates a pen if JPen is missing from the environment and hooks into the correct version of JPen if present.
+</p>
+<p>Every client program that uses the bridge can be in one of two states.
+<ol>
+<li>JPen is not installed. Pressure, tilt, z, and pen modes will be static, set to default values
+</li>
+<li>JPen is installed. All pen values supported by the digitizer will be dynamic
+</li>
+</ol>
+</p>
+<p>To be in the second state, a user must at some point install JPen as a JRE extension. This can be done by running an installer program provided in the JPen distribution.
+Once the JRE extension is installed it never needs to be re-installed for the same JRE.
+</p>
+<p>The key to a successful bridged application is being able to operate in the first state well enough for the user to trust the application and see the value in installing the JRE extension. 
+For example, a drawing program may work with a reasonable default pressure.
+</p>
+
+<h2>Versioning Notes</h2>
+
+<p>The JRE extension and bridge are paired by SVN revision. 
+That is, a bridge built at revision X will only work with a JRE extension built at version X.
+</p>
+<p>A complete archive of bridges and extension installers can be found at
+<a href="http://sourceforge.net/projects/jpen/">http://sourceforge.net/projects/jpen/</a>.
+</p>
+
+<h2>Code Examples using the JPen Bridge</h2>
+
+<p>The key classes that make up the bridge are <tt>PenBridge</tt>, 
+<tt>BridgedPenListener</tt>, and <tt>BridgedPenEvent</tt>.
+</p>
+<p>A simple example:
+<pre>
+PenBridge bridge = new PenBridge();
+bridge.setDefaultPressure(0.9f);
+bridge.addBridgedPenListener(canvas, listener);
+// At this point listener is reporting pen or simulated pen events from canvas
+</pre>
+</p>
+
+</body>
+
+</html>

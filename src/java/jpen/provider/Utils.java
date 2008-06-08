@@ -22,16 +22,28 @@ package jpen.provider;
 
 import java.applet.Applet;
 import java.awt.Component;
-import java.awt.geom.Point2D;
 import java.awt.IllegalComponentStateException;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.Window;
-import java.util.List;
-import java.util.logging.Logger;
+import java.awt.geom.Point2D;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 public final class Utils {
+	static {
+		// Awaken status:
+		System.out.println("JPen status:");
+		System.out.println("-  dist_name ... " + getDistName());
+		System.out.println("-  revision .... " + getDistVersion());
+	}
+	
+	
 	private static final Logger L=Logger.getLogger(Utils.class.getName());
 	private static ResourceBundle moduleProperties;
 
@@ -80,14 +92,77 @@ public final class Utils {
 	public static final String getDistVersion(){
 		return getModuleProperties().getString("module.distVersion");
 	}
+	
+	
+	private static final String getNewJniLibName() {
+		return getDistName();
+	}
+
+	public static final String getNewDistVersion(){
+		return getDistRevision();
+	}
+	
+	
+	public static String getDistName() {
+		return readProperty("dist_name");
+	}
+	
+	public static String getDistRevision() {
+		return readProperty("revision");
+	}
+	
+	private static String readProperty(final String name) {
+		return AccessController.doPrivileged(new PrivilegedAction<String>() {
+			@Override
+			public String run() {
+				final InputStream is = Utils.class.getResourceAsStream("/" + name);
+				if (null == is)
+					return null;
+				try {
+					final BufferedReader r = new BufferedReader(new InputStreamReader(is));
+					try {
+						return r.readLine();
+					}
+					finally {
+						r.close();
+					}
+				}
+				catch (IOException e) {
+					System.err.println("Could not read \"" + name + "\"");
+				}
+				return null;
+			}
+		});
+	}
+	
 
 	public static final void loadLibrary() {
-		System.loadLibrary(getJniLibName());
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			@Override
+			public Object run() {
+				boolean newLib = false;
+				final String newJniLibName = getNewJniLibName();
+				if (null != newJniLibName) {
+					try {
+						System.loadLibrary(newJniLibName);
+						newLib = true;
+					}
+					catch (UnsatisfiedLinkError e) {
+						// Fall through
+					}
+				}
+				if (! newLib) {
+					// Try the old lib:
+					System.loadLibrary(getJniLibName());
+				}
+				return null;
+			}
+		});
 	}
 
 	public static final void loadLibraryOrFail() {
 		try {
-			System.loadLibrary(getJniLibName());
+			loadLibrary();
 		} catch(Exception ex) {
 			throw new AssertionError(ex);
 		}
