@@ -28,6 +28,10 @@
 		<fileset dir="bridge_lib">
 			<include name="**/*.jar"/>
 		</fileset>
+		<!-- IMPORTANT: REQUIRES JPEN DIST TO BE HERE -->
+		<fileset dir="${dist}">
+			<include name="*.jar"/>
+		</fileset>
 	</path>
 	
 	<path id="compile-cp">

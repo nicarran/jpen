@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+<installation version="1.0">
+
+    <info>
+        <appname>JPen JRE Extension</appname>
+        <appsubpath>jpen_ext/${VERSION}</appsubpath>
+        <appversion>${VERSION}</appversion>
+        <authors>
+            <author name="The JPen Team" email="nicarran_at_users.sourceforge.net"/>
+        </authors>
+        <url>http://sourceforge.net/projects/jpen/</url>
+    </info>
+    
+    <guiprefs width="640" height="480" resizable="no"/>
+    
+    <locale>
+        <langpack iso3="eng"/>
+    </locale>
+    
+    <resources>
+        <res id="InfoPanel.info" src="readme.txt"/>
+    </resources>
+    
+	
+    <panels>
+        <panel classname="HelloPanel"/>
+        <panel classname="InfoPanel"/>
+        <panel classname="TargetPanel"/> 
+        <panel classname="PacksPanel"/>
+        <panel classname="InstallPanel"/>
+        <panel classname="FinishPanel"/>
+    </panels>
+    
+    <packs>
+		<pack name="Base" required="yes">
+            <description>Documentation and uninstallation files</description>
+            <file src="readme.txt" targetdir="$INSTALL_PATH"/>
+        </pack>
+        <pack name="Native Extension" required="yes">
+            <description>Native files to allow JPen to talk to your digitizer</description>
+			<file src="${DIST_NAME}.jar" targetdir="$JAVA_HOME/lib/ext"/>
+			
+            <file src="${DIST_NAME}.dll" targetdir="$JAVA_HOME/bin">
+				<os family="windows"/>
+			</file>
+			<file src="lib${DIST_NAME}.so" targetdir="$JAVA_HOME/lib/i386">
+				<os family="unix"/>
+			</file>
+        </pack>
+    </packs>
+    
+</installation>
