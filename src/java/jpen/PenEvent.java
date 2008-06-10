@@ -30,9 +30,10 @@ public abstract class PenEvent
 	long time=-1;
 	PenEvent next;
 	public final transient Pen pen;
-
-	PenEvent(Pen pen) {
+	
+	PenEvent(Pen pen, long time) {
 		this.pen=pen;
+		this.time=time;
 	}
 
 	public long getTime() {

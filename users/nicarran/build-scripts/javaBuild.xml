@@ -240,7 +240,7 @@
 				<fileset dir="deptree/jars" includes="*.jar"/>
 			</classpath>
 			<batchtest>
-				<fileset dir="src/test" includes="**/*Test.class" excludes="**/*Tests.class"/>
+				<fileset dir="src/test" includes="**/XiBusTest.class" excludes="**/*Tests.class"/>
 			</batchtest>
 		</junit>
 	</target>

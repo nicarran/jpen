@@ -98,7 +98,7 @@ public class XinputProvider
 		thread.start();
 		L.fine("end");
 	}
-
+	
 	private void processQuedEvents() {
 		for(int i=xipDevices.length; --i>=0;)
 			xipDevices[i].processQuedEvents();

@@ -37,7 +37,7 @@ public class Pen extends PenState {
 	private MyThread thread;
 
 	/** Tail of event queue. */
-	PenEvent lastDispatchedEvent=new PenEvent(this) {
+	PenEvent lastDispatchedEvent=new PenEvent(this, 0) {
 		    public static final long serialVersionUID=1l;
 		    @Override
 		    void dispatch() { }
@@ -215,15 +215,7 @@ public class Pen extends PenState {
 	private final PhantomLevelFilter phantomLevelFilter=new PhantomLevelFilter();
 	private final List<PLevel> scheduledLevels=new ArrayList<PLevel>();
 	
-	/**
-	@deprecated Use {@link PenManager#scheduleLevelEvent(PenDevice, Collection)}.
-	*/
-	@Deprecated
-	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels) {
-		return scheduleLevelEvent(device,levels, -Integer.MAX_VALUE, Integer.MAX_VALUE, -Integer.MAX_VALUE, Integer.MAX_VALUE);
-	}
-	
-	final boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, int minX, int maxX, int minY, int maxY) {
+	final boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long time, int minX, int maxX, int minY, int maxY) {
 		synchronized(scheduledLevels) {
 			if(phantomLevelFilter.filter(device))
 				return false;
@@ -252,9 +244,9 @@ public class Pen extends PenState {
 			if(lastScheduledState.getKind().typeNumber!=newKindTypeNumber) {
 				PKind newKind=PKind.valueOf(newKindTypeNumber);
 				lastScheduledState.setKind(newKind);
-				schedule(new PKindEvent(this, newKind));
+				schedule(new PKindEvent(this, time, newKind));
 			}
-			PLevelEvent levelEvent=new PLevelEvent(this,
+			PLevelEvent levelEvent=new PLevelEvent(this, time,
 			    scheduledLevels.toArray(new PLevel[scheduledLevels.size()]));
 			phantomLevelFilter.setLastEvent(levelEvent);
 			schedule(levelEvent);
@@ -263,36 +255,28 @@ public class Pen extends PenState {
 		}
 	}
 
-	void scheduleButtonReleasedEvents(){
+	void scheduleButtonReleasedEvents(long time){
 		for(int i=PButton.Type.VALUES.size(); --i>=0;)
-			scheduleButtonEvent(new PButton(i, false));
+			scheduleButtonEvent(new PButton(i, false), time);
 		for(Integer extButtonTypeNumber: lastScheduledState.extButtonTypeNumberToValue.keySet())
-			scheduleButtonEvent(new PButton(extButtonTypeNumber, false));
+			scheduleButtonEvent(new PButton(extButtonTypeNumber, false), time);
 	}
 
 	private final Object buttonsLock=new Object();
-	/**
-	@deprecated Use {@link PenManager#scheduleButtonEvent(PButton)}.
-	*/
-	@Deprecated
-	public void scheduleButtonEvent(PButton button) {
+	
+	void scheduleButtonEvent(PButton button, long time) {
 		synchronized(buttonsLock) {
 			if(lastScheduledState.setButtonValue(button.typeNumber, button.value))
-				schedule(new PButtonEvent(this, button));
+				schedule(new PButtonEvent(this, time, button));
 		}
 	}
 
-	/**
-	@deprecated Use {@link PenManager#scheduleScrollEvent(PScroll)}
-	*/
-	@Deprecated
-	public void scheduleScrollEvent(PScroll scroll) {
-		schedule(new PScrollEvent(this, scroll));
+	void scheduleScrollEvent(PScroll scroll, long time) {
+		schedule(new PScrollEvent(this, time, scroll));
 	}
 
 	private final void schedule(PenEvent ev) {
 		synchronized(lastScheduledEvent) {
-			ev.time=System.currentTimeMillis();
 			lastScheduledEvent.next=ev;
 			lastScheduledEvent=ev;
 			if(thread!=null) thread.processNewEvents();

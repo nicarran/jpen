@@ -85,7 +85,7 @@
 						<arg value="-shared"/>
 						<arg value="-o"/>
 						<arg value="lib${module.jniLibName}.so"/>
-						<arg value="${module.linuxGccExtraLib}"/>
+						<arg line="${module.linuxGccExtraLib}"/>
 						<arg line="${_sources}"/>
 				</exec>
 				<move todir="product" file="src/c/linux/lib${module.jniLibName}.so"/>

@@ -49,7 +49,7 @@ int Bus_preCreate(SBus *pBus) {
 		XCloseDisplay(pBus->pDisplay);
 		return errorState;
 	}
-	
+
 	return Bus_refreshDeviceInfo(pBus);
 }
 
@@ -93,4 +93,43 @@ int Bus_setDevice(SBus *pBus, int deviceIndex) {
 		return errorState;
 	}
 	return pBus->deviceCellIndex=deviceCellIndex;
+}
+
+static jlong currentTimeMillis()
+{
+	struct timeval t;
+	gettimeofday(&t, NULL);
+	return ((jlong)t.tv_sec) * 1000 + (jlong)(t.tv_usec/1000);
+}
+
+/**
+Inspired by: xcommon.c - Ogle Video Player:
+---
+Get the current timestamp by causing an event to be generated
+by the X server.  This is only a single round-trip to the
+X server.  Inspired by kapplication::updateUserTimestamp().
+---
+
+And: jdk/src/solaris/native/sun/awt/awt_util.c
+*/
+jlong Bus_getZeroServerTimeUtc(SBus *pBus){
+	Window w = XCreateSimpleWindow( pBus->pDisplay, 
+																 DefaultRootWindow( pBus->pDisplay ), 0, 0, 1, 1, 0, 0, 0 );
+	jlong minZeroServerTime=-1, zeroServerTime;
+	unsigned char data[0];
+	XEvent ev;
+	int i=10;
+	while(--i>=0){
+		XSelectInput( pBus->pDisplay, w, PropertyChangeMask );
+		if(i%2)
+			XFlush(pBus->pDisplay);
+		XChangeProperty(pBus->pDisplay, w, XA_ATOM, XA_ATOM, 8,
+		    PropModeAppend, data, 0 );
+		XWindowEvent( pBus->pDisplay, w, PropertyChangeMask, &ev );
+		zeroServerTime=currentTimeMillis()-ev.xproperty.time;
+		if(minZeroServerTime==-1 || zeroServerTime<minZeroServerTime)
+			minZeroServerTime=zeroServerTime;
+	}
+	XDestroyWindow(pBus->pDisplay, w);
+	return minZeroServerTime;
 }

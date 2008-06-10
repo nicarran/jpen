@@ -1,5 +1,5 @@
 /* % [{
-% (C) Copyright 2008 Nicolas Carranza and individual contributors.
+% (C) Copyright 2008 JPen Developers and individual contributors.
 % See the jpen-copyright.txt file in the jpen distribution for a full
 % listing of individual contributors.
 %
@@ -27,6 +27,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/* Inaccessible static: zeroServerTimeUtc */
 /*
  * Class:     jpen_provider_xinput_XiBus
  * Method:    create
@@ -73,6 +74,14 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_setDevice
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_refreshDeviceInfo
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_xinput_XiBus
+ * Method:    getZeroServerTimeUtc
+ * Signature: (I)J
+ */
+JNIEXPORT jlong JNICALL Java_jpen_provider_xinput_XiBus_getZeroServerTimeUtc
   (JNIEnv *, jclass, jint);
 
 /*

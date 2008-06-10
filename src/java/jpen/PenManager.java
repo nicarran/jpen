@@ -191,7 +191,7 @@ public final class PenManager {
 			PenManager.this.paused=paused;
 			setWaitingMotionToPlay(paused);
 			if(paused)
-				pen.scheduleButtonReleasedEvents();
+				pen.scheduleButtonReleasedEvents(System.currentTimeMillis());
 			updateComponentWindow();
 			for(PenProvider provider: constructorToProvider.values())
 				provider.penManagerPaused(paused);
@@ -281,30 +281,39 @@ public final class PenManager {
 	public boolean getPaused() {
 		return paused;
 	}
-
-	@SuppressWarnings("deprecation")
+	
 	public void scheduleButtonEvent(PButton button) {
-		if(paused)
-			return;
-		pen.scheduleButtonEvent(button);
+		scheduleButtonEvent(button, System.currentTimeMillis());
 	}
 
-	@SuppressWarnings("deprecation")
+	public void scheduleButtonEvent(PButton button, long time) {
+		if(paused)
+			return;
+		pen.scheduleButtonEvent(button, time);
+	}
+	
 	public void scheduleScrollEvent(PScroll scroll) {
-		if(paused)
-			return;
-		pen.scheduleScrollEvent(scroll);
+		scheduleScrollEvent(scroll, System.currentTimeMillis());
 	}
 
-	@SuppressWarnings("deprecation")
+	public void scheduleScrollEvent(PScroll scroll, long time) {
+		if(paused)
+			return;
+		pen.scheduleScrollEvent(scroll, time);
+	}
+	
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels) {
+		return scheduleLevelEvent(device, levels, System.currentTimeMillis());
+	}
+	
+	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long time) {
 		if(paused)
 			return false;
 		switch(dragOutMode){
 		case DISABLED:
-			return pen.scheduleLevelEvent(device, levels, 0, component.getWidth(), 0, component.getHeight());
+			return pen.scheduleLevelEvent(device, levels, time, 0, component.getWidth(), 0, component.getHeight());
 		case ENABLED:
-			return pen.scheduleLevelEvent(device, levels,  -Integer.MAX_VALUE, Integer.MAX_VALUE, -Integer.MAX_VALUE, Integer.MAX_VALUE);
+			return pen.scheduleLevelEvent(device, levels, time,  -Integer.MAX_VALUE, Integer.MAX_VALUE, -Integer.MAX_VALUE, Integer.MAX_VALUE);
 		default:
 			throw new AssertionError();
 		}

@@ -29,8 +29,8 @@ public class PScrollEvent
 
 	public final PScroll scroll;
 
-	PScrollEvent(Pen pen, PScroll scroll) {
-		super(pen);
+	PScrollEvent(Pen pen, long time, PScroll scroll) {
+		super(pen, time);
 		this.scroll=scroll;
 	}
 

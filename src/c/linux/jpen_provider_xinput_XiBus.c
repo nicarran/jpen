@@ -72,6 +72,16 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_setDevice
 }
 
 /*
+ * Class:     jpen_provider_xinput_XiBus
+ * Method:    getZeroServerTimeUtc
+ * Signature: (I)J
+ */
+JNIEXPORT jlong JNICALL Java_jpen_provider_xinput_XiBus_getZeroServerTimeUtc
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Bus_getZeroServerTimeUtc(Bus_getP(cellIndex));
+}
+
+/*
  * Class:     jpen_provider_xinput_Bus
  * Method:    destroy
  * Signature: (I)I

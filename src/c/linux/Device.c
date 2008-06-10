@@ -62,13 +62,13 @@ void Device_setIsListening(SDevice *pDevice, int isListening) {
 		    eventClassesSize);*/
 
 		XGrabDevice(pBus->pDisplay, pDevice->pXdevice, DefaultRootWindow(pBus->pDisplay),
-		      0,
-		      eventClassesSize,
-		      eventClasses,
-		      GrabModeAsync,
-		      GrabModeAsync,
-		      CurrentTime
-		                 );
+		            0,
+		            eventClassesSize,
+		            eventClasses,
+		            GrabModeAsync,
+		            GrabModeAsync,
+		            CurrentTime
+		           );
 	}else{
 		XUngrabDevice(pBus->pDisplay, pDevice->pXdevice, CurrentTime);
 		XSync(pBus->pDisplay, 1);
@@ -150,31 +150,27 @@ static void Device_refreshValuatorValues(struct Device *pDevice, char first_axis
 	return True;
 }*/
 
-/**
-@return 1 if an event was received, 0 otherwise.
-*/
 int Device_nextEvent(struct Device *pDevice ) {
 	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
-	//XNextEvent(pBus->pDisplay, &pDevice->event);
-	//XCheckIfEvent(Bus_getP(pDevice->busCellIndex)->pDisplay, &pDevice->event, &Device_consumeEvent, 0));
+	pDevice->lastEventTime=-1;
 	pDevice->lastEventType=-1;
 	register int i;
 	for(i=0; i<E_EventType_size; i++) {
 		if(XCheckTypedEvent(pBus->pDisplay,
 		        pDevice->eventTypeIds[i],
 		        &pDevice->event)) {
-			/*if(pDevice->eventTypeIds[i]==pDevice->event.type) {*/
 			pDevice->lastEventType=i;
 			switch(i) {
 			case E_EventType_ButtonPress:
 			case E_EventType_ButtonRelease: {
 					XDeviceButtonEvent *pBEvent = (XDeviceButtonEvent*)&pDevice->event;
+					pDevice->lastEventTime=pBEvent->time;
 					pDevice->lastEventButton=pBEvent->button;
-					//Device_refreshValuatorValues(pDevice, pBEvent->first_axis, pBEvent->axes_count, pBEvent->axis_data);
 				}
 				break;
 			case E_EventType_MotionNotify: {
 					XDeviceMotionEvent *pMEvent=(XDeviceMotionEvent *) &pDevice->event;
+					pDevice->lastEventTime=pMEvent->time;
 					Device_refreshValuatorValues(pDevice, pMEvent->first_axis, pMEvent->axes_count, pMEvent->axis_data);
 				}
 				break;
@@ -185,4 +181,63 @@ int Device_nextEvent(struct Device *pDevice ) {
 		}
 	}
 	return false;
+}
+
+/**
+@return 1 if an event was received, 0 otherwise.
+*/
+int Device_nextEvent2(struct Device *pDevice ) {
+	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
+	register int i;
+	pDevice->lastEventType=-1;
+	pDevice->lastEventTime=-1;
+	for(i=E_EventType_size; --i>=0;) { // peek the first event
+		if(XCheckTypedEvent(pBus->pDisplay,
+		        pDevice->eventTypeIds[i],
+		        &pDevice->event)) {
+			switch(i) {
+			case E_EventType_ButtonPress:
+			case E_EventType_ButtonRelease:
+				{
+					XDeviceButtonEvent *pEvent = (XDeviceButtonEvent *)&pDevice->event;
+					pDevice->eventTime=pEvent->time;
+				}
+				break;
+			case E_EventType_MotionNotify:
+				{
+					XDeviceMotionEvent *pEvent=(XDeviceMotionEvent *)&pDevice->event;
+					pDevice->eventTime=pEvent->time;
+				}
+				break;
+			default:
+				printf("unhandled event!!\n");
+			}
+			if(pDevice->lastEventTime==-1 || pDevice->eventTime<pDevice->lastEventTime){
+				pDevice->lastEventType=i;
+				if(pDevice->lastEventTime!=-1)
+					XPutBackEvent(pBus->pDisplay, &pDevice->lastEvent);
+				pDevice->lastEventTime=pDevice->eventTime;
+				pDevice->lastEvent=pDevice->event;
+			}else
+				XPutBackEvent(pBus->pDisplay, &pDevice->event);
+		}
+	}
+	if(pDevice->lastEventType==-1)
+		return false;
+	switch(pDevice->lastEventType){
+	case E_EventType_ButtonPress:
+	case E_EventType_ButtonRelease:
+		{
+			XDeviceButtonEvent *pEvent = (XDeviceButtonEvent *)&pDevice->lastEvent;
+			pDevice->lastEventButton=pEvent->button;
+		}
+		break;
+	case E_EventType_MotionNotify:
+		{
+			XDeviceMotionEvent *pEvent=(XDeviceMotionEvent *)&pDevice->lastEvent;
+			Device_refreshValuatorValues(pDevice, pEvent->first_axis, pEvent->axes_count, pEvent->axis_data);
+		}
+		break;
+	}
+	return true;
 }

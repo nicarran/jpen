@@ -31,8 +31,8 @@ public class PLevelEvent
 
 	public final PLevel[] levels;
 
-	PLevelEvent(Pen pen, PLevel[] levels) {
-		super(pen);
+	PLevelEvent(Pen pen, long time, PLevel[] levels) {
+		super(pen, time);
 		this.levels=levels;
 	}
 

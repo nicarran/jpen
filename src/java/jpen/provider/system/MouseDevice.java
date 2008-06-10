@@ -56,11 +56,11 @@ class MouseDevice
 	private final MouseMotionListener mouseMotionL=new MouseMotionListener(){
 		    //@Override
 		    public void mouseMoved(MouseEvent ev) {
-			    scheduleMove(ev.getX(), ev.getY());
+			    scheduleMove(ev.getX(), ev.getY(), ev.getWhen());
 		    }
 		    //@Override
 		    public void mouseDragged(MouseEvent ev) {
-			    scheduleMove(ev.getX(), ev.getY());
+			    scheduleMove(ev.getX(), ev.getY(), ev.getWhen());
 		    }
 	    };
 	private final MouseWheelListener mouseWheelL=new MouseWheelListener(){
@@ -74,7 +74,7 @@ class MouseDevice
 			    }
 			    if(ev.getScrollType()==ev.WHEEL_UNIT_SCROLL && ev.getScrollAmount()>0) // > 0 : is because windows bug workaround, sometimes it is 0.
 				    value*=ev.getScrollAmount();
-			    getPenManager().scheduleScrollEvent(new PScroll(type.ordinal(), value));
+			    getPenManager().scheduleScrollEvent(new PScroll(type.ordinal(), value), ev.getWhen());
 		    }
 	    };
 	private final SystemProvider systemProvider;
@@ -120,15 +120,15 @@ class MouseDevice
 
 	private final PLevel[] changedLevelsA=new PLevel[2];
 	private final List<PLevel> changedLevels=Arrays.asList(changedLevelsA);
-	private void scheduleMove(int x, int y) {
+	private void scheduleMove(int x, int y, long time) {
 		changedLevelsA[0]=new PLevel(PLevel.Type.X.ordinal(), x);
 		changedLevelsA[1]=new PLevel(PLevel.Type.Y.ordinal(), y);
-		getPenManager().scheduleLevelEvent(this, changedLevels);
+		getPenManager().scheduleLevelEvent(this, changedLevels, time);
 	}
 
 	private void mouseButtonChanged(MouseEvent ev, boolean state) {
 		PButton.Type buttonType=getButtonType(ev.getButton());
-		getPenManager().scheduleButtonEvent(new PButton(buttonType.ordinal(), state));
+		getPenManager().scheduleButtonEvent(new PButton(buttonType.ordinal(), state), ev.getWhen());
 	}
 
 	private static PButton.Type getButtonType(int buttonNumber) {

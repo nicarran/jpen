@@ -1,5 +1,5 @@
 /* % [{
-% (C) Copyright 2008 Nicolas Carranza and individual contributors.
+% (C) Copyright 2008 JPen Developers and individual contributors.
 % See the jpen-copyright.txt file in the jpen distribution for a full
 % listing of individual contributors.
 %

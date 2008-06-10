@@ -32,6 +32,7 @@ class XiBus {
 	}
 	private final int cellIndex;
 	private XiDevice device;
+	private static long zeroServerTimeUtc=-1;
 
 	XiBus() throws Exception {
 		this.cellIndex=create();
@@ -77,6 +78,24 @@ class XiBus {
 	}
 	
 	private static native int refreshDeviceInfo(int cellIndex);
+	
+	public long getZeroServerTimeUtc(){
+		if(zeroServerTimeUtc==-1)
+			zeroServerTimeUtc=getZeroServerTimeUtc(cellIndex);
+		return zeroServerTimeUtc;
+	}
+	
+	long getZeroServerTimeUtcNotCached(){
+		return getZeroServerTimeUtc(cellIndex);
+	}
+	
+	private static native long getZeroServerTimeUtc(int cellIndex);
+	
+	/*public long getZeroServerTimeUtc(){
+		if(zeroServerTimeUtc==-1)
+			zeroServerTimeUtc=System.currentTimeMillis()-getCurrentServerTime();
+		return zeroServerTimeUtc;
+	}*/
 
 
 	@Override

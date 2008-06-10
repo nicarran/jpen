@@ -109,6 +109,17 @@ JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getCursor
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getTime
+ * Signature: (I)J
+ */
+JNIEXPORT jlong JNICALL Java_jpen_provider_wintab_WintabAccess_getTime
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Access_getP(cellIndex)->time;
+}
+
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
  * Method:    getButtons
  * Signature: (I)I
  */
@@ -292,4 +303,14 @@ JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getLcSysMode
 	SAccess *pAccess=Access_getP(cellIndex);
 	Access_refreshLc(pAccess);
 	return pAccess->lc.lcSysMode? JNI_TRUE: JNI_FALSE;
+}
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getZeroServerTimeUtc
+ * Signature: (I)J
+ */
+JNIEXPORT jlong JNICALL Java_jpen_provider_wintab_WintabAccess_getZeroServerTimeUtc
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Access_getZeroServerTimeUtc();
 }

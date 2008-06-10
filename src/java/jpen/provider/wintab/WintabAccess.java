@@ -27,6 +27,8 @@ import jpen.PLevel;
 import jpen.provider.Utils;
 
 class WintabAccess {
+	private static long zeroServerTimeUtc=-1;
+	
 	static{
 		Utils.loadLibraryOrFail();
 	}
@@ -86,6 +88,16 @@ class WintabAccess {
 	}
 
 	private static native int getCursor(int cellIndex);
+	
+	public long getTime(){
+		return getTime(cellIndex);
+	}
+	
+	private static native long getTime(int cellIndex);
+	
+	public long getTimeUtc(){
+		return getZeroServerTimeUtc()+getTime();
+	}
 
 	public int getButtons() {
 		return getButtons(cellIndex);
@@ -161,6 +173,14 @@ class WintabAccess {
 	}
 
 	private static native boolean getLcSysMode(int cellIndex);
+	
+	public long getZeroServerTimeUtc(){
+		if(zeroServerTimeUtc==-1)
+			zeroServerTimeUtc=getZeroServerTimeUtc(cellIndex);
+		return zeroServerTimeUtc;
+	}
+	
+	private static native long getZeroServerTimeUtc(int cellIndex);
 
 	@Override
 	public String toString() {

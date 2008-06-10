@@ -23,6 +23,9 @@
 
 #include "macros.h"
 #include <X11/extensions/XInput.h>
+#include <X11/Xatom.h>
+#include <sys/time.h>
+#include <jni.h>
 
 extern char *xerror;
 extern int xerrorHandler(Display *pDisplay, XErrorEvent *pEvent);
@@ -37,5 +40,6 @@ struct Bus {
 m_declareRow(Bus);
 extern int Bus_setDevice(SBus *pBus, int deviceIndex);
 extern int Bus_refreshDeviceInfo(SBus *pBus);
+extern jlong Bus_getZeroServerTimeUtc(SBus *pBus);
 
 #endif

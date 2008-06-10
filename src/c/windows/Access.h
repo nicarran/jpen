@@ -27,7 +27,7 @@
 //#ifdef USE_X_LIB
 //#include "INCLUDE/WINTABX.h"
 //#endif
-#define PACKETDATA	(PK_STATUS | PK_X | PK_Y | PK_NORMAL_PRESSURE | PK_CURSOR | PK_BUTTONS | PK_ORIENTATION)
+#define PACKETDATA	(PK_STATUS | PK_TIME | PK_X | PK_Y | PK_NORMAL_PRESSURE | PK_CURSOR | PK_BUTTONS | PK_ORIENTATION )
 #define PACKETMODE	0
 // #define PACKETTILT PKEXT_ABSOLUTE // TILT extension is not widely implemented (wacom), so I disable it and use pkOrientation to get tilt data 
 #include "INCLUDE/PKTDEF.h"
@@ -44,6 +44,11 @@
 #ifndef CSR_TYPE
 #	define CSR_TYPE 20
 #endif
+//^^^
+
+//vvv Taken from the jdk demo jvmti/hprof/src/windows/hprof_md.c
+#define FT2JLONG(ft) \
+	((jlong)(ft).dwHighDateTime << 32 | (jlong)(ft).dwLowDateTime)
 //^^^
 
 #define MAX_WINTAB_QUEUE_SIZE 64
@@ -79,6 +84,7 @@ struct Access {
 	UINT cursor;
 	DWORD buttons;
 	UINT status;
+	LONG time;
 	int tiltExtSupported; // not used if not def PACKETTILT (see above)
 };
 m_declareRow(Access);
@@ -91,5 +97,6 @@ extern int Access_getCsrType(int cursor);
 extern UINT Access_getFirstCursor(SAccess *pAccess);
 extern UINT Access_getCursorsCount(SAccess *pAccess);
 //extern static int Access_fillPacketQueue(SAccess *pAccess);
+extern jlong Access_getZeroServerTimeUtc();
 
 #endif

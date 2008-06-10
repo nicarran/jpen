@@ -29,8 +29,8 @@ public class PKindEvent
 
 	public final PKind kind;
 
-	PKindEvent(Pen pen, PKind kind) {
-		super(pen);
+	PKindEvent(Pen pen, long time, PKind kind) {
+		super(pen, time);
 		this.kind=kind;
 	}
 

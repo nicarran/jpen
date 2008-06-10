@@ -92,14 +92,24 @@ class XiDevice{
 	}
 
 	private static native boolean nextEvent(int cellIndex);
-
+	
+	public long getLastEventTime(){
+		return getLastEventTime(cellIndex);
+	}
+	
+	private static native long getLastEventTime(int cellIndex);
+	
+	public long getLastEventTimeUtc(){
+		return bus.getZeroServerTimeUtc()+getLastEventTime();
+	}
+	
 	public EventType getLastEventType() {
 		int lastEventTypeOrdinal=getLastEventType(cellIndex);
 		if(lastEventTypeOrdinal<0)
 			return null;
 		return EventType.VALUES.get(lastEventTypeOrdinal);
 	}
-
+	
 	private static native int getLastEventType(int cellIndex);
 
 	public int getLastEventButton() {

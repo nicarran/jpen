@@ -1,5 +1,5 @@
 /* % [{
-% (C) Copyright 2008 Nicolas Carranza and individual contributors.
+% (C) Copyright 2008 JPen Developers and individual contributors.
 % See the jpen-copyright.txt file in the jpen distribution for a full
 % listing of individual contributors.
 %
@@ -27,6 +27,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/* Inaccessible static: zeroServerTimeUtc */
 /*
  * Class:     jpen_provider_wintab_WintabAccess
  * Method:    create
@@ -89,6 +90,14 @@ JNIEXPORT jintArray JNICALL Java_jpen_provider_wintab_WintabAccess_getLevelRange
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getCursor
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getTime
+ * Signature: (I)J
+ */
+JNIEXPORT jlong JNICALL Java_jpen_provider_wintab_WintabAccess_getTime
   (JNIEnv *, jclass, jint);
 
 /*
@@ -217,6 +226,14 @@ JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getTiltExtSupp
  * Signature: (I)Z
  */
 JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getLcSysMode
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getZeroServerTimeUtc
+ * Signature: (I)J
+ */
+JNIEXPORT jlong JNICALL Java_jpen_provider_wintab_WintabAccess_getZeroServerTimeUtc
   (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus

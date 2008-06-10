@@ -102,14 +102,14 @@ int Access_preCreate(SAccess *pAccess) {
 			pRange[1]=axis.axMax;
 			return;
 		}
-		
+
 		// E_Valuators_orAzimuth, y E_Valuators_orAltitude
 		/*AXIS axises[3];
 		WTInfo(WTI_DEVICES+pAccess->device, DVC_ORIENTATION, &axises);*/
 		// UUPS: I commented this (above) out.  wacom->Intuos3 does not give me real capabilities here... it gives:
 		// azimuth: 0 - 3600
 		// altitude: 0 - 900
-		// -> I dont know how to get the "real" tablet limits using wintab : ( 
+		// -> I dont know how to get the "real" tablet limits using wintab : (
 		/*switch(valuator){
 		case	E_Valuators_orAzimuth:
 			axis=axises[0];
@@ -117,13 +117,13 @@ int Access_preCreate(SAccess *pAccess) {
 		case E_Valuators_orAltitude:
 			axis=axises[1];
 			break;
-		}
+	}
 		pRange[0]=axis.axMin;
 		pRange[1]=axis.axMax;*/
-		
-		pRange[0]=pRange[1]=0; 
+
+		pRange[0]=pRange[1]=0;
 	}
-	
+
 	int Access_refreshLc(SAccess *pAccess){
 		if(!WTGet(pAccess->ctx, &(pAccess->lc))) {
 			Access_setError("Couldn't get LOGCONTEXT info.");
@@ -182,6 +182,7 @@ int Access_preCreate(SAccess *pAccess) {
 		pAccess->cursor=p.pkCursor;
 		pAccess->buttons=p.pkButtons;
 		pAccess->status=p.pkStatus;
+		pAccess->time=p.pkTime;
 		return 1;
 	}
 
@@ -213,3 +214,36 @@ int Access_preCreate(SAccess *pAccess) {
 
 		return E_csrTypes_undef;
 	}
+
+	/**
+	Taken from the jdk demo jvmti/hprof/src/windows/hprof_md.c
+	*/
+	static jlong currentTimeMillis(void)
+	{
+		static jlong fileTime_1_1_70 = 0;
+		SYSTEMTIME st0;
+		FILETIME   ft0;
+
+		if (fileTime_1_1_70 == 0) {
+			/* Initialize fileTime_1_1_70 -- the Win32 file time of midnight
+			* 1/1/70.
+			 */ 
+
+			memset(&st0, 0, sizeof(st0));
+			st0.wYear  = 1970;
+			st0.wMonth = 1;
+			st0.wDay   = 1;
+			SystemTimeToFileTime(&st0, &ft0);
+			fileTime_1_1_70 = FT2JLONG(ft0);
+		}
+
+		GetSystemTime(&st0);
+		SystemTimeToFileTime(&st0, &ft0);
+
+		return (FT2JLONG(ft0) - fileTime_1_1_70) / 10000;
+	}
+
+	jlong Access_getZeroServerTimeUtc(){
+		return currentTimeMillis()-GetTickCount();
+	}
+

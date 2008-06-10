@@ -1,5 +1,5 @@
 /* % [{
-% (C) Copyright 2008 Nicolas Carranza and individual contributors.
+% (C) Copyright 2008 JPen Developers and individual contributors.
 % See the jpen-copyright.txt file in the jpen distribution for a full
 % listing of individual contributors.
 %
@@ -89,6 +89,14 @@ JNIEXPORT jstring JNICALL Java_jpen_provider_xinput_XiDevice_getError
  * Signature: (I)Z
  */
 JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_nextEvent
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    getLastEventTime
+ * Signature: (I)J
+ */
+JNIEXPORT jlong JNICALL Java_jpen_provider_xinput_XiDevice_getLastEventTime
   (JNIEnv *, jclass, jint);
 
 /*

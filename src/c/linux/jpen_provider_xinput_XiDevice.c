@@ -97,7 +97,17 @@ JNIEXPORT jstring JNICALL Java_jpen_provider_xinput_XiDevice_getError
  */
 JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_nextEvent
 (JNIEnv *pEnv, jclass class, jint cellIndex) {
-	return Device_nextEvent(Device_getP(cellIndex))? JNI_TRUE: JNI_FALSE;
+	return Device_nextEvent2(Device_getP(cellIndex))? JNI_TRUE: JNI_FALSE;
+}
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    getLastEventTime
+ * Signature: (I)J
+ */
+JNIEXPORT jlong JNICALL Java_jpen_provider_xinput_XiDevice_getLastEventTime
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Device_getP(cellIndex)->lastEventTime;
 }
 
 /*
