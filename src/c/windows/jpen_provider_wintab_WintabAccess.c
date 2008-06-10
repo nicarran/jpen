@@ -307,10 +307,10 @@ JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getLcSysMode
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getZeroServerTimeUtc
+ * Method:    getBootTimeUtc
  * Signature: (I)J
  */
-JNIEXPORT jlong JNICALL Java_jpen_provider_wintab_WintabAccess_getZeroServerTimeUtc
+JNIEXPORT jlong JNICALL Java_jpen_provider_wintab_WintabAccess_getBootTimeUtc
 (JNIEnv *pEnv, jclass class, jint cellIndex){
-	return Access_getZeroServerTimeUtc();
+	return Access_getBootTimeUtc();
 }

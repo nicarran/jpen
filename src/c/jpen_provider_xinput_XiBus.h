@@ -27,7 +27,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* Inaccessible static: zeroServerTimeUtc */
+/* Inaccessible static: bootTimeUtc */
 /*
  * Class:     jpen_provider_xinput_XiBus
  * Method:    create
@@ -78,10 +78,10 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_refreshDeviceInfo
 
 /*
  * Class:     jpen_provider_xinput_XiBus
- * Method:    getZeroServerTimeUtc
+ * Method:    getBootTimeUtc
  * Signature: (I)J
  */
-JNIEXPORT jlong JNICALL Java_jpen_provider_xinput_XiBus_getZeroServerTimeUtc
+JNIEXPORT jlong JNICALL Java_jpen_provider_xinput_XiBus_getBootTimeUtc
   (JNIEnv *, jclass, jint);
 
 /*

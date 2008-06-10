@@ -243,7 +243,7 @@ int Access_preCreate(SAccess *pAccess) {
 		return (FT2JLONG(ft0) - fileTime_1_1_70) / 10000;
 	}
 
-	jlong Access_getZeroServerTimeUtc(){
+	jlong Access_getBootTimeUtc(){
 		return currentTimeMillis()-GetTickCount();
 	}
 

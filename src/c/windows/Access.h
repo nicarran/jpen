@@ -97,6 +97,6 @@ extern int Access_getCsrType(int cursor);
 extern UINT Access_getFirstCursor(SAccess *pAccess);
 extern UINT Access_getCursorsCount(SAccess *pAccess);
 //extern static int Access_fillPacketQueue(SAccess *pAccess);
-extern jlong Access_getZeroServerTimeUtc();
+extern jlong Access_getBootTimeUtc();
 
 #endif

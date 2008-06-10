@@ -112,24 +112,24 @@ X server.  Inspired by kapplication::updateUserTimestamp().
 
 And: jdk/src/solaris/native/sun/awt/awt_util.c
 */
-jlong Bus_getZeroServerTimeUtc(SBus *pBus){
+jlong Bus_getBootTimeUtc(SBus *pBus){
 	Window w = XCreateSimpleWindow( pBus->pDisplay, 
 																 DefaultRootWindow( pBus->pDisplay ), 0, 0, 1, 1, 0, 0, 0 );
-	jlong minZeroServerTime=-1, zeroServerTime;
+	jlong minBootTime=-1, bootTime;
 	unsigned char data[0];
 	XEvent ev;
-	int i=10;
-	while(--i>=0){
+	int i=10; // do this 10 times to get the best result
+	while(--i>=0){ 
 		XSelectInput( pBus->pDisplay, w, PropertyChangeMask );
 		if(i%2)
 			XFlush(pBus->pDisplay);
 		XChangeProperty(pBus->pDisplay, w, XA_ATOM, XA_ATOM, 8,
 		    PropModeAppend, data, 0 );
 		XWindowEvent( pBus->pDisplay, w, PropertyChangeMask, &ev );
-		zeroServerTime=currentTimeMillis()-ev.xproperty.time;
-		if(minZeroServerTime==-1 || zeroServerTime<minZeroServerTime)
-			minZeroServerTime=zeroServerTime;
+		bootTime=currentTimeMillis()-ev.xproperty.time;
+		if(minBootTime==-1 || bootTime<minBootTime)
+			minBootTime=bootTime;
 	}
 	XDestroyWindow(pBus->pDisplay, w);
-	return minZeroServerTime;
+	return minBootTime;
 }

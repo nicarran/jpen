@@ -100,7 +100,7 @@ class XiDevice{
 	private static native long getLastEventTime(int cellIndex);
 	
 	public long getLastEventTimeUtc(){
-		return bus.getZeroServerTimeUtc()+getLastEventTime();
+		return bus.getBootTimeUtc()+getLastEventTime();
 	}
 	
 	public EventType getLastEventType() {
