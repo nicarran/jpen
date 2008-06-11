@@ -15,6 +15,7 @@ mkdir -p dist/temp/c/osx
 cp src/c/osx/*.{m,c,h} dist/temp/c/osx
 cp src/c/utils/*.{m,c,h} dist/temp/c/osx
 
+ant replace-c-packages
 
 # Wintab files:
 mkdir -p dist/temp/c/windows/INCLUDE

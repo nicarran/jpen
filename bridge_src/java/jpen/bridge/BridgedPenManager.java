@@ -76,7 +76,7 @@ public final class BridgedPenManager {
 	private boolean isJPenInstalled() {
 		// Attempt to detect <code>PenManager</code>
 		try {
-			return null != Class.forName("jpen.PenManager");
+			return null != Class.forName(String.format("jpen.r%s.PenManager", JPEN_VERSION.DIST_REVISION));
 		}
 		catch (ClassNotFoundException e) {
 			return false;
