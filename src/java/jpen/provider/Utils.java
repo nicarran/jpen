@@ -36,6 +36,9 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 public final class Utils {
+	private static final String DIST_REVISION = "${VERSION}";
+	private static final String DIST_NAME = "${DIST_NAME}";
+	
 	static {
 		// Awaken status:
 		System.out.println("JPen status:");
@@ -104,11 +107,13 @@ public final class Utils {
 	
 	
 	public static String getDistName() {
-		return readProperty("dist_name");
+//		return readProperty("dist_name");
+		return DIST_NAME;
 	}
 	
 	public static String getDistRevision() {
-		return readProperty("revision");
+//		return readProperty("revision");
+		return DIST_REVISION;
 	}
 	
 	private static String readProperty(final String name) {

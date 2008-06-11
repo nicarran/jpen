@@ -1,6 +1,6 @@
-Extension-Name: jpen
-Specification-Vendor: jpen
+Extension-Name: jpen_${VERSION}
+Specification-Vendor: jpen_${VERSION}
 Specification-Version: ${VERSION}
-Implementation-Vendor-Id: jpen
-Implementation-Vendor: jpen
+Implementation-Vendor-Id: jpen_${VERSION}
+Implementation-Vendor: jpen_${VERSION}
 Implementation-Version: ${VERSION}

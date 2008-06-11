@@ -21,8 +21,11 @@
 	<property 	name  ="dist-temp" 
 				value ="dist/temp" />
 	
-	<property 	name  ="src-java"
+	<property 	name  ="src-java-orig"
 				value ="src/java" />
+	
+	<property 	name  ="src-java"
+				value ="dist/src/java" />
 	
 	<property 	name  ="src-resources"
 				value ="src/resources" />
@@ -67,6 +70,13 @@
 	<target name="init-dirs">
 		<mkdir dir="${dist}"/>
 		<mkdir dir="${dist-temp}"/>
+		<mkdir dir="${src-java}"/>
+		
+		<copy todir="${src-java}">
+			<fileset dir="${src-java-orig}">
+				<include name="**/*"/>
+			</fileset>
+		</copy>
 	</target>
 	
 	<target name="copy-all">
@@ -83,6 +93,18 @@
 	</target>
 	
 	<target name="compile">
+		<loadfile 	srcFile="${dist-temp}/dist_name"
+					property="dist_name" />
+		<loadfile 	srcFile="${dist-temp}/revision"
+					property="dist_version" />
+		
+		<replace file="${src-java}/jpen/provider/Utils.java" 
+			token="${VERSION}"
+			value="${dist_version}"/>
+		<replace file="${src-java}/jpen/provider/Utils.java" 
+			token="${DIST_NAME}"
+			value="${dist_name}"/>
+		
 		<!--<echo message="${compile-cp-prop}"/>-->
 		<javac srcdir="${src-java}" destdir="${dist-temp}" classpathref="compile-cp" source="1.5" target="1.5"/>
 	</target>
@@ -171,11 +193,11 @@
 		<!-- Add extension information to the installer -->
 		<jar update="yes" destfile="${dist}/${dist_name}_installer.jar">
 			<manifest>
-			<attribute name="Extension-Name" value="jpen"/>
-			<attribute name="Specification-Vendor" value="jpen"/>
+			<attribute name="Extension-Name" value="jpen_${dist_version}"/>
+			<attribute name="Specification-Vendor" value="jpen_${dist_version}"/>
 			<attribute name="Specification-Version" value="${dist_version}"/>
-			<attribute name="Implementation-Vendor-Id" value="jpen"/>
-			<attribute name="Implementation-Vendor" value="jpen"/>
+			<attribute name="Implementation-Vendor-Id" value="jpen_${dist_version}"/>
+			<attribute name="Implementation-Vendor" value="jpen_${dist_version}"/>
 			<attribute name="Implementation-Version" value="${dist_version}"/>
 			</manifest>
 		</jar>

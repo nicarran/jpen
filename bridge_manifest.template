@@ -1,6 +1,6 @@
-Extension-List: jpen
-jpen-Extension-Name: jpen
+Extension-List: jpen_${VERSION}
+jpen-Extension-Name: jpen_${VERSION}
 jpen-Specification-Version: ${VERSION}
 jpen-Implementation-Version: ${VERSION}
-jpen-Implementation-Vendor-Id: jpen
+jpen-Implementation-Vendor-Id: jpen_${VERSION}
 jpen-Implementation-URL: http://resisttheb.org/jpen_ext/${VERSION}/${DIST_NAME}_installer.jar
