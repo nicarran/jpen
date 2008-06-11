@@ -120,6 +120,8 @@
 		
 		<copy file="prepackaged_hack/libjpen-2.so"
 			tofile="${dist}/lib${dist_name}.so"/>
+		<copy file="prepackaged_hack/jpen-2.jnilib"
+				tofile="${dist}/${dist_name}.jnilib"/>
 	</target>
 	
 	<target name="installer">
@@ -135,12 +137,15 @@
 		<fail unless="dll_exists" message="DLL does not exist!"/>
 		<available file="${dist}/lib${dist_name}.so" property="so_exists"/>
 		<fail unless="so_exists" message="SO does not exist!"/>
-			
+		<available file="${dist}/${dist_name}.jnilib" property="jnilib_exists"/>
+			<fail unless="jnilib_exists" message="JNILIB does not exist!"/>
+		
 		<mkdir dir="${dist-temp}/installer"/>
 		
 		<copy file="${dist}/${dist_name}.jar" todir="${dist-temp}/installer"/>
 		<copy file="${dist}/${dist_name}.dll" todir="${dist-temp}/installer"/>
 		<copy file="${dist}/lib${dist_name}.so" todir="${dist-temp}/installer"/>
+		<copy file="${dist}/${dist_name}.jnilib" todir="${dist-temp}/installer"/>
 		
 		<copy file="${src-installer}/installer.template.xml" tofile="${dist-temp}/installer/installer.xml"/>
 		<copy file="${src-installer}/readme.template.txt" tofile="${dist-temp}/installer/readme.txt"/>

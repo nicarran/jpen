@@ -38,7 +38,10 @@
         </pack>
         <pack name="Native Extension" required="yes">
             <description>Native files to allow JPen to talk to your digitizer</description>
-			<file src="${DIST_NAME}.jar" targetdir="$JAVA_HOME/lib/ext"/>
+			<file src="${DIST_NAME}.jar" targetdir="$JAVA_HOME/lib/ext">
+				<os family="windows"/>
+				<os family="unix" name="Linux"/>
+			</file>
 			
             <file src="${DIST_NAME}.dll" targetdir="$JAVA_HOME/bin">
 				<os family="windows"/>
@@ -46,7 +49,13 @@
 			<file src="lib${DIST_NAME}.so" targetdir="$JAVA_HOME/lib/i386">
 				<os family="unix" name="Linux"/>
 			</file>
-			<file src="${DIST_NAME}.jnilib" targetdir="~/Library/Java/Extensions">
+			
+			
+			<file src="${DIST_NAME}.jar" targetdir="/Library/Java/Extensions">
+				<os family="unix" name="Mac OS X" />
+			</file>
+			
+			<file src="${DIST_NAME}.jnilib" targetdir="/Library/Java/Extensions">
 				<os family="unix" name="Mac OS X" />
 			</file>
         </pack>
