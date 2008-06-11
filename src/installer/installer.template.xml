@@ -6,7 +6,7 @@
         <appsubpath>jpen_ext/${VERSION}</appsubpath>
         <appversion>${VERSION}</appversion>
         <authors>
-            <author name="The JPen Team" email="nicarran_at_users.sourceforge.net"/>
+            <author name="The JPen Team" email="xcolwell_at_users.sourceforge.net"/>
         </authors>
         <url>http://sourceforge.net/projects/jpen/</url>
     </info>
@@ -44,7 +44,10 @@
 				<os family="windows"/>
 			</file>
 			<file src="lib${DIST_NAME}.so" targetdir="$JAVA_HOME/lib/i386">
-				<os family="unix"/>
+				<os family="unix" name="Linux"/>
+			</file>
+			<file src="${DIST_NAME}.jnilib" targetdir="~/Library/Java/Extensions">
+				<os family="unix" name="Mac OS X" />
 			</file>
         </pack>
     </packs>

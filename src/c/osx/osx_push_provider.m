@@ -118,7 +118,7 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 /*
 ** Start up: use poseAsClass to subclass the NSApplication object on the fly.
 */
-JNIEXPORT void JNICALL Java_TabletWrapper_startup(JNIEnv *env, jobject this) {
+JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_startup(JNIEnv *env, jobject this) {
     [CustomApplication poseAsClass: [NSApplication class]];
     g_object = (*env)->NewGlobalRef( env, this );
     g_class = (*env)->GetObjectClass( env, this );
@@ -132,7 +132,7 @@ JNIEXPORT void JNICALL Java_TabletWrapper_startup(JNIEnv *env, jobject this) {
 /*
 ** Shut down: release our data.
 */
-JNIEXPORT void JNICALL Java_TabletWrapper_shutdown(JNIEnv *env, jobject this) {
+JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_shutdown(JNIEnv *env, jobject this) {
     if ( g_object )
         (*env)->DeleteGlobalRef( env, g_object );
     if ( g_class )

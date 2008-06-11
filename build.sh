@@ -1,4 +1,4 @@
-#! bash
+#! /bin/bash
 
 echo [Clean]
 ./build_clean.sh

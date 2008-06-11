@@ -1,14 +1,20 @@
-#! bash
+#! /bin/bash
 
 mkdir -p dist/temp/c
+cp src/c/*.{m,c,h} dist/temp/c
 
 mkdir -p dist/temp/c/windows
+cp src/c/windows/*.{m,c,h} dist/temp/c/windows
+cp src/c/utils/*.{m,c,h} dist/temp/c/windows
+
 mkdir -p dist/temp/c/linux
-cp src/c/*.{c,h} dist/temp/c
-cp src/c/windows/*.{c,h} dist/temp/c/windows
-cp src/c/linux/*.{c,h} dist/temp/c/linux
-cp src/c/utils/*.{c,h} dist/temp/c/windows
-cp src/c/utils/*.{c,h} dist/temp/c/linux
+cp src/c/linux/*.{m,c,h} dist/temp/c/linux
+cp src/c/utils/*.{m,c,h} dist/temp/c/linux
+
+mkdir -p dist/temp/c/osx
+cp src/c/osx/*.{m,c,h} dist/temp/c/osx
+cp src/c/utils/*.{m,c,h} dist/temp/c/osx
+
 
 # Wintab files:
 mkdir -p dist/temp/c/windows/INCLUDE

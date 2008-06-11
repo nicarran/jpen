@@ -1,4 +1,4 @@
-#! bash
+#! /bin/bash
 
 dist_name=`cat dist/temp/dist_name`
 

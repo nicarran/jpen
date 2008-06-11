@@ -1,4 +1,4 @@
-#! bash
+#! /bin/bash
 
 mkdir -p dist/temp
 revision=`svn info . | grep -e 'Revision:' | sed -e 's/[^0-9]//g'`
