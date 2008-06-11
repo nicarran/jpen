@@ -77,6 +77,35 @@
 				<include name="**/*"/>
 			</fileset>
 		</copy>
+		
+		<loadfile 	srcFile="${dist-temp}/dist_name"
+								property="dist_name" />
+					<loadfile 	srcFile="${dist-temp}/revision"
+								property="dist_version" />
+					
+					<replace file="${src-java}/jpen/provider/Utils.java" 
+						token="${VERSION}"
+						value="${dist_version}"/>
+					<replace file="${src-java}/jpen/provider/Utils.java" 
+						token="${DIST_NAME}"
+						value="${dist_name}"/>
+					
+					<replace dir="${src-java}" token="package jpen" value="package jpen.${dist_version}">
+						<include name="**/*.java"/>
+					</replace>
+					<replace dir="${src-java}" token="import jpen" value="import jpen.${dist_version}">
+						<include name="**/*.java"/>
+					</replace>
+		
+		<mkdir dir="${src-java}/jpen/${dist_version}"/>
+		
+		<move todir="${src-java}/jpen/${dist/version}">
+		    <fileset dir="${src-java}/jpen">
+		      <include name="*"/>
+		      <exclude name="${dist/version}"/>
+		    </fileset>
+		  </move>
+		
 	</target>
 	
 	<target name="copy-all">
@@ -93,17 +122,7 @@
 	</target>
 	
 	<target name="compile">
-		<loadfile 	srcFile="${dist-temp}/dist_name"
-					property="dist_name" />
-		<loadfile 	srcFile="${dist-temp}/revision"
-					property="dist_version" />
 		
-		<replace file="${src-java}/jpen/provider/Utils.java" 
-			token="${VERSION}"
-			value="${dist_version}"/>
-		<replace file="${src-java}/jpen/provider/Utils.java" 
-			token="${DIST_NAME}"
-			value="${dist_name}"/>
 		
 		<!--<echo message="${compile-cp-prop}"/>-->
 		<javac srcdir="${src-java}" destdir="${dist-temp}" classpathref="compile-cp" source="1.5" target="1.5"/>

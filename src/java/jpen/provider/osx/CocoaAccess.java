@@ -1,5 +1,9 @@
 package jpen.provider.osx;
 
+import javax.swing.JFrame;
+
+import jpen.provider.Utils;
+
 
 public class CocoaAccess {
 	
@@ -68,5 +72,16 @@ public class CocoaAccess {
         }
         */
         
+    }
+    
+    
+    
+    
+    public static void main(final String[] in) {
+    	Utils.loadLibrary();
+    	
+    	new CocoaAccess();
+    	
+    	new JFrame().setVisible(true);
     }
 }
