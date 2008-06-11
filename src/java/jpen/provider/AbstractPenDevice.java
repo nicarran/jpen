@@ -36,12 +36,23 @@ import jpen.PLevelEvent;
 public abstract class AbstractPenDevice
 	implements PenDevice {
 
+	private byte id;
 	private final PenProvider provider;
 	private int kindTypeNumber;
 	private boolean enabled;
 
 	protected AbstractPenDevice(PenProvider provider) {
 		this.provider=provider;
+	}
+	
+	//@Override
+	public byte getId(){
+		return id;
+	}
+	
+	//@Override
+	public void setId(byte id){
+		this.id=id;
 	}
 
 	//@Override

@@ -30,12 +30,33 @@ public class PLevelEvent
 	public static final long serialVersionUID=1l;
 
 	public final PLevel[] levels;
+	private final long deviceTime;
+	private final byte deviceId;
 
-	PLevelEvent(Pen pen, long time, PLevel[] levels) {
-		super(pen, time);
+	PLevelEvent(Pen pen, PLevel[] levels, byte deviceId, long deviceTime) {
+		super(pen);
 		this.levels=levels;
+		this.deviceTime=deviceTime;
+		this.deviceId=deviceId;
 	}
 
+	/**
+	Returns the timestamp in milliseconds of when this event ocurred in the {@link PenDevice}. The value returned was measured since some fixed but arbitrary time imposed by the {@link PenDevice}.
+
+	@see #getDeviceId()
+	@see #getTime()
+	*/
+	public long getDeviceTime(){
+		return deviceTime;
+	}
+	
+	/**
+	Returns the id of the {@link PenDevice} which generated this event.
+	*/
+	public byte getDeviceId(){
+		return deviceId;
+	}
+	
 	@Override
 	void copyTo(PenState penState){
 		penState.levels.setValues(this);
@@ -46,21 +67,21 @@ public class PLevelEvent
 		for(PenListener l:pen.getListenersArray())
 			l.penLevelEvent(this);
 	}
-	
+
 	public boolean containsLevelOfType(Set<PLevel.Type> levelTypes){
-			for(int i=levels.length; --i>=0;)
+		for(int i=levels.length; --i>=0;)
 			if(levelTypes.contains(levels[i].getType()))
 				return true;
 		return false;
 	}
-	
+
 	public boolean isMovement() {
 		return containsLevelOfType(PLevel.Type.MOVEMENT_TYPES);
 	}
 
 	@Override
 	public String toString() {
-		return "[PLevelEvent: time="+time+", levels="+Arrays.asList(levels)+"]";
+		return "[PLevelEvent: time="+time+", levels="+Arrays.asList(levels)+", deviceId="+deviceId+", deviceTime="+deviceTime+"]";
 	}
-	
+
 }

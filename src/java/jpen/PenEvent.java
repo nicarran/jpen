@@ -31,15 +31,17 @@ public abstract class PenEvent
 	PenEvent next;
 	public final transient Pen pen;
 	
-	PenEvent(Pen pen, long time) {
+	PenEvent(Pen pen) {
 		this.pen=pen;
-		this.time=time;
 	}
-
+	
+	/**
+	Returns the time in milliseconds of when this event was scheduled by the {@link Pen}.
+	*/
 	public long getTime() {
 		return time;
 	}
-
+	
 	abstract void copyTo(PenState penState);
 
 	abstract void dispatch();

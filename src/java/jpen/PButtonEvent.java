@@ -29,8 +29,8 @@ public class PButtonEvent
 
 	public final PButton button;
 
-	PButtonEvent(Pen pen, long time, PButton button) {
-		super(pen, time);
+	PButtonEvent(Pen pen, PButton button) {
+		super(pen);
 		this.button=button;
 	}
 

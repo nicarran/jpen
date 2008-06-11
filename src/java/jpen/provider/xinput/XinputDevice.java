@@ -112,7 +112,7 @@ class XinputDevice extends AbstractPenDevice {
 	}
 
 	private void scheduleScrollEvent(int number) {
-		getPenManager().scheduleScrollEvent(new PScroll(number==5? PScroll.Type.DOWN.ordinal(): PScroll.Type.UP.ordinal(),1), device.getLastEventTimeUtc());
+		getPenManager().scheduleScrollEvent(new PScroll(number==5? PScroll.Type.DOWN.ordinal(): PScroll.Type.UP.ordinal(),1));
 	}
 
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();
@@ -127,14 +127,14 @@ class XinputDevice extends AbstractPenDevice {
 		}*/
 			changedLevels.add(new PLevel(levelType.ordinal(), value));
 		}
-		getPenManager().scheduleLevelEvent(this, changedLevels, device.getLastEventTimeUtc());
+		getPenManager().scheduleLevelEvent(this, changedLevels, device.getLastEventTime());
 		changedLevels.clear();
 	}
 
 	void scheduleButtonEvent(int number, boolean state) {
 		if(L.isLoggable(Level.FINE))
 			L.fine("scheduling button event: number="+number+", state="+state);
-		getPenManager().scheduleButtonEvent(new PButton(number-1, state), device.getLastEventTimeUtc());
+		getPenManager().scheduleButtonEvent(new PButton(number-1, state));
 	}
 
 	private static final float RADS_PER_DEG=(float)(Math.PI/180);

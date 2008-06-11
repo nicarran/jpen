@@ -93,10 +93,9 @@ class WintabDevice
 		int newButtonsValues=wintabProvider.wintabAccess.getButtons();
 		if(newButtonsValues==lastButtonsValues)
 			return;
-		long time=wintabProvider.wintabAccess.getTimeUtc();
 		for(PButton.Type buttonType:PButton.Type.values()) {
 			boolean value=getButtonState(newButtonsValues, getButtonIndex(buttonType));
-			getPenManager().scheduleButtonEvent(new PButton(buttonType.ordinal(), value), time);
+			getPenManager().scheduleButtonEvent(new PButton(buttonType.ordinal(), value));
 		}
 		lastButtonsValues=newButtonsValues;
 	}
@@ -144,7 +143,7 @@ class WintabDevice
 			changedLevels.add(new PLevel(levelType.ordinal(), value));
 		}
 
-		getPenManager().scheduleLevelEvent(this, changedLevels, wintabProvider.wintabAccess.getTimeUtc());
+		getPenManager().scheduleLevelEvent(this, changedLevels, wintabProvider.wintabAccess.getTime());
 		changedLevels.clear();
 	}
 

@@ -74,7 +74,7 @@ class MouseDevice
 			    }
 			    if(ev.getScrollType()==ev.WHEEL_UNIT_SCROLL && ev.getScrollAmount()>0) // > 0 : is because windows bug workaround, sometimes it is 0.
 				    value*=ev.getScrollAmount();
-			    getPenManager().scheduleScrollEvent(new PScroll(type.ordinal(), value), ev.getWhen());
+			    getPenManager().scheduleScrollEvent(new PScroll(type.ordinal(), value));
 		    }
 	    };
 	private final SystemProvider systemProvider;
@@ -128,7 +128,7 @@ class MouseDevice
 
 	private void mouseButtonChanged(MouseEvent ev, boolean state) {
 		PButton.Type buttonType=getButtonType(ev.getButton());
-		getPenManager().scheduleButtonEvent(new PButton(buttonType.ordinal(), state), ev.getWhen());
+		getPenManager().scheduleButtonEvent(new PButton(buttonType.ordinal(), state));
 	}
 
 	private static PButton.Type getButtonType(int buttonNumber) {

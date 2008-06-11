@@ -60,6 +60,7 @@ public final class PenManager {
 	private final Map<PenProvider.Constructor, PenProvider.ConstructionException> constructorToException=new HashMap<PenProvider.Constructor, PenProvider.ConstructionException>();
 	private volatile boolean paused;
 	private final List<PenManagerListener> listeners=new ArrayList<PenManagerListener>();
+	private byte nextDeviceId;
 
 	// TODO: decide if DragOutMode and its machinery should be public... wait for comments on jpen.sf.net.
 	enum DragOutMode{
@@ -191,7 +192,7 @@ public final class PenManager {
 			PenManager.this.paused=paused;
 			setWaitingMotionToPlay(paused);
 			if(paused)
-				pen.scheduleButtonReleasedEvents(System.currentTimeMillis());
+				pen.scheduleButtonReleasedEvents();
 			updateComponentWindow();
 			for(PenProvider provider: constructorToProvider.values())
 				provider.penManagerPaused(paused);
@@ -234,6 +235,8 @@ public final class PenManager {
 				constructors.add(constructor);
 				PenProvider provider=constructor.construct(this);
 				constructorToProvider.put(constructor, provider);
+				for(PenDevice device:provider.getDevices())
+					firePenDeviceAdded(constructor, device);
 			} catch(PenProvider.ConstructionException ex) {
 				constructorToException.put(constructor, ex);
 			}
@@ -254,8 +257,10 @@ public final class PenManager {
 
 	public void firePenDeviceAdded(PenProvider.Constructor constructor, PenDevice device) {
 		synchronized(listeners) {
-			for(PenManagerListener l: listeners)
+			device.setId(nextDeviceId++);
+			for(PenManagerListener l: listeners){
 				l.penDeviceAdded(constructor, device);
+			}
 		}
 	}
 
@@ -283,23 +288,15 @@ public final class PenManager {
 	}
 	
 	public void scheduleButtonEvent(PButton button) {
-		scheduleButtonEvent(button, System.currentTimeMillis());
-	}
-
-	public void scheduleButtonEvent(PButton button, long time) {
 		if(paused)
 			return;
-		pen.scheduleButtonEvent(button, time);
+		pen.scheduleButtonEvent(button);
 	}
 	
 	public void scheduleScrollEvent(PScroll scroll) {
-		scheduleScrollEvent(scroll, System.currentTimeMillis());
-	}
-
-	public void scheduleScrollEvent(PScroll scroll, long time) {
 		if(paused)
 			return;
-		pen.scheduleScrollEvent(scroll, time);
+		pen.scheduleScrollEvent(scroll);
 	}
 	
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels) {

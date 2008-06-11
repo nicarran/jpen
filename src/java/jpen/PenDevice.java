@@ -37,4 +37,13 @@ public interface PenDevice {
 	boolean getEnabled();
 
 	String getName();
+	
+	byte getId();
+	
+	/**
+	Used by {@link PenManager} to set a unique id for this device.
+	
+	@see PLevelEvent#getDeviceId()
+	*/
+	void setId(byte id);
 }
