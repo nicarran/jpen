@@ -1,19 +1,37 @@
 package jpen.provider.osx;
 
-import javax.swing.JFrame;
-
-import jpen.provider.Utils;
 
 
 public class CocoaAccess {
+	private boolean active = false;
+	private CocoaProvider cocoaProvider = null;
+	
 	
 	public CocoaAccess() {
-		startup();
 	}
 	
 	
+	public void start() {
+		if (! active) {
+			active = true;
+			startup();
+		}
+	}
+	
+	public void stop() {
+		if (active) {
+			active = false;
+			shutdown();
+		}
+	}
+	
 	public void dispose() {
-		shutdown();
+		stop();
+	}
+	
+	
+	public void setProvider(final CocoaProvider _cocoaProvider) {
+		cocoaProvider = _cocoaProvider;
 	}
 	
 	
@@ -52,6 +70,8 @@ public class CocoaAccess {
         final float vendorDefined3
     ) {
 		System.out.println(String.format("[postEvent] device type: %d", pointingDeviceType));
+		
+		
 		
 		/*
         final int awt_type;

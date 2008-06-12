@@ -21,32 +21,29 @@
 package jpen;
 
 import java.awt.Component;
-import java.awt.Cursor;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.Window;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Set;
-import javax.swing.ImageIcon;
+import java.util.logging.Logger;
+
 import jpen.event.PenAdapter;
 import jpen.event.PenListener;
 import jpen.event.PenManagerListener;
-import jpen.provider.system.SystemProvider;
 import jpen.provider.Utils;
+import jpen.provider.osx.CocoaProvider;
+import jpen.provider.system.SystemProvider;
 import jpen.provider.wintab.WintabProvider;
 import jpen.provider.xinput.XinputProvider;
 

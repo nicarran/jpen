@@ -36,6 +36,9 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 public final class Utils {
+	private static final String DEFAULT_DIST_REVISION = String.format("${%s}", "VERSION");
+	private static final String DEFAULT_DIST_NAME = String.format("${%s}", "DIST_NAME");
+	
 	private static final String DIST_REVISION = "${VERSION}";
 	private static final String DIST_NAME = "${DIST_NAME}";
 	
@@ -45,6 +48,7 @@ public final class Utils {
 		System.out.println("-  dist_name ... " + getDistName());
 		System.out.println("-  revision .... " + getDistRevision());
 	}
+	
 	
 	
 	private static final Logger L=Logger.getLogger(Utils.class.getName());
@@ -108,17 +112,19 @@ public final class Utils {
 	
 	public static String getDistName() {
 //		return readProperty("dist_name");
-		return DIST_NAME;
+		return DEFAULT_DIST_NAME == DIST_NAME ? null
+				: DIST_NAME;
 	}
 	
 	public static String getDistRevision() {
 //		return readProperty("revision");
-		return DIST_REVISION;
+		return DEFAULT_DIST_REVISION == DIST_REVISION ? null
+				: DIST_REVISION;
 	}
 	
+	@Deprecated
 	private static String readProperty(final String name) {
 		return AccessController.doPrivileged(new PrivilegedAction<String>() {
-			@Override
 			public String run() {
 				final InputStream is = Utils.class.getResourceAsStream("/" + name);
 				if (null == is)
@@ -143,7 +149,6 @@ public final class Utils {
 
 	public static final void loadLibrary() {
 		AccessController.doPrivileged(new PrivilegedAction<Object>() {
-			@Override
 			public Object run() {
 				boolean newLib = false;
 				final String newJniLibName = getNewJniLibName();

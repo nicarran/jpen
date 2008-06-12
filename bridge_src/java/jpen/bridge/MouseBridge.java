@@ -28,12 +28,10 @@ private void init() {
  * <code>Bridge</code> IMPLEMENTATION
  **************************/
 
-@Override
 public boolean isSimulated() {
 	return true;
 }
 
-@Override
 public void dispose() {
 	component.removeMouseListener(this);
 	component.removeMouseMotionListener(this);
@@ -47,7 +45,6 @@ public void dispose() {
 
 // MOUSE HOOKS
 
-@Override
 public void mouseWheelMoved(MouseWheelEvent e) {
 	switch (bpmanager.wheelMode) {
 		case PRESSURE:
@@ -64,32 +61,26 @@ public void mouseWheelMoved(MouseWheelEvent e) {
 	}
 }
 
-@Override
 public void mouseDragged(MouseEvent e) {
 	locationChange(e.getX(), e.getY(), bpmanager.defaultZ);
 }
 
-@Override
 public void mouseMoved(MouseEvent e) {
 	locationChange(e.getX(), e.getY(), bpmanager.defaultZ);
 }
 
-@Override
 public void mouseClicked(MouseEvent e) {
 	// Do nothing
 }
 
-@Override
 public void mouseEntered(MouseEvent e) {
 	// Do nothing
 }
 
-@Override
 public void mouseExited(MouseEvent e) {
 	// Do nothing
 }
 
-@Override
 public void mousePressed(MouseEvent e) {
 	final PenButton button;
 	switch (e.getButton()) {
@@ -102,7 +93,6 @@ public void mousePressed(MouseEvent e) {
 }
 
 
-@Override
 public void mouseReleased(MouseEvent e) {
 	final PenButton button;
 	switch (e.getButton()) {

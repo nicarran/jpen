@@ -36,12 +36,10 @@ private void init() {
  * <code>Bridge</code> IMPLEMENTATION
  **************************/
 
-@Override
 public boolean isSimulated() {
 	return false;
 }
 
-@Override
 public void dispose() {
 	pmanager.pen.removeListener(this);
 }
@@ -53,7 +51,6 @@ public void dispose() {
 
 // PEN HOOKS
 
-@Override
 public void penButtonEvent(PButtonEvent ev) {
 	final PenButton button;
 	final PButton.Type type = ev.button.getType();
@@ -68,7 +65,6 @@ public void penButtonEvent(PButtonEvent ev) {
 	buttonChange(button, ev.button.value);
 }
 
-@Override
 public void penKindEvent(PKindEvent ev) {
 	final PenMode mode;
 	final PKind.Type type = ev.kind.getType();
@@ -83,7 +79,6 @@ public void penKindEvent(PKindEvent ev) {
 	modeChange(mode);
 }
 
-@Override
 public void penLevelEvent(PLevelEvent ev) {
 	boolean mlocation = false;
 	boolean mtilt = false;
@@ -130,7 +125,6 @@ public void penLevelEvent(PLevelEvent ev) {
 		tiltChange(ntiltx, ntilty);
 }
 
-@Override
 public void penScrollEvent(PScrollEvent ev) {
 	int step = Math.abs(ev.scroll.value);
 	if (PScroll.Type.UP == ev.scroll.getType())
@@ -138,7 +132,6 @@ public void penScrollEvent(PScrollEvent ev) {
 	scrollChange(step);
 }
 
-@Override
 public void penTock(long availableMillis) {
 	// Do nothing
 }

@@ -56,22 +56,18 @@ abstract class AbstractBridge implements Bridge {
 	 * <code>Bridge</code> IMPLEMENTATION
 	 **************************/
 	
-	@Override
 	public Component getComponent() {
 		return component;
 	}
 	
-	@Override
 	public BridgedPenListener getListener() {
 		return listener;
 	}
 	
-	@Override
 	public void enable() {
 		enabled = true;
 	}
 	
-	@Override
 	public void disable() {
 		enabled = false;
 	}
