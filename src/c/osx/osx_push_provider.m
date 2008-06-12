@@ -82,6 +82,9 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 	    		);
 	    }
 	    break;
+	case NSLeftMouseDown:
+	case NSLeftMouseUp:
+	case NSLeftMouseDragged:
     case NSTabletPoint:
         {
             NSPoint tilt = [event tilt];
@@ -125,7 +128,7 @@ JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_startup(JNIEnv *env, j
     g_class = (*env)->NewGlobalRef( env, g_class );
     if ( g_class != (jclass)0 ) {
         g_methodID = (*env)->GetMethodID( env, g_class, "postEvent", "(IIFFIIIIFFFFFFFF)V" );
-        g_methodID_prox = (*env)->GetMethodID( env, g_class, "postProximityEvent", "(IIBIIIIIIII)V" );
+        g_methodID_prox = (*env)->GetMethodID( env, g_class, "postProximityEvent", "(IIZIIIIIIII)V" );
     }
 }
 

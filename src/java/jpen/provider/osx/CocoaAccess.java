@@ -13,6 +13,7 @@ public class CocoaAccess {
 	
 	public void start() {
 		if (! active) {
+			System.out.println("Starting OSX Access");
 			active = true;
 			startup();
 		}
@@ -20,6 +21,7 @@ public class CocoaAccess {
 	
 	public void stop() {
 		if (active) {
+			System.out.println("Stopping OSX Access");
 			active = false;
 			shutdown();
 		}

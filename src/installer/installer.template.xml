@@ -55,7 +55,7 @@
 				<os family="unix" name="Mac OS X" />
 			</file>
 			
-			<file src="${DIST_NAME}.jnilib" targetdir="/Library/Java/Extensions">
+			<file src="lib${DIST_NAME}.jnilib" targetdir="/Library/Java/Extensions">
 				<os family="unix" name="Mac OS X" />
 			</file>
         </pack>

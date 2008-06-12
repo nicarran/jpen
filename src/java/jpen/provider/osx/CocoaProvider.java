@@ -19,15 +19,22 @@ public class CocoaProvider extends AbstractPenProvider {
 		}
 		
 		public boolean constructable() {
+			System.out.println("Constructable? " + (System.getProperty("os.name").toLowerCase().contains("mac")));
+			
 			return System.getProperty("os.name").toLowerCase().contains("mac");
 		}
 	
 		public PenProvider construct(PenManager pm) throws ConstructionException {
+			System.out.println("c0");
 			try {
 				Utils.loadLibrary();
+				System.out.println("c1");
 				CocoaAccess cocoaAccess=new CocoaAccess();
+				System.out.println("c2");
 				return new CocoaProvider(pm, this, cocoaAccess);
+				
 			} catch(Throwable t) {
+				t.printStackTrace();
 				throw new ConstructionException(t);
 			}
 		}
