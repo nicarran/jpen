@@ -58,9 +58,18 @@ public class CocoaAccess {
     	System.out.println(String.format("[postProximityEvent] device type: %d", pointingDeviceType));
     }
     
+    /**
+     * 
+     * @param special_pointingDeviceType 
+     * indicates whether this event came from the mouse or the tablet.
+     * A value of <code>0</code> indicates the mouse;
+     * a value of <code>1</code> indicates the tablet.
+     * Note that proximity events are not generated when switching between the mouse and tablet.
+     * 
+     */
     private void postEvent(
         final int type,
-		final int pointingDeviceType,
+		final int special_pointingDeviceType,
         final float x, final float y,
         final int absoluteX, final int absoluteY,  final int absoluteZ,
         final int buttonMask,
@@ -71,7 +80,7 @@ public class CocoaAccess {
         final float vendorDefined2,
         final float vendorDefined3
     ) {
-		System.out.println(String.format("[postEvent] device type: %d", pointingDeviceType));
+		System.out.println(String.format("[postEvent] device type: %d; %d", special_pointingDeviceType, type));
 		
 		// TODO: cycle buttons
 		// TODO: 
