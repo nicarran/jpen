@@ -207,6 +207,7 @@ public final class PenManager {
 		addProvider(new SystemProvider.Constructor());
 		addProvider(new XinputProvider.Constructor());
 		addProvider(new WintabProvider.Constructor());
+		addProvider(new CocoaProvider.Constructor());
 		pauser.setPaused(true);
 	}
 

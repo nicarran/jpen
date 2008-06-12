@@ -73,15 +73,4 @@ public class CocoaAccess {
         */
         
     }
-    
-    
-    
-    
-    public static void main(final String[] in) {
-    	Utils.loadLibrary();
-    	
-    	new CocoaAccess();
-    	
-    	new JFrame().setVisible(true);
-    }
 }
