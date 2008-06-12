@@ -48,6 +48,9 @@ public class CocoaProvider extends AbstractPenProvider {
 		for (PKind.Type type : PKind.Type.VALUES) {
 			deviceMap.put(type, new CocoaDevice(this, type));
 		}
+		
+		// TODO: when do we stop?
+		cocoaAccess.start();
 	}
 	
 	public void penManagerPaused(final boolean paused) {
