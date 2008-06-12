@@ -71,7 +71,8 @@ public class CocoaAccess {
     ) {
 		System.out.println(String.format("[postEvent] device type: %d", pointingDeviceType));
 		
-		
+		// TODO: cycle buttons
+		// TODO: 
 		
 		/*
         final int awt_type;
