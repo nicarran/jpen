@@ -13,6 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+/*
+ * Modified June 2008 for the JPen project.
+ */
 
 #include <jni.h>
 #include <Cocoa/Cocoa.h>
@@ -85,6 +88,12 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 	case NSLeftMouseDown:
 	case NSLeftMouseUp:
 	case NSLeftMouseDragged:
+	case NSRightMouseDown:
+	case NSRightMouseUp:
+	case NSRightMouseDragged:
+	case NSOtherMouseDown:
+	case NSOtherMouseUp:
+	case NSOtherMouseDragged:
 //    case NSTabletPoint:
         {
         	int tablet = NSTabletPointEventSubtype == [event subtype];
@@ -99,7 +108,7 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
                     [event absoluteX],
                     [event absoluteY],
                     [event absoluteZ],
-                    [event buttonMask],
+                    tablet ? [event buttonMask] : [event buttonNumber],
                     [event pressure],
                     [event rotation],
                     tilt.x,
@@ -145,3 +154,47 @@ JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_shutdown(JNIEnv *env, 
     g_object = NULL;
     g_class = NULL;
 }
+
+
+// CONSTANTS
+
+JNIEXPORT jintArray Java_jpen_provider_osx_CocoaAccess_getPointingDeviceTypes(JNIEnv *env, jobject this) {
+	jint a[4];
+	a[0] = NSUnknownPointingDevice;
+	a[1] = NSPenPointingDevice;
+	a[2] = NSCursorPointingDevice;
+	a[3] = NSEraserPointingDevice;
+	
+	jintArray types = (*env)->NewIntArray(env, 4);
+	(*env)->SetIntArrayRegion(env, types, 0, 4, (jint*) a);
+	
+	return types;
+	
+//NSUnknownPointingDevice = NX_TABLET_POINTER_UNKNOWN,
+//NSPenPointingDevice     = NX_TABLET_POINTER_PEN,
+//NSCursorPointingDevice  = NX_TABLET_POINTER_CURSOR,
+//NSEraserPointingDevice  = NX_TABLET_POINTER_ERASER
+}
+
+// NOTE: also want this for button masks
+
+JNIEXPORT jintArray Java_jpen_provider_osx_CocoaAccess_getButtonMasks(JNIEnv *env, jobject this) {
+	jint a[3];
+	a[0] = NSPenTipMask;
+	a[1] = NSPenLowerSideMask;
+	a[2] = NSPenUpperSideMask;
+		
+	jintArray types = (*env)->NewIntArray(env, 3);
+	(*env)->SetIntArrayRegion(env, types, 0, 3, (jint*) a);
+		
+	return types;
+	
+//NSPenTipMask =       NX_TABLET_BUTTON_PENTIPMASK,
+//NSPenLowerSideMask = NX_TABLET_BUTTON_PENLOWERSIDEMASK,
+//NSPenUpperSideMask = NX_TABLET_BUTTON_PENUPPERSIDEMASK
+}
+
+
+
+
+
