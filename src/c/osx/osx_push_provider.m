@@ -85,6 +85,7 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 	    		);
 	    }
 	    break;
+    case NSMouseMoved:
 	case NSLeftMouseDown:
 	case NSLeftMouseUp:
 	case NSLeftMouseDragged:
@@ -102,7 +103,7 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
             (*env)->CallVoidMethod( env, g_object, g_methodID,
                     [event type],
 					//[event pointingDeviceType],
-                    tablet ? 1 : 0,
+                    tablet ? 1 : NSMouseMoved == [event type] ? 2 : 0,
                     location.x,
                     location.y,
                     [event absoluteX],

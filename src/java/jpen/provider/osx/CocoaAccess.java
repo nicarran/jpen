@@ -148,21 +148,25 @@ public class CocoaAccess {
         */
 		
 		final CocoaDevice device;
-		if (0 == special_pointingDeviceType) {
+		if (0 == special_pointingDeviceType || 2 == special_pointingDeviceType) {
+			System.out.println("::CURSOR");
 			device = cocoaProvider.getDevice(PKind.Type.CURSOR);
 		}
-		else {
+		else
 			if (pointingDeviceTypes[1] == activePointingDeviceType) {
+				System.out.println("::STYLUS");
 				device = cocoaProvider.getDevice(PKind.Type.STYLUS);
 			}
-			else if (pointingDeviceTypes[1] == activePointingDeviceType) {
+			else if (pointingDeviceTypes[3] == activePointingDeviceType) {
+				System.out.println("::ERASER");
 				device = cocoaProvider.getDevice(PKind.Type.ERASER);
 			}
 			else {
+				System.out.println("::BAD::STYLUS");
 				assert false;
 				device = cocoaProvider.getDevice(PKind.Type.STYLUS);
 			}
-		}
+		
 		
 		levels.clear();
 		levels.add(new PLevel(PLevel.Type.X.ordinal(), x));
@@ -177,7 +181,12 @@ public class CocoaAccess {
 		
 		buttons.clear();
 		
-		if (0 == special_pointingDeviceType) {
+		if (2 == special_pointingDeviceType) {
+			buttons.add(new PButton(PButton.Type.LEFT.ordinal(), false));
+			buttons.add(new PButton(PButton.Type.CENTER.ordinal(), false));
+			buttons.add(new PButton(PButton.Type.RIGHT.ordinal(), false));
+		}
+		else if (0 == special_pointingDeviceType) {
 			// 0: left
 			// 1: right
 			// 2: middle

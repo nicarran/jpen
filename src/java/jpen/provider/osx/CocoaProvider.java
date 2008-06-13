@@ -46,7 +46,9 @@ public class CocoaProvider extends AbstractPenProvider {
 		
 		deviceMap = new HashMap<PKind.Type, CocoaDevice>(3);
 		for (PKind.Type type : PKind.Type.VALUES) {
-			deviceMap.put(type, new CocoaDevice(this, type));
+			final CocoaDevice device = new CocoaDevice(this, type);
+			deviceMap.put(type, device);
+			getPenManager().firePenDeviceAdded(getConstructor(), device);
 		}
 		
 		// TODO: when do we stop?
