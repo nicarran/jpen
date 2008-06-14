@@ -10,6 +10,8 @@ import java.util.Collection;
 
 import javax.swing.SwingUtilities;
 
+import sun.net.www.http.PosterOutputStream;
+
 import jpen.PButton;
 import jpen.PKind;
 import jpen.PLevel;
@@ -120,6 +122,45 @@ public class CocoaAccess {
      * 
      */
     private void postEvent(
+        final int type,
+		final int special_pointingDeviceType,
+        final float x, 
+        // Note: Cocoa gives the y-coordinate inverted, i.e. "opengl coordinates"
+        final float y,
+        final int absoluteX, final int absoluteY,  final int absoluteZ,
+        final int buttonMask,
+        final float pressure, final float rotation,
+        final float tiltX, final float tiltY,
+        final float tangentialPressure,
+        final float vendorDefined1,
+        final float vendorDefined2,
+        final float vendorDefined3
+    ) {
+    	if (SwingUtilities.isEventDispatchThread()) {
+    		postEvent_swing(
+				type, special_pointingDeviceType, 
+				x, y, absoluteX, absoluteY, absoluteZ, 
+				buttonMask, pressure, rotation, 
+				tiltX, tiltY, 
+				tangentialPressure, 
+				vendorDefined1, vendorDefined2, vendorDefined3
+    		);
+    	}
+    	else {
+    		SwingUtilities.invokeLater(new Runnable() {public void run() {
+    			postEvent_swing(
+					type, special_pointingDeviceType, 
+					x, y, absoluteX, absoluteY, absoluteZ, 
+					buttonMask, pressure, rotation, 
+					tiltX, tiltY, 
+					tangentialPressure, 
+					vendorDefined1, vendorDefined2, vendorDefined3
+	    		);
+    		}});
+    	}
+    }
+    
+    private void postEvent_swing(
         final int type,
 		final int special_pointingDeviceType,
         float x, 

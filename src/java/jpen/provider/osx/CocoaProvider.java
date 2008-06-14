@@ -70,6 +70,6 @@ public class CocoaProvider extends AbstractPenProvider {
 	
 	
 	public void dispose() {
-		cocoaAccess.start();
+		cocoaAccess.stop();
 	}
 }
