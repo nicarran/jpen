@@ -42,36 +42,23 @@ public class PLevel
 		/**
 		X axis value in pixels. The X axis points to the right of the screen. It's a left handed coordinate system: the Z axis points upside.  
 		*/
-	  X(true, false),
+	  X,
 		/**
 		Y axis value in pixels. The Y axis points to the bottom of the screen.
 		*/
-		Y(true, false),  
-		PRESSURE(false, false),
+		Y,  
+		/**
+		Range: 0 to 1.
+		*/
+		PRESSURE,
 	  /**
 		Angle between the Z axis and the projection of the pen against the X-Z plane. Range: -pi/2 to pi/2 (radians). 
 	  */
-	  TILT_X(false, true),
+	  TILT_X,
 	  /**
 		Angle between the Z axis and the projection of the pen against the Y-Z plane. Range: -pi/2 to pi/2.
 	  */
-	  TILT_Y(false, true);
-
-	  /**
-	  @deprecated Use {@link #MOVEMENT_TYPES} 
-	  */
-	  @Deprecated
-	  public final boolean isMovement;
-	  /**
-	  @deprecated Use {@link #TILT_TYPES}
-	  */
-	  @Deprecated
-	  public final boolean isTilt;
-
-	  Type(boolean isMovement, boolean isTilt) {
-		  this.isMovement=isMovement;
-		  this.isTilt=isTilt;
-	  }
+	  TILT_Y;
 
 	  public static final List<Type> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
 	  public static final Set<Type> MOVEMENT_TYPES=Collections.unmodifiableSet(EnumSet.of(X, Y));
