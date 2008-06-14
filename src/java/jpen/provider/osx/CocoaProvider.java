@@ -15,7 +15,7 @@ public class CocoaProvider extends AbstractPenProvider {
 		}
 		
 		public String getName() {
-			return "OS X";
+			return "Cocoa";
 		}
 		
 		public boolean constructable() {
@@ -51,8 +51,6 @@ public class CocoaProvider extends AbstractPenProvider {
 			getPenManager().firePenDeviceAdded(getConstructor(), device);
 		}
 		
-		// TODO: when do we stop?
-		cocoaAccess.start();
 	}
 	
 	public CocoaDevice getDevice(final PKind.Type type) {
@@ -60,6 +58,13 @@ public class CocoaProvider extends AbstractPenProvider {
 	}
 	
 	public void penManagerPaused(final boolean paused) {
-		// Do nothing
+		// <code>paused</code> indicates whether the pen manager has paused
+		// collecting mouse events.
+		if (paused) {
+			cocoaAccess.start();
+		}
+		else {
+			cocoaAccess.stop();
+		}
 	}
 }
