@@ -1,5 +1,7 @@
 package jpen.provider.osx;
 
+import java.awt.KeyboardFocusManager;
+import java.awt.Window;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -113,7 +115,9 @@ public class CocoaAccess {
     private void postEvent(
         final int type,
 		final int special_pointingDeviceType,
-        final float x, final float y,
+        final float x, 
+        // Note: Cocoa gives the y-coordinate inverted, i.e. "opengl coordinates"
+        float y,
         final int absoluteX, final int absoluteY,  final int absoluteZ,
         final int buttonMask,
         final float pressure, final float rotation,
@@ -146,6 +150,11 @@ public class CocoaAccess {
             break;
         }
         */
+		
+		final Window w = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+		if (null != w) {
+			y = w.getHeight() - y;
+		}
 		
 		final CocoaDevice device;
 		if (0 == special_pointingDeviceType || 2 == special_pointingDeviceType) {
