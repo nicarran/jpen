@@ -1,0 +1,122 @@
+<project name="jpen_browser_int" default="help" basedir=".">
+	<target name="help">
+<echo>JPen browser integration
+	
+[[test only]]
+</echo>
+	</target>
+	
+	
+	<!--
+	****************************************************
+	* BEGIN PROPERTIES 
+	****************************************************
+	-->
+	
+
+	<property file="conf/build.properties"/>
+	
+	<property 	name  ="version"
+				value ="trunk" />
+	
+	<property 	name  ="rev"
+				value ="2" />
+	
+	<property 	name  ="dist" 			
+				value ="dist" />
+	
+	<property 	name  ="installer" 			
+				value ="installer" />
+	
+	<property 	name  ="conf"
+				value ="conf" />
+	
+	<property 	name  ="dist-temp" 
+				value ="dist/temp" />
+	
+	<property 	name  ="src-java"
+				value ="src/java" />
+	
+	<property 	name  ="jar_name"
+				value ="jpen-bint-${rev}.jar" />
+	
+	
+	<path id="core-cp">
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	
+	<path id="compile-cp">
+		<path refid="core-cp"/>
+		<fileset dir="lib_compile">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="lib_jogl">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	<property name="compile-cp-prop" refid="compile-cp"/>
+	
+
+	<!--
+	****************************************************
+	* END PROPERTIES
+	****************************************************
+	-->
+	
+	
+	<taskdef name="IzPack" classpathref="compile-cp"
+	         classname="com.izforge.izpack.ant.IzPackTask"/>
+	
+	
+	<!--
+	****************************************************
+	* BEGIN BUILD 
+	****************************************************
+	-->
+	
+	<target name="clean">
+		<delete dir="${dist}"/>
+		<delete dir="${dist-temp}"/>
+	</target>
+	
+	<!-- Ensures the dist-temp and dist directories are created -->
+	<target name="init-dirs">
+		<mkdir dir="${dist}"/>
+		<mkdir dir="${dist-temp}"/>
+	</target>
+	
+	<target name="copy-all">
+		<copy todir="${dist-temp}">
+			<fileset dir="${src-java}">
+				<exclude name="**/*.java"/>
+				<exclude name="**/*.lnk"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="compile">
+		<!--<echo message="${compile-cp-prop}"/>-->
+		<javac srcdir="${src-java}" destdir="${dist-temp}" classpathref="compile-cp" source="1.5" target="1.5"/>
+	</target>
+	
+	<target name="dist" depends="clean, init-dirs, copy-all, compile">
+		<jar basedir="${dist-temp}" destfile="${dist}/${jar_name}" compress="true" level="9">
+		</jar>
+		<delete dir="${dist-temp}"/>
+		<echo message="- Building installer"/>
+		<IzPack input="${installer}/install.xml"
+		        output="${dist}/install.jar"
+		        installerType="standard"
+		        basedir="${installer}"
+		        IzPackDir="${dist}/"/>
+	</target>
+
+	<!--
+	****************************************************
+	* END BUILD 
+	****************************************************
+	-->
+	
+</project>

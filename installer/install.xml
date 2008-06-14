@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+<installation version="1.0">
+    <info>
+        <appname>FreeKS</appname>
+        <appversion>TEST - NOT FOR REDISTRIBUTION</appversion>
+        <authors>
+            <author name="K-Sketch Team" email="ksketch-dev@dub.washington.edu"/>
+        </authors>
+        <url>http://www.k-sketch.org/</url>
+    </info>
+    
+    <guiprefs width="640" height="480" resizable="no"/>
+    
+    <locale>
+        <langpack iso3="eng"/>
+    </locale>
+    
+    <resources>
+        <res id="InfoPanel.info" src="readme.txt"/>
+    </resources>
+    
+	
+    <panels>
+        <panel classname="HelloPanel"/>
+        <panel classname="InfoPanel"/>
+        <panel classname="TargetPanel"/> 
+        <panel classname="PacksPanel"/>
+        <panel classname="InstallPanel"/>
+        <panel classname="FinishPanel"/>
+    </panels>
+    
+    <packs>
+		<pack name="Base" required="yes">
+            <description>Documentation and uninstallation files</description>
+            <file src="readme.txt" targetdir="$INSTALL_PATH"/>
+        </pack>
+        <pack name="Native Extension" required="yes">
+            <description>Native files to allow FreeKS to talk to your digitizer</description>
+			<file src="jpen-2.jar" targetdir="$JAVA_HOME/lib/ext"/>
+            <file src="jpen-2.dll" targetdir="$JAVA_HOME/lib/ext">
+				<os family="windows"/>
+			</file>
+			<file src="libjpen-2.so" targetdir="$JAVA_HOME/lib/ext">
+				<os family="unix"/>
+			</file>
+        </pack>
+    </packs>
+    
+</installation>
