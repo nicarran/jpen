@@ -1,6 +1,7 @@
 package jpen.provider.osx;
 
 import java.awt.Component;
+import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Window;
@@ -31,7 +32,6 @@ public class CocoaAccess {
 	
 	public void start() {
 		if (! active) {
-			System.out.println("Starting OSX Access");
 			active = true;
 			startup();
 			
@@ -42,7 +42,6 @@ public class CocoaAccess {
 	
 	public void stop() {
 		if (active) {
-			System.out.println("Stopping OSX Access");
 			active = false;
 			shutdown();
 		}
@@ -51,6 +50,10 @@ public class CocoaAccess {
 	public void dispose() {
 		stop();
 	}
+	
+	
+	public native void enable();
+	public native void disable();
 	
 	
 	public void setProvider(final CocoaProvider _cocoaProvider) {
@@ -99,7 +102,7 @@ public class CocoaAccess {
         final int vendorID,
         final int vendorPointingDeviceType
     ) {
-    	System.out.println(String.format("[postProximityEvent] device type: %d", pointingDeviceType));
+//    	System.out.println(String.format("[postProximityEvent] device type: %d", pointingDeviceType));
     	
     	activePointingDeviceType = pointingDeviceType;
     }
@@ -131,39 +134,20 @@ public class CocoaAccess {
         final float vendorDefined2,
         final float vendorDefined3
     ) {
-		System.out.println(String.format("[postEvent] device type: %d; %d; %d", special_pointingDeviceType, type, buttonMask));
-		
-		// TODO: cycle buttons
-		// TODO: 
-		
-		/*
-        final int awt_type;
-        switch ( type ) {
-        default:
-        case 1: // NSLeftMouseDown
-            awt_type = MouseEvent.MOUSE_PRESSED;
-            break;
-        case 2: // NSLeftMouseUp
-            awt_type = MouseEvent.MOUSE_RELEASED;
-            break;
-        case 5: // NSLeftMouseMoved
-            awt_type = MouseEvent.MOUSE_MOVED;
-            break;
-        case 6: // NSLeftMouseDragged
-            awt_type = MouseEvent.MOUSE_DRAGGED;
-            break;
-        }
-        */
+//		System.out.println(String.format("[postEvent] device type: %d; %d; %d", special_pointingDeviceType, type, buttonMask));
 		
 		final Component c = cocoaProvider.getPenManager().component;
+//		final Component r = SwingUtilities.getRoot(c);
 		final Window w = SwingUtilities.getWindowAncestor(c);
 		assert w == KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
 		if (null != w) {
-			y = w.getHeight() - y;
+			final Insets insets = w.getInsets();
+			y = -y + (w.getHeight() - insets.bottom);
+			x = x - insets.left;
 		}
 		
-		final Point origin = new Point(0, 0);
-		SwingUtilities.convertPoint(c, origin, w);
+		Point origin = new Point(0, 0);
+		origin = SwingUtilities.convertPoint(w, origin, c);
 		
 		x += origin.x;
 		y += origin.y;
@@ -171,28 +155,24 @@ public class CocoaAccess {
 		
 		final CocoaDevice device;
 		if (0 == special_pointingDeviceType || 2 == special_pointingDeviceType) {
-			System.out.println("::CURSOR");
 			device = cocoaProvider.getDevice(PKind.Type.CURSOR);
 		}
-		else
-			if (pointingDeviceTypes[1] == activePointingDeviceType) {
-				System.out.println("::STYLUS");
-				device = cocoaProvider.getDevice(PKind.Type.STYLUS);
-			}
-			else if (pointingDeviceTypes[3] == activePointingDeviceType) {
-				System.out.println("::ERASER");
-				device = cocoaProvider.getDevice(PKind.Type.ERASER);
-			}
-			else {
-				System.out.println("::BAD::STYLUS");
-				assert false;
-				device = cocoaProvider.getDevice(PKind.Type.STYLUS);
-			}
+		else if (pointingDeviceTypes[1] == activePointingDeviceType) {
+			device = cocoaProvider.getDevice(PKind.Type.STYLUS);
+		}
+		else if (pointingDeviceTypes[3] == activePointingDeviceType) {
+			device = cocoaProvider.getDevice(PKind.Type.ERASER);
+		}
+		else {
+			assert false;
+			device = cocoaProvider.getDevice(PKind.Type.STYLUS);
+		}
 		
 		
 		levels.clear();
 		levels.add(new PLevel(PLevel.Type.X.ordinal(), x));
 		levels.add(new PLevel(PLevel.Type.Y.ordinal(), y));
+		// TODO: tilt values are likely incorrect
 		levels.add(new PLevel(PLevel.Type.TILT_X.ordinal(), tiltX));
 		levels.add(new PLevel(PLevel.Type.TILT_Y.ordinal(), tiltY));
 		levels.add(new PLevel(PLevel.Type.PRESSURE.ordinal(), pressure));

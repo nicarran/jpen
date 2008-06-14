@@ -10,13 +10,16 @@ public class CocoaDevice extends AbstractPenDevice {
 		super(_cocoaProvider);
 		
 		type = _type;
+		
+		setKindTypeNumber(type.ordinal());
 	}
+	
 	
 	public String getName() {
 		switch (type) {
-			case CURSOR: return "OS X Cursor";
-			case ERASER: return "OS X Eraser";
-			case STYLUS: return "OS X Stylus";
+			case CURSOR: return "Cocoa Cursor";
+			case ERASER: return "Cocoa Eraser";
+			case STYLUS: return "Cocoa Stylus";
 			default:
 				return "UNKNOWN";
 		}

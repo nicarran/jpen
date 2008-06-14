@@ -26,6 +26,7 @@ static jobject g_object;
 static jclass g_class;
 static jmethodID g_methodID;
 static jmethodID g_methodID_prox;
+static bool enabled = 0;
 
 /*
 ** A subclass of NSApplication which overrides sendEvent and calls back into Java with the event data for mouse events.
@@ -59,6 +60,11 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 @implementation CustomApplication
 - (void) sendEvent:(NSEvent *)event
 {
+	if (! enabled) {
+		[super sendEvent: event];
+		return;
+	}
+	
     JNIEnv *env;
     bool shouldDetach = false;
 
@@ -97,7 +103,7 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 	case NSOtherMouseDragged:
 //    case NSTabletPoint:
         {
-        	int tablet = NSTabletPointEventSubtype == [event subtype];
+        	bool tablet = NSTabletPointEventSubtype == [event subtype];
             NSPoint tilt = [event tilt];
             NSPoint location = [event locationInWindow];
             (*env)->CallVoidMethod( env, g_object, g_methodID,
@@ -129,6 +135,18 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
     [super sendEvent: event];
 }
 @end
+
+
+
+JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_enable(JNIEnv *env, jobject this) {
+    enabled = 1;
+}
+
+JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_disable(JNIEnv *env, jobject this) {
+	enabled = 0;
+}
+
+
 
 /*
 ** Start up: use poseAsClass to subclass the NSApplication object on the fly.

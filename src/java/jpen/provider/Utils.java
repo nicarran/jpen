@@ -36,6 +36,12 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 public final class Utils {
+	// BUILD NOTE:
+	// The tokens ${VERSION} and ${DIST_NAME} are replaced at build with their
+	// respective values
+	// NOTE:
+	// DEFAULT* are convoluted so that the string replacer does not 
+	// replace the token values at build.
 	private static final String DEFAULT_DIST_REVISION = String.format("${%s}", "VERSION");
 	private static final String DEFAULT_DIST_NAME = String.format("${%s}", "DIST_NAME");
 	

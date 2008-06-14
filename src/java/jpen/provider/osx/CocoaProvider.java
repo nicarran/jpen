@@ -51,6 +51,8 @@ public class CocoaProvider extends AbstractPenProvider {
 			getPenManager().firePenDeviceAdded(getConstructor(), device);
 		}
 		
+		
+		cocoaAccess.start();
 	}
 	
 	public CocoaDevice getDevice(final PKind.Type type) {
@@ -58,13 +60,16 @@ public class CocoaProvider extends AbstractPenProvider {
 	}
 	
 	public void penManagerPaused(final boolean paused) {
-		// <code>paused</code> indicates whether the pen manager has paused
-		// collecting mouse events.
-		if (paused) {
-			cocoaAccess.start();
+		if (! paused) {
+			cocoaAccess.enable();
 		}
 		else {
-			cocoaAccess.stop();
+			cocoaAccess.disable();
 		}
+	}
+	
+	
+	public void dispose() {
+		cocoaAccess.start();
 	}
 }
