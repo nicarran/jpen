@@ -19,6 +19,9 @@ import jpen.PLevel;
 
 
 public class CocoaAccess {
+	private static final float HALF_PI = (float) (Math.PI / 2);
+	
+	
 	private boolean active = false;
 	private CocoaProvider cocoaProvider = null;
 	
@@ -169,7 +172,7 @@ public class CocoaAccess {
         final int absoluteX, final int absoluteY,  final int absoluteZ,
         final int buttonMask,
         final float pressure, final float rotation,
-        final float tiltX, final float tiltY,
+        float tiltX, float tiltY,
         final float tangentialPressure,
         final float vendorDefined1,
         final float vendorDefined2,
@@ -193,6 +196,10 @@ public class CocoaAccess {
 		x += origin.x;
 		y += origin.y;
 		
+		// JPen expects tilt to be -pi/2 to pi/2 from vertical;
+		// Cocoa delivers tilt as -1 to 1 from vertical
+		tiltX *= HALF_PI;
+		tiltY *= HALF_PI;
 		
 		final CocoaDevice device;
 		if (0 == special_pointingDeviceType || 2 == special_pointingDeviceType) {
