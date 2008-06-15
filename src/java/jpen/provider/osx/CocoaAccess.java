@@ -220,7 +220,6 @@ public class CocoaAccess {
 		levels.clear();
 		levels.add(new PLevel(PLevel.Type.X.ordinal(), x));
 		levels.add(new PLevel(PLevel.Type.Y.ordinal(), y));
-		// TODO: tilt values are likely incorrect
 		levels.add(new PLevel(PLevel.Type.TILT_X.ordinal(), tiltX));
 		levels.add(new PLevel(PLevel.Type.TILT_Y.ordinal(), tiltY));
 		levels.add(new PLevel(PLevel.Type.PRESSURE.ordinal(), pressure));
