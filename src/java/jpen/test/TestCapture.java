@@ -3,6 +3,7 @@ package jpen.test;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.geom.Point2D;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,6 +25,11 @@ import jpen.bridge.PenButton;
 
 import com.sun.opengl.util.BufferUtil;
 
+
+/*
+ * TODO: leading point. checkpoint drawn stroke.
+ * 
+ */
 public class TestCapture extends JApplet {
 	
 //	static {
@@ -101,6 +107,9 @@ public class TestCapture extends JApplet {
 		final Frame[] pframe = {null};
 		
 		final GL[] glref = {null};
+		
+		final Frame[] leadingFrame = {null};
+		
 		
 		
 		final GLEventListener glel = new GLEventListener() {
@@ -192,9 +201,13 @@ public class TestCapture extends JApplet {
 				
 				renderCompletedFrames(gl);
 				
-				
-				if (2 <= frames.size() && 5 <= frames.size()) {
-					renderFrames(gl, frames);
+				final List<Frame> xframes = new ArrayList<Frame>(frames.size() + 1);
+				xframes.addAll(frames);
+				if (null != leadingFrame[0]) {
+					xframes.add(leadingFrame[0]);
+				}
+				if (2 <= xframes.size()) {
+					renderFrames(gl, xframes);
 //					renderFrames2(gl, frames);
 				}
 				
@@ -344,6 +357,11 @@ public class TestCapture extends JApplet {
 					frames.add(frame);
 					pframe[0] = frame;
 					daccum = 0.f;
+					
+					leadingFrame[0] = null;
+				}
+				else {
+					leadingFrame[0] = frame;
 				}
 				canvas.repaint();
 				}
