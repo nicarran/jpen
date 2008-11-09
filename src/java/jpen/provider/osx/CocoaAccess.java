@@ -10,8 +10,6 @@ import java.util.Collection;
 
 import javax.swing.SwingUtilities;
 
-import sun.net.www.http.PosterOutputStream;
-
 import jpen.PButton;
 import jpen.PKind;
 import jpen.PLevel;
@@ -20,52 +18,52 @@ import jpen.PLevel;
 
 public class CocoaAccess {
 	private static final float HALF_PI = (float) (Math.PI / 2);
-	
-	
+
+
 	private boolean active = false;
 	private CocoaProvider cocoaProvider = null;
-	
+
 	private int[] buttonMasks = {};
 	private int[] pointingDeviceTypes = {};
-	
+
 	private int activePointingDeviceType = -1;
-	
-	
+
+
 	public CocoaAccess() {
 	}
-	
-	
+
+
 	public void start() {
 		if (! active) {
 			active = true;
 			startup();
-			
+
 			buttonMasks = getButtonMasks();
 			pointingDeviceTypes = getPointingDeviceTypes();
 		}
 	}
-	
+
 	public void stop() {
 		if (active) {
 			active = false;
 			shutdown();
 		}
 	}
-	
+
 	public void dispose() {
 		stop();
 	}
-	
-	
+
+
 	public native void enable();
 	public native void disable();
-	
-	
+
+
 	public void setProvider(final CocoaProvider _cocoaProvider) {
 		cocoaProvider = _cocoaProvider;
 	}
-	
-	
+
+
 	/**
 	 * @return
 	 * The following Cocoa constants:
@@ -76,7 +74,7 @@ public class CocoaAccess {
 	 * }
 	 */
 	private native int[] getButtonMasks();
-	
+
 	/**
 	 * @return
 	 * The following Cocoa constants:
@@ -88,100 +86,100 @@ public class CocoaAccess {
 	 * }
 	 */
 	private native int[] getPointingDeviceTypes();
-	
+
 	private native void startup();
-    private native void shutdown();
-    
-    
-    // IIBIIIIIIII
-    private void postProximityEvent(
-        final int capabilityMask,
-        final int deviceID,
-        final boolean enteringProximity,
-        final int pointingDeviceID,
-        final int pointingDeviceSerialNumber,
-        final int pointingDeviceType,
-        final int systemTabletID,
-        final int tabletID,
-        final int uniqueID,
-        final int vendorID,
-        final int vendorPointingDeviceType
-    ) {
-//    	System.out.println(String.format("[postProximityEvent] device type: %d", pointingDeviceType));
-    	
-    	activePointingDeviceType = pointingDeviceType;
-    }
-    
-    
-    private Collection<PLevel> levels = new ArrayList<PLevel>(8);
-    private Collection<PButton> buttons = new ArrayList<PButton>(8);
-    /**
-     * 
-     * @param special_pointingDeviceType 
-     * indicates whether this event came from the mouse or the tablet.
-     * A value of <code>0</code> indicates the mouse;
-     * a value of <code>1</code> indicates the tablet.
-     * Note that proximity events are not generated when switching between the mouse and tablet.
-     * 
-     */
-    private void postEvent(
-        final int type,
-		final int special_pointingDeviceType,
-        final float x, 
-        // Note: Cocoa gives the y-coordinate inverted, i.e. "opengl coordinates"
-        final float y,
-        final int absoluteX, final int absoluteY,  final int absoluteZ,
-        final int buttonMask,
-        final float pressure, final float rotation,
-        final float tiltX, final float tiltY,
-        final float tangentialPressure,
-        final float vendorDefined1,
-        final float vendorDefined2,
-        final float vendorDefined3
-    ) {
-    	if (SwingUtilities.isEventDispatchThread()) {
-    		postEvent_swing(
-				type, special_pointingDeviceType, 
-				x, y, absoluteX, absoluteY, absoluteZ, 
-				buttonMask, pressure, rotation, 
-				tiltX, tiltY, 
-				tangentialPressure, 
-				vendorDefined1, vendorDefined2, vendorDefined3
-    		);
-    	}
-    	else {
-    		SwingUtilities.invokeLater(new Runnable() {public void run() {
-    			postEvent_swing(
-					type, special_pointingDeviceType, 
-					x, y, absoluteX, absoluteY, absoluteZ, 
-					buttonMask, pressure, rotation, 
-					tiltX, tiltY, 
-					tangentialPressure, 
-					vendorDefined1, vendorDefined2, vendorDefined3
-	    		);
-    		}});
-    	}
-    }
-    
-    private void postEvent_swing(
-        final int type,
-		final int special_pointingDeviceType,
-        float x, 
-        // Note: Cocoa gives the y-coordinate inverted, i.e. "opengl coordinates"
-        float y,
-        final int absoluteX, final int absoluteY,  final int absoluteZ,
-        final int buttonMask,
-        final float pressure, final float rotation,
-        float tiltX, float tiltY,
-        final float tangentialPressure,
-        final float vendorDefined1,
-        final float vendorDefined2,
-        final float vendorDefined3
-    ) {
-//		System.out.println(String.format("[postEvent] device type: %d; %d; %d", special_pointingDeviceType, type, buttonMask));
-		
+	private native void shutdown();
+
+
+	// IIBIIIIIIII
+	private void postProximityEvent(
+	  final int capabilityMask,
+	  final int deviceID,
+	  final boolean enteringProximity,
+	  final int pointingDeviceID,
+	  final int pointingDeviceSerialNumber,
+	  final int pointingDeviceType,
+	  final int systemTabletID,
+	  final int tabletID,
+	  final int uniqueID,
+	  final int vendorID,
+	  final int vendorPointingDeviceType
+	) {
+		//    	System.out.println(String.format("[postProximityEvent] device type: %d", pointingDeviceType));
+
+		activePointingDeviceType = pointingDeviceType;
+	}
+
+
+	private Collection<PLevel> levels = new ArrayList<PLevel>(8);
+	private Collection<PButton> buttons = new ArrayList<PButton>(8);
+	/**
+	 * 
+	 * @param special_pointingDeviceType 
+	 * indicates whether this event came from the mouse or the tablet.
+	 * A value of <code>0</code> indicates the mouse;
+	 * a value of <code>1</code> indicates the tablet.
+	 * Note that proximity events are not generated when switching between the mouse and tablet.
+	 * 
+	 */
+	private void postEvent(
+	  final int type,
+	  final int special_pointingDeviceType,
+	  final float x,
+	  // Note: Cocoa gives the y-coordinate inverted, i.e. "opengl coordinates"
+	  final float y,
+	  final int absoluteX, final int absoluteY,  final int absoluteZ,
+	  final int buttonMask,
+	  final float pressure, final float rotation,
+	  final float tiltX, final float tiltY,
+	  final float tangentialPressure,
+	  final float vendorDefined1,
+	  final float vendorDefined2,
+	  final float vendorDefined3
+	) {
+		if (SwingUtilities.isEventDispatchThread()) {
+			postEvent_swing(
+			  type, special_pointingDeviceType,
+			  x, y, absoluteX, absoluteY, absoluteZ,
+			  buttonMask, pressure, rotation,
+			  tiltX, tiltY,
+			  tangentialPressure,
+			  vendorDefined1, vendorDefined2, vendorDefined3
+			);
+		}
+		else {
+			SwingUtilities.invokeLater(new Runnable() {public void run() {
+					    postEvent_swing(
+					      type, special_pointingDeviceType,
+					      x, y, absoluteX, absoluteY, absoluteZ,
+					      buttonMask, pressure, rotation,
+					      tiltX, tiltY,
+					      tangentialPressure,
+					      vendorDefined1, vendorDefined2, vendorDefined3
+					    );
+				    }});
+		}
+	}
+
+	private void postEvent_swing(
+	  final int type,
+	  final int special_pointingDeviceType,
+	  float x,
+	  // Note: Cocoa gives the y-coordinate inverted, i.e. "opengl coordinates"
+	  float y,
+	  final int absoluteX, final int absoluteY,  final int absoluteZ,
+	  final int buttonMask,
+	  final float pressure, final float rotation,
+	  float tiltX, float tiltY,
+	  final float tangentialPressure,
+	  final float vendorDefined1,
+	  final float vendorDefined2,
+	  final float vendorDefined3
+	) {
+		//		System.out.println(String.format("[postEvent] device type: %d; %d; %d", special_pointingDeviceType, type, buttonMask));
+
 		final Component c = cocoaProvider.getPenManager().component;
-//		final Component r = SwingUtilities.getRoot(c);
+		//		final Component r = SwingUtilities.getRoot(c);
 		final Window w = SwingUtilities.getWindowAncestor(c);
 		assert w == KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
 		if (null != w) {
@@ -189,18 +187,18 @@ public class CocoaAccess {
 			y = -y + (w.getHeight() - insets.bottom);
 			x = x - insets.left;
 		}
-		
+
 		Point origin = new Point(0, 0);
 		origin = SwingUtilities.convertPoint(w, origin, c);
-		
+
 		x += origin.x;
 		y += origin.y;
-		
+
 		// JPen expects tilt to be -pi/2 to pi/2 from vertical;
 		// Cocoa delivers tilt as -1 to 1 from vertical
 		tiltX *= HALF_PI;
 		tiltY *= HALF_PI;
-		
+
 		final CocoaDevice device;
 		if (0 == special_pointingDeviceType || 2 == special_pointingDeviceType) {
 			device = cocoaProvider.getDevice(PKind.Type.CURSOR);
@@ -215,21 +213,21 @@ public class CocoaAccess {
 			assert false;
 			device = cocoaProvider.getDevice(PKind.Type.STYLUS);
 		}
-		
-		
+
+
 		levels.clear();
 		levels.add(new PLevel(PLevel.Type.X.ordinal(), x));
 		levels.add(new PLevel(PLevel.Type.Y.ordinal(), y));
 		levels.add(new PLevel(PLevel.Type.TILT_X.ordinal(), tiltX));
 		levels.add(new PLevel(PLevel.Type.TILT_Y.ordinal(), tiltY));
 		levels.add(new PLevel(PLevel.Type.PRESSURE.ordinal(), pressure));
-		
+
 		cocoaProvider.getPenManager().scheduleLevelEvent(device, levels);
 
-		
-		
+
+
 		buttons.clear();
-		
+
 		if (2 == special_pointingDeviceType) {
 			buttons.add(new PButton(PButton.Type.LEFT.ordinal(), false));
 			buttons.add(new PButton(PButton.Type.CENTER.ordinal(), false));
@@ -250,12 +248,12 @@ public class CocoaAccess {
 			buttons.add(new PButton(PButton.Type.CENTER.ordinal(), 0 != (buttonMask & buttonMasks[1])));
 			buttons.add(new PButton(PButton.Type.RIGHT.ordinal(), 0 != (buttonMask & buttonMasks[2])));
 		}
-		
+
 		for (PButton button : buttons) {
 			cocoaProvider.getPenManager().scheduleButtonEvent(button);
 		}
-		
+
 		levels.clear();
 		buttons.clear();
-    }
+	}
 }

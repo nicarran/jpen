@@ -13,15 +13,15 @@ public class CocoaProvider extends AbstractPenProvider {
 	public static class Constructor implements PenProvider.Constructor {
 		public Constructor() {
 		}
-		
+
 		public String getName() {
 			return "Cocoa";
 		}
-		
+
 		public boolean constructable() {
 			return System.getProperty("os.name").toLowerCase().contains("mac");
 		}
-	
+
 		public PenProvider construct(PenManager pm) throws ConstructionException {
 			try {
 				Utils.loadLibrary();
@@ -33,32 +33,31 @@ public class CocoaProvider extends AbstractPenProvider {
 		}
 	}
 
-	
+
 	private final CocoaAccess cocoaAccess;
 	private final Map<PKind.Type, CocoaDevice> deviceMap;
-	
-	private CocoaProvider(final PenManager _penManager, 
-			final Constructor _constructor, final CocoaAccess _cocoaAccess
-	) {
+
+	private CocoaProvider(final PenManager _penManager,
+	    final Constructor _constructor, final CocoaAccess _cocoaAccess
+	                     ) {
 		super(_penManager, _constructor);
 		cocoaAccess = _cocoaAccess;
 		cocoaAccess.setProvider(this);
-		
+
 		deviceMap = new HashMap<PKind.Type, CocoaDevice>(3);
 		for (PKind.Type type : PKind.Type.VALUES) {
 			final CocoaDevice device = new CocoaDevice(this, type);
 			deviceMap.put(type, device);
 			getPenManager().firePenDeviceAdded(getConstructor(), device);
 		}
-		
-		
+
 		cocoaAccess.start();
 	}
-	
+
 	public CocoaDevice getDevice(final PKind.Type type) {
 		return deviceMap.get(type);
 	}
-	
+
 	public void penManagerPaused(final boolean paused) {
 		if (! paused) {
 			cocoaAccess.enable();
@@ -67,8 +66,8 @@ public class CocoaProvider extends AbstractPenProvider {
 			cocoaAccess.disable();
 		}
 	}
-	
-	
+
+
 	public void dispose() {
 		cocoaAccess.stop();
 	}
