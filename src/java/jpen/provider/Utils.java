@@ -27,6 +27,8 @@ import java.awt.IllegalComponentStateException;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.ResourceBundle;
@@ -82,9 +84,18 @@ public final class Utils {
 	}
 
 	public static final void loadLibrary() {
-		System.loadLibrary(getJniLibName());
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			    public Object run() {
+				    System.loadLibrary(getJniLibName());
+				    return null;
+			    }
+		    });
 	}
 
+	/**
+	@deprecated Use {@link #loadLibrary()}.
+	*/
+	@Deprecated
 	public static final void loadLibraryOrFail() {
 		try {
 			System.loadLibrary(getJniLibName());
@@ -92,5 +103,5 @@ public final class Utils {
 			throw new AssertionError(ex);
 		}
 	}
-	
+
 }

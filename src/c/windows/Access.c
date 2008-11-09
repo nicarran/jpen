@@ -88,19 +88,29 @@ int Access_preCreate(SAccess *pAccess) {
 		return cleanState;
 	}
 
-	static UINT axisIndexes[]={
-	      DVC_X,
-	      DVC_Y,
-	      DVC_NPRESSURE,
-	    };
-
 	void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange) {
-		AXIS axis;
-		if(valuator<(sizeof axisIndexes )/sizeof(UINT)) {
-			WTInfo(WTI_DEVICES+pAccess->device, axisIndexes[valuator], &axis);
-			pRange[0]=axis.axMin;
-			pRange[1]=axis.axMax;
-			return;
+		if(Access_refreshLc(pAccess)){
+			Access_appendError(" Couldn't get status.");
+		}
+		switch(valuator){
+		case E_Valuators_x:
+			pRange[0]=pRange[1]=pAccess->lc.lcOutOrgX;
+			pRange[1]+=pAccess->lc.lcOutExtX;
+			break;
+		case E_Valuators_y:
+			pRange[0]=pRange[1]=pAccess->lc.lcOutOrgY;
+			pRange[1]+=pAccess->lc.lcOutExtY;
+			break;
+		case E_Valuators_press:
+			{
+				AXIS axis;
+				WTInfo(WTI_DEVICES+pAccess->device, DVC_NPRESSURE, &axis);
+				pRange[0]=axis.axMin;
+				pRange[1]=axis.axMax;
+			}
+			break;
+		default:
+			pRange[0]=pRange[1]=0;
 		}
 
 		// E_Valuators_orAzimuth, y E_Valuators_orAltitude
@@ -120,8 +130,6 @@ int Access_preCreate(SAccess *pAccess) {
 	}
 		pRange[0]=axis.axMin;
 		pRange[1]=axis.axMax;*/
-
-		pRange[0]=pRange[1]=0;
 	}
 
 	int Access_refreshLc(SAccess *pAccess){
@@ -175,7 +183,6 @@ int Access_preCreate(SAccess *pAccess) {
 		PACKET p=pAccess->queue[pAccess->queueConsumableIndex++];
 		pAccess->valuatorValues[E_Valuators_x]= p.pkX;
 		pAccess->valuatorValues[E_Valuators_y]= p.pkY;
-		// ToDo: p.pkOrientation.orAzimuth, p.pkOrientation.orAltitude, p.pkZ
 		pAccess->valuatorValues[E_Valuators_press]= p.pkNormalPressure;
 		pAccess->valuatorValues[E_Valuators_orAzimuth]=p.pkOrientation.orAzimuth;
 		pAccess->valuatorValues[E_Valuators_orAltitude]=p.pkOrientation.orAltitude;
@@ -183,6 +190,9 @@ int Access_preCreate(SAccess *pAccess) {
 		pAccess->buttons=p.pkButtons;
 		pAccess->status=p.pkStatus;
 		pAccess->time=p.pkTime;
+		// vvv EXPERIMENTAL
+		//printf("pitch=%li, roll=%li, yaw=%li\n", p.pkRotation.roPitch, p.pkRotation.roRoll, p.pkRotation.roYaw);
+		//^^^
 		return 1;
 	}
 
@@ -246,4 +256,3 @@ int Access_preCreate(SAccess *pAccess) {
 	jlong Access_getBootTimeUtc(){
 		return currentTimeMillis()-GetTickCount();
 	}
-

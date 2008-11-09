@@ -61,7 +61,6 @@ struct Device {
 m_declareRow(Device);
 extern int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex);
 extern int Device_nextEvent(SDevice *pDevice );
-extern int Device_nextEvent2(SDevice *pDevice );
 extern void Device_refreshValuatorRanges(SDevice *pDevice);
 extern void Device_setIsListening(SDevice *pDevice, int isListening);
 

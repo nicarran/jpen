@@ -27,9 +27,6 @@ import jpen.PenManager;
 import jpen.provider.Utils;
 
 class XiBus {
-	static{
-		Utils.loadLibraryOrFail();
-	}
 	private final int cellIndex;
 	private XiDevice device;
 	private static long bootTimeUtc=-1;

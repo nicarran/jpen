@@ -27,7 +27,7 @@
 //#ifdef USE_X_LIB
 //#include "INCLUDE/WINTABX.h"
 //#endif
-#define PACKETDATA	(PK_STATUS | PK_TIME | PK_X | PK_Y | PK_NORMAL_PRESSURE | PK_CURSOR | PK_BUTTONS | PK_ORIENTATION )
+#define PACKETDATA	(PK_STATUS | PK_TIME | PK_X | PK_Y | PK_NORMAL_PRESSURE | PK_CURSOR | PK_BUTTONS | PK_ORIENTATION /* ToDo: | PK_ROTATION*/)
 #define PACKETMODE	0
 // #define PACKETTILT PKEXT_ABSOLUTE // TILT extension is not widely implemented (wacom), so I disable it and use pkOrientation to get tilt data 
 #include "INCLUDE/PKTDEF.h"

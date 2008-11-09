@@ -29,9 +29,6 @@ import jpen.provider.Utils;
 class WintabAccess {
 	private static long bootTimeUtc=-1;
 	
-	static{
-		Utils.loadLibraryOrFail();
-	}
 	/**
 	This must be like E_csrTypes enumeration.
 	*/

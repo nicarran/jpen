@@ -146,52 +146,15 @@ static void Device_refreshValuatorValues(struct Device *pDevice, char first_axis
 	}
 }
 
-/*static Bool Device_consumeEvent(Display *pDisplay, XEvent *pEvent, char *arg) {
-	return True;
-}*/
-
-int Device_nextEvent(struct Device *pDevice ) {
-	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
-	pDevice->lastEventTime=-1;
-	pDevice->lastEventType=-1;
-	register int i;
-	for(i=0; i<E_EventType_size; i++) {
-		if(XCheckTypedEvent(pBus->pDisplay,
-		        pDevice->eventTypeIds[i],
-		        &pDevice->event)) {
-			pDevice->lastEventType=i;
-			switch(i) {
-			case E_EventType_ButtonPress:
-			case E_EventType_ButtonRelease: {
-					XDeviceButtonEvent *pBEvent = (XDeviceButtonEvent*)&pDevice->event;
-					pDevice->lastEventTime=pBEvent->time;
-					pDevice->lastEventButton=pBEvent->button;
-				}
-				break;
-			case E_EventType_MotionNotify: {
-					XDeviceMotionEvent *pMEvent=(XDeviceMotionEvent *) &pDevice->event;
-					pDevice->lastEventTime=pMEvent->time;
-					Device_refreshValuatorValues(pDevice, pMEvent->first_axis, pMEvent->axes_count, pMEvent->axis_data);
-				}
-				break;
-			default:
-				printf("unhandled event!!\n");
-			}
-			return true;
-		}
-	}
-	return false;
-}
-
 /**
 @return 1 if an event was received, 0 otherwise.
 */
-int Device_nextEvent2(struct Device *pDevice ) {
+int Device_nextEvent(struct Device *pDevice ) {
 	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
 	register int i;
 	pDevice->lastEventType=-1;
 	pDevice->lastEventTime=-1;
-	for(i=E_EventType_size; --i>=0;) { // peek the first event
+	for(i=E_EventType_size; --i>=0;) { // check all event types to get only the first (in time) event
 		if(XCheckTypedEvent(pBus->pDisplay,
 		        pDevice->eventTypeIds[i],
 		        &pDevice->event)) {

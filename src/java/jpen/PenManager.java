@@ -62,168 +62,15 @@ public final class PenManager {
 	private final List<PenManagerListener> listeners=new ArrayList<PenManagerListener>();
 	private byte nextDeviceId;
 
-	// TODO: decide if DragOutMode and its machinery should be public... wait for comments on jpen.sf.net.
-	enum DragOutMode{
-	  /**
-	  Dragging outside the component stops firing events. This is the default {@link PenManager#getDragOutMode()}.
-	  */
-	  DISABLED,
-	  /**
-	  Dragging outside the {@link #component} is enabled and causes event firing. <b>Warning</b>: If the dragging travels above other windows, digitized events may stop firing.
-	  */
-	  ENABLED;
-	  //  implement NO_LEVELS: dragging enabled but no levels are fired?
-	}
-	private DragOutMode dragOutMode=DragOutMode.ENABLED;
-
-	private class Pauser
-				extends MouseAdapter
-				implements MouseMotionListener // in jdk 1.5 MouseAdapter does not implement this int.
-	{
-		private boolean isDraggingOut; // state: dragging outside the component
-
-		private Window componentWindow;
-		private boolean pauseOnWindowDeactivation=true;
-		private final WindowListener windowListener=new WindowAdapter(){
-			    @Override
-			    public void windowDeactivated(WindowEvent ev){
-				    if(pauseOnWindowDeactivation)
-					    synchronized(Pauser.this){
-						    stopDraggingOut();
-						    setPaused(true);
-					    }
-			    }
-		    };
-		{
-			updateComponentWindow();
-		}
-
-		private final PenListener penListener=new PenAdapter(){
-			    @Override
-			    public void penButtonEvent(PButtonEvent ev){
-				    synchronized(Pauser.this){
-					    if(!ev.button.value)
-						    if(!pen.hasPressedButtons()){
-							    if(isDraggingOut){
-								    stopDraggingOut();
-								    setPaused(true); // causes button release schedule but there may be level events still to be processed in the pen event queue (here I'm in the queue processing thread).
-							    }
-						    }
-				    }
-			    }
-		    };
-
-		private boolean waitingMotionToPlay;
-
-		@Override
-		public synchronized void mouseEntered(MouseEvent ev) {
-			if(isDraggingOut)
-				stopDraggingOut();
-			else
-				setWaitingMotionToPlay(true);
-		}
-
-		private synchronized void setWaitingMotionToPlay(boolean waitingMotionToPlay){
-			if(this.waitingMotionToPlay==waitingMotionToPlay)
-				return;
-			this.waitingMotionToPlay=waitingMotionToPlay;
-			if(waitingMotionToPlay)
-				component.addMouseMotionListener(this);
-			else
-				component.removeMouseMotionListener(this);
-		}
-
-		//@Override
-		public synchronized void mouseMoved(MouseEvent ev){
-			if(!paused)
-				throw new AssertionError();
-			setPaused(false);
-		}
-
-		//@Override
-		public void mouseDragged(MouseEvent ev){}
-
-		private synchronized void stopDraggingOut(){
-			if(!isDraggingOut)
-				return;
-			isDraggingOut=false;
-			pen.removeListener(penListener);
-		}
-
-		@Override
-		public synchronized void mouseExited(MouseEvent ev) {
-			if(isDraggingOut) // TEST
-				throw new AssertionError();
-			startDraggingOut();
-			if(!isDraggingOut)
-				setPaused(true);
-		}
-
-		private synchronized void startDraggingOut(){
-			if(dragOutMode.equals(DragOutMode.DISABLED) || !pen.hasPressedButtons())
-				return;
-			if(componentWindow==null){
-				L.warning("Disabled dragging out capability: component window found.");
-				return;
-			}
-			if(!componentWindow.isActive()){
-				L.info("Dragging out on inactive window is not supported.");
-				return;
-			}
-			isDraggingOut=true;
-			pen.addListener(penListener);
-		}
-
-		private void updateComponentWindow(){
-			if(component==null)
-				return;
-			if(componentWindow!=null)
-				componentWindow.removeWindowListener(windowListener); // may be already removed
-			componentWindow=Utils.getLocationOnScreen(component, null);
-			if(componentWindow!=null)
-				componentWindow.addWindowListener(windowListener);
-		}
-
-		private synchronized void setPaused(boolean paused) {
-			if(PenManager.this.paused==paused)
-				return;
-			//if(!paused && pauseOnWindowDeactivation && componentWindow!=null && !componentWindow.isActive())
-			//return;
-			PenManager.this.paused=paused;
-			setWaitingMotionToPlay(paused);
-			if(paused)
-				pen.scheduleButtonReleasedEvents();
-			updateComponentWindow();
-			for(PenProvider provider: constructorToProvider.values())
-				provider.penManagerPaused(paused);
-		}
-	}
-
-	private final Pauser pauser=new Pauser();
+	private final DragOutHandler dragOutHandler;
 
 
 	public PenManager(Component component) {
 		this.component=component;
-		component.addMouseListener(pauser);
 		addProvider(new SystemProvider.Constructor());
 		addProvider(new XinputProvider.Constructor());
 		addProvider(new WintabProvider.Constructor());
-		pauser.setPaused(true);
-	}
-
-	// TODO: set this public?
-	void setDragOutMode(DragOutMode dragOutMode){
-		this.dragOutMode=dragOutMode;
-	}
-
-	// TODO: set this public?
-	DragOutMode getDragOutMode(){
-		return dragOutMode;
-	}
-
-	// TODO: set this public?
-	void setPauseOnWindowDeactivation(boolean pauseOnWindowDeactivation){
-		pauser.pauseOnWindowDeactivation=pauseOnWindowDeactivation;
+		dragOutHandler=new DragOutHandler(this);
 	}
 
 	/**
@@ -282,6 +129,16 @@ public final class PenManager {
 	public PenProvider.ConstructionException getConstructionException(PenProvider.Constructor constructor) {
 		return constructorToException.get(constructor);
 	}
+	
+	void setPaused(boolean paused) {
+		if(this.paused==paused)
+			return;
+		this.paused=paused;
+		if(paused)
+			pen.scheduleButtonReleasedEvents();
+		for(PenProvider provider: constructorToProvider.values())
+			provider.penManagerPaused(paused);
+	}
 
 	public boolean getPaused() {
 		return paused;
@@ -306,7 +163,7 @@ public final class PenManager {
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long time) {
 		if(paused)
 			return false;
-		switch(dragOutMode){
+		switch(dragOutHandler.getMode()){
 		case DISABLED:
 			return pen.scheduleLevelEvent(device, levels, time, 0, component.getWidth(), 0, component.getHeight());
 		case ENABLED:

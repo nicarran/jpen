@@ -20,6 +20,8 @@
 % }] */
 package jpen.provider;
 
+import java.awt.DisplayMode;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
@@ -29,7 +31,7 @@ import java.util.logging.Logger;
 import jpen.PLevel;
 
 public final class VirtualScreenBounds{
-	private static final Logger L=Logger.getLogger(VirtualScreenBounds.class.getName());
+	static final Logger L=Logger.getLogger(VirtualScreenBounds.class.getName());
 	private static VirtualScreenBounds INSTANCE;
 	private final Rectangle2D.Float r=new Rectangle2D.Float();
 
@@ -63,9 +65,8 @@ public final class VirtualScreenBounds{
 	static void calc(Rectangle2D r){
 		for (GraphicsDevice gd: GraphicsEnvironment.
 		        getLocalGraphicsEnvironment().getScreenDevices()){
-			if(L.isLoggable(Level.FINE))
-				L.fine("graphicsDevice: "+gd);
-			r.add(gd.getDefaultConfiguration().getBounds());
+			GraphicsConfiguration graphicsConfiguration=gd.getDefaultConfiguration();
+			r.add(graphicsConfiguration.getBounds());
 		}
 	}
 

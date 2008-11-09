@@ -29,10 +29,6 @@ import jpen.PLevel;
 import jpen.provider.Utils;
 
 class XiDevice{
-	static{
-		Utils.loadLibraryOrFail();
-	}
-
 	enum EventType{
 		BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY;
 		public static final List<EventType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));

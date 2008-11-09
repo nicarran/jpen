@@ -41,9 +41,10 @@ public interface PenDevice {
 	byte getId();
 	
 	/**
-	Used by {@link PenManager} to set a unique id for this device.
+	Used by {@link PenManager} to set a unique and constant id for this device.
 	
 	@see PLevelEvent#getDeviceId()
 	*/
 	void setId(byte id);
+	
 }

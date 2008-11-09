@@ -225,7 +225,8 @@
 	</target>
 	
 	<target name="test" description="Does JUnit tests" depends="compile, deptree">
-		<junit haltonfailure="yes" fork="yes" jvm="${module.javaExecutable}" showoutput="yes" forkmode="once">
+		<junit haltonfailure="yes" fork="yes" showoutput="yes"  forkmode="once">
+			<!--jvm="${module.javaExecutable}" test on the current vm!-->
 			<jvmarg value="-Xmx512M"/>
 						<!--<jvmarg value="-Xms256M"/>-->
 			<jvmarg value="-Djava.util.logging.config.file=logging.properties"/>
@@ -233,11 +234,12 @@
 						<!--<jvmarg value="-XX:+ShowMessageBoxOnError"/>-->
 						<!--<jvmarg value="-Xincgc"/>-->
 			<jvmarg value="-Dsun.java2d.opengl=True"/>
-			<jvmarg value="-Djava.library.path=deptree/jars"/>
+			<jvmarg value="-Djava.library.path=deptree/jars:deptree/test-deptree/jars"/>
 			<formatter type="plain" usefile="false"/>
 			<classpath>
 				<pathelement path="${module.srcclasspath}"/>
 				<fileset dir="deptree/jars" includes="*.jar"/>
+				<fileset dir="deptree/test-deptree/jars" includes="*.jar"/>
 			</classpath>
 			<batchtest>
 				<fileset dir="src/test" includes="**/*Test.class" excludes="**/*Tests.class"/>
