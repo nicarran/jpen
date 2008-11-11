@@ -34,6 +34,10 @@ permission notice:
 	limitations under the License.
 }] */
 
+/*
+Based on code by Jerry Huxtable. See http://www.jhlabs.com/java/tablet/ .
+*/
+
 #include <jni.h>
 #include <Cocoa/Cocoa.h>
 
