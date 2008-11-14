@@ -30,6 +30,7 @@ class XiBus {
 	private static long bootTimeUtc=-1;
 
 	XiBus() throws Exception {
+		Utils.loadLibrary();
 		this.cellIndex=create();
 		if(cellIndex==-1)
 			throw new Exception(getError());

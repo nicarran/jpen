@@ -1,6 +1,6 @@
 Manifest-Version: 1.2
 Ant-Version: Apache Ant 1.6.5
-Created-By: JPen Developers (See http://jpen.sf.net)
-Main-Class: UNDEFINED
+Created-By: Nicolas Carranza (See http://jpen.sf.net)
+Main-Class: jpen.demo.JPenDemoControl
 Class-Path: 
 

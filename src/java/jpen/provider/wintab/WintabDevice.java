@@ -43,6 +43,9 @@ import static java.lang.Math.*;
 class WintabDevice
 	extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(WintabDevice.class.getName());
+	{
+		//L.setLevel(Level.ALL);
+	}
 	final WintabProvider wintabProvider;
 	public final int cursor;
 	private int lastButtonsValues;
@@ -78,19 +81,21 @@ class WintabDevice
 
 	void scheduleEvents() {
 		if(!getEnabled()) {
-			L.fine("disabled");
+			//L.fine("disabled");
 			return;
 		}
-		if(L.isLoggable(Level.FINE))
-			L.fine(wintabProvider.wintabAccess.toString());
+		//if(L.isLoggable(Level.FINE))
+			//L.fine(wintabProvider.wintabAccess.toString());
 		scheduleLevelEvent();
-		scheduleButtonEvents();
+		// scheduleButtonEvents(); nicarran:  TODO use this to support extra buttons.
 	}
 
 	private void scheduleButtonEvents() {
 		int newButtonsValues=wintabProvider.wintabAccess.getButtons();
 		if(newButtonsValues==lastButtonsValues)
 			return;
+		if(L.isLoggable(Level.FINE))
+			L.fine("newButtonsValues="+newButtonsValues);
 		for(PButton.Type buttonType:PButton.Type.values()) {
 			boolean value=getButtonState(newButtonsValues, getButtonIndex(buttonType));
 			getPenManager().scheduleButtonEvent(new PButton(buttonType.ordinal(), value));
@@ -119,25 +124,25 @@ class WintabDevice
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();
 	private void scheduleLevelEvent() {
 		Utils.getLocationOnScreen(getComponent(), componentLocation);
-		if(L.isLoggable(Level.FINE)) {
+		/*if(L.isLoggable(Level.FINE)) {
 			L.fine("componentLocation: "+componentLocation);
 			Point p=getComponent().getLocationOnScreen();
 			if(!componentLocation.equals(p))
 				L.fine("UUUPS! something is wrong with the component location calc, getLocationOnScreen(): "+p);
-		}
+		}*/
 		for(PLevel.Type levelType:PLevel.Type.values()) {
 			float value=PLevel.getCoordinateValueForComponent(
 			              getComponent().getSize(componentSize), componentLocation,  levelType,  getMultRangedValue(levelType));
 			//value=wintabProvider.mouseLocator.getCorrectedLocation(levelType, value);
-			if(L.isLoggable(Level.FINE)) {
+			/*if(L.isLoggable(Level.FINE)) {
 				L.fine("levelType="+levelType+", value="+value);
-			}
+			}*/
 			/*if(levelType.isMovement && value<0) {
 				L.fine("negative value... pausing...");
 				wintabProvider.setPaused(true);
 				changedLevels.clear();
 				return;
-			}*/
+		}*/
 			changedLevels.add(new PLevel(levelType.ordinal(), value));
 		}
 
@@ -160,7 +165,7 @@ class WintabDevice
 			  altitude*PI_over_2_over_900;
 			double theta=
 			  wintabProvider.wintabAccess.getValue(PLevel.Type.TILT_X)*PI_over_2_over_900
-			  -PI_over_2; 
+			  -PI_over_2;
 			switch(type) {
 			case TILT_X:
 				return (float)atan(cos(theta)/tan(betha));
@@ -173,14 +178,14 @@ class WintabDevice
 
 		float rangedValue=wintabProvider.getLevelRange(type).getRangedValue(
 		      wintabProvider.wintabAccess.getValue(type));
-		
+
 		if(PLevel.Type.MOVEMENT_TYPES.contains(type)){
 			if(type.equals(PLevel.Type.Y))
 				rangedValue=1f-rangedValue;
 			rangedValue=wintabProvider.screenBounds.getLevelRangeOffset(type)+
-		       rangedValue*wintabProvider.screenBounds.getLevelRangeMult(type);
+			            rangedValue*wintabProvider.screenBounds.getLevelRangeMult(type);
 		}
-		
+
 		return rangedValue;
 	}
 }

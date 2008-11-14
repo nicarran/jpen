@@ -168,10 +168,10 @@ public class Pen extends PenState {
 		return listenersArray;
 	}
 
-	private static class PhantomLevelFilter {
+	private static class PhantomEventFilter {
 		public static int THRESHOLD_PERIOD=200;
 		private PenDevice lastDevice; // last device NOT filtered
-		private PLevelEvent lastEvent; // last event scheduled
+		private PenEvent lastEvent; // last event scheduled
 		boolean filteredFirstInSecuence;
 		private long time;
 		private long firstInSecuenceTime;
@@ -201,18 +201,18 @@ public class Pen extends PenState {
 			return false;
 		}
 
-		void setLastEvent(PLevelEvent event) {
+		void setLastEvent(PenEvent event) {
 			this.lastEvent=event;
 		}
 
-		PLevelEvent getLastEvent() {
+		PenEvent getLastEvent() {
 			return lastEvent;
 		}
 	}
 
-	private final PhantomLevelFilter phantomLevelFilter=new PhantomLevelFilter();
+	private final PhantomEventFilter phantomLevelFilter=new PhantomEventFilter();
 	private final List<PLevel> scheduledLevels=new ArrayList<PLevel>();
-	
+
 	final boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long penDeviceTime, int minX, int maxX, int minY, int maxY) {
 		synchronized(scheduledLevels) {
 			if(phantomLevelFilter.filter(device))
@@ -241,6 +241,10 @@ public class Pen extends PenState {
 			int newKindTypeNumber=device.getKindTypeNumber();
 			if(lastScheduledState.getKind().typeNumber!=newKindTypeNumber) {
 				PKind newKind=PKind.valueOf(newKindTypeNumber);
+				if(newKind==null){
+					scheduledLevels.clear();
+					return false;
+				}
 				lastScheduledState.setKind(newKind);
 				schedule(new PKindEvent(this, newKind));
 			}
@@ -261,7 +265,7 @@ public class Pen extends PenState {
 	}
 
 	private final Object buttonsLock=new Object();
-	
+
 	void scheduleButtonEvent(PButton button) {
 		synchronized(buttonsLock) {
 			if(lastScheduledState.setButtonValue(button.typeNumber, button.value))
@@ -269,8 +273,8 @@ public class Pen extends PenState {
 		}
 	}
 
-	void scheduleScrollEvent(PScroll scroll) {
-		schedule(new PScrollEvent(this, scroll));
+	void scheduleScrollEvent(PenDevice device, PScroll scroll) {
+			schedule(new PScrollEvent(this, scroll));
 	}
 
 	private final void schedule(PenEvent ev) {

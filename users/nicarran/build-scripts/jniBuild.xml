@@ -41,8 +41,8 @@
 		</target>
 
 		<target name="clean" depends="javaBuild.clean">
-				<delete file="product/lib${module.jniLibName}.so" failonerror="false"/>
-				<delete file="product/${module.jniLibName}.dll" failonerror="false"/>
+				<!--<delete file="product/lib${module.jniLibName}.so" failonerror="false"/>
+				<delete file="product/${module.jniLibName}.dll" failonerror="false"/>-->
 				<delete>
 						<fileset dir="src/c/windows" includes="*.o"/>
 				</delete>
@@ -132,8 +132,13 @@
 				</delete>
 				<move todir="product" file="src/c/windows/${module.jniLibName}.dll"/>
 		</target>
+		
+		<target name="libOsx" depends="init">
+				<copy file="srcTrunk/repos-sf2/jpen/branches/bridge_trunk/prepackaged_hack/${module.jniLibName}.jnilib"
+				toDir="product"/>
+		</target>
 
-		<target name="lib" depends="libLinux, libWin"/>
+		<target name="lib" depends="libLinux, libWin, libOsx"/>
 
 		<target name="distLib" depends="lib, javaBuild.distLib"/>
 

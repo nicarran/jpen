@@ -39,7 +39,7 @@ public abstract class AbstractPenProvider
 	}
 
 	//@Override
-	public Collection<? extends PenDevice> getDevices() {
+	public Collection<PenDevice> getDevices() {
 		return devicesA;
 	}
 

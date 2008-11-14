@@ -74,7 +74,15 @@ public final class Utils {
 
 	private static final String getJniLibName() {
 		return getModuleProperties().getString("module.id")+"-"+
-		       getModuleProperties().getString("module.version");
+		       getVersion();
+	}
+
+	public static final String getFullVersion(){
+		return getVersion()+"-"+getDistVersion();
+	}
+
+	public static final String getVersion(){
+		return getModuleProperties().getString("module.version");
 	}
 
 	public static final String getDistVersion(){

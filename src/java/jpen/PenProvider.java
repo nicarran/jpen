@@ -38,6 +38,6 @@ public interface PenProvider {
 	}
 	Constructor getConstructor();
 	PenManager getPenManager();
-	Collection<? extends PenDevice> getDevices();
+	Collection<PenDevice> getDevices();
 	void penManagerPaused(boolean paused);
 }

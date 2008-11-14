@@ -26,6 +26,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jpen.PButton;
 import jpen.PButtonEvent;
 import jpen.PenDevice;
@@ -40,6 +42,11 @@ import jpen.PScrollEvent;
 
 class MouseDevice
 	extends AbstractPenDevice {
+	private static final Logger L=Logger.getLogger(MouseDevice.class.getName());
+	{
+		//L.setLevel(Level.ALL);
+	}
+
 	private final MouseListener mouseL=new MouseAdapter() {
 		    @Override
 		    public void mousePressed(MouseEvent ev) {
@@ -72,7 +79,7 @@ class MouseDevice
 			    }
 			    if(ev.getScrollType()==ev.WHEEL_UNIT_SCROLL && ev.getScrollAmount()>0) // > 0 : is because windows bug workaround, sometimes it is 0.
 				    value*=ev.getScrollAmount();
-			    getPenManager().scheduleScrollEvent(new PScroll(type.ordinal(), value));
+			    getPenManager().scheduleScrollEvent(MouseDevice.this, new PScroll(type.ordinal(), value));
 		    }
 	    };
 	private final SystemProvider systemProvider;
@@ -126,6 +133,10 @@ class MouseDevice
 
 	private void mouseButtonChanged(MouseEvent ev, boolean state) {
 		PButton.Type buttonType=getButtonType(ev.getButton());
+		if(buttonType==null)
+			return;
+		if(L.isLoggable(Level.FINE))
+			L.fine("scheduling button event: "+buttonType+", "+state);
 		getPenManager().scheduleButtonEvent(new PButton(buttonType.ordinal(), state));
 	}
 
@@ -138,6 +149,6 @@ class MouseDevice
 		case MouseEvent.BUTTON3:
 			return PButton.Type.RIGHT;
 		}
-		return PButton.Type.RIGHT;
+		return null;
 	}
 }

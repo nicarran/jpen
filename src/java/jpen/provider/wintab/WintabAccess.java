@@ -37,6 +37,7 @@ class WintabAccess {
 	private final int cellIndex;
 
 	WintabAccess() throws Exception {
+		Utils.loadLibrary();
 		this.cellIndex=create();
 		if(cellIndex==-1)
 			throw new Exception(getError());

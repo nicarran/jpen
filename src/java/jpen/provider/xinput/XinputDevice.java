@@ -47,6 +47,9 @@ import static jpen.provider.xinput.XiDevice.*;
 
 class XinputDevice extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(XinputDevice.class.getName());
+	{
+		//L.setLevel(Level.ALL);
+	}
 	public final XiDevice device;
 	private final PLevel.Range[] levelRanges;
 	private final XinputProvider xinputProvider;
@@ -82,7 +85,7 @@ class XinputDevice extends AbstractPenDevice {
 			return PKind.Type.CURSOR.ordinal();
 		else if(getName().indexOf("tylus")!=-1)
 			return PKind.Type.STYLUS.ordinal();
-		return PKind.Type.CURSOR.ordinal();
+		return -1;
 	}
 
 	void processQuedEvents() {
@@ -93,8 +96,9 @@ class XinputDevice extends AbstractPenDevice {
 			switch(eventType) {
 			case BUTTON_PRESS:
 				int lastEventButton=device.getLastEventButton();
-				if( lastEventButton ==4 || lastEventButton ==5 )
-					scheduleScrollEvent(lastEventButton);
+				if( lastEventButton ==4 || lastEventButton ==5 ){
+					//scheduleScrollEvent(lastEventButton); nicarran: the mouse provider catches this.
+				}
 				else
 					scheduleButtonEvent(lastEventButton, true);
 				break;
@@ -110,7 +114,7 @@ class XinputDevice extends AbstractPenDevice {
 	}
 
 	private void scheduleScrollEvent(int number) {
-		getPenManager().scheduleScrollEvent(new PScroll(number==5? PScroll.Type.DOWN.ordinal(): PScroll.Type.UP.ordinal(),1));
+		getPenManager().scheduleScrollEvent(this, new PScroll(number==5? PScroll.Type.DOWN.ordinal(): PScroll.Type.UP.ordinal(),1));
 	}
 
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();

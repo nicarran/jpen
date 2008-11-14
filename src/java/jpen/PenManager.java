@@ -60,8 +60,9 @@ public final class PenManager {
 
 	/**
 	Constructs and adds provider if {@link PenProvider.Constructor#constructable()} is true.
+	@return The {@link PenProvider} added or null if it couldn't be constructed.
 	*/
-	public void addProvider(PenProvider.Constructor constructor) {
+	public PenProvider addProvider(PenProvider.Constructor constructor) {
 		if(constructor.constructable()) {
 			try {
 				constructors.add(constructor);
@@ -69,10 +70,12 @@ public final class PenManager {
 				constructorToProvider.put(constructor, provider);
 				for(PenDevice device:provider.getDevices())
 					firePenDeviceAdded(constructor, device);
+				return provider;
 			} catch(PenProvider.ConstructionException ex) {
 				constructorToException.put(constructor, ex);
 			}
 		}
+		return null;
 	}
 
 	public void addListener(PenManagerListener l) {
@@ -114,7 +117,7 @@ public final class PenManager {
 	public PenProvider.ConstructionException getConstructionException(PenProvider.Constructor constructor) {
 		return constructorToException.get(constructor);
 	}
-	
+
 	void setPaused(boolean paused) {
 		if(this.paused==paused)
 			return;
@@ -128,31 +131,31 @@ public final class PenManager {
 	public boolean getPaused() {
 		return paused;
 	}
-	
+
 	public void scheduleButtonEvent(PButton button) {
 		if(paused)
 			return;
 		pen.scheduleButtonEvent(button);
 	}
-	
-	public void scheduleScrollEvent(PScroll scroll) {
+
+	public void scheduleScrollEvent(PenDevice device, PScroll scroll) {
 		if(paused)
 			return;
-		pen.scheduleScrollEvent(scroll);
+		pen.scheduleScrollEvent(device, scroll);
 	}
-	
+
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels) {
 		return scheduleLevelEvent(device, levels, System.currentTimeMillis());
 	}
-	
-	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long time) {
+
+	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long deviceTime) {
 		if(paused)
 			return false;
 		switch(dragOutHandler.getMode()){
 		case DISABLED:
-			return pen.scheduleLevelEvent(device, levels, time, 0, component.getWidth(), 0, component.getHeight());
+			return pen.scheduleLevelEvent(device, levels, deviceTime, 0, component.getWidth(), 0, component.getHeight());
 		case ENABLED:
-			return pen.scheduleLevelEvent(device, levels, time,  -Integer.MAX_VALUE, Integer.MAX_VALUE, -Integer.MAX_VALUE, Integer.MAX_VALUE);
+			return pen.scheduleLevelEvent(device, levels, deviceTime,  -Integer.MAX_VALUE, Integer.MAX_VALUE, -Integer.MAX_VALUE, Integer.MAX_VALUE);
 		default:
 			throw new AssertionError();
 		}

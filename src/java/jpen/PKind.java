@@ -51,6 +51,8 @@ public class PKind
 	private static final List<PKind> VALUES=Collections.unmodifiableList(VALUES_L);
 
 	public static PKind valueOf(int typeNumber){
+		if(typeNumber<0)
+			return null;
 		while(VALUES_L.size()<=typeNumber)
 			VALUES_L.add(new PKind(VALUES_L.size()));
 		return VALUES_L.get(typeNumber);
