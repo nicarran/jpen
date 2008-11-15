@@ -102,12 +102,14 @@ class StatusReport{
 			}
 			appendLine("Construction Exception: "+constructionExceptionStackTrace, 2);
 			PenProvider penProvider=penManager.getProvider(constructor);
-			Collection<PenDevice> penDevices=penProvider.getDevices();
-			for(PenDevice penDevice:penDevices){
-				appendLine("Device: "+penDevice.getName(), 2);
-				appendLine("Is Digitizer: "+penDevice.isDigitizer(), 3);
-				appendLine("Enabled: "+penDevice.getEnabled(), 3);
-				appendLine("Kind: "+PKind.valueOf(penDevice.getKindTypeNumber()), 3);
+			if(penProvider!=null){
+				Collection<PenDevice> penDevices=penProvider.getDevices();
+				for(PenDevice penDevice:penDevices){
+					appendLine("Device: "+penDevice.getName(), 2);
+					appendLine("Is Digitizer: "+penDevice.isDigitizer(), 3);
+					appendLine("Enabled: "+penDevice.getEnabled(), 3);
+					appendLine("Kind: "+PKind.valueOf(penDevice.getKindTypeNumber()), 3);
+				}
 			}
 		}
 	}
