@@ -19,17 +19,30 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 package jpen.demo;
 
 import javax.swing.JComponent;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import jpen.Pen;
 
-class StatusReportPanel{
-	private final JTextArea textArea=new JTextArea();
-	
-	final JComponent panel=new JScrollPane(textArea);
-	
-	StatusReportPanel(StatusReport statusReport){
-		textArea.setText(statusReport.toString());
-		textArea.setEditable(false);
-		textArea.setCaretPosition(0);
+abstract class DataDisplay<
+	C extends JComponent>{
+	final C component;
+	private boolean isDirty;
+
+	DataDisplay(C component){
+		this.component=component;
 	}
+
+	void setIsDirty(boolean isDirty){
+		this.isDirty=isDirty;
+	}
+	
+	boolean getIsDirty(){
+		return isDirty;
+	}
+
+	final void update(Pen pen){
+		if(getIsDirty())
+			updateImp(pen);
+		setIsDirty(false);
+	}
+	
+	abstract void updateImp(Pen pen);
 }

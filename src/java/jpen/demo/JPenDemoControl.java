@@ -1,5 +1,5 @@
 /* [{
-Copyright 2007, 2008 Nicolas Carranza <nicarran at gmail.com>
+Copyright 2008 Nicolas Carranza <nicarran at gmail.com>
 
 This file is part of jpen.
 
@@ -46,7 +46,8 @@ public class JPenDemoControl{
 		ScrollsPanel scrollsPanel=new ScrollsPanel(pen);
 		KindPanel kindPanel=new KindPanel(pen);
 		LevelsPanel levelsPanel=new LevelsPanel(pen);
-		mainPanel=new MainPanel(penCanvas, buttonsPanel, scrollsPanel, kindPanel, levelsPanel);
+		AvailableTimePanel availableTimePanel=new AvailableTimePanel(pen); // the last listener to measure the really available time
+		mainPanel=new MainPanel(penCanvas, buttonsPanel, scrollsPanel, kindPanel, levelsPanel, availableTimePanel);
 		mainPanel.panel.setPreferredSize(SIZE);
 
 		statusReportButton.addActionListener(new ActionListener(){

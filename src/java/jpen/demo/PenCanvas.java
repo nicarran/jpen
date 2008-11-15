@@ -1,5 +1,5 @@
 /* [{
-Copyright 2007, 2008 Nicolas Carranza <nicarran at gmail.com>
+Copyright 2008 Nicolas Carranza <nicarran at gmail.com>
 
 This file is part of jpen.
 
@@ -70,6 +70,8 @@ class PenCanvas
 
 	PenCanvas() {
 		this.penManager=new PenManager(this);
+		penManager.pen.setFirePenTockOnSwing(true);
+		penManager.pen.setFrequency(40);
 		Utils.freezeSize(this, SIZE);
 		setDoubleBuffered(false);
 		setOpaque(false);
@@ -107,15 +109,11 @@ class PenCanvas
 			    }
 			    @Override
 			    public void penTock(long availableTime) {
-				    if(availableTime>0) {
-					    if(isDirty){
-						    repaint(dirtyArea.x, dirtyArea.y, dirtyArea.width, dirtyArea.height);
-						    isDirty=false;
-					    }
-				    } else {
-					    if(isDirty)
-						    L.fine("no time to request repaint");
-				    }
+				    if(availableTime<0)
+					    L.warning("no available time to repaint... but this is a test, so I continue.");
+				    if(isDirty)
+					    repaint(dirtyArea.x, dirtyArea.y, dirtyArea.width, dirtyArea.height);
+				    isDirty=false;
 			    }
 		    });
 	}

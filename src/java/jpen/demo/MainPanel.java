@@ -1,5 +1,5 @@
 /* [{
-Copyright 2007, 2008 Nicolas Carranza <nicarran at gmail.com>
+Copyright 2008 Nicolas Carranza <nicarran at gmail.com>
 
 This file is part of jpen.
 
@@ -28,7 +28,7 @@ import javax.swing.JLabel;
 class MainPanel{
 	final Box panel=Box.createVerticalBox();
 
-	MainPanel(PenCanvas penCanvas, ButtonsPanel buttonsPanel, ScrollsPanel scrollsPanel, KindPanel kindPanel, LevelsPanel levelsPanel){
+	MainPanel(PenCanvas penCanvas, ButtonsPanel buttonsPanel, ScrollsPanel scrollsPanel, KindPanel kindPanel, LevelsPanel levelsPanel, AvailableTimePanel availableTimePanel){
 		penCanvas.scrollPane.setBorder(BorderFactory.createTitledBorder("Pen Enabled Component"));
 		panel.add(Utils.alignTopLeft(penCanvas.scrollPane));
 
@@ -45,7 +45,9 @@ class MainPanel{
 		column.add(Utils.labelComponent(
 		             "Kind:", kindPanel.panel
 		           ));
-		column.add(Utils.createVerticalStrut());
+		column.add(Utils.labelComponent(
+		             "Available Millis:", availableTimePanel.panel
+		           ));
 		Box line=Box.createHorizontalBox();
 		buttonsPanel.panel.setBorder(BorderFactory.createTitledBorder("Buttons"));
 		line.add(Utils.alignTopLeft(buttonsPanel.panel));
@@ -53,7 +55,6 @@ class MainPanel{
 		line.add(Utils.createHorizontalStrut());
 		line.add(Utils.alignTopLeft(scrollsPanel.panel));
 		column.add(Utils.alignTopLeft(line));
-		column.add(Utils.createVerticalStrut());
 		column.add(Utils.labelComponent(
 		             "JPen Version:", new JLabel(jpen.provider.Utils.getFullVersion())
 		           ));

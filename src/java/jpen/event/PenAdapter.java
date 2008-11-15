@@ -34,4 +34,5 @@ public class PenAdapter
 	//@Override
 	public void penScrollEvent(PScrollEvent ev) {}
 	//@Override
-	public void penTock(long availableMillis) {}}
+	public void penTock(long availableMillis) {}
+}

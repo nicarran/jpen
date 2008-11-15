@@ -1,5 +1,5 @@
 /* [{
-Copyright 2007, 2008 Nicolas Carranza <nicarran at gmail.com>
+Copyright 2008 Nicolas Carranza <nicarran at gmail.com>
 
 This file is part of jpen.
 
@@ -33,6 +33,7 @@ class StatusReport{
 
 	StatusReport(PenManager penManager){
 		appendHeader(penManager);
+		appendPenThreadCrashInfo(penManager);
 		appendProvidersInfo(penManager);
 		appendSystemInfo(penManager);
 		appendFooter(penManager);
@@ -57,6 +58,13 @@ class StatusReport{
 		appendLine("Date: "+new java.util.Date());
 	}
 
+	private void appendPenThreadCrashInfo(PenManager penManager){
+		Exception penThreadCrashException=penManager.pen.getThreadException();
+		if(penThreadCrashException!=null){
+			appendLine("Pen Thread Crashed: "+Utils.evalStackTrace(penThreadCrashException));
+		}
+	}
+
 	private void appendFooter(PenManager penManager){
 		appendLine("===== ===== =====");
 	}
@@ -64,10 +72,10 @@ class StatusReport{
 	private static final Set<String> PRIVATE_SYSTEM_PROPERTIES=new HashSet<String>(Arrays.asList(
 	      new String[]{
 	        "user.dir",
-					"java.io.tmpdir",
-					"line.separator",
-					"user.home",
-					"user.name",
+	        "java.io.tmpdir",
+	        "line.separator",
+	        "user.home",
+	        "user.name",
 	      }
 	    ));
 
@@ -90,11 +98,7 @@ class StatusReport{
 			PenProvider.ConstructionException constructionException=penManager.getConstructionException(constructor);
 			String constructionExceptionStackTrace="none";
 			if(constructionException!=null){
-				java.io.StringWriter sw=new java.io.StringWriter();
-				java.io.PrintWriter pw=new java.io.PrintWriter(sw);
-				constructionException.printStackTrace(pw);
-				pw.close();
-				constructionExceptionStackTrace=sw.toString();
+				constructionExceptionStackTrace=Utils.evalStackTrace(constructionException);
 			}
 			appendLine("Construction Exception: "+constructionExceptionStackTrace, 2);
 			PenProvider penProvider=penManager.getProvider(constructor);

@@ -1,5 +1,5 @@
 /* [{
-Copyright 2007, 2008 Nicolas Carranza <nicarran at gmail.com>
+Copyright 2008 Nicolas Carranza <nicarran at gmail.com>
 
 This file is part of jpen.
 
@@ -29,23 +29,30 @@ import jpen.PScroll;
 import jpen.PScrollEvent;
 
 class ScrollsPanel{
-	private final Map<PScroll.Type, Counter> scrollTypeToCounter=new EnumMap<PScroll.Type, Counter>(PScroll.Type.class);
+	private final Map<PScroll.Type, Display> scrollTypeToDisplay=new EnumMap<PScroll.Type, Display>(PScroll.Type.class);
 	{
 		for(PScroll.Type scrollType: PScroll.Type.VALUES)
-			scrollTypeToCounter.put(scrollType, new Counter());
+			scrollTypeToDisplay.put(scrollType, new Display());
 	}
 
-	static class Counter
-		extends JTextField{
-		private int value=-1;
-		Counter(){
-			super(3);
-			setHorizontalAlignment(JTextField.RIGHT);
-			setEditable(false);
+	static class Display
+		extends DataDisplay<JTextField>{
+		private int value=0;
+		Display(){
+			super(new JTextField(3));
+			component.setHorizontalAlignment(JTextField.RIGHT);
+			component.setEditable(false);
 			increase();
 		}
+
+		@Override
+		void updateImp(Pen pen){
+			component.setText(String.valueOf(value));
+		}
+
 		void increase(){
-			setText(String.valueOf(++value));
+			value++;
+			setIsDirty(true);
 		}
 	}
 
@@ -53,18 +60,28 @@ class ScrollsPanel{
 	{
 		for(PScroll.Type scrollType: PScroll.Type.VALUES){
 			panel.add(Utils.labelComponent(
-			            scrollType.toString(), scrollTypeToCounter.get(scrollType)
+			            scrollType.toString(), scrollTypeToDisplay.get(scrollType).component
 			          ));
 		}
 	}
 
 	ScrollsPanel(Pen pen){
-		pen.addListener(new SwingPenListenerProxy(new PenAdapter(){
+		pen.addListener(new PenAdapter(){
+			                private Pen pen;
 			                @Override
 			                public void penScrollEvent(PScrollEvent ev){
-												Counter counter=scrollTypeToCounter.get(ev.scroll.getType());
-												counter.increase();
+				                pen=ev.pen;
+				                Display display=scrollTypeToDisplay.get(ev.scroll.getType());
+				                display.increase();
 			                }
-		                }).proxy);
+			                @Override
+			                public void penTock(long availableMillis){
+				                if(pen==null)
+					                return;
+				                for(Display display: scrollTypeToDisplay.values())
+					                display.update(pen);
+				                pen=null;
+			                }
+		                });
 	}
 }

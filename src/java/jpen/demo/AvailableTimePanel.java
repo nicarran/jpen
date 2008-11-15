@@ -18,39 +18,30 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.demo;
 
-import java.awt.Component;
+import javax.swing.JComponent;
 import javax.swing.JTextField;
 import jpen.event.PenAdapter;
 import jpen.Pen;
-import jpen.PKind;
-import jpen.PKindEvent;
 
-class KindPanel{
-	final JTextField kindTextField=new JTextField(8);
-	{
-		kindTextField.setEditable(false);
-		kindTextField.setHorizontalAlignment(JTextField.CENTER);
-	}
-	final Component panel=kindTextField;
+class AvailableTimePanel{
+	final StringBuilder text=new StringBuilder();
+	final JTextField textField=new JTextField(5);
 
-	KindPanel(Pen pen){
+	final JComponent panel=textField;
+
+	AvailableTimePanel(final Pen pen){
+		textField.setHorizontalAlignment(JTextField.CENTER);
+		textField.setEditable(false);
 		pen.addListener(new PenAdapter(){
-			                private Pen pen;
-			                @Override
-			                public void penKindEvent(PKindEvent ev){
-				                pen=ev.pen;
-			                }
+			                String period=String.valueOf(1000/pen.getFrequency());
 			                @Override
 			                public void penTock(long availableMillis){
-				                if(pen!=null)
-					                update(pen.getKind());
-				                pen=null;
+				                text.setLength(0);
+				                text.append(availableMillis);
+				                text.append(" / ");
+				                text.append(period);
+				                textField.setText(text.toString());
 			                }
 		                });
-		update(pen.getKind());
-	}
-
-	void update(PKind kind){
-		kindTextField.setText(kind.getType().toString());
 	}
 }

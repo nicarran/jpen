@@ -1,5 +1,5 @@
 /* [{
-Copyright 2007, 2008 Nicolas Carranza <nicarran at gmail.com>
+Copyright 2008 Nicolas Carranza <nicarran at gmail.com>
 
 This file is part of jpen.
 
@@ -28,33 +28,56 @@ import jpen.PButtonEvent;
 import jpen.Pen;
 
 class ButtonsPanel{
-	private final Map<PButton.Type, JCheckBox> buttonTypeToCheckBox=new EnumMap<PButton.Type, JCheckBox>(PButton.Type.class);
+	private final Map<PButton.Type, Display> buttonTypeToDisplay=new EnumMap<PButton.Type, Display>(PButton.Type.class);
 	{
 		for(PButton.Type buttonType: PButton.Type.VALUES){
-			JCheckBox checkBox=new JCheckBox(buttonType.toString());
-			checkBox.setEnabled(false);
-			buttonTypeToCheckBox.put(buttonType, checkBox);
+			buttonTypeToDisplay.put(buttonType, new Display(buttonType));
+		}
+	}
+	static class Display
+		extends DataDisplay<JCheckBox>{
+		final PButton.Type buttonType;
+		Display(PButton.Type buttonType){
+			super(new JCheckBox(buttonType.toString()));
+			this.buttonType=buttonType;
+			component.setEnabled(false);
+		}
+
+		@Override
+		void updateImp(Pen pen){
+			component.setSelected(pen.getButtonValue(buttonType));
 		}
 	}
 	public final Box panel=Box.createVerticalBox();
 	{
 		for(PButton.Type buttonType: PButton.Type.VALUES){
-			panel.add(buttonTypeToCheckBox.get(buttonType));
+			panel.add(buttonTypeToDisplay.get(buttonType).component);
 		}
 	}
 
 	ButtonsPanel(Pen pen){
-		pen.addListener(new SwingPenListenerProxy(new PenAdapter(){
+		pen.addListener(new PenAdapter(){
+			                private Pen pen;
 			                @Override
 			                public void penButtonEvent(PButtonEvent ev){
-												PButton.Type buttonType=ev.button.getType();
-												if(buttonType==null){
-													System.out.println("null button type for event: "+ev);
-													return;
-												}
-				                JCheckBox checkBox=buttonTypeToCheckBox.get(buttonType);
-				                checkBox.setSelected(ev.button.value);
+				                pen=ev.pen;
+				                PButton.Type buttonType=ev.button.getType();
+				                if(buttonType==null){
+					                System.out.println("null button type for event: "+ev);
+					                return;
+				                }
+				                Display display=buttonTypeToDisplay.get(buttonType);
+				                display.setIsDirty(true);
 			                }
-		                }).proxy);
+			                @Override
+			                public void penTock(long availableMillis){
+				                if(pen==null)
+					                return;
+				                for(Display display: buttonTypeToDisplay.values())
+					                display.update(pen);
+				                pen=null;
+			                }
+		                }
+		               );
 	}
 }

@@ -1,5 +1,5 @@
 /* [{
-Copyright 2007, 2008 Nicolas Carranza <nicarran at gmail.com>
+Copyright 2008 Nicolas Carranza <nicarran at gmail.com>
 
 This file is part of jpen.
 
@@ -66,5 +66,13 @@ final class Utils{
 	static Component createVerticalStrut(){
 		return new Box.Filler(new Dimension(0,3), new Dimension(0,3),
 		       new Dimension(0, 3));
+	}
+	
+	static String evalStackTrace(Throwable t){
+		java.io.StringWriter sw=new java.io.StringWriter();
+		java.io.PrintWriter pw=new java.io.PrintWriter(sw);
+		t.printStackTrace(pw);
+		pw.close();
+		return sw.toString();
 	}
 }

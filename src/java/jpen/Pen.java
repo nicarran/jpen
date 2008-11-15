@@ -18,6 +18,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -25,14 +26,15 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Queue;
+import javax.swing.SwingUtilities;
 import jpen.event.PenListener;
 
 public class Pen extends PenState {
 
 	private static final Logger L=Logger.getLogger(Pen.class.getName());
-	public static final int DEFAULT_FREQUENCY=60;
+	public static final int DEFAULT_FREQUENCY=60; // TODO: 50 is a better default or less??
 	private int frequency;
-	private MyThread thread;
+	private volatile MyThread thread;
 
 	/** Tail of event queue. */
 	PenEvent lastDispatchedEvent=new PenEvent(this) {
@@ -47,7 +49,8 @@ public class Pen extends PenState {
 	private PenEvent lastScheduledEvent=lastDispatchedEvent;
 	public final PenState lastScheduledState=new PenState();
 	private final List<PenListener> listeners=new ArrayList<PenListener>();
-	private PenListener[] listenersArray;
+	private volatile PenListener[] listenersArray;
+	private boolean firePenTockOnSwing;
 
 	private class MyThread
 		extends Thread {
@@ -59,9 +62,17 @@ public class Pen extends PenState {
 		PenEvent event;
 		volatile boolean waitedNewEvents;
 		volatile boolean waitingNewEvents;
+		Exception exception;
 		{
 			setName("jpen-Pen");
 		}
+		private final Runnable penTockFirer=new Runnable(){
+			    //@Override
+			    public void run(){
+				    for(PenListener l:getListenersArray())
+					    l.penTock( availablePeriod - (System.currentTimeMillis()-beforeTime) );
+			    }
+		    };
 
 		public synchronized void run() {
 			try {
@@ -79,20 +90,24 @@ public class Pen extends PenState {
 						lastDispatchedEvent=event;
 					}
 					availablePeriod=period+waitTime;
-					for(PenListener l:getListenersArray())
-						l.penTock( availablePeriod - (System.currentTimeMillis()-beforeTime) );
-
+					firePenTock();
 					procTime=System.currentTimeMillis()-beforeTime;
-
 					waitTime=period-procTime;
 					if(waitTime>0) {
 						wait(waitTime);
 						waitTime=0;
 					}
 				}
-			} catch(InterruptedException ex) {
-				throw new Error(ex);
+			} catch(Exception ex) {
+				exception=ex;
 			}
+		}
+
+		private void firePenTock() throws InterruptedException, InvocationTargetException{
+			if(firePenTockOnSwing)
+				SwingUtilities.invokeAndWait(penTockFirer);
+			else
+				penTockFirer.run();
 		}
 
 		private boolean waitNewEvents() throws InterruptedException {
@@ -115,8 +130,23 @@ public class Pen extends PenState {
 	Pen() {
 		setFrequency(DEFAULT_FREQUENCY);
 	}
+	
+	public Exception getThreadException(){
+		return thread==null? null: thread.exception;
+	}
 
-	public void setFrequency(int frequency) {
+	public boolean getFirePenTockOnSwing() {
+		return firePenTockOnSwing;
+	}
+
+	/**
+	@param firePenTockOnSwing If {@code true} then {@link PenListener#penTock(long)} is called from the event dispatch thread. {@code false} by default.
+	*/
+	public void setFirePenTockOnSwing(boolean firePenTockOnSwing){
+		this.firePenTockOnSwing = firePenTockOnSwing;
+	}
+
+	public synchronized void setFrequency(int frequency) {
 		if(frequency<=0)
 			throw new IllegalArgumentException();
 		stop();
@@ -274,7 +304,7 @@ public class Pen extends PenState {
 	}
 
 	void scheduleScrollEvent(PenDevice device, PScroll scroll) {
-			schedule(new PScrollEvent(this, scroll));
+		schedule(new PScrollEvent(this, scroll));
 	}
 
 	private final void schedule(PenEvent ev) {
