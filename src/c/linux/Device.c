@@ -173,14 +173,16 @@ int Device_nextEvent(struct Device *pDevice ) {
 			default:
 				printf("unhandled event!!\n");
 			}
+			//printf(" event timestamp: %li \n", pDevice->eventTime);
 			if(pDevice->lastEventTime==-1 || pDevice->eventTime<pDevice->lastEventTime){
 				pDevice->lastEventType=i;
 				if(pDevice->lastEventTime!=-1)
 					XPutBackEvent(pBus->pDisplay, &pDevice->lastEvent);
 				pDevice->lastEventTime=pDevice->eventTime;
 				pDevice->lastEvent=pDevice->event;
-			}else
+			}else{
 				XPutBackEvent(pBus->pDisplay, &pDevice->event);
+			}
 		}
 	}
 	if(pDevice->lastEventType==-1)

@@ -21,15 +21,23 @@ package jpen.demo;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.LookAndFeel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import jpen.Pen;
 
 public class JPenDemoControl{
+	private static final Logger L=Logger.getLogger(JPenDemoControl.class.getName());
+	{
+		//L.setLevel(Level.ALL);
+	}
 
 	//private static final Dimension SIZE=new Dimension(450, 480);
 	//private static final Dimension SIZE=new Dimension(400, 440);
@@ -77,6 +85,14 @@ public class JPenDemoControl{
 	}
 
 	public static void main(String... args) {
+		try{
+			if(System.getProperty("os.name").toLowerCase().contains("linux"))
+				UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+			else
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}catch(Exception ex){
+			L.warning("the \"system\" couldn't be setted... weird!");
+		}
 		JPenDemoControl jpenDemoControl=new JPenDemoControl();
 		jpenDemoControl.showDialog(null, "JPen Demo");
 		System.exit(0);

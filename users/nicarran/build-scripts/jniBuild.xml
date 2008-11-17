@@ -134,7 +134,9 @@
 		</target>
 		
 		<target name="libOsx" depends="init">
-				<copy file="srcTrunk/repos-sf2/jpen/branches/bridge_trunk/prepackaged_hack/${module.jniLibName}.jnilib"
+				<!--<copy file="srcTrunk/repos-sf2/jpen/branches/bridge_trunk/prepackaged_hack/${module.jniLibName}.jnilib"
+				toDir="product"/>-->
+				<copy file="srcTrunk/repos-sf2/jpen/trunk/users/karldd/product/lib${module.jniLibName}.jnilib"
 				toDir="product"/>
 		</target>
 
