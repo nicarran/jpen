@@ -91,7 +91,7 @@ public class JPenDemoControl{
 			else
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}catch(Exception ex){
-			L.warning("the \"system\" couldn't be setted... weird!");
+			L.warning("The \"system\" look and feel couldn't be setted.");
 		}
 		JPenDemoControl jpenDemoControl=new JPenDemoControl();
 		jpenDemoControl.showDialog(null, "JPen Demo");
