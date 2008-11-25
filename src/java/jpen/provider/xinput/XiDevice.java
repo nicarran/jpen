@@ -38,7 +38,7 @@ class XiDevice{
 	final int deviceIndex;
 
 	XiDevice(XiBus bus, int cellIndex, int deviceIndex) {
-		Utils.loadLibrary();
+		XinputProvider.loadLibrary();
 		this.bus=bus;
 		this.cellIndex=cellIndex;
 		this.deviceIndex=deviceIndex;

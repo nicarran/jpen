@@ -72,9 +72,16 @@ public final class Utils {
 		return moduleProperties;
 	}
 
-	private static final String getJniLibName() {
-		return getModuleProperties().getString("module.id")+"-"+
-		       getVersion();
+	private static final String getJniLibName(String architecture) {
+		StringBuilder jniLibName=new StringBuilder(64);
+		jniLibName.append(getModuleProperties().getString("module.id"));
+		jniLibName.append("-");
+		jniLibName.append(getVersion());
+		if(architecture!=null){
+			jniLibName.append("-");
+			jniLibName.append(architecture);
+		}
+		return jniLibName.toString();
 	}
 
 	public static final String getFullVersion(){
@@ -90,24 +97,16 @@ public final class Utils {
 	}
 
 	public static final void loadLibrary() {
+		loadLibrary(null);
+	}
+
+	public static final void loadLibrary(final String architecture) {
 		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			    public Object run() {
-				    System.loadLibrary(getJniLibName());
+				    String jniLibName=getJniLibName(architecture);
+				    System.loadLibrary(jniLibName);
 				    return null;
 			    }
 		    });
 	}
-
-	/**
-	@deprecated Use {@link #loadLibrary()}.
-	*/
-	@Deprecated
-	public static final void loadLibraryOrFail() {
-		try {
-			System.loadLibrary(getJniLibName());
-		} catch(Exception ex) {
-			throw new AssertionError(ex);
-		}
-	}
-
 }

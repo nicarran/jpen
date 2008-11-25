@@ -34,9 +34,25 @@ public class XinputProvider
 	extends AbstractPenProvider {
 	private static final Logger L=Logger.getLogger(XinputProvider.class.getName());
 	public static final int PERIOD=10;
+	private static boolean libraryLoaded;
+
 	private final  Thread thread;
 	private final XinputDevice[] xipDevices;
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
+
+	public static String getArchitecture(){
+		String architecture=System.getProperty("sun.arch.data.model");
+		if(architecture==null)
+			architecture="32";
+		return architecture;
+	}
+
+	public static void loadLibrary(){
+		if(!libraryLoaded){
+			Utils.loadLibrary(getArchitecture());
+			libraryLoaded=true;
+		}
+	}
 
 	public static class Constructor
 		implements PenProvider.Constructor {
@@ -52,7 +68,7 @@ public class XinputProvider
 		//@Override
 		public PenProvider construct(PenManager pm) throws ConstructionException {
 			try {
-				Utils.loadLibrary();
+				loadLibrary();
 				return new XinputProvider(pm, this);
 			} catch(Throwable t) {
 				throw new ConstructionException(t);
@@ -79,34 +95,34 @@ public class XinputProvider
 		xipDevices=devices.toArray(new XinputDevice[devices.size()]);
 
 		thread=new Thread("jpen-XinputProvider") {
-						 public synchronized void run() {
-							 try {
-								 while(true) {
-									 processQuedEvents();
-									 wait(PERIOD);
-									 while(getPenManager().getPaused())
-										 wait();
-								 }
-							 } catch(InterruptedException ex) { throw new Error(ex);}
-						 }
-					 }
-					 ;
+			       public synchronized void run() {
+				       try {
+					       while(true) {
+						       processQuedEvents();
+						       wait(PERIOD);
+						       while(getPenManager().getPaused())
+							       wait();
+					       }
+				       } catch(InterruptedException ex) { throw new Error(ex);}
+			       }
+		       }
+		       ;
 		thread.setDaemon(true);
 		thread.setPriority(Thread.MAX_PRIORITY);
 		thread.start();
 		L.fine("end");
 	}
-	
+
 	private void processQuedEvents() {
 		for(int i=xipDevices.length; --i>=0;)
 			xipDevices[i].processQuedEvents();
 	}
-	
+
 	private void resetDevices(){
 		for(int i=xipDevices.length; --i>=0;)
 			xipDevices[i].reset();
 	}
-	
+
 	private void pauseDevices(boolean paused){
 		for(int i=xipDevices.length; --i>=0;)
 			xipDevices[i].device.setIsListening(!paused);

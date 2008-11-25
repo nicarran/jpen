@@ -68,7 +68,7 @@
 				</touch>-->
 		</target>
 
-		<target name="libLinux" depends="init">
+		<target name="libLinux32" depends="init">
 				<pathconvert pathsep=" " dirsep="/" property="_sources">
 						<path>
 								<fileset dir="src/c/linux" includes="*.c"/>
@@ -83,14 +83,43 @@
 						<arg value="-Wall"/>
 						<arg value="-fpic"/>
 						<arg value="-shared"/>
+						<arg value="-m32"/>
 						<arg value="-o"/>
-						<arg value="lib${module.jniLibName}.so"/>
+						<arg value="lib${module.jniLibName}-32.so"/>
 						<arg line="${module.linuxGccExtraLib}"/>
 						<arg line="${_sources}"/>
 				</exec>
-				<move todir="product" file="src/c/linux/lib${module.jniLibName}.so"/>
+				<move todir="product" file="src/c/linux/lib${module.jniLibName}-32.so"/>
 				<!--<move todir="product" file="src/c/lib${module.jniLibName}.so"/>-->
 		</target>
+		
+		<target name="libLinux64" depends="init">
+				<pathconvert pathsep=" " dirsep="/" property="_sources">
+						<path>
+								<fileset dir="src/c/linux" includes="*.c"/>
+								<!--<fileset dir="src/c" includes="linux/*.c, all/*.c"/>-->
+						</path>
+						<!--<mapper type="flatten"/>-->
+						<map from="${basedir}/src/c/linux/" to=""/>
+				</pathconvert>
+				<echo>sources: ${_sources}</echo>
+				<!--<exec dir="src/c" executable="gcc" failonerror="true">-->
+				<exec dir="src/c/linux" executable="x86_64-pc-linux-gnu-gcc" failonerror="true">
+						<arg value="-Wall"/>
+						<arg value="-fpic"/>
+						<arg value="-shared"/>
+						<arg value="-I/opt/sun-jdk-1.6.0.10/include"/>
+						<arg value="-I/opt/sun-jdk-1.6.0.10/include/linux"/>
+						<arg value="-I/usr/include"/>
+						<arg value="-o"/>
+						<arg value="lib${module.jniLibName}-64.so"/>
+						<arg line="${_sources}"/>
+				</exec>
+				<move todir="product" file="src/c/linux/lib${module.jniLibName}-64.so"/>
+				<!--<move todir="product" file="src/c/lib${module.jniLibName}.so"/>-->
+		</target>
+		
+		<target name="libLinux" depends="libLinux32, libLinux64"></target>
 
 		<target name="libWin" depends="init">
 				<pathconvert pathsep=" " dirsep="/" property="_wsources">

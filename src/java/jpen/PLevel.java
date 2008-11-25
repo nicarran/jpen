@@ -137,28 +137,4 @@ public class PLevel
 		}
 		return coordinateValue;
 	}
-
-	/**
-	@deprecated No replacement for this method in the new API. There is a similar method: {@link #getCoordinateValueForComponent(Dimension componentSize, Point2D.Float componentLocation, PLevel.Type coordinate, float coordinateValue)}.
-	*/
-	@Deprecated
-	public static final float getCoordinateValueInsideComponent( Dimension componentSize, Point2D.Float componentLocation, PLevel.Type coordinate, float coordinateValue) {
-		if(L.isLoggable(Level.FINE)){
-			L.fine("componentSize="+componentSize+", componentLocation="+componentLocation+", coordinate="+coordinate+", coordinateValue="+coordinateValue);
-		}
-		switch(coordinate) {
-		case X:
-			coordinateValue-=componentLocation.x;
-			//if(coordinateValue>componentSize.width)
-			//return -1;
-			break;
-		case Y:
-			coordinateValue-=componentLocation.y;
-			//if(coordinateValue>componentSize.height)
-			//return -1;
-			break;
-		}
-		return coordinateValue;
-	}
-
 }

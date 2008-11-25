@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import jpen.PenDevice;
 import jpen.PenManager;
 import jpen.PenProvider;
@@ -81,7 +82,8 @@ class StatusReport{
 
 	private void appendSystemInfo(PenManager penManager){
 		appendLine("System Properties:");
-		for(Object property: System.getProperties().keySet()){
+		TreeSet<Object> properties=new TreeSet<Object>(System.getProperties().keySet());
+		for(Object property: properties){
 			String propertyName=property.toString();
 			if(PRIVATE_SYSTEM_PROPERTIES.contains(propertyName))
 				continue;
