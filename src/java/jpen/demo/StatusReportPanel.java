@@ -18,6 +18,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.demo;
 
+import java.awt.Dimension;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -25,11 +26,15 @@ import javax.swing.JTextArea;
 class StatusReportPanel{
 	private final JTextArea textArea=new JTextArea();
 	
-	final JComponent panel=new JScrollPane(textArea);
+	final JScrollPane panel=new JScrollPane(textArea);
+	{
+		panel.setPreferredSize(new Dimension(430, 430));
+	}
 	
 	StatusReportPanel(StatusReport statusReport){
 		textArea.setText(statusReport.toString());
 		textArea.setEditable(false);
+		textArea.setLineWrap(true);
 		textArea.setCaretPosition(0);
 	}
 }

@@ -165,7 +165,7 @@ class DragOutHandler
 		if(mode.equals(Mode.DISABLED) || !penManager.pen.hasPressedButtons())
 			return;
 		if(componentWindow==null){
-			L.warning("Disabled dragging out capability: component window found.");
+			L.warning("Disabled dragging out capability: component window not found.");
 			return;
 		}
 		if(!componentWindow.isActive()){

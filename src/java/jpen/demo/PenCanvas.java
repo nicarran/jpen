@@ -54,6 +54,7 @@ class PenCanvas
 	private static final Color BACKGROUND_COLOR=new Color(247, 217, 186); // yellish
 	private static final float CURSOR_DIAM=2;
 	private static final float STROKE_RAD=30f;
+	private static final Dimension PREF_SCROLLPANE_SIZE=new Dimension(230,230);
 
 	final PenManager penManager;
 	final JScrollPane scrollPane;
@@ -76,6 +77,7 @@ class PenCanvas
 		setDoubleBuffered(false);
 		setOpaque(false);
 		scrollPane=new JScrollPane(this);
+		scrollPane.setPreferredSize(PREF_SCROLLPANE_SIZE);
 
 		image.setAccelerationPriority(1);
 
@@ -87,8 +89,6 @@ class PenCanvas
 		penManager.pen.addListener(new PenAdapter() {
 			    @Override
 			    public void penLevelEvent(PLevelEvent ev) {
-				    if(!ev.containsLevelOfType(PLevel.Type.MOVEMENT_TYPES))
-					    return;
 				    for(PLevel level:ev.levels) {
 					    PLevel.Type levelType=level.getType();
 					    switch(levelType) {

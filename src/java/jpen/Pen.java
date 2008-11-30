@@ -130,7 +130,7 @@ public class Pen extends PenState {
 	Pen() {
 		setFrequency(DEFAULT_FREQUENCY);
 	}
-	
+
 	public Exception getThreadException(){
 		return thread==null? null: thread.exception;
 	}
@@ -247,6 +247,7 @@ public class Pen extends PenState {
 		synchronized(scheduledLevels) {
 			if(phantomLevelFilter.filter(device))
 				return false;
+			boolean scheduledMovement=false;
 			for(PLevel level:levels) {
 				if(level.value==lastScheduledState.getLevelValue(level.typeNumber))
 					continue;
@@ -254,10 +255,12 @@ public class Pen extends PenState {
 				if(levelType!=null)
 					switch(levelType){
 					case X:
+						scheduledMovement=true;
 						if(level.value<minX || level.value>maxX)
 							continue;
 						break;
 					case Y:
+						scheduledMovement=true;
 						if(level.value<minY || level.value>maxY)
 							continue;
 						break;
@@ -268,15 +271,14 @@ public class Pen extends PenState {
 			}
 			if(scheduledLevels.isEmpty())
 				return false;
-			int newKindTypeNumber=device.getKindTypeNumber();
-			if(lastScheduledState.getKind().typeNumber!=newKindTypeNumber) {
-				PKind newKind=PKind.valueOf(newKindTypeNumber);
-				if(newKind==null){
-					scheduledLevels.clear();
-					return false;
+			if(scheduledMovement &&
+			        lastScheduledState.getKind().typeNumber!=
+			        device.getKindTypeNumber()){
+				PKind newKind=PKind.valueOf(device.getKindTypeNumber());
+				if(newKind!=null){ // unexpected device type level values are ignored
+					lastScheduledState.setKind(newKind);
+					schedule(new PKindEvent(this, newKind));
 				}
-				lastScheduledState.setKind(newKind);
-				schedule(new PKindEvent(this, newKind));
 			}
 			PLevelEvent levelEvent=new PLevelEvent(this,
 			    scheduledLevels.toArray(new PLevel[scheduledLevels.size()]), device.getId(), penDeviceTime);

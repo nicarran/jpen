@@ -34,25 +34,14 @@ public class XinputProvider
 	extends AbstractPenProvider {
 	private static final Logger L=Logger.getLogger(XinputProvider.class.getName());
 	public static final int PERIOD=10;
-	private static boolean libraryLoaded;
+	
+	static void loadLibrary(){
+		NativeLoader.getInstance().load();
+	}
 
 	private final  Thread thread;
 	private final XinputDevice[] xipDevices;
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
-
-	public static String getArchitecture(){
-		String architecture=System.getProperty("sun.arch.data.model");
-		if(architecture==null)
-			architecture="32";
-		return architecture;
-	}
-
-	public static void loadLibrary(){
-		if(!libraryLoaded){
-			Utils.loadLibrary(getArchitecture());
-			libraryLoaded=true;
-		}
-	}
 
 	public static class Constructor
 		implements PenProvider.Constructor {

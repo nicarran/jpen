@@ -39,31 +39,31 @@ public class JPenDemoControl{
 		//L.setLevel(Level.ALL);
 	}
 
-	//private static final Dimension SIZE=new Dimension(450, 480);
-	//private static final Dimension SIZE=new Dimension(400, 440);
-	private static final Dimension SIZE=new Dimension(400, 400);
+	//private static final Dimension SIZE=new Dimension(400, 400);
 
 	final PenCanvas penCanvas;
 	final MainPanel mainPanel;
 	final JButton statusReportButton=new JButton("Status Report...");
 
-	JPenDemoControl(){
+	public JPenDemoControl(){
 		penCanvas=new PenCanvas();
 		Pen pen=penCanvas.penManager.pen;
 		ButtonsPanel buttonsPanel=new ButtonsPanel(pen);
 		ScrollsPanel scrollsPanel=new ScrollsPanel(pen);
 		KindPanel kindPanel=new KindPanel(pen);
 		LevelsPanel levelsPanel=new LevelsPanel(pen);
-		AvailableTimePanel availableTimePanel=new AvailableTimePanel(pen); // the last listener to measure the really available time
-		mainPanel=new MainPanel(penCanvas, buttonsPanel, scrollsPanel, kindPanel, levelsPanel, availableTimePanel);
-		mainPanel.panel.setPreferredSize(SIZE);
+		SampleRatePanel sampleRatePanel=new SampleRatePanel(pen);
+		// --- the last listener to measure the time still available: 
+		AvailableTimePanel availableTimePanel=new AvailableTimePanel(pen); 
+		mainPanel=new MainPanel(penCanvas, buttonsPanel, scrollsPanel, kindPanel, levelsPanel, availableTimePanel, sampleRatePanel);
+		//mainPanel.panel.setPreferredSize(SIZE);
 
 		statusReportButton.addActionListener(new ActionListener(){
 			    //@Override
 			    public void actionPerformed(ActionEvent ev){
 				    StatusReportPanel statusReportPanel=new StatusReportPanel(
 				          new StatusReport(penCanvas.penManager));
-				    statusReportPanel.panel.setPreferredSize(SIZE);
+				    //statusReportPanel.panel.setPreferredSize(SIZE);
 				    JOptionPane.showMessageDialog(mainPanel.panel, statusReportPanel.panel, "JPen Status Report", JOptionPane.INFORMATION_MESSAGE);
 			    }
 		    });
@@ -75,11 +75,19 @@ public class JPenDemoControl{
 		f.setVisible(true);
 		f.setDefaultCloseOperation(f.EXIT_ON_CLOSE);*/
 	}
+	
+	public JComponent getMainPanelComponent(){
+		return mainPanel.panel;
+	}
+	
+	public JButton getStatusReportButton(){
+		return statusReportButton;
+	}
 
 	public void showDialog(JComponent parent, String title){
 		String closeOption="Close";
 		Object[] options=new Object[]{statusReportButton, closeOption};
-		JOptionPane.showOptionDialog(null, mainPanel.panel, title,
+		JOptionPane.showOptionDialog(null, getMainPanelComponent(), title,
 		    JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
 		    null, options, closeOption);
 	}

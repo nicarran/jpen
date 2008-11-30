@@ -77,7 +77,7 @@ public final class Utils {
 		jniLibName.append(getModuleProperties().getString("module.id"));
 		jniLibName.append("-");
 		jniLibName.append(getVersion());
-		if(architecture!=null){
+		if(architecture!=null && architecture.trim().length()!=0){
 			jniLibName.append("-");
 			jniLibName.append(architecture);
 		}

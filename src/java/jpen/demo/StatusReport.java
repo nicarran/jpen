@@ -82,12 +82,16 @@ class StatusReport{
 
 	private void appendSystemInfo(PenManager penManager){
 		appendLine("System Properties:");
+		try{
 		TreeSet<Object> properties=new TreeSet<Object>(System.getProperties().keySet());
 		for(Object property: properties){
 			String propertyName=property.toString();
 			if(PRIVATE_SYSTEM_PROPERTIES.contains(propertyName))
 				continue;
 			appendLine(propertyName+": "+System.getProperty(propertyName), 1);
+		}
+		}catch(SecurityException ex){
+			appendLine("System Properties are not readable. You can install JPen as a Java Extension to avoid security restrictions.", 1);
 		}
 	}
 

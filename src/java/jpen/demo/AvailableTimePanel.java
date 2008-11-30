@@ -25,12 +25,12 @@ import jpen.Pen;
 
 class AvailableTimePanel{
 	final StringBuilder text=new StringBuilder();
-	final JTextField textField=new JTextField(5);
+	final JTextField textField=new JTextField(7);
 
 	final JComponent panel=textField;
 
 	AvailableTimePanel(final Pen pen){
-		textField.setHorizontalAlignment(JTextField.CENTER);
+		textField.setHorizontalAlignment(JTextField.RIGHT);
 		textField.setEditable(false);
 		pen.addListener(new PenAdapter(){
 			                String period=String.valueOf(1000/pen.getFrequency());
@@ -40,6 +40,7 @@ class AvailableTimePanel{
 				                text.append(availableMillis);
 				                text.append(" / ");
 				                text.append(period);
+												text.append(" ms");
 				                textField.setText(text.toString());
 			                }
 		                });
