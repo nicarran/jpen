@@ -36,7 +36,7 @@ public class XinputProvider
 	public static final int PERIOD=10;
 	
 	static void loadLibrary(){
-		NativeLoader.getInstance().load();
+		NativeLoader.load();
 	}
 
 	private final  Thread thread;

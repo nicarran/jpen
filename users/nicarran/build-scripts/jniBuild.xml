@@ -109,8 +109,8 @@
 						<arg value="-Wall"/>
 						<arg value="-fpic"/>
 						<arg value="-shared"/>
-						<arg value="-I/opt/sun-jdk-1.6.0.10/include"/>
-						<arg value="-I/opt/sun-jdk-1.6.0.10/include/linux"/>
+						<arg value="-I/opt/sun-jdk-1.5.0.16/include"/>
+						<arg value="-I/opt/sun-jdk-1.5.0.16/include/linux"/>
 						<arg value="-I/usr/include"/>
 						<arg value="-o"/>
 						<arg value="lib${module.jniLibName}-x86_64.so"/>
@@ -120,7 +120,33 @@
 				<!--<move todir="product" file="src/c/lib${module.jniLibName}.so"/>-->
 		</target>
 		
-		<target name="libLinux" depends="libLinux-x86, libLinux-x86_64"></target>
+		<target name="libLinux-ia64" depends="init">
+				<pathconvert pathsep=" " dirsep="/" property="_sources">
+						<path>
+								<fileset dir="src/c/linux" includes="*.c"/>
+								<!--<fileset dir="src/c" includes="linux/*.c, all/*.c"/>-->
+						</path>
+						<!--<mapper type="flatten"/>-->
+						<map from="${basedir}/src/c/linux/" to=""/>
+				</pathconvert>
+				<echo>sources: ${_sources}</echo>
+				<!--<exec dir="src/c" executable="gcc" failonerror="true">-->
+				<exec dir="src/c/linux" executable="ia64-unknown-linux-gnu-gcc" failonerror="true">
+						<arg value="-Wall"/>
+						<arg value="-fpic"/>
+						<arg value="-shared"/>
+						<arg value="-I/opt/sun-jdk-1.5.0.16/include"/>
+						<arg value="-I/opt/sun-jdk-1.5.0.16/include/linux"/>
+						<arg value="-I/usr/include"/>
+						<arg value="-o"/>
+						<arg value="lib${module.jniLibName}-ia64.so"/>
+						<arg line="${_sources}"/>
+				</exec>
+				<move todir="product" file="src/c/linux/lib${module.jniLibName}-ia64.so"/>
+				<!--<move todir="product" file="src/c/lib${module.jniLibName}.so"/>-->
+		</target>
+		
+		<target name="libLinux" depends="libLinux-x86, libLinux-x86_64, libLinux-ia64"></target>
 
 		<target name="libWin" depends="init">
 				<pathconvert pathsep=" " dirsep="/" property="_wsources">
