@@ -60,8 +60,8 @@ public class Pen extends PenState {
 		long waitTime;
 		long availablePeriod;
 		PenEvent event;
-		private boolean waitedNewEvents;
-		private final Object waiter=new Object();
+		boolean waitedNewEvents;
+		final Object waiter=new Object();
 		Exception exception;
 		{
 			setName("jpen-Pen");
@@ -161,8 +161,8 @@ public class Pen extends PenState {
 			MyThread oldThread=thread;
 			thread=null;
 			oldThread.processNewEvents(); // may be waiting for new events.
-			synchronized(oldThread) {
-				oldThread.notify(); // may be waiting the frequency period
+			synchronized(oldThread.waiter) {
+				oldThread.waiter.notify(); // may be waiting the frequency period
 				try {
 					oldThread.join();
 				} catch(InterruptedException ex) {
