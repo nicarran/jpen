@@ -20,14 +20,17 @@ package jpen.provider.osx;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import jpen.PKind;
 import jpen.PenManager;
 import jpen.PenProvider;
+import jpen.PKind;
 import jpen.provider.AbstractPenProvider;
+import jpen.provider.NativeLibraryLoader;
 import jpen.provider.Utils;
 
 public class CocoaProvider extends AbstractPenProvider {
+	
+	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(); 
+	
 	public static class Constructor implements PenProvider.Constructor {
 		public Constructor() {
 		}
@@ -42,7 +45,7 @@ public class CocoaProvider extends AbstractPenProvider {
 
 		public PenProvider construct(PenManager pm) throws ConstructionException {
 			try {
-				Utils.loadLibrary();
+				LIB_LOADER.load();
 				CocoaAccess cocoaAccess=new CocoaAccess();
 				return new CocoaProvider(pm, this, cocoaAccess);
 			} catch(Throwable t) {

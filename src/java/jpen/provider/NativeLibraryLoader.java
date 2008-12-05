@@ -16,7 +16,7 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
-package jpen.provider.xinput;
+package jpen.provider;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -28,40 +28,48 @@ import java.util.Map;
 import java.util.prefs.Preferences;
 import jpen.provider.Utils;
 
-class NativeLoader{
-	private static final Logger L=Logger.getLogger(NativeLoader.class.getName());
+public class NativeLibraryLoader{
+	private static final Logger L=Logger.getLogger(NativeLibraryLoader.class.getName());
 	{
 		//L.setLevel(Level.ALL);
 	}
-	private static Map<String, Collection<String>> dataModelToArchitectures=new HashMap<String, Collection<String>>();
-	static{
-		dataModelToArchitectures.put("32", Arrays.asList(new String[]{""}));
-		dataModelToArchitectures.put("64", Arrays.asList(new String[]{"x86_64", "ia64"}));
+	private static String PREFERENCE_KEY$ARCHITECTURE="NativeLibraryLoader.architecture";
+
+	private final Map<String, Collection<String>> dataModelToArchitectures=new HashMap<String, Collection<String>>();
+	private boolean loaded;
+
+	public NativeLibraryLoader(){
+		this(new String[]{""});
 	}
 
-	private static String PREFERENCE_KEY$ARCHITECTURE="NativeLoader.arch";
-	private static boolean loaded;
+	public NativeLibraryLoader(String[] architectures){
+		this(architectures, architectures);
+	}
 
-	static synchronized void load(){
+	public NativeLibraryLoader(String[] architectures32, String[] architectures64){
+		dataModelToArchitectures.put("32", Arrays.asList(architectures32));
+		dataModelToArchitectures.put("64", Arrays.asList(architectures64));
+	}
+
+	public synchronized void load(){
 		if(!loaded){
 			String preferredArchitecture=getPreferredArchitecture();
 			Throwable loadExceptionCause=null;
 			if(preferredArchitecture!=null)
 				try{
-					L.info("loading preferred architecture: \""+preferredArchitecture+"\"");
 					Utils.loadLibrary(preferredArchitecture);
 				}catch(Throwable t){
 					setPreferredArchitecture(null);
 					loadExceptionCause=t;
 				}
 			else{
-				String dataModel=getDataModel();
+				String dataModel=getJavaVMDataModel();
 				Collection<String> architectures=dataModelToArchitectures.get(dataModel);
 				if(architectures==null)
 					throw new IllegalStateException("Unsupported data model: "+dataModel);
 				for(String architecture: architectures){
 					try{
-						L.info("loading architecture: \""+architecture+"\"");
+						L.info("trying to load architecture: \""+architecture+"\"");
 						Utils.loadLibrary(architecture);
 						setPreferredArchitecture(architecture);
 						loadExceptionCause=null;
@@ -78,14 +86,14 @@ class NativeLoader{
 		}
 	}
 
-	static class LoadException
+	public static class LoadException
 		extends RuntimeException{
 		LoadException(Throwable cause){
 			super(cause);
 		}
 	}
 
-	private static String getDataModel(){
+	private static String getJavaVMDataModel(){
 		String dataModel=AccessController.doPrivileged(new PrivilegedAction<String>() {
 			    //@Override
 			    public String run() {
@@ -95,14 +103,14 @@ class NativeLoader{
 		return dataModel==null? "32": dataModel;
 	}
 
-	private static String getPreferredArchitecture(){
+	private String getPreferredArchitecture(){
 		return AccessController.doPrivileged(new PrivilegedAction<String>(){
 			       //@Override
 			       public String run(){
 				       String override=System.getProperty("jpen.provider.architecture");
 				       if(override!=null)
 					       return override;
-				       Preferences preferences=Preferences.userNodeForPackage(NativeLoader.class);
+				       Preferences preferences=Preferences.userNodeForPackage(NativeLibraryLoader.class);
 				       return preferences.get(PREFERENCE_KEY$ARCHITECTURE, null);
 			       }
 		       });
@@ -112,12 +120,14 @@ class NativeLoader{
 		AccessController.doPrivileged(new PrivilegedAction<Object>(){
 			    //@Override
 			    public String run(){
-				    Preferences preferences=Preferences.userNodeForPackage(NativeLoader.class);
-						L.info("setting preferred architecture to: \""+architecture+"\"");
-				    if(architecture==null)
+				    Preferences preferences=Preferences.userNodeForPackage(NativeLibraryLoader.class);
+				    if(architecture==null){
 					    preferences.remove(PREFERENCE_KEY$ARCHITECTURE);
-				    else
+						}
+				    else{
+							L.info("setting preferred architecture value to: \""+architecture+"\"");
 					    preferences.put(PREFERENCE_KEY$ARCHITECTURE, architecture);
+						}
 				    return null;
 			    }
 		    });

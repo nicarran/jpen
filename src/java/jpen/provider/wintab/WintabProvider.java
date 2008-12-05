@@ -44,6 +44,7 @@ import jpen.PenManager;
 import jpen.PenProvider;
 import jpen.PLevel;
 import jpen.provider.AbstractPenProvider;
+import jpen.provider.NativeLibraryLoader;
 import jpen.provider.Utils;
 import jpen.provider.VirtualScreenBounds;
 
@@ -51,6 +52,12 @@ public class WintabProvider
 	extends AbstractPenProvider {
 	private static final Logger L=Logger.getLogger(WintabProvider.class.getName());
 	public static final int PERIOD=10;
+	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader();
+	
+	static void loadLibrary(){
+		LIB_LOADER.load();
+	}
+	
 	final WintabAccess wintabAccess;
 	private final Map<Integer, WintabDevice> cursorToDevice=new HashMap<Integer, WintabDevice>();
 	private final PLevel.Range[] levelRanges=new PLevel.Range[PLevel.Type.values().length];
@@ -124,7 +131,7 @@ public class WintabProvider
 		//@Override
 		public PenProvider construct(PenManager pm) throws ConstructionException {
 			try {
-				Utils.loadLibrary();
+				loadLibrary();
 				WintabAccess wintabAccess=new WintabAccess();
 				return new WintabProvider(pm, this, wintabAccess);
 			} catch(Throwable t) {

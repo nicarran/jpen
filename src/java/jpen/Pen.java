@@ -61,7 +61,6 @@ public class Pen extends PenState {
 		long availablePeriod;
 		PenEvent event;
 		boolean waitedNewEvents;
-		final Object waiter=new Object();
 		Exception exception;
 		{
 			setName("jpen-Pen");
@@ -94,8 +93,8 @@ public class Pen extends PenState {
 					procTime=System.currentTimeMillis()-beforeTime;
 					waitTime=period-procTime;
 					if(waitTime>0) {
-						synchronized(waiter){
-							waiter.wait(waitTime);
+						synchronized(this){
+							wait(waitTime);
 						}
 						waitTime=0;
 					}
@@ -108,8 +107,8 @@ public class Pen extends PenState {
 		private boolean waitNewEvents() throws InterruptedException {
 			if(lastDispatchedEvent.next!=null)
 				return false;
-			synchronized(waiter){
-				waiter.wait();
+			synchronized(this){
+				wait();
 			}
 			return true;
 		}
@@ -121,10 +120,8 @@ public class Pen extends PenState {
 				penTockFirer.run();
 		}
 
-		void processNewEvents() {
-			synchronized(waiter){
-				waiter.notify();
-			}
+		synchronized void processNewEvents() {
+			notify();
 		}
 	}
 
@@ -160,7 +157,7 @@ public class Pen extends PenState {
 		if(thread!=null) {
 			MyThread oldThread=thread;
 			thread=null;
-			oldThread.processNewEvents(); // may be waiting for new events.
+			oldThread.processNewEvents(); // because it may be waiting for new events.
 			try {
 				oldThread.join();
 			} catch(InterruptedException ex) {

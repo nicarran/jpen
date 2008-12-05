@@ -27,6 +27,7 @@ import jpen.PenDevice;
 import jpen.PenManager;
 import jpen.PenProvider;
 import jpen.provider.AbstractPenProvider;
+import jpen.provider.NativeLibraryLoader;
 import jpen.provider.Utils;
 import jpen.provider.VirtualScreenBounds;
 
@@ -35,8 +36,10 @@ public class XinputProvider
 	private static final Logger L=Logger.getLogger(XinputProvider.class.getName());
 	public static final int PERIOD=10;
 	
+	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""}, new String[]{"x86_64", "ia64"});
+	
 	static void loadLibrary(){
-		NativeLoader.load();
+		LIB_LOADER.load();
 	}
 
 	private final  Thread thread;
