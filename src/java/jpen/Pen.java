@@ -161,13 +161,10 @@ public class Pen extends PenState {
 			MyThread oldThread=thread;
 			thread=null;
 			oldThread.processNewEvents(); // may be waiting for new events.
-			synchronized(oldThread.waiter) {
-				oldThread.waiter.notify(); // may be waiting the frequency period
-				try {
-					oldThread.join();
-				} catch(InterruptedException ex) {
-					throw new Error(ex);
-				}
+			try {
+				oldThread.join();
+			} catch(InterruptedException ex) {
+				throw new Error(ex);
 			}
 		}
 		frequency=-1;
