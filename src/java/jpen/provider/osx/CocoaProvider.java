@@ -31,9 +31,8 @@ public class CocoaProvider extends AbstractPenProvider {
 	
 	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(); 
 	
-	public static class Constructor implements PenProvider.Constructor {
-		public Constructor() {
-		}
+	public static class Constructor 
+	extends AbstractPenProvider.AbstractConstructor{
 
 		public String getName() {
 			return "Cocoa";
@@ -43,14 +42,10 @@ public class CocoaProvider extends AbstractPenProvider {
 			return System.getProperty("os.name").toLowerCase().contains("mac");
 		}
 
-		public PenProvider construct(PenManager pm) throws ConstructionException {
-			try {
+		public PenProvider constructProvider() throws Throwable {
 				LIB_LOADER.load();
 				CocoaAccess cocoaAccess=new CocoaAccess();
-				return new CocoaProvider(pm, this, cocoaAccess);
-			} catch(Throwable t) {
-				throw new ConstructionException(t);
-			}
+				return new CocoaProvider(this, cocoaAccess);
 		}
 	}
 
@@ -58,10 +53,8 @@ public class CocoaProvider extends AbstractPenProvider {
 	private final CocoaAccess cocoaAccess;
 	private final Map<PKind.Type, CocoaDevice> deviceMap;
 
-	private CocoaProvider(final PenManager _penManager,
-	    final Constructor _constructor, final CocoaAccess _cocoaAccess
-	                     ) {
-		super(_penManager, _constructor);
+	private CocoaProvider(final Constructor _constructor, final CocoaAccess _cocoaAccess) {
+		super(_constructor);
 		cocoaAccess = _cocoaAccess;
 		cocoaAccess.setProvider(this);
 

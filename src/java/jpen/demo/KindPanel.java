@@ -51,6 +51,7 @@ class KindPanel{
 	}
 
 	void update(PKind kind){
-		kindTextField.setText(kind.getType().toString());
+		kindTextField.setText(
+		  PKindTypeNumberCombo.getPKindTypeStringValue(kind.typeNumber));
 	}
 }

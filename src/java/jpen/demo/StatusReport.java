@@ -98,20 +98,18 @@ class StatusReport{
 	private void appendProvidersInfo(PenManager penManager){
 		appendLine("Providers:");
 		for(PenProvider.Constructor constructor: penManager.getConstructors()){
-			if(!constructor.constructable())
-				continue;
 			appendLine("Constructor: "+constructor.getName(), 1);
-			PenProvider.ConstructionException constructionException=penManager.getConstructionException(constructor);
+			PenProvider.ConstructionException constructionException=constructor.getConstructionException();
 			String constructionExceptionStackTrace="none";
 			if(constructionException!=null){
 				constructionExceptionStackTrace=Utils.evalStackTrace(constructionException);
 			}
 			appendLine("Construction Exception: "+constructionExceptionStackTrace, 2);
-			PenProvider penProvider=penManager.getProvider(constructor);
+			PenProvider penProvider=constructor.getConstructed();
 			if(penProvider!=null){
 				Collection<PenDevice> penDevices=penProvider.getDevices();
 				for(PenDevice penDevice:penDevices){
-					appendLine("Device: "+penDevice.getName(), 2);
+					appendLine("Device: "+penDevice.getName()+" ("+penDevice.getPhysicalId()+")", 2);
 					appendLine("Is Digitizer: "+penDevice.isDigitizer(), 3);
 					appendLine("Enabled: "+penDevice.getEnabled(), 3);
 					appendLine("Kind: "+PKind.valueOf(penDevice.getKindTypeNumber()), 3);

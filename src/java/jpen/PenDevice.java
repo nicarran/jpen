@@ -35,14 +35,22 @@ public interface PenDevice {
 	boolean getEnabled();
 
 	String getName();
+	/**
+	@return A unique and constant id. This id is assigned at runtime and can change between restarts.
 	
+	@see #getPhysicalId()
+	*/
 	byte getId();
 	
 	/**
-	Used by {@link PenManager} to set a unique and constant id for this device.
+	Don't call this method. It is only for use by {@link PenManager}.
 	
 	@see PLevelEvent#getDeviceId()
 	*/
 	void setId(byte id);
 	
+	/**
+	@return A unique and constant id. This id is always the same for the given device, even if the program restarts.
+	*/
+	String getPhysicalId();
 }

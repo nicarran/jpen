@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Set;
@@ -53,11 +54,12 @@ public class WintabProvider
 	private static final Logger L=Logger.getLogger(WintabProvider.class.getName());
 	public static final int PERIOD=10;
 	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader();
-	
+	//static{L.setLevel(Level.ALL);}
+
 	static void loadLibrary(){
 		LIB_LOADER.load();
 	}
-	
+
 	final WintabAccess wintabAccess;
 	private final Map<Integer, WintabDevice> cursorToDevice=new HashMap<Integer, WintabDevice>();
 	private final PLevel.Range[] levelRanges=new PLevel.Range[PLevel.Type.values().length];
@@ -118,7 +120,7 @@ public class WintabProvider
 }*/
 
 	public static class Constructor
-		implements PenProvider.Constructor {
+		extends AbstractPenProvider.AbstractConstructor{
 		//@Override
 		public String getName() {
 			return "Wintab";
@@ -129,21 +131,17 @@ public class WintabProvider
 		}
 
 		//@Override
-		public PenProvider construct(PenManager pm) throws ConstructionException {
-			try {
-				loadLibrary();
-				WintabAccess wintabAccess=new WintabAccess();
-				return new WintabProvider(pm, this, wintabAccess);
-			} catch(Throwable t) {
-				throw new ConstructionException(t);
-			}
+		public PenProvider constructProvider() throws Throwable {
+			loadLibrary();
+			WintabAccess wintabAccess=new WintabAccess();
+			return new WintabProvider(this, wintabAccess);
 		}
 	}
 
 
 
-	private WintabProvider(PenManager penManager, Constructor constructor, WintabAccess wintabAccess) {
-		super(penManager, constructor);
+	private WintabProvider(Constructor constructor, WintabAccess wintabAccess) {
+		super(constructor);
 		L.fine("start");
 		this.wintabAccess=wintabAccess;
 		//this.mouseLocator=new MouseLocator();

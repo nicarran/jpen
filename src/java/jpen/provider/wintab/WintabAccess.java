@@ -105,7 +105,7 @@ class WintabAccess {
 		return CursorType.VALUES.get(getCursorTypeOrdinal(cursor));
 	}
 
-	private static native int getCursorTypeOrdinal(int cursor);
+	static native int getCursorTypeOrdinal(int cursor);
 
 	public int getFirstCursor() {
 		return getFirstCursor(cellIndex);
@@ -123,7 +123,7 @@ class WintabAccess {
 
 	public static native String getCursorName(int cursor);
 
-	public static native long getCursorId(int cursor);
+	public static native long getPhysicalId(int cursor);
 
 	public static native int getCursorMode(int cursor);
 
@@ -199,7 +199,7 @@ class WintabAccess {
 		sb.append(getCursor());
 		sb.append(", cursorType=");
 		sb.append(getCursorType(getCursor()));
-		sb.append(", id="+getCursorId(getCursor()));
+		sb.append(", id="+getPhysicalId(getCursor()));
 		sb.append(", buttons=");
 		sb.append(getButtons());
 		sb.append(", defCtxSysMode="+getDefCtxSysMode());

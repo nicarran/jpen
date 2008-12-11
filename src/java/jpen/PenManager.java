@@ -36,18 +36,17 @@ import jpen.provider.xinput.XinputProvider;
 
 public final class PenManager {
 	private static final Logger L=Logger.getLogger(PenManager.class.getName());
+	
 	public final Pen  pen=new Pen();
 	public final Component component;
-	private final Map<PenProvider.Constructor, PenProvider> constructorToProvider=new HashMap<PenProvider.Constructor, PenProvider>();
-	private final Set<PenProvider.Constructor> constructors=new HashSet<PenProvider.Constructor>();
-	private final Set<PenProvider.Constructor> constructorsA=Collections.unmodifiableSet(constructors);
-	private final Map<PenProvider.Constructor, PenProvider.ConstructionException> constructorToException=new HashMap<PenProvider.Constructor, PenProvider.ConstructionException>();
+	private final Set<PenProvider.Constructor> providerConstructors=new HashSet<PenProvider.Constructor>();
+	private final Set<PenProvider.Constructor> providerConstructorsA=Collections.unmodifiableSet(providerConstructors);
+	private final Map<Byte, PenDevice> deviceIdToDevice=new HashMap<Byte, PenDevice>();
+	private final Collection<PenDevice> devicesA=Collections.unmodifiableCollection(deviceIdToDevice.values());
+	private byte nextDeviceId;
 	private volatile boolean paused;
 	private final List<PenManagerListener> listeners=new ArrayList<PenManagerListener>();
-	private byte nextDeviceId;
-
 	private final DragOutHandler dragOutHandler;
-
 
 	public PenManager(Component component) {
 		this.component=component;
@@ -62,17 +61,15 @@ public final class PenManager {
 	Constructs and adds provider if {@link PenProvider.Constructor#constructable()} is true.
 	@return The {@link PenProvider} added or null if it couldn't be constructed.
 	*/
-	public PenProvider addProvider(PenProvider.Constructor constructor) {
-		if(constructor.constructable()) {
-			try {
-				constructors.add(constructor);
-				PenProvider provider=constructor.construct(this);
-				constructorToProvider.put(constructor, provider);
+	public PenProvider addProvider(PenProvider.Constructor providerConstructor) {
+		if(providerConstructor.constructable()) {
+			if(!this.providerConstructors.add(providerConstructor))
+				throw new IllegalArgumentException("constructor already added");
+			if(providerConstructor.construct(this)){
+				PenProvider provider=providerConstructor.getConstructed();
 				for(PenDevice device:provider.getDevices())
-					firePenDeviceAdded(constructor, device);
+					firePenDeviceAdded(providerConstructor, device);
 				return provider;
-			} catch(PenProvider.ConstructionException ex) {
-				constructorToException.put(constructor, ex);
 			}
 		}
 		return null;
@@ -92,30 +89,57 @@ public final class PenManager {
 
 	public void firePenDeviceAdded(PenProvider.Constructor constructor, PenDevice device) {
 		synchronized(listeners) {
-			device.setId(nextDeviceId++);
+			byte nextDeviceId=getNextDeviceId();
+			device.setId(nextDeviceId);
+			if(deviceIdToDevice.put(nextDeviceId, device)!=null)
+				throw new AssertionError();
 			for(PenManagerListener l: listeners){
 				l.penDeviceAdded(constructor, device);
 			}
 		}
 	}
 
+	private byte getNextDeviceId(){
+		Set<Byte> deviceIds=deviceIdToDevice.keySet();
+		while(deviceIds.contains(Byte.valueOf(nextDeviceId)))
+			nextDeviceId++;
+		return nextDeviceId;
+	}
+
 	public void firePenDeviceRemoved(PenProvider.Constructor constructor, PenDevice device) {
 		synchronized(listeners) {
+			if(deviceIdToDevice.remove(device.getId())==null)
+				throw new IllegalArgumentException("device not found");
 			for(PenManagerListener l: listeners)
 				l.penDeviceRemoved(constructor, device);
 		}
 	}
 
+	public PenDevice getDevice(byte deviceId){
+		return deviceIdToDevice.get(Byte.valueOf(deviceId));
+	}
+
+	public Collection<PenDevice> getDevices(){
+		return devicesA;
+	}
+
 	public Set<PenProvider.Constructor> getConstructors() {
-		return constructorsA;
+		return providerConstructorsA;
 	}
 
+	/**
+	@deprecated use {@link PenProvider.Constructor#getConstructed()}
+	*/
+	@Deprecated
 	public PenProvider getProvider(PenProvider.Constructor constructor) {
-		return constructorToProvider.get(constructor);
+		return constructor.getConstructed();
 	}
-
+	/**
+	@deprecated use {@link PenProvider.Constructor#getConstructionException()}
+	*/
+	@Deprecated
 	public PenProvider.ConstructionException getConstructionException(PenProvider.Constructor constructor) {
-		return constructorToException.get(constructor);
+		return constructor.getConstructionException();
 	}
 
 	void setPaused(boolean paused) {
@@ -124,8 +148,11 @@ public final class PenManager {
 		this.paused=paused;
 		if(paused)
 			pen.scheduleButtonReleasedEvents();
-		for(PenProvider provider: constructorToProvider.values())
-			provider.penManagerPaused(paused);
+		for(PenProvider.Constructor providerConstructor: providerConstructors){
+			PenProvider penProvider=providerConstructor.getConstructed();
+			if(penProvider!=null)
+				penProvider.penManagerPaused(paused);
+		}
 	}
 
 	public boolean getPaused() {
@@ -153,9 +180,9 @@ public final class PenManager {
 			return false;
 		switch(dragOutHandler.getMode()){
 		case DISABLED:
-			return pen.scheduleLevelEvent(device, levels, deviceTime, 0, component.getWidth(), 0, component.getHeight());
+			return pen.scheduleLevelEvent(device, deviceTime, levels, 0, component.getWidth(), 0, component.getHeight());
 		case ENABLED:
-			return pen.scheduleLevelEvent(device, levels, deviceTime,  -Integer.MAX_VALUE, Integer.MAX_VALUE, -Integer.MAX_VALUE, Integer.MAX_VALUE);
+			return pen.scheduleLevelEvent(device, deviceTime, levels,  -Integer.MAX_VALUE, Integer.MAX_VALUE, -Integer.MAX_VALUE, Integer.MAX_VALUE);
 		default:
 			throw new AssertionError();
 		}

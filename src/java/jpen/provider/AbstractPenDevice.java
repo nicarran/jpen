@@ -35,6 +35,7 @@ public abstract class AbstractPenDevice
 	implements PenDevice {
 
 	private byte id;
+	private String physicalId;
 	private final PenProvider provider;
 	private int kindTypeNumber;
 	private boolean enabled;
@@ -82,9 +83,25 @@ public abstract class AbstractPenDevice
 	public void setEnabled(boolean enabled) {
 		this.enabled=enabled;
 	}
+	
+	//@Override
+	public String getPhysicalId(){
+		String physicalId=this.physicalId;
+		if(physicalId==null)
+			synchronized(this){
+				physicalId=this.physicalId;
+				if(physicalId==null)
+					physicalId=this.physicalId=evalPhysicalId();
+			}
+		return physicalId;
+	}
+	
+	protected String evalPhysicalId(){
+		return getName().trim()+"@"+provider.getConstructor().getName().trim();
+	}
 
 	public final PenManager getPenManager() {
-		return provider.getPenManager();
+		return provider.getConstructor().getPenManager();
 	}
 
 	public final Pen getPen() {

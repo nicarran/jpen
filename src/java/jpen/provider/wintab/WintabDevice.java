@@ -43,9 +43,8 @@ import static java.lang.Math.*;
 class WintabDevice
 	extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(WintabDevice.class.getName());
-	{
-		//L.setLevel(Level.ALL);
-	}
+	//static { L.setLevel(Level.ALL);	}
+
 	final WintabProvider wintabProvider;
 	public final int cursor;
 	private int lastButtonsValues;
@@ -62,6 +61,13 @@ class WintabDevice
 		L.fine("end");
 	}
 
+	@Override
+	protected String evalPhysicalId(){
+		return  wintabProvider.wintabAccess.getCursorTypeOrdinal(cursor)+"-"
+		        +wintabProvider.wintabAccess.getPhysicalId(cursor)+"@"
+		        +wintabProvider.getConstructor().getName();
+	}
+
 	private int getDefaultKindTypeNumber() {
 		WintabAccess.CursorType cursorType=wintabProvider.wintabAccess.getCursorType(cursor);
 		switch(cursorType) {
@@ -76,16 +82,16 @@ class WintabDevice
 	}
 
 	public String getName() {
-		return wintabProvider.wintabAccess.getCursorName(cursor);
+		return wintabProvider.wintabAccess.getCursorName(cursor).trim();
 	}
 
 	void scheduleEvents() {
 		if(!getEnabled()) {
-			//L.fine("disabled");
+			L.fine("disabled");
 			return;
 		}
 		//if(L.isLoggable(Level.FINE))
-			//L.fine(wintabProvider.wintabAccess.toString());
+		//L.fine(wintabProvider.wintabAccess.toString());
 		scheduleLevelEvent();
 		// scheduleButtonEvents(); nicarran:  TODO use this to support extra buttons.
 	}
@@ -129,14 +135,14 @@ class WintabDevice
 			Point p=getComponent().getLocationOnScreen();
 			if(!componentLocation.equals(p))
 				L.fine("UUUPS! something is wrong with the component location calc, getLocationOnScreen(): "+p);
-		}*/
+	}*/
 		for(PLevel.Type levelType:PLevel.Type.values()) {
 			float value=PLevel.getCoordinateValueForComponent(
 			              getComponent().getSize(componentSize), componentLocation,  levelType,  getMultRangedValue(levelType));
 			//value=wintabProvider.mouseLocator.getCorrectedLocation(levelType, value);
 			/*if(L.isLoggable(Level.FINE)) {
 				L.fine("levelType="+levelType+", value="+value);
-			}*/
+		}*/
 			/*if(levelType.isMovement && value<0) {
 				L.fine("negative value... pausing...");
 				wintabProvider.setPaused(true);

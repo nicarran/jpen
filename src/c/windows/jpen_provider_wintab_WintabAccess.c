@@ -182,10 +182,10 @@ JNIEXPORT jstring JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorName
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getCursorId
+ * Method:    getPhysicalId
  * Signature: (I)J
  */
-JNIEXPORT jlong JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorId
+JNIEXPORT jlong JNICALL Java_jpen_provider_wintab_WintabAccess_getPhysicalId
 (JNIEnv *pEnv, jclass class, jint cursor) {
 	DWORD r;
 	WTInfo( WTI_CURSORS + cursor, CSR_PHYSID, &r );

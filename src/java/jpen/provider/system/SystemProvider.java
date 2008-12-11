@@ -31,7 +31,7 @@ public class SystemProvider
 	extends AbstractPenProvider {
 
 	public static class Constructor
-		implements PenProvider.Constructor {
+	extends AbstractPenProvider.AbstractConstructor {
 		//@Override
 		public String getName() {
 			return "System";
@@ -41,13 +41,13 @@ public class SystemProvider
 			return true;
 		}
 		//@Override
-		public PenProvider construct(PenManager pm) throws ConstructionException {
-			return new SystemProvider(pm, this);
+		protected PenProvider constructProvider() throws Throwable {
+			return new SystemProvider(this);
 		}
 	}
 
-	private SystemProvider(PenManager penManager, Constructor constructor) {
-		super(penManager, constructor);
+	private SystemProvider(Constructor constructor) {
+		super(constructor);
 		devices.add(new MouseDevice(this));
 	}
 

@@ -28,13 +28,11 @@ import jpen.PenManager;
 
 public abstract class AbstractPenProvider
 	implements PenProvider {
-	private final PenManager penManager;
 	private final Constructor constructor;
 	protected final List<PenDevice> devices=new ArrayList<PenDevice>();
 	private final List<PenDevice> devicesA=Collections.unmodifiableList(devices);
 
-	protected AbstractPenProvider(PenManager penManager, Constructor constructor) {
-		this.penManager=penManager;
+	protected AbstractPenProvider(Constructor constructor) {
 		this.constructor=constructor;
 	}
 
@@ -43,9 +41,8 @@ public abstract class AbstractPenProvider
 		return devicesA;
 	}
 
-	//@Override
 	public final PenManager getPenManager() {
-		return penManager;
+		return getConstructor().getPenManager();
 	}
 
 	//@Override
@@ -56,5 +53,43 @@ public abstract class AbstractPenProvider
 	//@Override
 	public String toString() {
 		return "[PenProvider: constructor.name="+getConstructor().getName()+"]";
+	}
+
+	public static abstract class AbstractConstructor
+		implements PenProvider.Constructor{
+		private PenManager penManager;
+		private PenProvider constructed;
+		private ConstructionException constructionException;
+
+		//@Override
+		public PenManager getPenManager(){
+			return penManager;
+		}
+
+		//@Override
+		public ConstructionException getConstructionException(){
+			return constructionException;
+		}
+
+		//@Override
+		public PenProvider getConstructed(){
+			return constructed;
+		}
+
+		//@Override
+		public final boolean construct(PenManager penManager){
+			if(this.penManager!=null)
+				throw new IllegalStateException("constructor already used by PenManager");
+			this.penManager=penManager;
+			try{
+				this.constructed=constructProvider();
+			}catch(Throwable t){
+				this.constructionException=new ConstructionException(t);
+				return false;
+			}
+			return true;
+		}
+
+		protected abstract PenProvider constructProvider() throws Throwable;
 	}
 }

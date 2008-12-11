@@ -30,8 +30,11 @@ import javax.swing.SwingUtilities;
 import jpen.event.PenListener;
 
 public class Pen extends PenState {
-
 	private static final Logger L=Logger.getLogger(Pen.class.getName());
+	//static{
+	//L.setLevel(Level.ALL);
+	//}
+
 	public static final int DEFAULT_FREQUENCY=60; // TODO: 50 is a better default or less??
 	private int frequency;
 	private volatile MyThread thread;
@@ -52,9 +55,9 @@ public class Pen extends PenState {
 	private volatile PenListener[] listenersArray;
 	private boolean firePenTockOnSwing;
 
-	private class MyThread
+	private final class MyThread
 		extends Thread {
-		final int period=1000/Pen.this.frequency;
+		final int period;
 		long beforeTime;
 		long procTime;
 		long waitTime;
@@ -62,8 +65,24 @@ public class Pen extends PenState {
 		PenEvent event;
 		boolean waitedNewEvents;
 		Exception exception;
-		{
-			setName("jpen-Pen");
+		private final Waiter waiter=new Waiter();
+		volatile boolean stopRunning;
+		Thread oldThread;
+
+		final class Waiter
+			extends Object{
+			synchronized void doWait(long timeout) throws InterruptedException{
+				wait(timeout);
+			}
+			synchronized void doNotify(){
+				notify();
+			}
+		}
+
+		MyThread(Thread oldThread){
+			period=1000/Pen.this.frequency;
+			this.oldThread=oldThread;
+			setName("jpen-Pen-"+period+"ms");
 		}
 		private final Runnable penTockFirer=new Runnable(){
 			    //@Override
@@ -75,7 +94,11 @@ public class Pen extends PenState {
 
 		public void run() {
 			try {
-				while(Pen.this.thread==this) {
+				L.fine("v");
+				if(oldThread!=null)
+					oldThread.join();
+				oldThread=null;
+				while(!stopRunning) {
 					waitedNewEvents=waitNewEvents();
 					beforeTime=System.currentTimeMillis();
 					if(waitedNewEvents)
@@ -93,43 +116,54 @@ public class Pen extends PenState {
 					procTime=System.currentTimeMillis()-beforeTime;
 					waitTime=period-procTime;
 					if(waitTime>0) {
-						synchronized(this){
-							wait(waitTime);
-						}
+						waiter.doWait(waitTime);
 						waitTime=0;
 					}
 				}
 			} catch(Exception ex) {
 				exception=ex;
 			}
+			L.fine("^");
 		}
 
 		private boolean waitNewEvents() throws InterruptedException {
 			if(lastDispatchedEvent.next!=null)
 				return false;
-			synchronized(this){
-				wait();
-			}
+			waiter.doWait(0);
 			return true;
 		}
 
 		private void firePenTock() throws InterruptedException, InvocationTargetException{
+			if(getListenersArray().length==0)
+				return;
 			if(firePenTockOnSwing)
 				SwingUtilities.invokeAndWait(penTockFirer);
 			else
 				penTockFirer.run();
 		}
 
-		synchronized void processNewEvents() {
-			notify();
+		void processNewEvents() {
+			waiter.doNotify();
+		}
+
+		void stop(boolean join){
+			stopRunning=true;
+			processNewEvents(); // because it may be waiting for new events.
+			if(join)
+				try{
+					join();
+				}
+				catch(InterruptedException ex) {
+					throw new Error(ex);
+				}
 		}
 	}
 
 	Pen() {
-		setFrequency(DEFAULT_FREQUENCY);
+		setFrequencyLater(DEFAULT_FREQUENCY);
 	}
 
-	public Exception getThreadException(){
+	public synchronized Exception getThreadException(){
 		return thread==null? null: thread.exception;
 	}
 
@@ -144,27 +178,41 @@ public class Pen extends PenState {
 		this.firePenTockOnSwing = firePenTockOnSwing;
 	}
 
-	public synchronized void setFrequency(int frequency) {
-		if(frequency<=0)
-			throw new IllegalArgumentException();
-		stop();
-		this.frequency=frequency;
-		thread=new MyThread();
-		thread.start();
+	/**
+	Changes the frequency and waits for the event queue to dispatch all pending events. Warning: this method can not be called from the event dispatcher thread.
+
+	@throws Error if called from the event dispatcher thread. 
+	@deprecated Use {@link #setFrequencyLater(int)}.
+	*/
+	@Deprecated
+	// TODO: for jpen3... setFrequency to be setFrequencyLater and create setFrequencyAndWait?
+	public void setFrequency(int frequency){
+		setFrequency(frequency, true);
 	}
 
-	private void stop() {
-		if(thread!=null) {
-			MyThread oldThread=thread;
-			thread=null;
-			oldThread.processNewEvents(); // because it may be waiting for new events.
-			try {
-				oldThread.join();
-			} catch(InterruptedException ex) {
-				throw new Error(ex);
-			}
+	private synchronized void setFrequency(int frequency, boolean wait) {
+		if(frequency<=0)
+			throw new IllegalArgumentException();
+		if(frequency==this.frequency)
+			return;
+		if(wait && SwingUtilities.isEventDispatchThread())
+			throw new Error("Cannot call setFrequency(int, <true>) from the event dispatcher thread");
+		L.fine("v");
+		MyThread oldThread=this.thread;
+		if(oldThread!=null){
+			oldThread.stop(wait);
 		}
-		frequency=-1;
+		this.frequency=frequency;
+		thread=new MyThread(oldThread);
+		thread.start();
+		L.fine("^");
+	}
+
+	/**
+	Changes the frequency.  This method returns immediately, the change of frequency will happen after all the pending events are processed.
+	*/
+	public void setFrequencyLater(int frequency){
+		setFrequency(frequency, false);
 	}
 
 	public int getFrequency() {
@@ -186,9 +234,10 @@ public class Pen extends PenState {
 	}
 
 	PenListener[] getListenersArray() {
+		PenListener[] listenersArray=this.listenersArray; // copy to speed up volatile access
 		if(listenersArray==null)
 			synchronized(listeners) {
-				listenersArray=listeners.toArray(new PenListener[listeners.size()]);
+				this.listenersArray=listenersArray=listeners.toArray(new PenListener[listeners.size()]);
 			}
 		return listenersArray;
 	}
@@ -238,7 +287,7 @@ public class Pen extends PenState {
 	private final PhantomEventFilter phantomLevelFilter=new PhantomEventFilter();
 	private final List<PLevel> scheduledLevels=new ArrayList<PLevel>();
 
-	final boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long penDeviceTime, int minX, int maxX, int minY, int maxY) {
+	final boolean scheduleLevelEvent(PenDevice device, long penDeviceTime, Collection<PLevel> levels,  int minX, int maxX, int minY, int maxY) {
 		synchronized(scheduledLevels) {
 			if(phantomLevelFilter.filter(device))
 				return false;
@@ -270,7 +319,7 @@ public class Pen extends PenState {
 			        lastScheduledState.getKind().typeNumber!=
 			        device.getKindTypeNumber()){
 				PKind newKind=PKind.valueOf(device.getKindTypeNumber());
-				if(newKind!=null){ // unexpected device type level values are ignored
+				if(newKind!=null){ // the null kind is ignored
 					lastScheduledState.setKind(newKind);
 					schedule(new PKindEvent(this, newKind));
 				}
@@ -309,6 +358,7 @@ public class Pen extends PenState {
 			ev.time=System.currentTimeMillis();
 			lastScheduledEvent.next=ev;
 			lastScheduledEvent=ev;
+			MyThread thread=this.thread; // copy to speed up volatile access
 			if(thread!=null) thread.processNewEvents();
 		}
 	}

@@ -89,7 +89,7 @@ class MouseDevice
 		this.systemProvider=systemProvider;
 		setEnabled(true);
 	}
-
+	
 	@Override
 	public boolean isDigitizer(){
 		return false;
@@ -97,7 +97,7 @@ class MouseDevice
 
 	//@Override
 	public String getName() {
-		return "mouse";
+		return "Mouse";
 	}
 
 	@Override

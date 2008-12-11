@@ -18,57 +18,26 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.demo;
 
-import java.awt.Color;
-import java.awt.Dimension;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
+import javax.swing.JTabbedPane;
 
 class MainPanel{
+	private final JTabbedPane tabbedPane=new JTabbedPane(JTabbedPane.TOP);
 	final Box panel=Box.createVerticalBox();
-
-	MainPanel(PenCanvas penCanvas, ButtonsPanel buttonsPanel, ScrollsPanel scrollsPanel, KindPanel kindPanel, LevelsPanel levelsPanel, AvailableTimePanel availableTimePanel, SampleRatePanel sampleRatePanel){
+	final DevicesPanel devicesPanel; 
+	
+	MainPanel(PenCanvas penCanvas){
 		penCanvas.scrollPane.setBorder(BorderFactory.createTitledBorder("Pen Enabled Component"));
 		panel.add(Utils.alignTopLeft(penCanvas.scrollPane));
-
-		Box bottomPanel=Box.createHorizontalBox();
-		panel.add(Utils.alignTopLeft(bottomPanel));
-
-		Box column=Box.createVerticalBox();
-		levelsPanel.panel.setBorder(BorderFactory.createTitledBorder("Levels"));
-		column.add(Utils.alignTopLeft(levelsPanel.panel));
-
-		bottomPanel.add(Utils.alignTopLeft(column));
-
-		column=Box.createVerticalBox();
-		column.add(Utils.labelComponent(
-		             "Kind:", kindPanel.panel
-		           ));
-		Box line=Box.createHorizontalBox();
-		buttonsPanel.panel.setBorder(BorderFactory.createTitledBorder("Buttons"));
-		line.add(Utils.alignTopLeft(buttonsPanel.panel));
-		scrollsPanel.panel.setBorder(BorderFactory.createTitledBorder("Scrolls"));
-		line.add(Utils.createHorizontalStrut());
-		line.add(Utils.alignTopLeft(scrollsPanel.panel));
-		column.add(Utils.alignTopLeft(line));
-		column.add(Utils.labelComponent(
-		             "Available Millis:", availableTimePanel.panel
-		           ));
-		column.add(Utils.labelComponent(
-																		"Sample Period:", sampleRatePanel.panel
-																		));
-		column.add(Utils.labelComponent(
-		             "JPen Version:", new JLabel(jpen.provider.Utils.getFullVersion())
-		           ));
-		/*column.add(Utils.labelComponent(
-																		"Java Version:", new JLabel(System.getProperty("java.version"))
-																		));
-		column.add(Utils.labelComponent(
-																		"Operating System:", new JLabel(System.getProperty("os.name"))
-																		));*/
-
-		bottomPanel.add(Utils.createHorizontalStrut());
-		bottomPanel.add(Utils.alignTopLeft(column));
+		
+		StatePanel statePanel=new StatePanel(penCanvas.penManager);
+		tabbedPane.addTab("Pen", statePanel.panel);
+		
+		devicesPanel=new DevicesPanel(penCanvas.penManager);
+		//devicesPanel.panel.setBorder(BorderFactory.createTitledBorder("Devices"));
+		tabbedPane.addTab("Input Devices", devicesPanel.panel);
+		
+		panel.add(Utils.alignTopLeft(tabbedPane));
 	}
 }

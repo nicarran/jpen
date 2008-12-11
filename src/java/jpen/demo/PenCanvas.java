@@ -53,7 +53,7 @@ class PenCanvas
 	private static final Dimension SIZE=new Dimension(1000,1000);
 	private static final Color BACKGROUND_COLOR=new Color(247, 217, 186); // yellish
 	private static final float CURSOR_DIAM=2;
-	private static final float STROKE_RAD=30f;
+	private static final float STROKE_RAD=25f;
 	private static final Dimension PREF_SCROLLPANE_SIZE=new Dimension(230,230);
 
 	final PenManager penManager;
@@ -72,7 +72,7 @@ class PenCanvas
 	PenCanvas() {
 		this.penManager=new PenManager(this);
 		penManager.pen.setFirePenTockOnSwing(true);
-		penManager.pen.setFrequency(40);
+		penManager.pen.setFrequencyLater(40);
 		Utils.freezeSize(this, SIZE);
 		setDoubleBuffered(false);
 		setOpaque(false);
@@ -128,28 +128,31 @@ class PenCanvas
 	}
 
 	private synchronized void paintStroke() {
-		if(!penManager.pen.getButtonValue(PButton.Type.LEFT)){
-			L.fine("left button is not pressed");
-			return ;
-		}
+		if(!penManager.pen.getButtonValue(PButton.Type.LEFT))
+			return;
 
 		PKind.Type kindType=penManager.pen.getKind().getType();
-		float r=kindType.equals(PKind.Type.CURSOR)? 0.5f: penManager.pen.getLevelValue(PLevel.Type.PRESSURE);
+		float r=penManager.pen.getLevelValue(PLevel.Type.PRESSURE);
+		if(PKind.Type.CURSOR.equals(kindType))
+			r=0.5f;
 		r*=r*STROKE_RAD;
 		if(r==0){
 			L.fine("no pressure");
 			return ;
 		}
-		switch(kindType) {
-		case STYLUS:
-			g.setColor(Color.BLACK);
-			break;
-		case ERASER:
-			g.setColor(BACKGROUND_COLOR);
-			break;
-		case CURSOR:
-			g.setColor(Color.BLUE);
-		}
+		if(kindType==null){
+			g.setColor(Color.PINK);
+		}else
+			switch(kindType) {
+			case STYLUS:
+				g.setColor(Color.BLACK);
+				break;
+			case ERASER:
+				g.setColor(BACKGROUND_COLOR);
+				break;
+			case CURSOR:
+				g.setColor(Color.BLUE);
+			}
 		stroke.x=cursorCenter.x-r;
 		stroke.y=cursorCenter.y-r;
 		stroke.width=stroke.height=2*r;

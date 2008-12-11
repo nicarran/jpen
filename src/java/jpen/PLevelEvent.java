@@ -50,6 +50,8 @@ public class PLevelEvent
 	
 	/**
 	Returns the id of the {@link PenDevice} which generated this event.
+	
+	@see PenManager#getDevice(byte)
 	*/
 	public byte getDeviceId(){
 		return deviceId;

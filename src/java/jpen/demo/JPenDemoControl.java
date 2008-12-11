@@ -47,16 +47,7 @@ public class JPenDemoControl{
 
 	public JPenDemoControl(){
 		penCanvas=new PenCanvas();
-		Pen pen=penCanvas.penManager.pen;
-		ButtonsPanel buttonsPanel=new ButtonsPanel(pen);
-		ScrollsPanel scrollsPanel=new ScrollsPanel(pen);
-		KindPanel kindPanel=new KindPanel(pen);
-		LevelsPanel levelsPanel=new LevelsPanel(pen);
-		SampleRatePanel sampleRatePanel=new SampleRatePanel(pen);
-		// --- the last listener to measure the time still available: 
-		AvailableTimePanel availableTimePanel=new AvailableTimePanel(pen); 
-		mainPanel=new MainPanel(penCanvas, buttonsPanel, scrollsPanel, kindPanel, levelsPanel, availableTimePanel, sampleRatePanel);
-		//mainPanel.panel.setPreferredSize(SIZE);
+		mainPanel=new MainPanel(penCanvas);
 
 		statusReportButton.addActionListener(new ActionListener(){
 			    //@Override
@@ -75,11 +66,16 @@ public class JPenDemoControl{
 		f.setVisible(true);
 		f.setDefaultCloseOperation(f.EXIT_ON_CLOSE);*/
 	}
+
+	public void setSupportCustomPKinds(boolean supportCustomPKinds){
+		mainPanel.devicesPanel.devicesTableModel.
+		       setSupportCustomPKinds(supportCustomPKinds);
+	}
 	
 	public JComponent getMainPanelComponent(){
 		return mainPanel.panel;
 	}
-	
+
 	public JButton getStatusReportButton(){
 		return statusReportButton;
 	}
@@ -102,6 +98,7 @@ public class JPenDemoControl{
 			L.warning("The \"system\" look and feel couldn't be setted.");
 		}
 		JPenDemoControl jpenDemoControl=new JPenDemoControl();
+		jpenDemoControl.setSupportCustomPKinds(true);
 		jpenDemoControl.showDialog(null, "JPen Demo");
 		System.exit(0);
 	}

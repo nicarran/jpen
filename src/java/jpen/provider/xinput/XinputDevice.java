@@ -65,6 +65,11 @@ class XinputDevice extends AbstractPenDevice {
 		setKindTypeNumber(getDefaultKindTypeNumber());
 		setEnabled(true);
 	}
+	
+	//@Override
+	public String getName() {
+		return device.getName();
+	}
 
 	void resetLevelRanges(){
 		device.refreshLevelRanges();
@@ -154,10 +159,5 @@ class XinputDevice extends AbstractPenDevice {
 			         devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);
 
 		return devValue;
-	}
-
-	//@Override
-	public String getName() {
-		return device.getName();
 	}
 }

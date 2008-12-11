@@ -22,9 +22,12 @@ import java.util.Collection;
 
 public interface PenProvider {
 	public interface Constructor {
+		PenManager getPenManager();
 		String getName();
 		boolean constructable();
-		PenProvider construct(PenManager pm) throws ConstructionException;
+		boolean construct(PenManager pm);
+		ConstructionException getConstructionException();
+		PenProvider getConstructed();
 	}
 
 	public class ConstructionException extends Exception {
@@ -37,7 +40,6 @@ public interface PenProvider {
 		}
 	}
 	Constructor getConstructor();
-	PenManager getPenManager();
 	Collection<PenDevice> getDevices();
 	void penManagerPaused(boolean paused);
 }

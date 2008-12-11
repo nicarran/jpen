@@ -35,9 +35,9 @@ public class XinputProvider
 	extends AbstractPenProvider {
 	private static final Logger L=Logger.getLogger(XinputProvider.class.getName());
 	public static final int PERIOD=10;
-	
+
 	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""}, new String[]{"x86_64", "ia64"});
-	
+
 	static void loadLibrary(){
 		LIB_LOADER.load();
 	}
@@ -47,7 +47,7 @@ public class XinputProvider
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 
 	public static class Constructor
-		implements PenProvider.Constructor {
+		extends AbstractPenProvider.AbstractConstructor{
 		//@Override
 		public String getName() {
 			return "XInput";
@@ -57,19 +57,15 @@ public class XinputProvider
 			return System.getProperty("os.name").toLowerCase().contains("linux");
 		}
 
-		//@Override
-		public PenProvider construct(PenManager pm) throws ConstructionException {
-			try {
-				loadLibrary();
-				return new XinputProvider(pm, this);
-			} catch(Throwable t) {
-				throw new ConstructionException(t);
-			}
+		@Override
+		public PenProvider constructProvider() throws Throwable {
+			loadLibrary();
+			return new XinputProvider(this);
 		}
 	}
 
-	private XinputProvider(PenManager penManager, Constructor constructor) throws Exception {
-		super(penManager, constructor);
+	private XinputProvider(Constructor constructor) throws Exception {
+		super(constructor);
 		L.fine("start");
 
 		XiBus bus=new XiBus();
