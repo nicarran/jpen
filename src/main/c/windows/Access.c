@@ -39,6 +39,8 @@ static UINT ScanExts(UINT wTag) {
 #endif
 
 int Access_preCreate(SAccess *pAccess) {
+	// Set queue size
+	int queueSize=MAX_WINTAB_QUEUE_SIZE;
 	HWND hWnd=GetDesktopWindow();
 	if(!hWnd) {
 		Access_setError("Couldn't get desktop window.");
@@ -76,8 +78,6 @@ int Access_preCreate(SAccess *pAccess) {
 			return errorState;
 		}
 
-		// Set queue size
-		int queueSize=MAX_WINTAB_QUEUE_SIZE;
 		for(; queueSize>=MIN_WINTAB_QUEUE_SIZE; queueSize-=16)
 			if(WTQueueSizeSet(pAccess->ctx, queueSize))
 				break;
