@@ -20,7 +20,16 @@ public class SmokeTest extends TestCase {
 
     public void testPenManager() throws Exception {
         JComponent component = new JPanel();
-	PenManager penManager = new PenManager(component);
+        PenManager penManager = new PenManager(component);
+        System.out.println("Providers:");
+        int count=0;
+        for(PenProvider.Constructor constructor: penManager.getConstructors()){
+            if(!constructor.constructable())
+                continue;
+            count++;
+            System.out.println("Constructor: "+constructor.getName());
+        }
+        assertTrue(count>=2);
     }
 }
 
