@@ -113,6 +113,26 @@
       <properties>
         <source.dir>src/main/c/windows</source.dir>
       </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.freehep</groupId>
+            <artifactId>freehep-nar-plugin</artifactId>
+            <configuration>
+              <linker>
+                <name>g++</name>
+                <libs>
+                  <lib>
+                    <name>WINTAB32</name>
+                    <type>shared</type>
+                    <directory>src/main/c/windows/lib</directory>
+                  </lib>
+                </libs>
+              </linker>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>
