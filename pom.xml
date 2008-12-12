@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>net.sourcegorge.jpen</groupId>
+  <groupId>net.sourceforge.jpen</groupId>
   <artifactId>jpen</artifactId>
   <packaging>nar</packaging>
   <name>JPEN</name>
