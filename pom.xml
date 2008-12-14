@@ -60,6 +60,7 @@
         <version>2.0-alpha-10</version>
         <extensions>true</extensions>
         <configuration>
+          <output>jpen-2</output>
           <libraries>
             <library>
               <type>jni</type>
