@@ -32,9 +32,10 @@ public class SystemProvider
 
 	public static class Constructor
 	extends AbstractPenProvider.AbstractConstructor {
+		public static final String NAME="System";
 		//@Override
 		public String getName() {
-			return "System";
+			return NAME;
 		}
 		//@Override
 		public boolean constructable() {

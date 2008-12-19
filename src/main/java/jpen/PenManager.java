@@ -47,6 +47,7 @@ public final class PenManager {
 	private volatile boolean paused;
 	private final List<PenManagerListener> listeners=new ArrayList<PenManagerListener>();
 	private final DragOutHandler dragOutHandler;
+	private PenDevice systemMouseDevice;
 
 	public PenManager(Component component) {
 		this.component=component;
@@ -93,6 +94,8 @@ public final class PenManager {
 			device.setId(nextDeviceId);
 			if(deviceIdToDevice.put(nextDeviceId, device)!=null)
 				throw new AssertionError();
+			if(constructor.getName().equals(SystemProvider.Constructor.NAME))
+				systemMouseDevice=device;
 			for(PenManagerListener l: listeners){
 				l.penDeviceAdded(constructor, device);
 			}
@@ -121,6 +124,10 @@ public final class PenManager {
 
 	public Collection<PenDevice> getDevices(){
 		return devicesA;
+	}
+	
+	public PenDevice getSystemMouseDevice(){
+		return systemMouseDevice;
 	}
 
 	public Set<PenProvider.Constructor> getConstructors() {

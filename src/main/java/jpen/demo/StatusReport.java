@@ -28,11 +28,11 @@ import jpen.PenManager;
 import jpen.PenProvider;
 import jpen.PKind;
 
-class StatusReport{
+public class StatusReport{
 
 	private final StringBuilder report=new StringBuilder();
 
-	StatusReport(PenManager penManager){
+	public StatusReport(PenManager penManager){
 		appendHeader(penManager);
 		appendPenThreadCrashInfo(penManager);
 		appendProvidersInfo(penManager);
@@ -122,7 +122,5 @@ class StatusReport{
 	public String toString(){
 		return report.toString();
 	}
-
-
 
 }
