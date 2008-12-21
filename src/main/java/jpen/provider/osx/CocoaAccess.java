@@ -155,6 +155,19 @@ public class CocoaAccess {
 	  final float vendorDefined2,
 	  final float vendorDefined3
 	) {
+		if(special_pointingDeviceType!=1) // nicarran: EXPERIMENTAL: possible "pressure jump" bug workaround.
+			return;
+		
+		// nicarran: EXPERIMENTAL: no need to use the event dispatcher thread.
+		postTabletEvent(
+			  type, special_pointingDeviceType,
+			  x, y, absoluteX, absoluteY, absoluteZ,
+			  buttonMask, pressure, rotation,
+			  tiltX, tiltY,
+			  tangentialPressure,
+			  vendorDefined1, vendorDefined2, vendorDefined3
+			);
+		/*
 		if (SwingUtilities.isEventDispatchThread()) {
 			postEvent_swing(
 			  type, special_pointingDeviceType,
@@ -176,10 +189,10 @@ public class CocoaAccess {
 					      vendorDefined1, vendorDefined2, vendorDefined3
 					    );
 				    }});
-		}
+		}*/
 	}
 
-	private void postEvent_swing(
+	private void postTabletEvent(
 	  final int type,
 	  final int special_pointingDeviceType,
 	  float x,

@@ -62,7 +62,7 @@ public class CocoaProvider extends AbstractPenProvider {
 		for (PKind.Type type : PKind.Type.VALUES) {
 			final CocoaDevice device = new CocoaDevice(this, type);
 			deviceMap.put(type, device);
-			getPenManager().firePenDeviceAdded(getConstructor(), device);
+			devices.add(device);
 		}
 
 		cocoaAccess.start();
