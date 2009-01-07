@@ -36,7 +36,7 @@ public final class Utils {
 	private static ResourceBundle moduleProperties;
 
 	/**
-	@return the container window or null if 
+	@return the container window or null.
 	*/
 	public static final Window getLocationOnScreen(Component c, Point2D.Float location) {
 		if(location!=null)

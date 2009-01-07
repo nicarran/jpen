@@ -92,7 +92,7 @@ class DevicesTableModel
 		      @Override
 		      void setValue(Integer val, PenDevice device){
 			      device.setKindTypeNumber(val);
-						updateKindTypeNumberCombo();
+			      updateKindTypeNumberCombo();
 		      }
 
 		      @Override
@@ -146,7 +146,7 @@ class DevicesTableModel
 		penManager.addListener(this);
 		updateDevices();
 	}
-	
+
 	void setSupportCustomPKinds(boolean supportCustomPKinds){
 		this.supportCustomPKinds=supportCustomPKinds;
 		updateKindTypeNumberCombo();
@@ -164,8 +164,10 @@ class DevicesTableModel
 		for(PenDevice device: devices)
 			if(devicesMax<device.getKindTypeNumber())
 				devicesMax=device.getKindTypeNumber();
-		if(supportCustomPKinds)
-			devicesMax++; 
+		if(supportCustomPKinds){
+			if(++devicesMax<PKind.Type.VALUES.size())
+				devicesMax=PKind.Type.VALUES.size(); // to show at least one custom PKind
+		}
 		if(devicesMax>kindTypeNumberCombo.getMaxPKindTypeNumber())
 			kindTypeNumberCombo.setMaxPKindTypeNumber(devicesMax);
 	}

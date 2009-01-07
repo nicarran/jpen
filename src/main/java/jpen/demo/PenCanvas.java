@@ -128,18 +128,17 @@ class PenCanvas
 	}
 
 	private synchronized void paintStroke() {
-		if(!penManager.pen.getButtonValue(PButton.Type.LEFT))
-			return;
-
+		float pressure=penManager.pen.getLevelValue(PLevel.Type.PRESSURE);
 		PKind.Type kindType=penManager.pen.getKind().getType();
-		float r=penManager.pen.getLevelValue(PLevel.Type.PRESSURE);
-		if(PKind.Type.CURSOR.equals(kindType))
-			r=0.5f;
-		r*=r*STROKE_RAD;
-		if(r==0){
+		if(PKind.Type.CURSOR.equals(kindType)
+		        && penManager.pen.getButtonValue(PButton.Type.LEFT))
+			pressure=0.5f;
+		if(pressure==0){
 			L.fine("no pressure");
-			return ;
+			return;
 		}
+
+		float r=pressure*STROKE_RAD;
 		if(kindType==null){
 			g.setColor(Color.PINK);
 		}else
