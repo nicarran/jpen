@@ -19,6 +19,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 package jpen;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
