@@ -25,82 +25,100 @@ import jpen.PenManager;
 import jpen.provider.Utils;
 
 class XiBus {
+	static final Object XLIB_LOCK=new Object();
+
 	private final int cellIndex;
 	private XiDevice device;
 	private static long bootTimeUtc=-1;
 
 	XiBus() throws Exception {
-		XinputProvider.loadLibrary();
-		this.cellIndex=create();
-		if(cellIndex==-1)
-			throw new Exception(getError());
+		synchronized(XLIB_LOCK){
+			XinputProvider.loadLibrary();
+			this.cellIndex=create();
+			if(cellIndex==-1)
+				throw new Exception(getError());
+		}
 	}
 
 	private static native int create();
 	private static native  String getError();
 
 	public int getDevicesSize() {
-		return getDevicesSize(cellIndex);
+		synchronized(XLIB_LOCK){
+			return getDevicesSize(cellIndex);
+		}
 	}
 
 	private static native int getDevicesSize(int cellIndex);
 
 	public String getDeviceName(int deviceIndex) {
-		return getDeviceName(cellIndex, deviceIndex);
+		synchronized(XLIB_LOCK){
+			return getDeviceName(cellIndex, deviceIndex);
+		}
 	}
 
 	private static native String getDeviceName(int cellIndex, int deviceIndex);
 
 	public XiDevice getDevice() {
-		return device;
+		synchronized(XLIB_LOCK){
+			return device;
+		}
 	}
 
 	public void setDevice(int deviceIndex) throws Exception {
-		if(deviceIndex==-1) {
-			device=null;
-			return;
+		synchronized(XLIB_LOCK){
+			if(deviceIndex==-1) {
+				device=null;
+				return;
+			}
+			int deviceCellIndex=setDevice(cellIndex, deviceIndex);
+			if(deviceCellIndex<0)
+				throw new Exception(getError());
+			device=new XiDevice(this, deviceCellIndex, deviceIndex);
 		}
-		int deviceCellIndex=setDevice(cellIndex, deviceIndex);
-		if(deviceCellIndex<0)
-			throw new Exception(getError());
-		device=new XiDevice(this, deviceCellIndex, deviceIndex);
 	}
 
 	private static native int setDevice(int cellIndex, int deviceIndex);
-	
+
 	public void refreshDeviceInfo(){
-		if(refreshDeviceInfo(cellIndex)!=0)
-			throw new IllegalStateException(getError());
+		synchronized(XLIB_LOCK){
+			if(refreshDeviceInfo(cellIndex)!=0)
+				throw new IllegalStateException(getError());
+		}
 	}
-	
+
 	private static native int refreshDeviceInfo(int cellIndex);
-	
+
 	public long getBootTimeUtc(){
-		if(bootTimeUtc==-1)
-			bootTimeUtc=getBootTimeUtc(cellIndex);
-		return bootTimeUtc;
+		synchronized(XLIB_LOCK){
+			if(bootTimeUtc==-1)
+				bootTimeUtc=getBootTimeUtc(cellIndex);
+			return bootTimeUtc;
+		}
 	}
-	
+
 	long getBootTimeUtcNotCached(){
 		return getBootTimeUtc(cellIndex);
 	}
-	
+
 	private static native long getBootTimeUtc(int cellIndex);
-	
+
 	/*public long getBootTimeUtc(){
 		if(bootTimeUtc==-1)
 			bootTimeUtc=System.currentTimeMillis()-getCurrentServerTime();
 		return bootTimeUtc;
-	}*/
+}*/
 
 
 	@Override
 	protected void finalize() {
-		if(cellIndex!=-1)
-			destroy(cellIndex);
+		synchronized(XLIB_LOCK){
+			if(cellIndex!=-1)
+				destroy(cellIndex);
+		}
 	}
 	static native int destroy(int cellIndex);
-	
+
 	@Override
 	public String toString() {
 		return "{Bus: device="+device+"}";

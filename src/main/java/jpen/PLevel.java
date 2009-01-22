@@ -56,9 +56,11 @@ public class PLevel
 	  /**
 		Angle between the Z axis and the projection of the pen against the Y-Z plane. Range: -pi/2 to pi/2.
 	  */
-	  TILT_Y;
+	  TILT_Y,
+		CUSTOM;
 
-	  public static final List<Type> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
+		public static final List<Type> ALL_VALUES=Collections.unmodifiableList(Arrays.asList(values()));
+		public static final List<Type> VALUES=TypedClass.createStandardTypes(ALL_VALUES);
 	  public static final Set<Type> MOVEMENT_TYPES=Collections.unmodifiableSet(EnumSet.of(X, Y));
 	  public static final Set<Type> TILT_TYPES=Collections.unmodifiableSet(EnumSet.of(TILT_X, TILT_Y));
 		
@@ -115,8 +117,8 @@ public class PLevel
 	}
 
 	@Override
-	List<Type> getTypes() {
-		return Type.VALUES;
+	List<Type> getAllTypes() {
+		return Type.ALL_VALUES;
 	}
 
 	public boolean isMovement() {

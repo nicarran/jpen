@@ -36,7 +36,7 @@ import jpen.provider.xinput.XinputProvider;
 
 public final class PenManager {
 	private static final Logger L=Logger.getLogger(PenManager.class.getName());
-	
+
 	public final Pen  pen=new Pen();
 	public final Component component;
 	private final Set<PenProvider.Constructor> providerConstructors=new HashSet<PenProvider.Constructor>();
@@ -46,7 +46,7 @@ public final class PenManager {
 	private byte nextDeviceId;
 	private volatile boolean paused;
 	private final List<PenManagerListener> listeners=new ArrayList<PenManagerListener>();
-	private final DragOutHandler dragOutHandler;
+	final PenManagerPlayer penManagerPlayer;
 	private PenDevice systemMouseDevice;
 
 	public PenManager(Component component) {
@@ -55,7 +55,7 @@ public final class PenManager {
 		addProvider(new XinputProvider.Constructor());
 		addProvider(new WintabProvider.Constructor());
 		addProvider(new CocoaProvider.Constructor());
-		dragOutHandler=new DragOutHandler(this);
+		penManagerPlayer=new PenManagerPlayer(this);
 	}
 
 	/**
@@ -125,28 +125,13 @@ public final class PenManager {
 	public Collection<PenDevice> getDevices(){
 		return devicesA;
 	}
-	
+
 	public PenDevice getSystemMouseDevice(){
 		return systemMouseDevice;
 	}
 
 	public Set<PenProvider.Constructor> getConstructors() {
 		return providerConstructorsA;
-	}
-
-	/**
-	@deprecated use {@link PenProvider.Constructor#getConstructed()}
-	*/
-	@Deprecated
-	public PenProvider getProvider(PenProvider.Constructor constructor) {
-		return constructor.getConstructed();
-	}
-	/**
-	@deprecated use {@link PenProvider.Constructor#getConstructionException()}
-	*/
-	@Deprecated
-	public PenProvider.ConstructionException getConstructionException(PenProvider.Constructor constructor) {
-		return constructor.getConstructionException();
 	}
 
 	void setPaused(boolean paused) {
@@ -185,13 +170,14 @@ public final class PenManager {
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long deviceTime) {
 		if(paused)
 			return false;
-		switch(dragOutHandler.getMode()){
-		case DISABLED:
-			return pen.scheduleLevelEvent(device, deviceTime, levels, 0, component.getWidth(), 0, component.getHeight());
-		case ENABLED:
-			return pen.scheduleLevelEvent(device, deviceTime, levels,  -Integer.MAX_VALUE, Integer.MAX_VALUE, -Integer.MAX_VALUE, Integer.MAX_VALUE);
-		default:
-			throw new AssertionError();
-		}
+		return pen.scheduleLevelEvent(device, deviceTime, levels, 0, component.getWidth(), 0, component.getHeight(), penManagerPlayer);
+	}
+
+	@Deprecated // experimental:
+	public void setIsRelaxedPlayer(boolean isRelaxedPlayer){
+		penManagerPlayer.setPauseOnWindowDeactivation(!isRelaxedPlayer);
+		penManagerPlayer.setWaitMotionToPlay(!isRelaxedPlayer);
+		//penManagerPlayer.setDragOutMode(isRelaxedPlayer? PenManagerPlayer.DragOutMode.DISABLED:
+		//														PenManagerPlayer.DragOutMode.ENABLED);
 	}
 }

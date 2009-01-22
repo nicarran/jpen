@@ -30,9 +30,7 @@ import jpen.provider.Utils;
 
 public class NativeLibraryLoader{
 	private static final Logger L=Logger.getLogger(NativeLibraryLoader.class.getName());
-	{
-		//L.setLevel(Level.ALL);
-	}
+	// static{L.setLevel(Level.ALL);	}
 	private static String PREFERENCE_KEY$ARCHITECTURE="NativeLibraryLoader.architecture";
 
 	private final Map<String, Collection<String>> dataModelToArchitectures=new HashMap<String, Collection<String>>();
@@ -57,7 +55,7 @@ public class NativeLibraryLoader{
 			Throwable loadExceptionCause=null;
 			if(preferredArchitecture!=null)
 				try{
-					Utils.loadLibrary(preferredArchitecture);
+					loadLibrary(preferredArchitecture);
 				}catch(Throwable t){
 					setPreferredArchitecture(null);
 					loadExceptionCause=t;
@@ -69,8 +67,7 @@ public class NativeLibraryLoader{
 					throw new IllegalStateException("Unsupported data model: "+dataModel);
 				for(String architecture: architectures){
 					try{
-						L.info("trying to load architecture: \""+architecture+"\"");
-						Utils.loadLibrary(architecture);
+						loadLibrary(architecture);
 						setPreferredArchitecture(architecture);
 						loadExceptionCause=null;
 						break;
@@ -81,8 +78,10 @@ public class NativeLibraryLoader{
 				}
 			}
 			loaded=true;
-			if(loadExceptionCause!=null)
+			if(loadExceptionCause!=null){
+				L.info("no suitable JNI library found");
 				throw new LoadException(loadExceptionCause);
+			}
 		}
 	}
 
@@ -123,12 +122,52 @@ public class NativeLibraryLoader{
 				    Preferences preferences=Preferences.userNodeForPackage(NativeLibraryLoader.class);
 				    if(architecture==null){
 					    preferences.remove(PREFERENCE_KEY$ARCHITECTURE);
-						}
+				    }
 				    else{
-							L.info("setting preferred architecture value to: \""+architecture+"\"");
 					    preferences.put(PREFERENCE_KEY$ARCHITECTURE, architecture);
-						}
+							L.info("preferred architecture set");
+				    }
 				    return null;
+			    }
+		    });
+	}
+
+	private static final String getJniLibName(String architecture) {
+		StringBuilder jniLibName=new StringBuilder(64);
+		jniLibName.append(Utils.getModuleId());
+		jniLibName.append("-");
+		jniLibName.append(Utils.getVersion());
+		if(architecture!=null && architecture.trim().length()!=0){
+			jniLibName.append("-");
+			jniLibName.append(architecture);
+		}
+		return jniLibName.toString();
+	}
+
+	public static final void loadLibrary() {
+		loadLibrary(null);
+	}
+
+	static final void loadLibrary(final String architecture) {
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			    final String jniLibName=getJniLibName(architecture);
+			    //@Override
+			    public Object run() {
+				    try{
+					    L.info("loading JNI library: "+jniLibName+" ...");
+					    System.loadLibrary(jniLibName);
+					    L.info(jniLibName+" loaded");
+					    return null;
+				    }catch(RuntimeException ex){
+					    logOnFail();
+					    throw ex;
+				    }catch(Error ex){
+					    logOnFail();
+					    throw ex;
+				    }
+			    }
+			    private void logOnFail(){
+				    L.info(jniLibName+" couldn't be loaded");
 			    }
 		    });
 	}

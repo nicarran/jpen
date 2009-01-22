@@ -35,9 +35,7 @@ import jpen.Pen;
 
 public class JPenDemoControl{
 	private static final Logger L=Logger.getLogger(JPenDemoControl.class.getName());
-	{
-		//L.setLevel(Level.ALL);
-	}
+	//static{L.setLevel(Level.ALL);}
 
 	//private static final Dimension SIZE=new Dimension(400, 400);
 

@@ -43,24 +43,19 @@ class PKindTypeNumberCombo{
 		    });
 	}
 
-	
+
 	static String getPKindTypeStringValue(int intValue){
-		String sValue;
-		int maxKindTypeNumber=PKind.Type.VALUES.size()-1;
-		if(intValue<0)
-			sValue="NONE";
-		else if(intValue>maxKindTypeNumber)
-			sValue="CUSTOM "+(intValue-maxKindTypeNumber);
+		int maxKindTypeNumber=PKind.Type.VALUES.size();
+		if(intValue>=maxKindTypeNumber)
+			return "CUSTOM "+(intValue-maxKindTypeNumber);
 		else
-			sValue=PKind.Type.VALUES.get(intValue).toString();
-		return sValue;
+			return PKind.Type.VALUES.get(intValue).toString();
 	}
 
 	private void update(){
 		comboBox.removeAllItems();
-		comboBox.addItem(-1);
-		for(int i=0; i<=maxPKindTypeNumber; i++)
-			comboBox.addItem(Integer.valueOf(i));
+		for(int i=0; i<=maxPKindTypeNumber; i++)// the CUSTOM PKind can not be setted directly.
+				comboBox.addItem(Integer.valueOf(i));
 	}
 
 	int getMaxPKindTypeNumber(){

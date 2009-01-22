@@ -43,9 +43,7 @@ import jpen.PScrollEvent;
 class MouseDevice
 	extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(MouseDevice.class.getName());
-	{
-		//L.setLevel(Level.ALL);
-	}
+	//static {L.setLevel(Level.ALL);	}
 
 	private final MouseListener mouseL=new MouseAdapter() {
 		    @Override

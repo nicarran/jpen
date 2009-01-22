@@ -31,11 +31,10 @@ import jpen.event.PenListener;
 
 public class Pen extends PenState {
 	private static final Logger L=Logger.getLogger(Pen.class.getName());
-	//static{
-	//L.setLevel(Level.ALL);
-	//}
+	//static{L.setLevel(Level.ALL);}
 
 	public static final int DEFAULT_FREQUENCY=60; // TODO: 50 is a better default or less??
+
 	private int frequency;
 	private volatile MyThread thread;
 
@@ -121,6 +120,7 @@ public class Pen extends PenState {
 					}
 				}
 			} catch(Exception ex) {
+				L.warning("jpen-Pen thread threw an exception: "+Utils.evalStackTrace(ex));
 				exception=ex;
 			}
 			L.fine("^");
@@ -287,7 +287,7 @@ public class Pen extends PenState {
 	private final PhantomEventFilter phantomLevelFilter=new PhantomEventFilter();
 	private final List<PLevel> scheduledLevels=new ArrayList<PLevel>();
 
-	final boolean scheduleLevelEvent(PenDevice device, long penDeviceTime, Collection<PLevel> levels,  int minX, int maxX, int minY, int maxY) {
+	final boolean scheduleLevelEvent(PenDevice device, long penDeviceTime, Collection<PLevel> levels,  int minX, int maxX, int minY, int maxY, PenManagerPlayer penManagerPlayer) {
 		synchronized(scheduledLevels) {
 			if(phantomLevelFilter.filter(device))
 				return false;
@@ -300,12 +300,12 @@ public class Pen extends PenState {
 					switch(levelType){
 					case X:
 						scheduledMovement=true;
-						if(level.value<minX || level.value>maxX)
+						if(!evalLevelValueIsInRange(level.value, minX, maxX, penManagerPlayer))
 							continue;
 						break;
 					case Y:
 						scheduledMovement=true;
-						if(level.value<minY || level.value>maxY)
+						if(!evalLevelValueIsInRange(level.value, minY, maxY, penManagerPlayer))
 							continue;
 						break;
 					default:
@@ -318,8 +318,8 @@ public class Pen extends PenState {
 			if(scheduledMovement &&
 			        lastScheduledState.getKind().typeNumber!=
 			        device.getKindTypeNumber()){
-				PKind newKind=PKind.valueOf(device.getKindTypeNumber());
-				if(newKind!=null){ // the null kind is ignored
+				if(device.getKindTypeNumber()!=PKind.Type.IGNORE.ordinal()){
+					PKind newKind=PKind.valueOf(device.getKindTypeNumber());
 					lastScheduledState.setKind(newKind);
 					schedule(new PKindEvent(this, newKind));
 				}
@@ -331,6 +331,15 @@ public class Pen extends PenState {
 			scheduledLevels.clear();
 			return true;
 		}
+	}
+
+	private boolean evalLevelValueIsInRange(float levelValue, int min , int max, PenManagerPlayer penManagerPlayer){
+		if(levelValue<min || levelValue>max){
+			if(penManagerPlayer!=null &&
+			        penManagerPlayer.stopPlayingIfNotDragOut())
+				return false;
+		}
+		return true;
 	}
 
 	void scheduleButtonReleasedEvents(){

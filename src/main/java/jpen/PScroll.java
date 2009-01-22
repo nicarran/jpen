@@ -28,8 +28,9 @@ public class PScroll
 	public static final long serialVersionUID=1l;
 
 	public enum Type {
-		UP, DOWN;
-		public static final List<Type> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
+		UP, DOWN, CUSTOM;
+		public static final List<Type> ALL_VALUES=Collections.unmodifiableList(Arrays.asList(values()));
+		public static final List<Type> VALUES=TypedClass.createStandardTypes(ALL_VALUES);
 	}
 
 	public PScroll(int typeNumber, int value) {
@@ -37,7 +38,7 @@ public class PScroll
 	}
 
 	@Override
-	List<Type> getTypes() {
-		return Type.VALUES;
+	List<Type> getAllTypes() {
+		return Type.ALL_VALUES;
 	}
 }

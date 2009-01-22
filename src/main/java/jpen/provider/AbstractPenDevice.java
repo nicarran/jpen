@@ -37,7 +37,7 @@ public abstract class AbstractPenDevice
 	private byte id;
 	private String physicalId;
 	private final PenProvider provider;
-	private int kindTypeNumber;
+	private int kindTypeNumber=PKind.Type.CURSOR.ordinal();
 	private boolean enabled;
 
 	protected AbstractPenDevice(PenProvider provider) {
@@ -66,6 +66,8 @@ public abstract class AbstractPenDevice
 	
 	//@Override
 	public void setKindTypeNumber(int kindTypeNumber) {
+		if(kindTypeNumber<0)
+			throw new IllegalArgumentException("PKind.Type must be >= 0");
 		this.kindTypeNumber=kindTypeNumber;
 	}
 

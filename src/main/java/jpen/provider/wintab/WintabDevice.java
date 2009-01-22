@@ -136,7 +136,8 @@ class WintabDevice
 			if(!componentLocation.equals(p))
 				L.fine("UUUPS! something is wrong with the component location calc, getLocationOnScreen(): "+p);
 	}*/
-		for(PLevel.Type levelType:PLevel.Type.values()) {
+		for(int i=PLevel.Type.VALUES.size(); --i>=0;) {
+			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
 			float value=PLevel.getCoordinateValueForComponent(
 			              getComponent().getSize(componentSize), componentLocation,  levelType,  getMultRangedValue(levelType));
 			//value=wintabProvider.mouseLocator.getCorrectedLocation(levelType, value);

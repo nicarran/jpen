@@ -46,9 +46,7 @@ class PenCanvas
 	extends JComponent {
 	public static final long serialVersionUID=1l;
 	private static final Logger L=Logger.getLogger(PenCanvas.class.getName());
-	{
-		//L.setLevel(Level.ALL);
-	}
+	//static {L.setLevel(Level.ALL);}
 
 	private static final Dimension SIZE=new Dimension(1000,1000);
 	private static final Color BACKGROUND_COLOR=new Color(247, 217, 186); // yellish
@@ -138,20 +136,21 @@ class PenCanvas
 			return;
 		}
 
+		pressure*=pressure; // parabolic sensitivity
 		float r=pressure*STROKE_RAD;
-		if(kindType==null){
+		switch(kindType) {
+		case CUSTOM:
 			g.setColor(Color.PINK);
-		}else
-			switch(kindType) {
-			case STYLUS:
-				g.setColor(Color.BLACK);
-				break;
-			case ERASER:
-				g.setColor(BACKGROUND_COLOR);
-				break;
-			case CURSOR:
-				g.setColor(Color.BLUE);
-			}
+			break;
+		case STYLUS:
+			g.setColor(Color.BLACK);
+			break;
+		case ERASER:
+			g.setColor(BACKGROUND_COLOR);
+			break;
+		case CURSOR:
+			g.setColor(Color.BLUE);
+		}
 		stroke.x=cursorCenter.x-r;
 		stroke.y=cursorCenter.y-r;
 		stroke.width=stroke.height=2*r;

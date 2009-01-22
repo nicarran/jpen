@@ -24,9 +24,11 @@ import java.util.List;
 import jpen.PLevel;
 import jpen.provider.Utils;
 
-class WintabAccess {
+final class WintabAccess {
+	private static final Object LOCK=new Object();
+
 	private static long bootTimeUtc=-1;
-	
+
 	/**
 	This must be like E_csrTypes enumeration.
 	*/
@@ -37,84 +39,114 @@ class WintabAccess {
 	private final int cellIndex;
 
 	WintabAccess() throws Exception {
-		WintabProvider.loadLibrary();
-		this.cellIndex=create();
-		if(cellIndex==-1)
-			throw new Exception(getError());
+		synchronized(LOCK){
+			WintabProvider.loadLibrary();
+			this.cellIndex=create();
+			if(cellIndex==-1)
+				throw new Exception(getError());
+		}
 	}
 
 	private static native int create();
 	private static native String getError();
 
 	int getValue(PLevel.Type levelType) {
-		// tilt data is really azimuth and altitude and must be transformed!
-		return getValue(cellIndex, levelType.ordinal());
+		synchronized(LOCK){
+			// tilt data is really azimuth and altitude and must be transformed!
+			return getValue(cellIndex, getLevelTypeValueIndex(levelType));
+		}
 	}
 
-	private static native int getValue(int cellIndex, int levelTypeOrdinal);
+	private static native int getValue(int cellIndex, int valueIndex);
 
 	public boolean nextPacket() {
-		return nextPacket(cellIndex);
+		synchronized(LOCK){
+			return nextPacket(cellIndex);
+		}
 	}
 
 	private static native boolean nextPacket(int cellIndex);
 
 
 	public boolean getEnabled() {
-		return getEnabled(cellIndex);
+		synchronized(LOCK){
+			return getEnabled(cellIndex);
+		}
 	}
 
 	private static native boolean getEnabled(int cellIndex);
 
 	public void setEnabled(boolean enabled) {
-		setEnabled(cellIndex, enabled);
+		synchronized(LOCK){
+			setEnabled(cellIndex, enabled);
+		}
 	}
 
 	private static native void setEnabled(int cellIndex, boolean enabled);
 
 	public PLevel.Range getLevelRange(PLevel.Type levelType) {
-		int[] minMax=getLevelRange(cellIndex, levelType.ordinal());
-		return new PLevel.Range(minMax[0], minMax[1]);
+		synchronized(LOCK){
+			int[] minMax=getLevelRange(cellIndex,getLevelTypeValueIndex(levelType));
+			return new PLevel.Range(minMax[0], minMax[1]);
+		}
+	}
+	
+	static int getLevelTypeValueIndex(PLevel.Type levelType){
+		return levelType.ordinal();
 	}
 
-	private static native int[] getLevelRange(int cellIndex, int levelTypeOrdinal);
+	private static native int[] getLevelRange(int cellIndex, int valueIndex);
 
 	public int getCursor() {
-		return getCursor(cellIndex);
+		synchronized(LOCK){
+			return getCursor(cellIndex);
+		}
 	}
 
 	private static native int getCursor(int cellIndex);
-	
+
 	public long getTime(){
-		return getTime(cellIndex);
+		synchronized(LOCK){
+			return getTime(cellIndex);
+		}
 	}
-	
+
 	private static native long getTime(int cellIndex);
-	
+
 	public long getTimeUtc(){
-		return getBootTimeUtc()+getTime();
+		synchronized(LOCK){
+			return getBootTimeUtc()+getTime();
+		}
 	}
 
 	public int getButtons() {
-		return getButtons(cellIndex);
+		synchronized(LOCK){
+			return getButtons(cellIndex);
+		}
 	}
 
 	private static native int getButtons(int cellIndex);
 
 	public static CursorType getCursorType(int cursor) {
-		return CursorType.VALUES.get(getCursorTypeOrdinal(cursor));
+		synchronized(LOCK){
+			return CursorType.VALUES.get(getCursorTypeOrdinal(cursor));
+		}
 	}
 
 	static native int getCursorTypeOrdinal(int cursor);
 
 	public int getFirstCursor() {
-		return getFirstCursor(cellIndex);
+		synchronized(LOCK){
+			return getFirstCursor(cellIndex);
+		}
 	}
 
 	private static native int getFirstCursor(int cellIndex);
 
 	public int getCursorsCount() {
-		return getCursorsCount(cellIndex);
+		synchronized(LOCK){
+			return getCursorsCount(cellIndex);
+		}
 	}
 
 	private static native int getCursorsCount(int cellIndex);
@@ -128,7 +160,9 @@ class WintabAccess {
 	public static native int getCursorMode(int cursor);
 
 	public String getDeviceName() {
-		return getDeviceName(cellIndex);
+		synchronized(LOCK){
+			return getDeviceName(cellIndex);
+		}
 	}
 
 	private static native String getDeviceName(int cellIndex);
@@ -143,8 +177,10 @@ class WintabAccess {
 
 	@Override
 	protected void finalize() {
-		if(cellIndex!=-1)
-			destroy(cellIndex);
+		synchronized(LOCK){
+			if(cellIndex!=-1)
+				destroy(cellIndex);
+		}
 	}
 
 	private static native int destroy(int cellIndex);
@@ -152,61 +188,71 @@ class WintabAccess {
 	public static native int[] getButtonMap(int cursor);
 
 	public int getStatus(){
-		return getStatus(cellIndex);
+		synchronized(LOCK){
+			return getStatus(cellIndex);
+		}
 	}
 
 	public static native int getStatus(int cellIndex);
 
 	public boolean getTiltExtSupported() {
-		return getTiltExtSupported(cellIndex);
+		synchronized(LOCK){
+			return getTiltExtSupported(cellIndex);
+		}
 	}
 
 	private static native boolean getTiltExtSupported(int cellIndex);
 
 
 	public boolean getLcSysMode(){
-		return getLcSysMode(cellIndex);
+		synchronized(LOCK){
+			return getLcSysMode(cellIndex);
+		}
 	}
 
 	private static native boolean getLcSysMode(int cellIndex);
-	
+
 	public long getBootTimeUtc(){
-		if(bootTimeUtc==-1)
-			bootTimeUtc=getBootTimeUtc(cellIndex);
-		return bootTimeUtc;
+		synchronized(LOCK){
+			if(bootTimeUtc==-1)
+				bootTimeUtc=getBootTimeUtc(cellIndex);
+			return bootTimeUtc;
+		}
 	}
-	
+
 	private static native long getBootTimeUtc(int cellIndex);
 
 	@Override
 	public String toString() {
-		StringBuffer sb=new StringBuffer();
-		sb.append("WintabAccess:[values=(");
-		for(PLevel.Type levelType: PLevel.Type.values()) {
-			sb.append(levelType);
-			sb.append("=");
-			sb.append(getValue(levelType));
-			sb.append(",");
+		synchronized(LOCK){
+			StringBuffer sb=new StringBuffer();
+			sb.append("WintabAccess:[values=(");
+			for(PLevel.Type levelType: PLevel.Type.values()) {
+				sb.append(levelType);
+				sb.append("=");
+				sb.append(getValue(levelType));
+				sb.append(",");
+			}
+			sb.append(") levelRanges=( ");
+			for(PLevel.Type levelType: PLevel.Type.values()) {
+				sb.append(levelType);
+				sb.append("=");
+				sb.append(getLevelRange(levelType));
+				sb.append(" ");
+			}
+			sb.append("), cursor=");
+			sb.append(getCursor());
+			sb.append(", cursorType=");
+			sb.append(getCursorType(getCursor()));
+			sb.append(", id="+getPhysicalId(getCursor()));
+			sb.append(", buttons=");
+			sb.append(getButtons());
+			sb.append(", defCtxSysMode="+getDefCtxSysMode());
+			sb.append(", DDCtxSysMode="+getDDCtxSysMode());
+			sb.append(", lcSysMode="+getLcSysMode());
+			sb.append(", status="+getStatus());
+			sb.append("]");
+			return sb.toString();
 		}
-		sb.append(") levelRanges=( ");
-		for(PLevel.Type levelType: PLevel.Type.values()) {
-			sb.append(levelType);
-			sb.append("=");
-			sb.append(getLevelRange(levelType));
-			sb.append(" ");
-		}
-		sb.append("), cursor=");
-		sb.append(getCursor());
-		sb.append(", cursorType=");
-		sb.append(getCursorType(getCursor()));
-		sb.append(", id="+getPhysicalId(getCursor()));
-		sb.append(", buttons=");
-		sb.append(getButtons());
-		sb.append(", defCtxSysMode="+getDefCtxSysMode());
-		sb.append(", DDCtxSysMode="+getDDCtxSysMode());
-		sb.append(", lcSysMode="+getLcSysMode());
-		sb.append(", status="+getStatus());
-		sb.append("]");
-		return sb.toString();
 	}
 }

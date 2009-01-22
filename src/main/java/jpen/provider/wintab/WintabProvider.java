@@ -62,7 +62,7 @@ public class WintabProvider
 
 	final WintabAccess wintabAccess;
 	private final Map<Integer, WintabDevice> cursorToDevice=new HashMap<Integer, WintabDevice>();
-	private final PLevel.Range[] levelRanges=new PLevel.Range[PLevel.Type.values().length];
+	private final PLevel.Range[] levelRanges=new PLevel.Range[PLevel.Type.VALUES.size()];
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 	private final Thread thread;
 	private boolean paused=true;
@@ -146,8 +146,10 @@ public class WintabProvider
 		this.wintabAccess=wintabAccess;
 		//this.mouseLocator=new MouseLocator();
 
-		for(PLevel.Type levelType: PLevel.Type.values())
+		for(int i=PLevel.Type.VALUES.size(); --i>=0;){
+			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
 			levelRanges[levelType.ordinal()]=wintabAccess.getLevelRange(levelType);
+		}
 
 		thread=new Thread("jpen-WintabProvider") {
 			       public synchronized void run() {

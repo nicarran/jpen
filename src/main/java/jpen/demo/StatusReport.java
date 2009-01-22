@@ -62,7 +62,7 @@ public class StatusReport{
 	private void appendPenThreadCrashInfo(PenManager penManager){
 		Exception penThreadCrashException=penManager.pen.getThreadException();
 		if(penThreadCrashException!=null){
-			appendLine("Pen Thread Crashed: "+Utils.evalStackTrace(penThreadCrashException));
+			appendLine("Pen Thread Crashed: "+jpen.Utils.evalStackTrace(penThreadCrashException));
 		}
 	}
 
@@ -102,7 +102,7 @@ public class StatusReport{
 			PenProvider.ConstructionException constructionException=constructor.getConstructionException();
 			String constructionExceptionStackTrace="none";
 			if(constructionException!=null){
-				constructionExceptionStackTrace=Utils.evalStackTrace(constructionException);
+				constructionExceptionStackTrace=jpen.Utils.evalStackTrace(constructionException);
 			}
 			appendLine("Construction Exception: "+constructionExceptionStackTrace, 2);
 			PenProvider penProvider=constructor.getConstructed();

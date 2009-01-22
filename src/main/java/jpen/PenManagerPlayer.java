@@ -31,63 +31,62 @@ import jpen.event.PenAdapter;
 import jpen.event.PenListener;
 import jpen.provider.Utils;
 
-class DragOutHandler
+class PenManagerPlayer
 			extends MouseAdapter
-			implements MouseMotionListener // in jdk 1.5 MouseAdapter does not implement this interface.
 {
-	private static final Logger L=Logger.getLogger(DragOutHandler.class.getName());
-	{
-		//L.setLevel(Level.ALL);
-	}
+	private static final Logger L=Logger.getLogger(PenManagerPlayer.class.getName());
+	//static {L.setLevel(Level.ALL);}
 
 	public final PenManager penManager;
-	enum Mode{
-	  /**
-	  Dragging outside the component stops firing events.
-	  */
-	  DISABLED,
-	  /**
-	  Dragging outside the {@link #component} is enabled and causes event firing. <b>Warning</b>: If the dragging travels above other windows, digitized events may stop firing.
-	  */
-	  ENABLED;
-	  //  implement NO_LEVELS: dragging enabled but no levels are fired?
-	}
-	private Mode mode=Mode.ENABLED;
-
 	private boolean isDraggingOut; // state: dragging outside the component
-	private Window componentWindow;
-	private boolean pauseOnWindowDeactivation=true;
+	private Window componentWindow; // may be null
+	private boolean pauseOnWindowDeactivation=true; 
+	private boolean waitMotionToPlay=true;
 	private final WindowListener windowListener=new WindowAdapter(){
 		    @Override
 		    public void windowDeactivated(WindowEvent ev){
 			    if(pauseOnWindowDeactivation)
-				    synchronized(DragOutHandler.this){
-					    stopDraggingOut();
-					    setPaused(true);
+				    synchronized(PenManagerPlayer.this){
+					    stopPlaying();
 				    }
 		    }
 	    };
-	private final PenListener penListener=new PenAdapter(){
+	private final PenListener draggingOutPenListener=new PenAdapter(){
 		    @Override
 		    public void penButtonEvent(PButtonEvent ev){
-			    synchronized(DragOutHandler.this){
+			    synchronized(PenManagerPlayer.this){
 				    if(!ev.button.value)
 					    if(!penManager.pen.hasPressedButtons()){
-						    if(isDraggingOut){
-							    stopDraggingOut();
-							    setPaused(true); // causes button release schedule but there may be level events still to be processed in the pen event queue (here I'm in the queue processing thread).
+						    if(isDraggingOut){// causes button release schedule but there may be level events still to be processed in the pen event queue (here I'm in the queue processing thread).
+							    stopPlaying();
 						    }
 					    }
 			    }
 		    }
 	    };
-
 	private boolean waitingMotionToPlay;
+	private final MouseMotionListener waitingMotionMouseListener=new MouseMotionListener(){  // in jdk 1.5 MouseAdapter does not implement this interface.
+		    //@Override
+		    public synchronized void mouseMoved(MouseEvent ev){
+			    if(!penManager.getPaused())
+				    throw new AssertionError();
+			    setPaused(false);
+		    }
+		    //@Override
+		    public void mouseDragged(MouseEvent ev){
+		    }
+	    };
 
-	DragOutHandler(PenManager penManager){
+	PenManagerPlayer(PenManager penManager){
 		this.penManager=penManager;
 		penManager.component.addMouseListener(this);
 		setPaused(true);
+	}
+
+	private synchronized void setPaused(boolean paused) {
+		penManager.setPaused(paused);
+		setWaitingMotionToPlay(paused);
+		updateComponentWindow();
 	}
 
 	private void updateComponentWindow(){
@@ -100,20 +99,13 @@ class DragOutHandler
 			componentWindow.addWindowListener(windowListener);
 	}
 
-
-	// TODO: set this public?
-	void setMode(Mode mode){
-		this.mode=mode;
-	}
-
-	// TODO: set this public?
-	Mode getMode(){
-		return mode;
-	}
-
 	// TODO: set this public?
 	void setPauseOnWindowDeactivation(boolean pauseOnWindowDeactivation){
 		this.pauseOnWindowDeactivation=pauseOnWindowDeactivation;
+	}
+
+	void setWaitMotionToPlay(boolean waitMotionToPlay){
+		this.waitMotionToPlay=waitMotionToPlay;
 	}
 
 	@Override
@@ -121,7 +113,21 @@ class DragOutHandler
 		if(isDraggingOut)
 			stopDraggingOut();
 		else
+			startPlaying();
+	}
+
+	private void startPlaying(){
+		if(waitMotionToPlay)
 			setWaitingMotionToPlay(true);
+		else
+			setPaused(false);
+	}
+
+	@Override
+	public synchronized void mouseExited(MouseEvent ev) {
+		//if(isDraggingOut)
+			//throw new AssertionError();
+		stopPlayingIfNotDragOut();
 	}
 
 	private synchronized void setWaitingMotionToPlay(boolean waitingMotionToPlay){
@@ -129,56 +135,46 @@ class DragOutHandler
 			return;
 		this.waitingMotionToPlay=waitingMotionToPlay;
 		if(waitingMotionToPlay)
-			penManager.component.addMouseMotionListener(this);
+			penManager.component.addMouseMotionListener(waitingMotionMouseListener);
 		else
-			penManager.component.removeMouseMotionListener(this);
+			penManager.component.removeMouseMotionListener(waitingMotionMouseListener);
 	}
 
-	//@Override
-	public synchronized void mouseMoved(MouseEvent ev){
-		if(!penManager.getPaused())
-			throw new AssertionError();
-		setPaused(false);
+	synchronized boolean startDraggingOutIfRequired(){
+		if(isDraggingOut)
+			return true;
+		if(!penManager.pen.hasPressedButtons())
+			return false;
+		if(componentWindow==null){
+			L.warning("Disabled dragging out capability: component window not found.");
+			return false;
+		}
+		if(pauseOnWindowDeactivation && !componentWindow.isActive()){
+			L.info("Dragging out on inactive window is not supported.");
+			return false;
+		}
+		isDraggingOut=true;
+		penManager.pen.addListener(draggingOutPenListener);
+		return true;
+	}
+	
+	boolean stopPlayingIfNotDragOut(){
+		if(!startDraggingOutIfRequired()){
+			setPaused(true);
+			return true;
+		}
+		return false;
 	}
 
-	//@Override
-	public void mouseDragged(MouseEvent ev){
+	void stopPlaying(){
+		stopDraggingOut();
+		setPaused(true);
 	}
 
 	private synchronized void stopDraggingOut(){
 		if(!isDraggingOut)
 			return;
 		isDraggingOut=false;
-		penManager.pen.removeListener(penListener);
-	}
-
-	@Override
-	public synchronized void mouseExited(MouseEvent ev) {
-		if(isDraggingOut) // TEST
-			throw new AssertionError();
-		startDraggingOut();
-		if(!isDraggingOut)
-			setPaused(true);
-	}
-
-	private synchronized void startDraggingOut(){
-		if(mode.equals(Mode.DISABLED) || !penManager.pen.hasPressedButtons())
-			return;
-		if(componentWindow==null){
-			L.warning("Disabled dragging out capability: component window not found.");
-			return;
-		}
-		if(!componentWindow.isActive()){
-			L.info("Dragging out on inactive window is not supported.");
-			return;
-		}
-		isDraggingOut=true;
-		penManager.pen.addListener(penListener);
-	}
-
-	private synchronized void setPaused(boolean paused) {
-		penManager.setPaused(paused);
-		setWaitingMotionToPlay(paused);
-		updateComponentWindow();
+		penManager.pen.removeListener(draggingOutPenListener);
 	}
 }

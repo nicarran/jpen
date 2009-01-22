@@ -42,7 +42,6 @@ class ScrollsPanel{
 			super(new JTextField(3));
 			component.setHorizontalAlignment(JTextField.RIGHT);
 			component.setEditable(false);
-			increase();
 		}
 
 		@Override

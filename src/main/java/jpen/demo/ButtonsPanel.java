@@ -62,10 +62,6 @@ class ButtonsPanel{
 			                public void penButtonEvent(PButtonEvent ev){
 				                pen=ev.pen;
 				                PButton.Type buttonType=ev.button.getType();
-				                if(buttonType==null){
-					                System.out.println("null button type for event: "+ev);
-					                return;
-				                }
 				                Display display=buttonTypeToDisplay.get(buttonType);
 				                display.setIsDirty(true);
 			                }

@@ -26,11 +26,12 @@ import jpen.PenManager;
 import jpen.PLevel;
 import jpen.provider.Utils;
 
-class XiDevice{
-	
+final class XiDevice{
+	public static final Object XLIB_LOCK=XiBus.XLIB_LOCK;
+
 	enum EventType{
-		BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY;
-		public static final List<EventType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
+	  BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY;
+	  public static final List<EventType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
 	}
 
 	final int cellIndex;
@@ -38,112 +39,139 @@ class XiDevice{
 	final int deviceIndex;
 
 	XiDevice(XiBus bus, int cellIndex, int deviceIndex) {
-		XinputProvider.loadLibrary();
-		this.bus=bus;
-		this.cellIndex=cellIndex;
-		this.deviceIndex=deviceIndex;
+			XinputProvider.loadLibrary();
+			this.bus=bus;
+			this.cellIndex=cellIndex;
+			this.deviceIndex=deviceIndex;
 	}
 
 	public String getName() {
 		return bus.getDeviceName(deviceIndex);
 	}
-	
+
 	public boolean getIsListening(){
-		return getIsListening(cellIndex);
+		synchronized(XLIB_LOCK){
+			return getIsListening(cellIndex);
+		}
 	}
-	
+
 	private static native boolean getIsListening(int cellIndex);
-	
+
 	public void setIsListening(boolean isListening){
-		setIsListening(cellIndex, isListening);
+		synchronized(XLIB_LOCK){
+			setIsListening(cellIndex, isListening);
+		}
 	}
-	
+
 	private static native void setIsListening(int cellIndex, boolean isListening);
 
 	public PLevel.Range getLevelRange(PLevel.Type levelType) {
-		return new PLevel.Range(getLevelRangeMin(cellIndex, levelType.ordinal()), getLevelRangeMax(cellIndex, levelType.ordinal()));
+		synchronized(XLIB_LOCK){
+			int typeIndex=getLevelTypeValueIndex(levelType);
+			return new PLevel.Range(getLevelRangeMin(cellIndex, typeIndex), getLevelRangeMax(cellIndex, typeIndex));
+		}
+	}
+	
+	static int getLevelTypeValueIndex(PLevel.Type levelType){
+		return levelType.ordinal();
 	}
 
 	private static native int getLevelRangeMin(int cellIndex, int levelTypeOrdinal);
 	private static native int getLevelRangeMax(int cellIndex, int levelTypeOrdinal);
 
 	public int getValue(PLevel.Type levelType) {
-		return getValue(cellIndex, levelType.ordinal());
+		synchronized(XLIB_LOCK){
+			return getValue(cellIndex, getLevelTypeValueIndex(levelType));
+		}
 	}
 
-	private static native int getValue(int cellIndex, int dataTypeOrdinal);
+	private static native int getValue(int cellIndex, int valueIndex);
 
 	@Override
 	protected void finalize() {
-		if(cellIndex!=-1)
-			destroy(cellIndex);
+		synchronized(XLIB_LOCK){
+			if(cellIndex!=-1)
+				destroy(cellIndex);
+		}
 	}
 	private static native int destroy(int cellIndex);
 	private static native String getError();
 
 	public boolean nextEvent() {
-		if(bus.getDevice()!=this)
-			throw new IllegalStateException("This device is not the bus owner.");
-		return nextEvent(cellIndex);
+		synchronized(XLIB_LOCK){
+			if(bus.getDevice()!=this)
+				throw new IllegalStateException("This device is not the bus owner.");
+			return nextEvent(cellIndex);
+		}
 	}
 
 	private static native boolean nextEvent(int cellIndex);
-	
+
 	public long getLastEventTime(){
-		return getLastEventTime(cellIndex);
+		synchronized(XLIB_LOCK){
+			return getLastEventTime(cellIndex);
+		}
 	}
-	
+
 	private static native long getLastEventTime(int cellIndex);
-	
+
 	public long getLastEventTimeUtc(){
 		return bus.getBootTimeUtc()+getLastEventTime();
 	}
-	
+
 	public EventType getLastEventType() {
-		int lastEventTypeOrdinal=getLastEventType(cellIndex);
-		if(lastEventTypeOrdinal<0)
-			return null;
-		return EventType.VALUES.get(lastEventTypeOrdinal);
+		synchronized(XLIB_LOCK){
+			int lastEventTypeOrdinal=getLastEventType(cellIndex);
+			if(lastEventTypeOrdinal<0)
+				return null;
+			return EventType.VALUES.get(lastEventTypeOrdinal);
+		}
 	}
-	
+
 	private static native int getLastEventType(int cellIndex);
 
 	public int getLastEventButton() {
-		return getLastEventButton(cellIndex);
+		synchronized(XLIB_LOCK){
+			return getLastEventButton(cellIndex);
+		}
 	}
 
 	private static native int getLastEventButton(int cellIndex);
-	
+
 	public void refreshLevelRanges(){
-		refreshLevelRanges(cellIndex);
+		synchronized(XLIB_LOCK){
+			refreshLevelRanges(cellIndex);
+		}
 	}
-	
+
 	private static native void refreshLevelRanges(int cellIndex);
 
 	@Override
 	public String toString() {
-		StringBuffer sb=new StringBuffer();
-		sb.append("{Device: name=");
-		sb.append(getName());
-		sb.append(", levelRanges=( ");
-		for(PLevel.Type levelType: PLevel.Type.values()) {
-			sb.append(levelType);
-			sb.append("=");
-			sb.append(getLevelRange(levelType));
-			sb.append(" ");
+		synchronized(XLIB_LOCK){
+			StringBuffer sb=new StringBuffer();
+			sb.append("{Device: name=");
+			sb.append(getName());
+			sb.append(", levelRanges=( ");
+			for(PLevel.Type levelType: PLevel.Type.values()) {
+				sb.append(levelType);
+				sb.append("=");
+				sb.append(getLevelRange(levelType));
+				sb.append(" ");
+			}
+			sb.append(") values=(");
+			for(PLevel.Type levelType: PLevel.Type.values()) {
+				sb.append(levelType);
+				sb.append("=");
+				sb.append(getValue(levelType));
+				sb.append(",");
+			}
+			sb.append(") , lastEventType=");
+			sb.append(getLastEventType());
+			sb.append(", lastEventButton=");
+			sb.append(getLastEventButton());
+			sb.append("}");
+			return sb.toString();
 		}
-		sb.append(") values=(");
-		for(PLevel.Type levelType: PLevel.Type.values()) {
-			sb.append(levelType);
-			sb.append("=");
-			sb.append(getValue(levelType));
-			sb.append(",");
-		}
-		sb.append(") , lastEventType=");
-		sb.append(getLastEventType());
-		sb.append(", lastEventButton=");
-		sb.append(getLastEventButton());
-		sb.append("}");
-		return sb.toString();
 	}
 }

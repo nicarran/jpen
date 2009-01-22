@@ -47,9 +47,8 @@ import static jpen.provider.xinput.XiDevice.*;
 
 class XinputDevice extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(XinputDevice.class.getName());
-	{
-		//L.setLevel(Level.ALL);
-	}
+	// static{L.setLevel(Level.ALL);}
+
 	public final XiDevice device;
 	private final PLevel.Range[] levelRanges;
 	private final XinputProvider xinputProvider;
@@ -60,12 +59,12 @@ class XinputDevice extends AbstractPenDevice {
 		super(xinputProvider);
 		this.device=device;
 		this.xinputProvider=xinputProvider;
-		levelRanges=new PLevel.Range[PLevel.Type.values().length];
+		levelRanges=new PLevel.Range[PLevel.Type.VALUES.size()];
 		resetLevelRanges();
 		setKindTypeNumber(getDefaultKindTypeNumber());
 		setEnabled(true);
 	}
-	
+
 	//@Override
 	public String getName() {
 		return device.getName();
@@ -73,8 +72,10 @@ class XinputDevice extends AbstractPenDevice {
 
 	void resetLevelRanges(){
 		device.refreshLevelRanges();
-		for(PLevel.Type levelType: PLevel.Type.values())
+		for(int i=PLevel.Type.VALUES.size(); --i>=0; ){
+			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
 			levelRanges[levelType.ordinal()]=device.getLevelRange(levelType);
+		}
 	}
 
 	void reset(){
@@ -90,7 +91,7 @@ class XinputDevice extends AbstractPenDevice {
 			return PKind.Type.CURSOR.ordinal();
 		else if(getName().indexOf("tylus")!=-1)
 			return PKind.Type.STYLUS.ordinal();
-		return -1;
+		return PKind.Type.IGNORE.ordinal();
 	}
 
 	void processQuedEvents() {
@@ -105,7 +106,7 @@ class XinputDevice extends AbstractPenDevice {
 					//scheduleScrollEvent(lastEventButton); nicarran: the mouse provider catches this.
 				}
 				else
-					scheduleButtonEvent(lastEventButton, true);
+					scheduleButtonEvent(lastEventButton-1, true);
 				break;
 			case BUTTON_RELEASE:
 				lastEventButton=device.getLastEventButton();
@@ -125,7 +126,8 @@ class XinputDevice extends AbstractPenDevice {
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();
 	private void scheduleLevelEvent() {
 		Utils.getLocationOnScreen(getComponent(), componentLocation);
-		for(PLevel.Type levelType:PLevel.Type.values()) {
+		for(int i=PLevel.Type.VALUES.size(); --i>=0;) {
+			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
 			float value=PLevel.getCoordinateValueForComponent(
 			              getComponent().getSize(componentSize), componentLocation,  levelType, getMultRangedValue(levelType));
 			/*if(levelType.isMovement && value<0) {
@@ -141,7 +143,7 @@ class XinputDevice extends AbstractPenDevice {
 	void scheduleButtonEvent(int number, boolean state) {
 		if(L.isLoggable(Level.FINE))
 			L.fine("scheduling button event: number="+number+", state="+state);
-		getPenManager().scheduleButtonEvent(new PButton(number-1, state));
+		getPenManager().scheduleButtonEvent(new PButton(number, state));
 	}
 
 	private static final float RADS_PER_DEG=(float)(Math.PI/180);

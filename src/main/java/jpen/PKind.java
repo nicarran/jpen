@@ -29,18 +29,15 @@ public class PKind
 	public static final long serialVersionUID=1l;
 
 	public enum Type{
-	  CURSOR, STYLUS, ERASER;
-		public static final List<Type> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
-
+		CURSOR, STYLUS, ERASER, 
 		/**
-		@deprecated Use {@link #VALUES} and return {@code null} if the {@code kindTypeNumber} is out of range;
+		Used for devices that does not identify the pen, rater extends it, like the pad.
 		*/
-		@Deprecated
-	  public static final PKind.Type valueOf(int kindTypeNumber) {
-		  if(kindTypeNumber<0 || kindTypeNumber>=VALUES.size())
-			  return null;
-		  return VALUES.get(kindTypeNumber);
-	  }
+		IGNORE, 
+		CUSTOM;
+		
+		public static final List<Type> ALL_VALUES=Collections.unmodifiableList(Arrays.asList(values()));
+		public static final List<Type> VALUES=TypedClass.createStandardTypes(ALL_VALUES);
 	}
 
 	private PKind(int typeNumber) {
@@ -49,21 +46,19 @@ public class PKind
 
 	private static final List<PKind> VALUES_L=new ArrayList<PKind>(Type.VALUES.size());
 	private static final List<PKind> VALUES=Collections.unmodifiableList(VALUES_L);
+	
+	public static PKind valueOf(Type type){
+		return valueOf(type.ordinal());
+	}
 
 	public static PKind valueOf(int typeNumber){
-		if(typeNumber<0)
-			return null;
 		while(VALUES_L.size()<=typeNumber)
 			VALUES_L.add(new PKind(VALUES_L.size()));
 		return VALUES_L.get(typeNumber);
 	}
 
-	public static PKind valueOf(Type type){
-		return valueOf(type.ordinal());
-	}
-
 	@Override
-	List<Type> getTypes() {
-		return Type.VALUES;
+	List<Type> getAllTypes() {
+		return Type.ALL_VALUES;
 	}
 }

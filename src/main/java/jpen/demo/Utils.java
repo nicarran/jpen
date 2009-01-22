@@ -67,12 +67,4 @@ final class Utils{
 		return new Box.Filler(new Dimension(0,3), new Dimension(0,3),
 		       new Dimension(0, 3));
 	}
-	
-	static String evalStackTrace(Throwable t){
-		java.io.StringWriter sw=new java.io.StringWriter();
-		java.io.PrintWriter pw=new java.io.PrintWriter(sw);
-		t.printStackTrace(pw);
-		pw.close();
-		return sw.toString();
-	}
 }

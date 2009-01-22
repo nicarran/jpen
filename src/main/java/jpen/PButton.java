@@ -28,8 +28,9 @@ public class PButton
 	public static final long serialVersionUID=1l;
 
 	public enum Type{
-		LEFT, CENTER, RIGHT;
-		public static final List<Type> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
+		LEFT, CENTER, RIGHT, CUSTOM;
+		public static final List<Type> ALL_VALUES=Collections.unmodifiableList(Arrays.asList(values()));
+		public static final List<Type> VALUES=TypedClass.createStandardTypes(ALL_VALUES);
 	}
 
 	public PButton(int typeNumber, Boolean value) {
@@ -39,7 +40,7 @@ public class PButton
 	// TODO: valueOf ?
 
 	@Override
-	List<Type> getTypes() {
-		return Type.VALUES;
+	List<Type> getAllTypes(){
+		return Type.ALL_VALUES;
 	}
 }

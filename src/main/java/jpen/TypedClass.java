@@ -18,6 +18,8 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class TypedClass<T extends Enum<T>>
@@ -31,21 +33,32 @@ public abstract class TypedClass<T extends Enum<T>>
 		this.typeNumber=typeNumber;
 	}
 
-	abstract List<T> getTypes();
+	abstract List<T> getAllTypes();
 
 	/**
-	WARNING: This method returns {@code null} when the {@link #typeNumber} does not match any of the enum type ordinals. Always check for a null return value. 
-	
-	@return The enum type matching the {@link #typeNumber}, or {@code null} if there is no match.
+	@return The enum type matching the {@link #typeNumber}.
 	*/
 	public final T getType() {
 		return getType(typeNumber);
 	}
 
 	private final T getType(int typeNumber){
-		if(typeNumber<0 || typeNumber>=getTypes().size())
-			return null;
-		return getTypes().get(typeNumber);
+		List<T> types=getAllTypes();
+		int customTypeOrdinal=getCustomTypeOrdinal(types);
+		if(typeNumber>=customTypeOrdinal)
+			return types.get(customTypeOrdinal);
+		return types.get(typeNumber);
+	}
+	
+	private static final <T extends Enum<T>> int getCustomTypeOrdinal(Collection<T> types){
+		return types.size()-1;// the last is always the CUSTOM
+	}
+
+	@SuppressWarnings("unchecked")
+	static final <T extends Enum<T>> List<T> createStandardTypes(List<T> allTypes){
+		List<T> stdTypes=new ArrayList<T>(allTypes);
+		stdTypes.remove(getCustomTypeOrdinal(stdTypes));
+		return Collections.unmodifiableList(stdTypes);
 	}
 
 	@Override

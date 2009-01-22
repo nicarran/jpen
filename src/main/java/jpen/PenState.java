@@ -27,7 +27,7 @@ public class PenState
 
 	static class Levels implements java.io.Serializable {
 		public static final long serialVersionUID=1l;
-		private final float[] values=new float[PLevel.Type.values().length];
+		private final float[] values=new float[PLevel.Type.VALUES.size()]; // CUSTOM type does not store value.
 		private final Map<Integer, Float> extTypeNumberToValue=new HashMap<Integer, Float>();
 
 		void setValues(PenState.Levels levels){
@@ -41,6 +41,14 @@ public class PenState
 			for(PLevel level:ev.levels)
 				setValue(level.typeNumber, level.value);
 		}
+		
+		final void setValue(int levelTypeNumber, float value){
+			if(levelTypeNumber>=values.length) {
+				setExtValue(levelTypeNumber, value);
+				return;
+			}
+			values[levelTypeNumber]=value;
+		}
 
 		float getValue(int levelTypeNumber) {
 			if(levelTypeNumber>=values.length)
@@ -53,14 +61,6 @@ public class PenState
 			return value==null? 0f: value;
 		}
 
-		final void setValue(int levelTypeNumber, float value){
-			if(levelTypeNumber>=values.length) {
-				setExtValue(levelTypeNumber, value);
-				return;
-			}
-			values[levelTypeNumber]=value;
-		}
-
 		private final void setExtValue(int levelTypeNumber, float value){
 			extTypeNumberToValue.put(levelTypeNumber, value);
 		}
@@ -68,7 +68,7 @@ public class PenState
 
 	private PKind kind=PKind.valueOf(PKind.Type.CURSOR);
 	final Levels levels=new Levels();
-	private final int[] buttonValues=new int[PButton.Type.values().length];
+	private final int[] buttonValues=new int[PButton.Type.VALUES.size()]; // CUSTOM type does not store value.
 	final Map<Integer, Integer> extButtonTypeNumberToValue=new HashMap<Integer, Integer>();
 	private int pressedButtonsCount;
 
