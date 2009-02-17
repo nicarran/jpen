@@ -31,7 +31,11 @@ import javax.swing.JScrollPane;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import jpen.PButton;
 import jpen.Pen;
+import jpen.PKind;
+import jpen.PLevel;
+import jpen.PLevelEmulator;
 
 public class JPenDemoControl{
 	private static final Logger L=Logger.getLogger(JPenDemoControl.class.getName());
@@ -46,6 +50,9 @@ public class JPenDemoControl{
 	public JPenDemoControl(){
 		penCanvas=new PenCanvas();
 		mainPanel=new MainPanel(penCanvas);
+		
+		setSupportCustomPKinds(true);
+		penCanvas.penManager.pen.levelEmulator.setPressureTriggerForLeftCursorButton(0.5f);
 
 		statusReportButton.addActionListener(new ActionListener(){
 			    //@Override
@@ -67,9 +74,9 @@ public class JPenDemoControl{
 
 	public void setSupportCustomPKinds(boolean supportCustomPKinds){
 		mainPanel.devicesPanel.devicesTableModel.
-		       setSupportCustomPKinds(supportCustomPKinds);
+		setSupportCustomPKinds(supportCustomPKinds);
 	}
-	
+
 	public JComponent getMainPanelComponent(){
 		return mainPanel.panel;
 	}
@@ -96,7 +103,6 @@ public class JPenDemoControl{
 			L.warning("The \"system\" look and feel couldn't be setted.");
 		}
 		JPenDemoControl jpenDemoControl=new JPenDemoControl();
-		jpenDemoControl.setSupportCustomPKinds(true);
 		jpenDemoControl.showDialog(null, "JPen Demo");
 		System.exit(0);
 	}

@@ -53,6 +53,8 @@ public class Pen extends PenState {
 	private final List<PenListener> listeners=new ArrayList<PenListener>();
 	private volatile PenListener[] listenersArray;
 	private boolean firePenTockOnSwing;
+	public final PLevelEmulator levelEmulator=new PLevelEmulator();
+	private PLevelFilter levelFilter=PLevelFilter.AllowAll.INSTANCE;
 
 	private final class MyThread
 		extends Thread {
@@ -161,6 +163,14 @@ public class Pen extends PenState {
 
 	Pen() {
 		setFrequencyLater(DEFAULT_FREQUENCY);
+	}
+	
+	public PLevelFilter getLevelFilter(){
+		return levelFilter;
+	}
+	
+	public void setLevelFilter(PLevelFilter levelFilter){
+		this.levelFilter=levelFilter;
 	}
 
 	public synchronized Exception getThreadException(){
@@ -295,21 +305,21 @@ public class Pen extends PenState {
 			for(PLevel level:levels) {
 				if(level.value==lastScheduledState.getLevelValue(level.typeNumber))
 					continue;
-				PLevel.Type levelType=level.getType();
-				if(levelType!=null)
-					switch(levelType){
-					case X:
-						scheduledMovement=true;
-						if(!evalLevelValueIsInRange(level.value, minX, maxX, penManagerPlayer))
-							continue;
-						break;
-					case Y:
-						scheduledMovement=true;
-						if(!evalLevelValueIsInRange(level.value, minY, maxY, penManagerPlayer))
-							continue;
-						break;
-					default:
-					}
+				if(levelFilter.filterPenLevel(level))
+					continue;
+				switch(level.getType()){
+				case X:
+					scheduledMovement=true;
+					if(!evalLevelValueIsInRange(level.value, minX, maxX, penManagerPlayer))
+						continue;
+					break;
+				case Y:
+					scheduledMovement=true;
+					if(!evalLevelValueIsInRange(level.value, minY, maxY, penManagerPlayer))
+						continue;
+					break;
+				default:
+				}
 				scheduledLevels.add(level);
 				lastScheduledState.levels.setValue(level.typeNumber, level.value);
 			}
@@ -353,8 +363,11 @@ public class Pen extends PenState {
 
 	void scheduleButtonEvent(PButton button) {
 		synchronized(buttonsLock) {
-			if(lastScheduledState.setButtonValue(button.typeNumber, button.value))
-				schedule(new PButtonEvent(this, button));
+			if(lastScheduledState.setButtonValue(button.typeNumber, button.value)){
+				PButtonEvent buttonEvent=new PButtonEvent(this, button);
+				schedule(buttonEvent);
+				levelEmulator.scheduleEmulatedEvent(buttonEvent);
+			}
 		}
 	}
 
@@ -362,7 +375,7 @@ public class Pen extends PenState {
 		schedule(new PScrollEvent(this, scroll));
 	}
 
-	private final void schedule(PenEvent ev) {
+	final void schedule(PenEvent ev) {
 		synchronized(lastScheduledEvent) {
 			ev.time=System.currentTimeMillis();
 			lastScheduledEvent.next=ev;

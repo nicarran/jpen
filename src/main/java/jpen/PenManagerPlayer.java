@@ -67,10 +67,12 @@ class PenManagerPlayer
 	private boolean waitingMotionToPlay;
 	private final MouseMotionListener waitingMotionMouseListener=new MouseMotionListener(){  // in jdk 1.5 MouseAdapter does not implement this interface.
 		    //@Override
-		    public synchronized void mouseMoved(MouseEvent ev){
+		    public void mouseMoved(MouseEvent ev){
+					synchronized(PenManagerPlayer.this){
 			    if(!penManager.getPaused())
 				    throw new AssertionError();
 			    setPaused(false);
+					}
 		    }
 		    //@Override
 		    public void mouseDragged(MouseEvent ev){

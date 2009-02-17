@@ -25,6 +25,8 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -85,6 +87,8 @@ class MouseDevice
 	MouseDevice(SystemProvider systemProvider) {
 		super(systemProvider);
 		this.systemProvider=systemProvider;
+		getComponent().addMouseListener(mouseL);
+		getComponent().addMouseWheelListener(mouseWheelL);
 		setEnabled(true);
 	}
 	
@@ -103,22 +107,10 @@ class MouseDevice
 		if(getEnabled()==enabled)
 			return;
 		if(getEnabled())
-			unlisten();
+			getComponent().removeMouseMotionListener(mouseMotionL);
 		super.setEnabled(enabled);
 		if(getEnabled())
-			listen();
-	}
-
-	private void listen() {
-		getComponent().addMouseListener(mouseL);
-		getComponent().addMouseMotionListener(mouseMotionL);
-		getComponent().addMouseWheelListener(mouseWheelL);
-	}
-
-	private void unlisten() {
-		getComponent().removeMouseListener(mouseL);
-		getComponent().removeMouseMotionListener(mouseMotionL);
-		getComponent().removeMouseWheelListener(mouseWheelL);
+			getComponent().addMouseMotionListener(mouseMotionL);
 	}
 
 	private final PLevel[] changedLevelsA=new PLevel[2];

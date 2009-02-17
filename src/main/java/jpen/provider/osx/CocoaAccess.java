@@ -155,21 +155,31 @@ public class CocoaAccess {
 	  final float vendorDefined2,
 	  final float vendorDefined3
 	) {
-		/* nicarran: TODO: test this:
-		 if(special_pointingDeviceType!=1)
-		return;*/
-
-		postTabletEvent(
-		  type, special_pointingDeviceType,
-		  x, y, absoluteX, absoluteY, absoluteZ,
-		  buttonMask, pressure, rotation,
-		  tiltX, tiltY,
-		  tangentialPressure,
-		  vendorDefined1, vendorDefined2, vendorDefined3
-		);
+		if (SwingUtilities.isEventDispatchThread()) {
+			postEvent_swing(
+			  type, special_pointingDeviceType,
+			  x, y, absoluteX, absoluteY, absoluteZ,
+			  buttonMask, pressure, rotation,
+			  tiltX, tiltY,
+			  tangentialPressure,
+			  vendorDefined1, vendorDefined2, vendorDefined3
+			);
+		}
+		else {
+			SwingUtilities.invokeLater(new Runnable() {public void run() {
+					    postEvent_swing(
+					      type, special_pointingDeviceType,
+					      x, y, absoluteX, absoluteY, absoluteZ,
+					      buttonMask, pressure, rotation,
+					      tiltX, tiltY,
+					      tangentialPressure,
+					      vendorDefined1, vendorDefined2, vendorDefined3
+					    );
+				    }});
+		}
 	}
 
-	private void postTabletEvent(
+	private void postEvent_swing(
 	  final int type,
 	  final int special_pointingDeviceType,
 	  float x,

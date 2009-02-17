@@ -108,7 +108,7 @@ class PenCanvas
 			    @Override
 			    public void penTock(long availableTime) {
 				    if(availableTime<0)
-					    L.warning("no available time to repaint... but this is a test, so I continue.");
+					    L.warning("no time to repaint... but this is a test, so I continue.");
 				    if(isDirty)
 					    repaint(dirtyArea.x, dirtyArea.y, dirtyArea.width, dirtyArea.height);
 				    isDirty=false;
@@ -127,10 +127,6 @@ class PenCanvas
 
 	private synchronized void paintStroke() {
 		float pressure=penManager.pen.getLevelValue(PLevel.Type.PRESSURE);
-		PKind.Type kindType=penManager.pen.getKind().getType();
-		if(PKind.Type.CURSOR.equals(kindType)
-		        && penManager.pen.getButtonValue(PButton.Type.LEFT))
-			pressure=0.5f;
 		if(pressure==0){
 			L.fine("no pressure");
 			return;
@@ -138,6 +134,7 @@ class PenCanvas
 
 		pressure*=pressure; // parabolic sensitivity
 		float r=pressure*STROKE_RAD;
+		PKind.Type kindType=penManager.pen.getKind().getType();
 		switch(kindType) {
 		case CUSTOM:
 			g.setColor(Color.PINK);

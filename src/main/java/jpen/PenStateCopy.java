@@ -30,17 +30,21 @@ public class PenStateCopy
 	public PenStateCopy(PenState penState){
 		setValues(penState);
 	}
+	
+	public PenState.Levels getLevels(){
+		return levels;
+	}
 
 	public void setLevelValue(PLevel level){
-		super.setLevelValue(level.typeNumber, level.value);
+		levels.setValue(level.typeNumber, level.value);
 	}
 
 	public void setLevelValue(PLevel.Type type, float value){
-		super.setLevelValue(type.ordinal(), value);
+		levels.setValue(type, value);
 	}
 
 	public void setLevelValue(int typeNumber, float value){
-		super.setLevelValue(typeNumber, value);
+		levels.setValue(typeNumber, value);
 	}
 
 	public boolean setButtonValue(PButton button) {

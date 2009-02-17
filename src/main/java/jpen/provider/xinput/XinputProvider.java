@@ -83,15 +83,14 @@ public class XinputProvider
 		xipDevices=devices.toArray(new XinputDevice[devices.size()]);
 
 		thread=new Thread("jpen-XinputProvider") {
-			       public synchronized void run() {
-				       try {
-					       while(true) {
-						       processQuedEvents();
-						       wait(PERIOD);
-						       while(getPenManager().getPaused())
-							       wait();
+			       public void run() {
+				       while(true) {
+					       processQuedEvents();
+					       jpen.Utils.synchronizedWait(this, PERIOD);
+					       while(getPenManager().getPaused()){
+						       jpen.Utils.synchronizedWait(this, 0);
 					       }
-				       } catch(InterruptedException ex) { throw new Error(ex);}
+				       }
 			       }
 		       }
 		       ;

@@ -152,18 +152,16 @@ public class WintabProvider
 		}
 
 		thread=new Thread("jpen-WintabProvider") {
-			       public synchronized void run() {
-				       try {
-					       while(true) {
-						       processQuedEvents();
-						       wait(PERIOD);
-						       while(paused){
-							       L.fine("going to wait...");
-							       wait();
-							       L.fine("notified");
-						       }
+			       public void run() {
+				       while(true) {
+					       processQuedEvents();
+					       jpen.Utils.synchronizedWait(this, PERIOD);
+					       while(getPaused()){
+						       L.fine("going to wait...");
+						       jpen.Utils.synchronizedWait(this, 0);
+						       L.fine("notified");
 					       }
-				       } catch(InterruptedException ex) { throw new Error(ex);}
+				       }
 			       }
 		       }
 		       ;
@@ -210,7 +208,11 @@ public class WintabProvider
 			;
 	}
 
-	void setPaused(boolean paused) {
+	private synchronized boolean getPaused(){
+		return paused;
+	}
+
+	synchronized void setPaused(boolean paused) {
 		L.fine("start");
 		if(paused==this.paused)
 			return;

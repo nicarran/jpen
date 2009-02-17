@@ -24,25 +24,33 @@ import java.util.Map;
 public class PenState
 	implements java.io.Serializable {
 	public static final long serialVersionUID=1l;
-
-	static class Levels implements java.io.Serializable {
+	
+	public static class Levels implements java.io.Serializable {
 		public static final long serialVersionUID=1l;
-		private final float[] values=new float[PLevel.Type.VALUES.size()]; // CUSTOM type does not store value.
+		private final float[] values=new float[PLevel.Type.VALUES.size()-1]; // CUSTOM type does not store value.
 		private final Map<Integer, Float> extTypeNumberToValue=new HashMap<Integer, Float>();
+		
+		public void setValues(PenState penState){
+			setValues(penState.levels);
+		}
 
-		void setValues(PenState.Levels levels){
+		public void setValues(PenState.Levels levels){
 			for(int i=values.length; --i>=0;)
 				values[i]=levels.values[i];
 			extTypeNumberToValue.clear();
 			extTypeNumberToValue.putAll(levels.extTypeNumberToValue);
 		}
 
-		void setValues(PLevelEvent ev){
+		public void setValues(PLevelEvent ev){
 			for(PLevel level:ev.levels)
 				setValue(level.typeNumber, level.value);
 		}
-		
-		final void setValue(int levelTypeNumber, float value){
+
+		public final void setValue(PLevel.Type levelType, float value){
+			setValue(levelType.ordinal(), value);
+		}
+
+		public final void setValue(int levelTypeNumber, float value){
 			if(levelTypeNumber>=values.length) {
 				setExtValue(levelTypeNumber, value);
 				return;
@@ -50,10 +58,14 @@ public class PenState
 			values[levelTypeNumber]=value;
 		}
 
-		float getValue(int levelTypeNumber) {
+		public float getValue(int levelTypeNumber) {
 			if(levelTypeNumber>=values.length)
 				return getExtValue(levelTypeNumber);
 			return values[levelTypeNumber];
+		}
+
+		public float getValue(PLevel.Type levelType){
+			return getValue(levelType.ordinal());
 		}
 
 		private float getExtValue(int extLevelTypeNumber) {
@@ -83,18 +95,12 @@ public class PenState
 		return levels.getValue(levelTypeNumber);
 	}
 
-	void setLevelValue(int levelTypeNumber, float value){
-		levels.setValue(levelTypeNumber, value);
-	}
-
 	public PKind getKind(){
 		return kind;
 	}
 
 	void setKind(PKind kind) {
-		//boolean oldValue=this.kindTypeNumber;
 		this.kind=kind;
-		//return oldValue=kindTypeNumber;
 	}
 
 	public boolean getButtonValue(PButton.Type buttonType) {
@@ -108,7 +114,7 @@ public class PenState
 	public boolean hasPressedButtons(){
 		return pressedButtonsCount>0;
 	}
-	
+
 	public int getPressedButtonsCount(){
 		return pressedButtonsCount;
 	}
