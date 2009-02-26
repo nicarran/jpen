@@ -40,13 +40,13 @@ class PenManagerPlayer
 	public final PenManager penManager;
 	private boolean isDraggingOut; // state: dragging outside the component
 	private Window componentWindow; // may be null
-	private boolean pauseOnWindowDeactivation=true; 
+	private boolean pauseOnWindowDeactivation=true;
 	private boolean waitMotionToPlay=true;
 	private final WindowListener windowListener=new WindowAdapter(){
 		    @Override
 		    public void windowDeactivated(WindowEvent ev){
 			    if(pauseOnWindowDeactivation)
-				    synchronized(PenManagerPlayer.this){
+				    synchronized(penManager.pen.scheduler){
 					    stopPlaying();
 				    }
 		    }
@@ -54,7 +54,7 @@ class PenManagerPlayer
 	private final PenListener draggingOutPenListener=new PenAdapter(){
 		    @Override
 		    public void penButtonEvent(PButtonEvent ev){
-			    synchronized(PenManagerPlayer.this){
+			    synchronized(penManager.pen.scheduler){
 				    if(!ev.button.value)
 					    if(!penManager.pen.hasPressedButtons()){
 						    if(isDraggingOut){// causes button release schedule but there may be level events still to be processed in the pen event queue (here I'm in the queue processing thread).
@@ -68,11 +68,11 @@ class PenManagerPlayer
 	private final MouseMotionListener waitingMotionMouseListener=new MouseMotionListener(){  // in jdk 1.5 MouseAdapter does not implement this interface.
 		    //@Override
 		    public void mouseMoved(MouseEvent ev){
-					synchronized(PenManagerPlayer.this){
-			    if(!penManager.getPaused())
-				    throw new AssertionError();
-			    setPaused(false);
-					}
+			    synchronized(penManager.pen.scheduler){
+				    if(!penManager.getPaused())
+					    throw new AssertionError();
+				    setPaused(false);
+			    }
 		    }
 		    //@Override
 		    public void mouseDragged(MouseEvent ev){
@@ -85,10 +85,12 @@ class PenManagerPlayer
 		setPaused(true);
 	}
 
-	private synchronized void setPaused(boolean paused) {
-		penManager.setPaused(paused);
-		setWaitingMotionToPlay(paused);
-		updateComponentWindow();
+	private void setPaused(boolean paused) {
+		synchronized(penManager.pen.scheduler){
+			penManager.setPaused(paused);
+			setWaitingMotionToPlay(paused);
+			updateComponentWindow();
+		}
 	}
 
 	private void updateComponentWindow(){
@@ -111,11 +113,13 @@ class PenManagerPlayer
 	}
 
 	@Override
-	public synchronized void mouseEntered(MouseEvent ev) {
-		if(isDraggingOut)
-			stopDraggingOut();
-		else
-			startPlaying();
+	public void mouseEntered(MouseEvent ev) {
+		synchronized(penManager.pen.scheduler){
+			if(isDraggingOut)
+				stopDraggingOut();
+			else
+				startPlaying();
+		}
 	}
 
 	private void startPlaying(){
@@ -125,14 +129,7 @@ class PenManagerPlayer
 			setPaused(false);
 	}
 
-	@Override
-	public synchronized void mouseExited(MouseEvent ev) {
-		//if(isDraggingOut)
-			//throw new AssertionError();
-		stopPlayingIfNotDragOut();
-	}
-
-	private synchronized void setWaitingMotionToPlay(boolean waitingMotionToPlay){
+	private void setWaitingMotionToPlay(boolean waitingMotionToPlay){
 		if(this.waitingMotionToPlay==waitingMotionToPlay)
 			return;
 		this.waitingMotionToPlay=waitingMotionToPlay;
@@ -142,7 +139,24 @@ class PenManagerPlayer
 			penManager.component.removeMouseMotionListener(waitingMotionMouseListener);
 	}
 
-	synchronized boolean startDraggingOutIfRequired(){
+	@Override
+	public void mouseExited(MouseEvent ev) {
+		//if(isDraggingOut)
+		//throw new AssertionError();
+		stopPlayingIfNotDragOut();
+	}
+
+	boolean stopPlayingIfNotDragOut(){
+		synchronized(penManager.pen.scheduler){
+			if(!startDraggingOutIfRequired()){
+				setPaused(true);
+				return true;
+			}
+			return false;
+		}
+	}
+
+	private boolean startDraggingOutIfRequired(){
 		if(isDraggingOut)
 			return true;
 		if(!penManager.pen.hasPressedButtons())
@@ -159,21 +173,13 @@ class PenManagerPlayer
 		penManager.pen.addListener(draggingOutPenListener);
 		return true;
 	}
-	
-	boolean stopPlayingIfNotDragOut(){
-		if(!startDraggingOutIfRequired()){
-			setPaused(true);
-			return true;
-		}
-		return false;
-	}
 
-	void stopPlaying(){
+	private void stopPlaying(){
 		stopDraggingOut();
 		setPaused(true);
 	}
 
-	private synchronized void stopDraggingOut(){
+	private void stopDraggingOut(){
 		if(!isDraggingOut)
 			return;
 		isDraggingOut=false;

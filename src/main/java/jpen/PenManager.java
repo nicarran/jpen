@@ -37,7 +37,8 @@ import jpen.provider.xinput.XinputProvider;
 public final class PenManager {
 	private static final Logger L=Logger.getLogger(PenManager.class.getName());
 
-	public final Pen  pen=new Pen();
+	final PLevelEmulator levelEmulator=new PLevelEmulator(this);
+	public final Pen  pen=new Pen(levelEmulator);
 	public final Component component;
 	private final Set<PenProvider.Constructor> providerConstructors=new HashSet<PenProvider.Constructor>();
 	private final Set<PenProvider.Constructor> providerConstructorsA=Collections.unmodifiableSet(providerConstructors);
@@ -46,8 +47,10 @@ public final class PenManager {
 	private byte nextDeviceId;
 	private volatile boolean paused;
 	private final List<PenManagerListener> listeners=new ArrayList<PenManagerListener>();
+	private PenManagerListener[] listenersArray;
 	final PenManagerPlayer penManagerPlayer;
 	private PenDevice systemMouseDevice;
+
 
 	public PenManager(Component component) {
 		this.component=component;
@@ -79,26 +82,34 @@ public final class PenManager {
 	public void addListener(PenManagerListener l) {
 		synchronized(listeners) {
 			listeners.add(l);
+			listenersArray=null;
 		}
 	}
 
 	public void removeListener(PenManagerListener l) {
 		synchronized(listeners) {
 			listeners.remove(l);
+			listenersArray=null;
+		}
+	}
+
+	PenManagerListener[] getListenersArray(){
+		synchronized(listeners){
+			if(listenersArray==null)
+				listenersArray=listeners.toArray(new PenManagerListener[listeners.size()]);
+			return listenersArray;
 		}
 	}
 
 	public void firePenDeviceAdded(PenProvider.Constructor constructor, PenDevice device) {
-		synchronized(listeners) {
-			byte nextDeviceId=getNextDeviceId();
-			device.setId(nextDeviceId);
-			if(deviceIdToDevice.put(nextDeviceId, device)!=null)
-				throw new AssertionError();
-			if(constructor.getName().equals(SystemProvider.Constructor.NAME))
-				systemMouseDevice=device;
-			for(PenManagerListener l: listeners){
-				l.penDeviceAdded(constructor, device);
-			}
+		byte nextDeviceId=getNextDeviceId();
+		device.setId(nextDeviceId);
+		if(deviceIdToDevice.put(nextDeviceId, device)!=null)
+			throw new AssertionError();
+		if(constructor.getName().equals(SystemProvider.Constructor.NAME))
+			systemMouseDevice=device;
+		for(PenManagerListener l: getListenersArray()){
+			l.penDeviceAdded(constructor, device);
 		}
 	}
 
@@ -110,12 +121,10 @@ public final class PenManager {
 	}
 
 	public void firePenDeviceRemoved(PenProvider.Constructor constructor, PenDevice device) {
-		synchronized(listeners) {
-			if(deviceIdToDevice.remove(device.getId())==null)
-				throw new IllegalArgumentException("device not found");
-			for(PenManagerListener l: listeners)
-				l.penDeviceRemoved(constructor, device);
-		}
+		if(deviceIdToDevice.remove(device.getId())==null)
+			throw new IllegalArgumentException("device not found");
+		for(PenManagerListener l: getListenersArray())
+			l.penDeviceRemoved(constructor, device);
 	}
 
 	public PenDevice getDevice(byte deviceId){
@@ -139,7 +148,7 @@ public final class PenManager {
 			return;
 		this.paused=paused;
 		if(paused)
-			pen.scheduleButtonReleasedEvents();
+			pen.scheduler.scheduleButtonReleasedEvents();
 		for(PenProvider.Constructor providerConstructor: providerConstructors){
 			PenProvider penProvider=providerConstructor.getConstructed();
 			if(penProvider!=null)
@@ -154,13 +163,13 @@ public final class PenManager {
 	public void scheduleButtonEvent(PButton button) {
 		if(paused)
 			return;
-		pen.scheduleButtonEvent(button);
+		pen.scheduler.scheduleButtonEvent(button);
 	}
 
 	public void scheduleScrollEvent(PenDevice device, PScroll scroll) {
 		if(paused)
 			return;
-		pen.scheduleScrollEvent(device, scroll);
+		pen.scheduler.scheduleScrollEvent(device, scroll);
 	}
 
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels) {
@@ -170,7 +179,7 @@ public final class PenManager {
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long deviceTime) {
 		if(paused)
 			return false;
-		return pen.scheduleLevelEvent(device, deviceTime, levels, 0, component.getWidth(), 0, component.getHeight(), penManagerPlayer);
+		return pen.scheduler.scheduleLevelEvent(device, deviceTime, levels, 0, component.getWidth(), 0, component.getHeight(), penManagerPlayer);
 	}
 
 	@Deprecated // experimental:

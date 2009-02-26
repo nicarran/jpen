@@ -71,7 +71,8 @@ class ScrollsPanel{
 			                public void penScrollEvent(PScrollEvent ev){
 				                pen=ev.pen;
 				                Display display=scrollTypeToDisplay.get(ev.scroll.getType());
-				                display.increase();
+												if(display!=null)
+													display.increase();
 			                }
 			                @Override
 			                public void penTock(long availableMillis){

@@ -47,7 +47,7 @@ import static jpen.provider.xinput.XiDevice.*;
 
 class XinputDevice extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(XinputDevice.class.getName());
-	// static{L.setLevel(Level.ALL);}
+	//static{L.setLevel(Level.ALL);}
 
 	public final XiDevice device;
 	private final PLevel.Range[] levelRanges;
@@ -120,7 +120,7 @@ class XinputDevice extends AbstractPenDevice {
 	}
 
 	private void scheduleScrollEvent(int number) {
-		getPenManager().scheduleScrollEvent(this, new PScroll(number==5? PScroll.Type.DOWN.ordinal(): PScroll.Type.UP.ordinal(),1));
+		getPenManager().scheduleScrollEvent(this, new PScroll(number==5? PScroll.Type.DOWN.ordinal(): PScroll.Type.UP.ordinal(),1)); 
 	}
 
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();
@@ -141,9 +141,11 @@ class XinputDevice extends AbstractPenDevice {
 	}
 
 	void scheduleButtonEvent(int number, boolean state) {
+		/*
+		it fires different numbers for press and release. : (  TODO: support the pad buttons.
 		if(L.isLoggable(Level.FINE))
 			L.fine("scheduling button event: number="+number+", state="+state);
-		getPenManager().scheduleButtonEvent(new PButton(number, state));
+		getPenManager().scheduleButtonEvent(new PButton(number, state));*/
 	}
 
 	private static final float RADS_PER_DEG=(float)(Math.PI/180);

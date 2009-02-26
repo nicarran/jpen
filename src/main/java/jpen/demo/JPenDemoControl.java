@@ -21,6 +21,7 @@ package jpen.demo;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -31,8 +32,10 @@ import javax.swing.JScrollPane;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import jpen.demo.inspect.Inspector;
 import jpen.PButton;
 import jpen.Pen;
+import jpen.PenManager;
 import jpen.PKind;
 import jpen.PLevel;
 import jpen.PLevelEmulator;
@@ -93,7 +96,7 @@ public class JPenDemoControl{
 		    null, options, closeOption);
 	}
 
-	public static void main(String... args) {
+	public static void main(String... args) throws IOException, NumberFormatException{
 		try{
 			if(System.getProperty("os.name").toLowerCase().contains("linux"))
 				UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
@@ -103,7 +106,17 @@ public class JPenDemoControl{
 			L.warning("The \"system\" look and feel couldn't be setted.");
 		}
 		JPenDemoControl jpenDemoControl=new JPenDemoControl();
+		startInspector(jpenDemoControl.penCanvas.penManager);
 		jpenDemoControl.showDialog(null, "JPen Demo");
 		System.exit(0);
+	}
+	
+	static void startInspector(PenManager penManager) throws IOException{
+		String inspectorPeriodProperty=System.getProperty("jpen.demo.inspectorPeriod");
+		if(inspectorPeriodProperty!=null){
+			int inspectorPeriod=Integer.valueOf(inspectorPeriodProperty);
+			Inspector inspector=new Inspector(penManager, "jpen", inspectorPeriod);
+			L.info("inspector constructed");
+		}
 	}
 }

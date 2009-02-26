@@ -51,6 +51,7 @@ public class NativeLibraryLoader{
 
 	public synchronized void load(){
 		if(!loaded){
+			L.finest("v");
 			String preferredArchitecture=getPreferredArchitecture();
 			Throwable loadExceptionCause=null;
 			if(preferredArchitecture!=null)
@@ -82,6 +83,7 @@ public class NativeLibraryLoader{
 				L.info("no suitable JNI library found");
 				throw new LoadException(loadExceptionCause);
 			}
+			L.finest("^");
 		}
 	}
 

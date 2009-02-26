@@ -19,11 +19,17 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 package jpen;
 
 import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jpen.PButton;
 import jpen.PKind;
 
 public final class PLevelEmulator{
+	static final Logger L=Logger.getLogger(PLevelEmulator.class.getName());
+	//static { L.setLevel(Level.ALL); }
 
 	public static class ButtonTriggerPolicy{
 		public final int levelTypeNumber;
@@ -39,12 +45,22 @@ public final class PLevelEmulator{
 			this.onPressValue=onPressValue;
 			this.onReleaseValue=onReleaseValue;
 		}
+
+		@Override
+		public String toString(){
+			return "( levelTypeNumber="+levelTypeNumber+", onPressValue="+onPressValue+", onReleaseValue="+onReleaseValue+" )";
+		}
 	}
 
-	PLevelEmulator(){
+	final PenManager penManager;
+
+	PLevelEmulator(PenManager penManager){
+		this.penManager=penManager;
 	}
 
 	private final List<List<ButtonTriggerPolicy>> kindTypeToButtonTypeToButtonTriggerPolicy=new ArrayList<List<ButtonTriggerPolicy>>();
+	private final List<ButtonTriggerPolicy> activeButtonTriggerPolicies=new ArrayList<ButtonTriggerPolicy>();
+	private final BitSet activeLevelTypes=new BitSet();
 
 	public void setPressureTriggerForLeftCursorButton(float pressure){
 		setTriggerForLeftCursorButton(new ButtonTriggerPolicy(PLevel.Type.PRESSURE,pressure,0f));
@@ -58,7 +74,7 @@ public final class PLevelEmulator{
 		setTrigger(kindType.ordinal(), buttonType.ordinal(), triggerPolicy);
 	}
 
-	public void setTrigger(int kindTypeNumber, int buttonTypeNumber, ButtonTriggerPolicy triggerPolicy){
+	public synchronized void setTrigger(int kindTypeNumber, int buttonTypeNumber, ButtonTriggerPolicy triggerPolicy){
 		List<ButtonTriggerPolicy> buttonTypeToButtonTriggerPolicy=getButtonTypeToButtonTriggerPolicy(kindTypeNumber);
 		ensureListSize(buttonTypeToButtonTriggerPolicy, buttonTypeNumber);
 		buttonTypeToButtonTriggerPolicy.set(buttonTypeNumber, triggerPolicy);
@@ -68,44 +84,10 @@ public final class PLevelEmulator{
 		return getButtonTriggerPolicy(kindType, buttonType);
 	}
 
-	public ButtonTriggerPolicy getButtonTriggerPolicy(int kindTypeNumber, int buttonTypeNumber){
+	public synchronized ButtonTriggerPolicy getButtonTriggerPolicy(int kindTypeNumber, int buttonTypeNumber){
 		List<ButtonTriggerPolicy> buttonTypeToButtonTriggerPolicy=getButtonTypeToButtonTriggerPolicy(kindTypeNumber);
 		ensureListSize(buttonTypeToButtonTriggerPolicy, buttonTypeNumber);
 		return buttonTypeToButtonTriggerPolicy.get(buttonTypeNumber);
-	}
-	
-	void scheduleEmulatedEvent(PButtonEvent buttonEvent){
-		PLevel level=emulateLevel(buttonEvent);
-		if(level==null)
-			return;
-		if(buttonEvent.pen.getLevelFilter().filterPenLevel(level))
-			return;
-		PLevelEvent levelEvent=new PLevelEvent(buttonEvent.pen,
-		    new PLevel[]{level},
-		    (byte)-1,
-		    buttonEvent.time);
-		buttonEvent.pen.lastScheduledState.levels.setValue(level.typeNumber, level.value);
-		buttonEvent.pen.schedule(levelEvent);
-	}
-
-	private PLevel emulateLevel(PButtonEvent buttonEvent){
-		PenState lastScheduledState=buttonEvent.pen.lastScheduledState;
-		PLevelEmulator.ButtonTriggerPolicy triggerPolicy=getButtonTriggerPolicy(
-		      lastScheduledState.getKind().typeNumber,
-		      buttonEvent.button.typeNumber);
-		if(triggerPolicy!=null){
-			float levelValue=buttonEvent.button.value? triggerPolicy.onPressValue: triggerPolicy.onReleaseValue;
-			if(lastScheduledState.getLevelValue(triggerPolicy.levelTypeNumber)==
-			        levelValue)
-				return null;
-			return new PLevel(triggerPolicy.levelTypeNumber, levelValue);
-		}
-		return null;
-	}
-
-	private static void ensureListSize(List<?> list, int index){
-		while(list.size()<=index)
-			list.add(null);
 	}
 
 	private List<ButtonTriggerPolicy> getButtonTypeToButtonTriggerPolicy(int kindType){
@@ -117,4 +99,63 @@ public final class PLevelEmulator{
 		return buttonTypeToButtonTriggerPolicy;
 	}
 
+	private static void ensureListSize(List<?> list, int index){
+		while(list.size()<=index)
+			list.add(null);
+	}
+
+	void scheduleEmulatedEvent(PButtonEvent buttonEvent){
+		PLevel emulatedLevel=null;
+		if(buttonEvent.button.value)
+			emulatedLevel=emulateOnPress(buttonEvent.button.typeNumber);
+		else
+			emulatedLevel=emulateOnRelease(buttonEvent.button.typeNumber);
+		if(emulatedLevel!=null)
+			penManager.scheduleLevelEvent(null, Collections.singleton(emulatedLevel), buttonEvent.time);
+	}
+
+	private PLevel emulateOnPress(int buttonTypeNumber){
+		PenState lastScheduledState=penManager.pen.lastScheduledState;
+		ButtonTriggerPolicy triggerPolicy=getButtonTriggerPolicy(
+		      lastScheduledState.getKind().typeNumber,
+		      buttonTypeNumber);
+		if(L.isLoggable(Level.FINE)) L.fine("triggerPolicy: "+triggerPolicy);
+		if(triggerPolicy!=null){
+			if(lastScheduledState.getLevelValue(triggerPolicy.levelTypeNumber)==
+			        triggerPolicy.onPressValue)
+				return null;
+			setActiveButtonTriggerPolicy(buttonTypeNumber, triggerPolicy);
+			return new PLevel(triggerPolicy.levelTypeNumber, triggerPolicy.onPressValue);
+		}
+		return null;
+	}
+
+	private void setActiveButtonTriggerPolicy(int buttonTypeNumber, ButtonTriggerPolicy policy){
+		ensureListSize(activeButtonTriggerPolicies, buttonTypeNumber);
+		ButtonTriggerPolicy oldValue=activeButtonTriggerPolicies.set(buttonTypeNumber, policy);
+		if(oldValue!=null)
+			activeLevelTypes.set(oldValue.levelTypeNumber, false);
+		if(policy!=null){
+			activeLevelTypes.set(policy.levelTypeNumber, true);
+		}
+	}
+
+	private PLevel emulateOnRelease(int buttonTypeNumber){
+		ensureListSize(activeButtonTriggerPolicies, buttonTypeNumber);
+		ButtonTriggerPolicy triggerPolicy=getActiveButtonTriggerPolicy(buttonTypeNumber);
+		if(triggerPolicy!=null){
+			setActiveButtonTriggerPolicy(buttonTypeNumber, null);
+			return new PLevel(triggerPolicy.levelTypeNumber, triggerPolicy.onReleaseValue);
+		}
+		return null;
+	}
+
+	private ButtonTriggerPolicy getActiveButtonTriggerPolicy(int buttonTypeNumber){
+		ensureListSize(activeButtonTriggerPolicies, buttonTypeNumber);
+		return activeButtonTriggerPolicies.get(buttonTypeNumber);
+	}
+
+	boolean isActiveLevel(int levelTypeNumber){
+		return activeLevelTypes.get(levelTypeNumber); 
+	}
 }

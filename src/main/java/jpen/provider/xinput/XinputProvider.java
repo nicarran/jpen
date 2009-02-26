@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import jpen.PenDevice;
 import jpen.PenManager;
 import jpen.PenProvider;
+import jpen.PKind;
 import jpen.provider.AbstractPenProvider;
 import jpen.provider.NativeLibraryLoader;
 import jpen.provider.Utils;
@@ -81,6 +82,9 @@ public class XinputProvider
 		}
 
 		xipDevices=devices.toArray(new XinputDevice[devices.size()]);
+		if(devices.size()==1){
+			xipDevices[0].setKindTypeNumber(PKind.Type.STYLUS.ordinal());
+		}
 
 		thread=new Thread("jpen-XinputProvider") {
 			       public void run() {

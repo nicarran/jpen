@@ -101,7 +101,8 @@ class LevelsPanel{
 												pen=ev.pen;
 				                for(PLevel level: ev.levels){
 					                Display display=levelTypeToDisplay.get(level.getType());
-													display.setIsDirty(true);
+													if(display!=null)
+														display.setIsDirty(true);
 				                }
 			                }
 											@Override

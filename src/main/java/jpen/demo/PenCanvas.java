@@ -73,7 +73,7 @@ class PenCanvas
 		penManager.pen.setFrequencyLater(40);
 		Utils.freezeSize(this, SIZE);
 		setDoubleBuffered(false);
-		setOpaque(false);
+		setOpaque(true);
 		scrollPane=new JScrollPane(this);
 		scrollPane.setPreferredSize(PREF_SCROLLPANE_SIZE);
 

@@ -63,7 +63,8 @@ class ButtonsPanel{
 				                pen=ev.pen;
 				                PButton.Type buttonType=ev.button.getType();
 				                Display display=buttonTypeToDisplay.get(buttonType);
-				                display.setIsDirty(true);
+												if(display!=null)
+													display.setIsDirty(true);
 			                }
 			                @Override
 			                public void penTock(long availableMillis){

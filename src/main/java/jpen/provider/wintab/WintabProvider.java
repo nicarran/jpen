@@ -66,58 +66,6 @@ public class WintabProvider
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 	private final Thread thread;
 	private boolean paused=true;
-	//final MouseLocator mouseLocator;
-
-	/*
-	class MouseLocator
-		extends MouseMotionAdapter{
-		private final float[] coords=new float[PLevel.Type.values().length];
-		private final boolean[] comparedCoords=new boolean[PLevel.Type.values().length];
-		private boolean isMouseMode=false;
-
-		{
-			getPenManager().component.addMouseMotionListener(this);
-		}
-
-		private void reset(){
-			comparedCoords[PLevel.Type.X.ordinal()]=false;
-			comparedCoords[PLevel.Type.Y.ordinal()]=false;
-			isMouseMode=false;
-		}
-
-		@SuppressWarnings("fallthrough")
-		float getCorrectedLocation(PLevel.Type levelType, float penLocation){
-			switch(levelType){
-			case X:
-			case Y:
-				if(getIsMouseMode(levelType, penLocation))
-					return getCoord(levelType);
-			default:
-				return penLocation;
-			}
-		}
-
-		private boolean getIsMouseMode(PLevel.Type levelType, float penLocation){
-			if(!comparedCoords[levelType.ordinal()]){
-				isMouseMode= isMouseMode ||
-										 Math.abs(penLocation-getCoord(levelType))>3;
-				if(isMouseMode)
-					L.fine("mouse mode detected");
-				comparedCoords[levelType.ordinal()]=true;
-			}
-			return isMouseMode;
-		}
-
-		synchronized float getCoord(PLevel.Type levelType){
-			return coords[levelType.ordinal()];
-		}
-
-		@Override
-		public synchronized void mouseMoved(MouseEvent ev){
-			coords[PLevel.Type.X.ordinal()]= ev.getX();
-			coords[PLevel.Type.Y.ordinal()]= ev.getY();
-		}
-}*/
 
 	public static class Constructor
 		extends AbstractPenProvider.AbstractConstructor{

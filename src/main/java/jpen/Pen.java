@@ -48,12 +48,13 @@ public class Pen extends PenState {
 	    }
 	    ;
 	/** Head of event queue. */
-	private PenEvent lastScheduledEvent=lastDispatchedEvent;
-	public final PenState lastScheduledState=new PenState();
+	//private PenEvent lastScheduledEvent=lastDispatchedEvent;
+	final PenScheduler scheduler=new PenScheduler(this);
+	public final PenState lastScheduledState=scheduler.lastScheduledState;
 	private final List<PenListener> listeners=new ArrayList<PenListener>();
-	private volatile PenListener[] listenersArray;
+	private PenListener[] listenersArray;
 	private boolean firePenTockOnSwing;
-	public final PLevelEmulator levelEmulator=new PLevelEmulator();
+	public final PLevelEmulator levelEmulator;
 	private PLevelFilter levelFilter=PLevelFilter.AllowAll.INSTANCE;
 
 	private final class MyThread
@@ -73,7 +74,8 @@ public class Pen extends PenState {
 		final class Waiter
 			extends Object{
 			synchronized void doWait(long timeout) throws InterruptedException{
-				wait(timeout);
+				if(!stopRunning)
+					wait(timeout);
 			}
 			synchronized void doNotify(){
 				notify();
@@ -95,7 +97,7 @@ public class Pen extends PenState {
 
 		public void run() {
 			try {
-				L.fine("v");
+				L.finest("v");
 				if(oldThread!=null)
 					oldThread.join();
 				oldThread=null;
@@ -125,7 +127,7 @@ public class Pen extends PenState {
 				L.warning("jpen-Pen thread threw an exception: "+Utils.evalStackTrace(ex));
 				exception=ex;
 			}
-			L.fine("^");
+			L.finest("^");
 		}
 
 		private boolean waitNewEvents() throws InterruptedException {
@@ -161,20 +163,29 @@ public class Pen extends PenState {
 		}
 	}
 
-	Pen() {
+	Pen(){
+		this(null);
+	}
+
+	Pen(PLevelEmulator levelEmulator) {
+		this.levelEmulator=levelEmulator;
 		setFrequencyLater(DEFAULT_FREQUENCY);
 	}
 	
+	void processNewEvents(){
+		thread.processNewEvents();
+	}
+	
+	PenEvent getLastDispatchedEvent(){
+		return lastDispatchedEvent;
+	}
+
 	public PLevelFilter getLevelFilter(){
 		return levelFilter;
 	}
-	
+
 	public void setLevelFilter(PLevelFilter levelFilter){
 		this.levelFilter=levelFilter;
-	}
-
-	public synchronized Exception getThreadException(){
-		return thread==null? null: thread.exception;
 	}
 
 	public boolean getFirePenTockOnSwing() {
@@ -207,7 +218,7 @@ public class Pen extends PenState {
 			return;
 		if(wait && SwingUtilities.isEventDispatchThread())
 			throw new Error("Cannot call setFrequency(int, <true>) from the event dispatcher thread");
-		L.fine("v");
+		L.finest("v");
 		MyThread oldThread=this.thread;
 		if(oldThread!=null){
 			oldThread.stop(wait);
@@ -215,7 +226,7 @@ public class Pen extends PenState {
 		this.frequency=frequency;
 		thread=new MyThread(oldThread);
 		thread.start();
-		L.fine("^");
+		L.finest("^");
 	}
 
 	/**
@@ -227,6 +238,10 @@ public class Pen extends PenState {
 
 	public int getFrequency() {
 		return frequency;
+	}
+	
+	public synchronized Exception getThreadException(){
+		return thread.exception;
 	}
 
 	public void addListener(PenListener l) {
@@ -244,144 +259,10 @@ public class Pen extends PenState {
 	}
 
 	PenListener[] getListenersArray() {
-		PenListener[] listenersArray=this.listenersArray; // copy to speed up volatile access
-		if(listenersArray==null)
-			synchronized(listeners) {
-				this.listenersArray=listenersArray=listeners.toArray(new PenListener[listeners.size()]);
-			}
-		return listenersArray;
-	}
-
-	private static class PhantomEventFilter {
-		public static int THRESHOLD_PERIOD=200;
-		private PenDevice lastDevice; // last device NOT filtered
-		private PenEvent lastEvent; // last event scheduled
-		boolean filteredFirstInSecuence;
-		private long time;
-		private long firstInSecuenceTime;
-
-		boolean filter(PenDevice device) {
-			if(!device.isDigitizer()) {
-				time=System.currentTimeMillis();
-				if(lastDevice!=null &&
-				        lastDevice!=device &&
-				        time-lastEvent.time<=THRESHOLD_PERIOD
-				  )
-					return true;
-				if(!filteredFirstInSecuence) {
-					L.fine("filtered first in sequence to prioritize digitized input in race");
-					filteredFirstInSecuence=true;
-					firstInSecuenceTime=System.currentTimeMillis();
-					return true;
-				}
-				if(time-firstInSecuenceTime<=THRESHOLD_PERIOD){
-					L.fine("filtering after the first for a period to allow digitized input to come and win in race");
-					return true;
-				}
-				L.fine("digitized input going as event");
-			} else
-				filteredFirstInSecuence=false;
-			lastDevice=device;
-			return false;
-		}
-
-		void setLastEvent(PenEvent event) {
-			this.lastEvent=event;
-		}
-
-		PenEvent getLastEvent() {
-			return lastEvent;
-		}
-	}
-
-	private final PhantomEventFilter phantomLevelFilter=new PhantomEventFilter();
-	private final List<PLevel> scheduledLevels=new ArrayList<PLevel>();
-
-	final boolean scheduleLevelEvent(PenDevice device, long penDeviceTime, Collection<PLevel> levels,  int minX, int maxX, int minY, int maxY, PenManagerPlayer penManagerPlayer) {
-		synchronized(scheduledLevels) {
-			if(phantomLevelFilter.filter(device))
-				return false;
-			boolean scheduledMovement=false;
-			for(PLevel level:levels) {
-				if(level.value==lastScheduledState.getLevelValue(level.typeNumber))
-					continue;
-				if(levelFilter.filterPenLevel(level))
-					continue;
-				switch(level.getType()){
-				case X:
-					scheduledMovement=true;
-					if(!evalLevelValueIsInRange(level.value, minX, maxX, penManagerPlayer))
-						continue;
-					break;
-				case Y:
-					scheduledMovement=true;
-					if(!evalLevelValueIsInRange(level.value, minY, maxY, penManagerPlayer))
-						continue;
-					break;
-				default:
-				}
-				scheduledLevels.add(level);
-				lastScheduledState.levels.setValue(level.typeNumber, level.value);
-			}
-			if(scheduledLevels.isEmpty())
-				return false;
-			if(scheduledMovement &&
-			        lastScheduledState.getKind().typeNumber!=
-			        device.getKindTypeNumber()){
-				if(device.getKindTypeNumber()!=PKind.Type.IGNORE.ordinal()){
-					PKind newKind=PKind.valueOf(device.getKindTypeNumber());
-					lastScheduledState.setKind(newKind);
-					schedule(new PKindEvent(this, newKind));
-				}
-			}
-			PLevelEvent levelEvent=new PLevelEvent(this,
-			    scheduledLevels.toArray(new PLevel[scheduledLevels.size()]), device.getId(), penDeviceTime);
-			phantomLevelFilter.setLastEvent(levelEvent);
-			schedule(levelEvent);
-			scheduledLevels.clear();
-			return true;
-		}
-	}
-
-	private boolean evalLevelValueIsInRange(float levelValue, int min , int max, PenManagerPlayer penManagerPlayer){
-		if(levelValue<min || levelValue>max){
-			if(penManagerPlayer!=null &&
-			        penManagerPlayer.stopPlayingIfNotDragOut())
-				return false;
-		}
-		return true;
-	}
-
-	void scheduleButtonReleasedEvents(){
-		for(int i=PButton.Type.VALUES.size(); --i>=0;)
-			scheduleButtonEvent(new PButton(i, false));
-		for(Integer extButtonTypeNumber: lastScheduledState.extButtonTypeNumberToValue.keySet())
-			scheduleButtonEvent(new PButton(extButtonTypeNumber, false));
-	}
-
-	private final Object buttonsLock=new Object();
-
-	void scheduleButtonEvent(PButton button) {
-		synchronized(buttonsLock) {
-			if(lastScheduledState.setButtonValue(button.typeNumber, button.value)){
-				PButtonEvent buttonEvent=new PButtonEvent(this, button);
-				schedule(buttonEvent);
-				levelEmulator.scheduleEmulatedEvent(buttonEvent);
-			}
-		}
-	}
-
-	void scheduleScrollEvent(PenDevice device, PScroll scroll) {
-		schedule(new PScrollEvent(this, scroll));
-	}
-
-	final void schedule(PenEvent ev) {
-		synchronized(lastScheduledEvent) {
-			ev.time=System.currentTimeMillis();
-			lastScheduledEvent.next=ev;
-			lastScheduledEvent=ev;
-			MyThread thread=this.thread; // copy to speed up volatile access
-			if(thread!=null) thread.processNewEvents();
+		synchronized(listeners){
+			if(listenersArray==null)
+				listenersArray=listeners.toArray(new PenListener[listeners.size()]);
+			return listenersArray;
 		}
 	}
 }

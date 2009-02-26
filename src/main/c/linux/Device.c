@@ -93,7 +93,7 @@ void Device_refreshValuatorRanges(struct Device *pDevice){
 		if(pAnyClassInfo->class==ValuatorClass) {
 			XValuatorInfo *pValuatorInfo=(XValuatorInfo *) pAnyClassInfo;
 			int i=0;
-			for(;i<=pValuatorInfo->num_axes; i++) {
+			for(;i<pValuatorInfo->num_axes; i++) {
 				if(i==E_Valuators_size)
 					break;
 				pDevice->valuatorRangeMins[i]=pValuatorInfo->axes[i].min_value;
@@ -111,6 +111,21 @@ void Device_refreshValuatorRanges(struct Device *pDevice){
 	}
 }
 
+static int Device_getNumAxes(struct Device *pDevice){
+	SBus *pBus=Bus_getP(pDevice->busCellIndex);
+	XDeviceInfo deviceInfo=pBus->pDeviceInfo[pDevice->index];
+	XAnyClassPtr pAnyClassInfo = deviceInfo.inputclassinfo;
+	int j=deviceInfo.num_classes;
+	while(--j>=0) {
+		if(pAnyClassInfo->class==ValuatorClass) {
+			XValuatorInfo *pValuatorInfo=(XValuatorInfo *) pAnyClassInfo;
+			return pValuatorInfo->num_axes;
+		}
+		pAnyClassInfo=(XAnyClassPtr)((char*)pAnyClassInfo+pAnyClassInfo->length);
+	}
+	return 0;
+}
+
 int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex) {
 	pDevice->busCellIndex=pBus->cellIndex;
 	pDevice->index=deviceIndex;
@@ -123,17 +138,22 @@ int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex) {
 		Device_setError("Mouse not supported as device.");
 		return errorState;
 	}
+	if(Device_getNumAxes(pDevice)<3){
+		Device_setError("Not enough axis data on device."); // TODO: change this criteria when supporting tablet buttons. 
+		return errorState;
+	}
+	
 	pDevice->pXdevice=XOpenDevice(pBus->pDisplay, deviceInfo.id);
 	if(!pDevice->pXdevice) {
 		Device_setError("Couldn't open the device.");
 		Device_appendError(xerror);
 		return errorState;
 	}
-
 	Device_refreshValuatorRanges(pDevice);
 	//Device_setIsListening(pDevice, true);
 	return 0;
 }
+
 
 static void Device_refreshValuatorValues(struct Device *pDevice, char first_axis, char axis_count, int *axisData) {
 	register int i=first_axis;
