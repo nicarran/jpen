@@ -34,6 +34,7 @@ final class PenScheduler{
 				time=System.currentTimeMillis();
 				if(lastDevice!=null &&
 				        lastDevice!=device &&
+				        lastEvent!=null &&
 				        time-lastEvent.time<=THRESHOLD_PERIOD
 				  )
 					return true;
@@ -134,14 +135,14 @@ final class PenScheduler{
 	}
 
 	synchronized void scheduleButtonEvent(PButton button) {
-			if(lastScheduledState.setButtonValue(button.typeNumber, button.value)){
-				if(L.isLoggable(Level.FINE))
-					L.fine("scheduling button event: "+button);
-				PButtonEvent buttonEvent=new PButtonEvent(pen, button);
-				schedule(buttonEvent);
-				if(buttonEvent!=null && pen.levelEmulator!=null)
-					pen.levelEmulator.scheduleEmulatedEvent(buttonEvent);
-			}
+		if(lastScheduledState.setButtonValue(button.typeNumber, button.value)){
+			if(L.isLoggable(Level.FINE))
+				L.fine("scheduling button event: "+button);
+			PButtonEvent buttonEvent=new PButtonEvent(pen, button);
+			schedule(buttonEvent);
+			if(buttonEvent!=null && pen.levelEmulator!=null)
+				pen.levelEmulator.scheduleEmulatedEvent(buttonEvent);
+		}
 	}
 
 	synchronized void scheduleScrollEvent(PenDevice device, PScroll scroll) {
@@ -149,9 +150,9 @@ final class PenScheduler{
 	}
 
 	private void schedule(PenEvent ev) {
-			ev.time=System.currentTimeMillis();
-			lastScheduledEvent.next=ev;
-			lastScheduledEvent=ev;
-			pen.processNewEvents();
+		ev.time=System.currentTimeMillis();
+		lastScheduledEvent.next=ev;
+		lastScheduledEvent=ev;
+		pen.processNewEvents();
 	}
 }
