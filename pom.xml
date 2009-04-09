@@ -60,6 +60,14 @@
         <version>2.0-alpha-10</version>
         <extensions>true</extensions>
         <configuration>
+          <java>
+            <include>true</include>
+          </java>
+          <javah>
+            <excludes>
+              <exclude>**/WintabAccess.class</exclude>
+            </excludes>
+          </javah>
           <output>jpen-2</output>
           <libraries>
             <library>
@@ -79,6 +87,9 @@
           <skip>true</skip>
         </configuration>
       </plugin>
+    <plugin>
+    <artifactId>maven-antrun-plugin</artifactId>
+    </plugin>
     </plugins>
   </build>
   <dependencies>
@@ -153,6 +164,44 @@
               </linker>
             </configuration>
           </plugin>
+          <plugin>
+  <!--
+    For whatever reason the NAR plugin fails to link this properly under
+    Win32.
+    
+    What it should do:
+    use the -Wl,-kill-at switch as below
+    
+    What it does:
+    use a -Wl,-Bdynamic switch
+    
+    Therefore, we have to re-link using the proper command line.
+  -->
+    <artifactId>maven-antrun-plugin</artifactId>
+    <executions>
+      <execution>
+        <phase>process-classes</phase>
+        <configuration>
+          <tasks>
+            <exec executable="gcc" dir="target/nar/lib/x86-Windows-g++/jni/">
+            <arg value="-shared" />
+            <arg value="-o" />
+            <arg value="jpen-2.dll" />
+            <arg value="../../../obj/x86-Windows-g++/jpen_provider_wintab_WintabAccess.o" />
+            <arg value="../../../obj/x86-Windows-g++/Access.o"/>
+            <arg value="../../../obj/x86-Windows-g++/macros.o"/>
+            <arg value="-L../../../../../src/main/c/windows/lib"/>
+            <arg value="-Wl,-kill-at"/>
+            <arg value="-lWINTAB32"/>
+            </exec>
+          </tasks>
+        </configuration>
+        <goals>
+          <goal>run</goal>
+        </goals>
+      </execution>
+    </executions>
+  </plugin>
         </plugins>
       </build>
     </profile>
