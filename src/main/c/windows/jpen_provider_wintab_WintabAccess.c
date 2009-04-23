@@ -285,7 +285,7 @@ JNIEXPORT jintArray JNICALL Java_jpen_provider_wintab_WintabAccess_getButtonMap
 	while(--i>=0)
 		buttonMap[i]=r[i];
 	jintArray array=(*pEnv)->NewIntArray(pEnv, 32);
-	if(!r)
+	if(array==NULL)
 		return NULL;
 	(*pEnv)->SetIntArrayRegion(pEnv, array, 0, 32, buttonMap);
 	return array;

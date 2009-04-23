@@ -28,7 +28,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 #define PACKETDATA	(PK_STATUS | PK_TIME | PK_X | PK_Y | PK_NORMAL_PRESSURE | PK_CURSOR | PK_BUTTONS | PK_ORIENTATION /* ToDo: | PK_ROTATION*/)
 #define PACKETMODE	0
 // #define PACKETTILT PKEXT_ABSOLUTE // TILT extension is not widely implemented (wacom), so I disable it and use pkOrientation to get tilt data 
-#include "INCLUDE/PKTDEF.h"
+#include "INCLUDE/PKTDEF.H"
 
 //vvv Taken from csrmaskex wacom example.
 // cellosoft.jtablet is also a good example. Thanks marcello (cellosoft)!!

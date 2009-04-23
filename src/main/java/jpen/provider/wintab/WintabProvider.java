@@ -53,7 +53,7 @@ public class WintabProvider
 	extends AbstractPenProvider {
 	private static final Logger L=Logger.getLogger(WintabProvider.class.getName());
 	public static final int PERIOD=10;
-	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader();
+	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""}, new String[]{"64"});
 	//static{L.setLevel(Level.ALL);}
 
 	static void loadLibrary(){

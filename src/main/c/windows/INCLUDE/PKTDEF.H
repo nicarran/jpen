@@ -5,7 +5,8 @@
 The text and information contained in this file may be freely used,
 copied, or distributed without compensation or licensing restrictions.
 
-This file is copyright 1991-1998 by LCS/Telegraphics.
+This file is copyright 1998-2008 by Wacom Technology
+with portions copyright 1991-1998 by LCS/Telegraphics.
 ------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------
 
@@ -26,8 +27,8 @@ How to use pktdef.h:
 	c. Include pktdef.h.
 	d. The generated structure typedef will be called
 	   <PACKETNAME>PACKET. Compare with 2.c. above and example #2 below.
-4. If using extension packet data, do the following additional steps
-   for each extension:
+4. If using extension data for extensions that report thier data in the packet,
+   do the following additional steps for each extension:
 	a. Before including pktdef.h, define <PACKETNAME>PACKET<EXTENSION>
 	   as either PKEXT_ABSOLUTE or PKEXT_RELATIVE.
 	b. The generated structure typedef will contain a field for the
@@ -39,6 +40,13 @@ How to use pktdef.h:
 	e. If <PACKETNAME>PACKET<EXTENSION> was PKEXT_RELATIVE, OR the
 	   packet mask bit with <PACKETNAME>PACKETMODE and use the result
 	   in the lcPktMode field of the LOGCONTEXT structure.
+5. If using extension data for extensions that report thier data in the extensions packet,
+   do the following additional steps for each extension:
+	a. Before including pktdef.h, define <PACKETNAME>PACKET<EXTENSION> as PKEXT_ABSOLUTE.
+	b. The generated extension structure typedef will contain a field for the
+	   extension data.
+	c. Call WTExtSet to activate the extention.  Use the context id in the WT_PACKETEXT
+	   message to retrieve the extension data <PACKETNAME>PACKETEXT.
 
 
 Example #1.	-- single packet format
@@ -136,14 +144,16 @@ extern "C" {
 #define __SFX3(x,s)		x ## s
 
 #define __TAG  	__IFX(tag,PACKET)
-#define __TYPES	__PFX(PACKET), * __IFX(P,PACKET), NEAR * __IFX(NP,PACKET), \
-					FAR * __IFX(LP,PACKET)
+#define __TYPES	__PFX(PACKET), * __IFX(P,PACKET), NEAR * __IFX(NP,PACKET), FAR * __IFX(LP,PACKET)
+
+#define __TAGE  	__IFX(tag,PACKETEXT)
+#define __TYPESE	__PFX(PACKETEXT), * __IFX(P,PACKETEXT), NEAR * __IFX(NP,PACKETEXT), FAR * __IFX(LP,PACKETEXT)
 
 #define __DATA		(__PFX(PACKETDATA))
 #define __MODE		(__PFX(PACKETMODE))
 #define __EXT(x)	__SFX2(__PFX(PACKET),x)
 
-	
+
 typedef struct __TAG {
 	#if (__DATA & PK_CONTEXT)
 		HCTX			pkContext;
@@ -212,10 +222,29 @@ typedef struct __TAG {
 
 } __TYPES ;
 
+#ifndef NOWTEXTENSIONS
+typedef struct __TAGE {
+	EXTENSIONBASE	pkBase;
+
+	#if (__EXT(EXPKEYS) == PKEXT_RELATIVE) || (__EXT(EXPKEYS) == PKEXT_ABSOLUTE)
+		EXPKEYSDATA pkExpKeys; /* 1.4 */
+	#endif
+	#if (__EXT(TOUCHSTRIP) == PKEXT_RELATIVE) || (__EXT(TOUCHSTRIP) == PKEXT_ABSOLUTE)
+		SLIDERDATA	pkTouchStrip; /* 1.4 */
+	#endif
+	#if (__EXT(TOUCHRING) == PKEXT_RELATIVE) || (__EXT(TOUCHRING) == PKEXT_ABSOLUTE)
+		SLIDERDATA	pkTouchRing; /* 1.4 */
+	#endif
+
+} __TYPESE ;
+#endif
+
 #undef PACKETNAME
 #undef __TAG
+#undef __TAGE
 #undef __TAG2
 #undef __TYPES
+#undef __TYPESE
 #undef __TYPES2
 #undef __DATA
 #undef __MODE

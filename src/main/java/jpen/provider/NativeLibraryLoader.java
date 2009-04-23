@@ -52,32 +52,7 @@ public class NativeLibraryLoader{
 	public synchronized void load(){
 		if(!loaded){
 			L.finest("v");
-			String preferredArchitecture=getPreferredArchitecture();
-			Throwable loadExceptionCause=null;
-			if(preferredArchitecture!=null)
-				try{
-					loadLibrary(preferredArchitecture);
-				}catch(Throwable t){
-					setPreferredArchitecture(null);
-					loadExceptionCause=t;
-				}
-			else{
-				String dataModel=getJavaVMDataModel();
-				Collection<String> architectures=dataModelToArchitectures.get(dataModel);
-				if(architectures==null)
-					throw new IllegalStateException("Unsupported data model: "+dataModel);
-				for(String architecture: architectures){
-					try{
-						loadLibrary(architecture);
-						setPreferredArchitecture(architecture);
-						loadExceptionCause=null;
-						break;
-					}catch(Throwable t){
-						setPreferredArchitecture(null);
-						loadExceptionCause=t;
-					}
-				}
-			}
+			Throwable loadExceptionCause=doLoad();
 			loaded=true;
 			if(loadExceptionCause!=null){
 				L.info("no suitable JNI library found");
@@ -85,6 +60,39 @@ public class NativeLibraryLoader{
 			}
 			L.finest("^");
 		}
+	}
+
+	/**
+	@return the last load exception or {@code null} if one matching library was found and loaded.
+	*/
+	private Throwable doLoad(){
+		String preferredArchitecture=getPreferredArchitecture();
+		if(preferredArchitecture!=null){
+			try{
+				loadLibrary(preferredArchitecture);
+				return null;
+			}catch(Throwable t){
+				setPreferredArchitecture(null);
+			}
+		}
+		
+		Throwable loadExceptionCause=null;
+		String dataModel=getJavaVMDataModel();
+		Collection<String> architectures=dataModelToArchitectures.get(dataModel);
+		if(architectures==null)
+			throw new IllegalStateException("Unsupported data model: "+dataModel);
+		for(String architecture: architectures){
+			try{
+				loadLibrary(architecture);
+				setPreferredArchitecture(architecture);
+				loadExceptionCause=null;
+				break;
+			}catch(Throwable t){
+				setPreferredArchitecture(null);
+				loadExceptionCause=t;
+			}
+		}
+		return loadExceptionCause;
 	}
 
 	public static class LoadException
@@ -127,7 +135,7 @@ public class NativeLibraryLoader{
 				    }
 				    else{
 					    preferences.put(PREFERENCE_KEY$ARCHITECTURE, architecture);
-							L.info("preferred architecture set");
+					    L.info("preferred architecture set");
 				    }
 				    return null;
 			    }
