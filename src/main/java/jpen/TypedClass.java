@@ -44,21 +44,21 @@ public abstract class TypedClass<T extends Enum<T>>
 	}
 
 	private final T getType(int typeNumber){
-		List<T> types=getAllTypes();
-		int customTypeOrdinal=getCustomTypeOrdinal(types);
-		if(typeNumber>=customTypeOrdinal)
-			return types.get(customTypeOrdinal);
-		return types.get(typeNumber);
+		List<T>allTypes=getAllTypes();
+		int customTypeOrdinal=getCustomTypeOrdinal(allTypes);
+		return allTypes.get( typeNumber<customTypeOrdinal? typeNumber: customTypeOrdinal );
 	}
-	
-	private static final <T extends Enum<T>> int getCustomTypeOrdinal(Collection<T> types){
-		return types.size()-1;// the last is always the CUSTOM
+
+	private static final <T extends Enum<T>> int getCustomTypeOrdinal(List<T> allTypes){
+		return allTypes.size()-1;// the last is always the CUSTOM
 	}
 
 	@SuppressWarnings("unchecked")
 	static final <T extends Enum<T>> List<T> createStandardTypes(List<T> allTypes){
-		List<T> stdTypes=new ArrayList<T>(allTypes);
-		stdTypes.remove(getCustomTypeOrdinal(stdTypes));
+		int customTypeOrdinal=getCustomTypeOrdinal(allTypes);
+		List<T> stdTypes=new ArrayList<T>(customTypeOrdinal);
+		for(int i=0; i<customTypeOrdinal; i++)
+			stdTypes.add(allTypes.get(i));
 		return Collections.unmodifiableList(stdTypes);
 	}
 

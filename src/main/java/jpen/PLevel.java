@@ -83,27 +83,31 @@ public class PLevel
 			  azimuthXAndAltitude[0]=PI;
 		  else if(tiltX==0 && tiltY==0){
 			  azimuthXAndAltitude[0]=0;
-			  azimuthXAndAltitude[1]=PI/2;
+			  azimuthXAndAltitude[1]=PI_2;
 			  return;
 		  } else
 			  azimuthXAndAltitude[0]=0;
 		  double tanTiltY=tan(tiltY);
 		  azimuthXAndAltitude[0]+=atan(tanTiltY/tan(tiltX));
 		  azimuthXAndAltitude[1]=azimuthXAndAltitude[0]==0?
-		      PI/2-tiltX:
+		      PI_2-tiltX:
 		      Math.abs(atan(sin(azimuthXAndAltitude[0])/tanTiltY));
 	  }
+		
+		private static final double PI_2=PI/2;
 	}
 
 	public static class Range {
 		public final float min;
 		public final float max;
+		private final float range;
 		public Range(float min, float max) {
 			this.min=min;
 			this.max=max;
+			this.range=max-min;
 		}
 		public final float getRangedValue(float value) {
-			return (value-min)/(max-min);
+			return (value-min)/range;
 		}
 
 		@Override
@@ -117,7 +121,7 @@ public class PLevel
 	}
 
 	@Override
-	List<Type> getAllTypes() {
+	final List<Type> getAllTypes() {
 		return Type.ALL_VALUES;
 	}
 

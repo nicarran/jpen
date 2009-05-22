@@ -39,16 +39,13 @@ public class Pen extends PenState {
 	private volatile MyThread thread;
 
 	/** Tail of event queue. */
-	PenEvent lastDispatchedEvent=new PenEvent(this) {
+	private PenEvent lastDispatchedEvent=new PenEvent(this) {
 		    public static final long serialVersionUID=1l;
 		    @Override
 		    void dispatch() { }
 		    @Override
 		    void copyTo(PenState penState){}
-	    }
-	    ;
-	/** Head of event queue. */
-	//private PenEvent lastScheduledEvent=lastDispatchedEvent;
+	    };
 	final PenScheduler scheduler=new PenScheduler(this);
 	public final PenState lastScheduledState=scheduler.lastScheduledState;
 	private final List<PenListener> listeners=new ArrayList<PenListener>();

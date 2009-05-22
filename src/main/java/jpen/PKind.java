@@ -58,7 +58,7 @@ public class PKind
 	}
 
 	@Override
-	List<Type> getAllTypes() {
+	final List<Type> getAllTypes() {
 		return Type.ALL_VALUES;
 	}
 }

@@ -24,26 +24,39 @@ import java.util.Map;
 public class PenState
 	implements java.io.Serializable {
 	public static final long serialVersionUID=1l;
-	
+
 	public static class Levels implements java.io.Serializable {
 		public static final long serialVersionUID=1l;
-		private final float[] values=new float[PLevel.Type.VALUES.size()-1]; // CUSTOM type does not store value.
+		private final float[] values=new float[PLevel.Type.VALUES.size()]; // CUSTOM type does not store value but VALUES does not have the CUSTOM
 		private final Map<Integer, Float> extTypeNumberToValue=new HashMap<Integer, Float>();
-		
+
 		public void setValues(PenState penState){
 			setValues(penState.levels);
 		}
 
 		public void setValues(PenState.Levels levels){
-			for(int i=values.length; --i>=0;)
+			for(int i=levels.values.length; --i>=0;)
 				values[i]=levels.values[i];
 			extTypeNumberToValue.clear();
 			extTypeNumberToValue.putAll(levels.extTypeNumberToValue);
+			for(int i=levels.values.length; i<values.length; i++){ // If a new PLevel.Type is added then transform the ext to this newer type
+				Float value=extTypeNumberToValue.remove(i);
+				if(value!=null)
+					values[i]=value;
+			}
 		}
 
 		public void setValues(PLevelEvent ev){
-			for(PLevel level:ev.levels)
-				setValue(level.typeNumber, level.value);
+			setValues(ev.levels);
+		}
+
+		public final void setValues(PLevel[] levels){
+			for(int i=levels.length; --i>=0; )
+				setValue(levels[i]);
+		}
+
+		public final void setValue(PLevel level){
+			setValue(level.typeNumber, level.value);
 		}
 
 		public final void setValue(PLevel.Type levelType, float value){
@@ -51,17 +64,15 @@ public class PenState
 		}
 
 		public final void setValue(int levelTypeNumber, float value){
-			if(levelTypeNumber>=values.length) {
+			if(levelTypeNumber<values.length) 
+				values[levelTypeNumber]=value;
+			else
 				setExtValue(levelTypeNumber, value);
-				return;
-			}
-			values[levelTypeNumber]=value;
 		}
 
 		public float getValue(int levelTypeNumber) {
-			if(levelTypeNumber>=values.length)
-				return getExtValue(levelTypeNumber);
-			return values[levelTypeNumber];
+			return levelTypeNumber<values.length ?
+			       values[levelTypeNumber]: getExtValue(levelTypeNumber);
 		}
 
 		public float getValue(PLevel.Type levelType){
@@ -72,7 +83,7 @@ public class PenState
 			Float value=extTypeNumberToValue.get(extLevelTypeNumber);
 			return value==null? 0f: value;
 		}
-
+		
 		private final void setExtValue(int levelTypeNumber, float value){
 			extTypeNumberToValue.put(levelTypeNumber, value);
 		}

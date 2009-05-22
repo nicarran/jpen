@@ -156,7 +156,7 @@ int type##_destroy(int cellIndex){\
 }\
 \
 void type##_setError(char *error){\
-	printf("--- jni: "#type": %s \n", error);\
+	/*printf("--- jni: "#type": %s \n", error);*/\
 	m_newstr(type##_row.error, #type ": ");\
 	type##_appendError(error);\
 }\

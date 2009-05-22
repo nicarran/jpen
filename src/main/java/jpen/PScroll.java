@@ -29,6 +29,7 @@ public class PScroll
 
 	public enum Type {
 		UP, DOWN, CUSTOM;
+		
 		public static final List<Type> ALL_VALUES=Collections.unmodifiableList(Arrays.asList(values()));
 		public static final List<Type> VALUES=TypedClass.createStandardTypes(ALL_VALUES);
 	}
@@ -38,7 +39,7 @@ public class PScroll
 	}
 
 	@Override
-	List<Type> getAllTypes() {
+	final List<Type> getAllTypes() {
 		return Type.ALL_VALUES;
 	}
 }

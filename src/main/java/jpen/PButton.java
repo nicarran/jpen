@@ -40,7 +40,7 @@ public class PButton
 	// TODO: valueOf ?
 
 	@Override
-	List<Type> getAllTypes(){
+	final List<Type> getAllTypes(){
 		return Type.ALL_VALUES;
 	}
 }
