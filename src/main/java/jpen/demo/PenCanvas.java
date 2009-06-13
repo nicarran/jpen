@@ -87,23 +87,20 @@ class PenCanvas
 		penManager.pen.addListener(new PenAdapter() {
 			    @Override
 			    public void penLevelEvent(PLevelEvent ev) {
-				    for(PLevel level:ev.levels) {
-					    PLevel.Type levelType=level.getType();
+				    if(!penManager.pen.getButtonValue(PButton.Type.LEFT))
+					    return;
+						for(PLevel.Type levelType: PLevel.Type.MOVEMENT_TYPES){
+							float value=penManager.pen.getLevelValue(levelType);
 					    switch(levelType) {
 					    case X:
-						    cursorCenter.x=level.value;
+						    cursorCenter.x=value;
 						    break;
 					    case Y:
-						    cursorCenter.y=level.value;
+						    cursorCenter.y=value;
 						    break;
 					    }
 				    }
 				    paintStroke();
-			    }
-			    @Override
-			    public void penButtonEvent(PButtonEvent ev){
-				    if(ev.button.getType()==PButton.Type.LEFT)
-					    paintStroke();
 			    }
 			    @Override
 			    public void penTock(long availableTime) {

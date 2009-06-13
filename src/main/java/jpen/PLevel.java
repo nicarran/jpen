@@ -34,66 +34,67 @@ public class PLevel
 			extends TypedValuedClass<PLevel.Type, Float>
 	implements java.io.Serializable {
 	private static final Logger L=Logger.getLogger(PLevel.class.getName());
+	//static{L.setLevel(Level.FINE);}
 	public static final long serialVersionUID=1l;
 
 	public enum Type{
 		/**
 		X axis value in pixels. The X axis points to the right of the screen. It's a left handed coordinate system: the Z axis points upside.  
 		*/
-	  X,
+		X,
 		/**
 		Y axis value in pixels. The Y axis points to the bottom of the screen.
 		*/
-		Y,  
+		Y,
 		/**
 		Range: 0 to 1.
 		*/
 		PRESSURE,
-	  /**
+		/**
 		Angle between the Z axis and the projection of the pen against the X-Z plane. Range: -pi/2 to pi/2 (radians). 
-	  */
-	  TILT_X,
-	  /**
+		*/
+		TILT_X,
+		/**
 		Angle between the Z axis and the projection of the pen against the Y-Z plane. Range: -pi/2 to pi/2.
-	  */
-	  TILT_Y,
+		*/
+		TILT_Y,
 		CUSTOM;
 
 		public static final List<Type> ALL_VALUES=Collections.unmodifiableList(Arrays.asList(values()));
 		public static final List<Type> VALUES=TypedClass.createStandardTypes(ALL_VALUES);
-	  public static final Set<Type> MOVEMENT_TYPES=Collections.unmodifiableSet(EnumSet.of(X, Y));
-	  public static final Set<Type> TILT_TYPES=Collections.unmodifiableSet(EnumSet.of(TILT_X, TILT_Y));
-		
+		public static final Set<Type> MOVEMENT_TYPES=Collections.unmodifiableSet(EnumSet.of(X, Y));
+		public static final Set<Type> TILT_TYPES=Collections.unmodifiableSet(EnumSet.of(TILT_X, TILT_Y));
+
 		/**
 		Evaluates the azimuthX and altitude given the tilt values of the pen.
-		
+
 		@see #evalAzimuthXAndAltitude(double[], double tiltX, double tiltY)
 		*/
 		public static void evalAzimuthXAndAltitude(double[] azimuthXAndAltitude, PenState pen){
 			evalAzimuthXAndAltitude(azimuthXAndAltitude, pen.getLevelValue(TILT_X), pen.getLevelValue(TILT_Y));
 		}
-		
+
 		/**
 		Evaluates the azimuthX and the altitude given the tilt ({@link #TILT_X}, {@link #TILT_Y}) values. Where:<p>
-		{@code azimuthX} is the angle between the X axis and the projection of the pen against the X-Y plane. Clockwise direction. Range: -pi/2 and 3*pi/2 <p>
+	{@code azimuthX} is the angle between the X axis and the projection of the pen against the X-Y plane. Clockwise direction. Range: -pi/2 and 3*pi/2 <p>
 		And {@code altitude} is the angle between the pen and the projection of the pen against the X-Y plane. Range: 0 to pi/2.
 		*/
-	  public static void evalAzimuthXAndAltitude(double[] azimuthXAndAltitude, double tiltX, double tiltY){
-		  if(tiltX<0)
-			  azimuthXAndAltitude[0]=PI;
-		  else if(tiltX==0 && tiltY==0){
-			  azimuthXAndAltitude[0]=0;
-			  azimuthXAndAltitude[1]=PI_2;
-			  return;
-		  } else
-			  azimuthXAndAltitude[0]=0;
-		  double tanTiltY=tan(tiltY);
-		  azimuthXAndAltitude[0]+=atan(tanTiltY/tan(tiltX));
-		  azimuthXAndAltitude[1]=azimuthXAndAltitude[0]==0?
-		      PI_2-tiltX:
-		      Math.abs(atan(sin(azimuthXAndAltitude[0])/tanTiltY));
-	  }
-		
+		public static void evalAzimuthXAndAltitude(double[] azimuthXAndAltitude, double tiltX, double tiltY){
+			if(tiltX<0)
+				azimuthXAndAltitude[0]=PI;
+			else if(tiltX==0 && tiltY==0){
+				azimuthXAndAltitude[0]=0;
+				azimuthXAndAltitude[1]=PI_2;
+				return;
+			} else
+				azimuthXAndAltitude[0]=0;
+			double tanTiltY=tan(tiltY);
+			azimuthXAndAltitude[0]+=atan(tanTiltY/tan(tiltX));
+			azimuthXAndAltitude[1]=azimuthXAndAltitude[0]==0?
+					PI_2-tiltX:
+					Math.abs(atan(sin(azimuthXAndAltitude[0])/tanTiltY));
+		}
+
 		private static final double PI_2=PI/2;
 	}
 

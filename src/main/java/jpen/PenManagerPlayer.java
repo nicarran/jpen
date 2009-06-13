@@ -161,14 +161,14 @@ class PenManagerPlayer
 			return true;
 		if(!penManager.pen.hasPressedButtons())
 			return false;
-		if(componentWindow==null){
+		/*if(componentWindow==null){
 			L.warning("Disabled dragging out capability: component window not found.");
 			return false;
 		}
 		if(pauseOnWindowDeactivation && !componentWindow.isActive()){
 			L.info("Dragging out on inactive window is not supported.");
 			return false;
-		}
+		}*/
 		isDraggingOut=true;
 		penManager.pen.addListener(draggingOutPenListener);
 		return true;

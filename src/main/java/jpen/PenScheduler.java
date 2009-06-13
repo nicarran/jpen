@@ -140,7 +140,7 @@ final class PenScheduler{
 				L.fine("scheduling button event: "+button);
 			PButtonEvent buttonEvent=new PButtonEvent(pen, button);
 			schedule(buttonEvent);
-			if(buttonEvent!=null && pen.levelEmulator!=null)
+			if(pen.levelEmulator!=null)
 				pen.levelEmulator.scheduleEmulatedEvent(buttonEvent);
 		}
 	}
