@@ -46,7 +46,7 @@ public abstract class TypedClass<T extends Enum<T>>
 	private final T getType(int typeNumber){
 		List<T>allTypes=getAllTypes();
 		int customTypeOrdinal=getCustomTypeOrdinal(allTypes);
-		return allTypes.get( typeNumber<customTypeOrdinal? typeNumber: customTypeOrdinal );
+		return allTypes.get( typeNumber < customTypeOrdinal ? typeNumber: customTypeOrdinal );
 	}
 
 	private static final <T extends Enum<T>> int getCustomTypeOrdinal(List<T> allTypes){

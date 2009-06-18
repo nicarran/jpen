@@ -1,10 +1,15 @@
 package jpen;
 
+import java.awt.geom.Point2D;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Map;
+import jpen.owner.PenOwner;
 
 final class PenScheduler{
 	static final Logger L=Logger.getLogger(PenScheduler.class.getName());
@@ -33,10 +38,10 @@ final class PenScheduler{
 			if(!device.isDigitizer()) {
 				time=System.currentTimeMillis();
 				if(lastDevice!=null &&
-				        lastDevice!=device &&
-				        lastEvent!=null &&
-				        time-lastEvent.time<=THRESHOLD_PERIOD
-				  )
+								lastDevice!=device &&
+								lastEvent!=null &&
+								time-lastEvent.time<=THRESHOLD_PERIOD
+					)
 					return true;
 				if(!filteredFirstInSecuence) {
 					L.fine("filtered first in sequence to prioritize digitized input in race");
@@ -64,13 +69,18 @@ final class PenScheduler{
 		}
 	}
 
+	private final Point clipLocationOnScreen=new Point();
+	private final Point2D.Float scheduledLocation=new Point2D.Float();
 
-
-	synchronized boolean scheduleLevelEvent(PenDevice device, long penDeviceTime, Collection<PLevel> levels,  int minX, int maxX, int minY, int maxY, PenManagerPlayer penManagerPlayer) {
+	synchronized boolean scheduleLevelEvent(PenManager penManager, PenDevice device, long penDeviceTime, Collection<PLevel> levels, boolean levelsOnScreen) {
 		// if device == null then this is an emulated event request
 		if(device!=null && phantomLevelFilter.filter(device))
 			return false;
 		boolean scheduledMovement=false;
+		scheduledLocation.x=lastScheduledState.levels.getValue(PLevel.Type.X);
+		scheduledLocation.y=lastScheduledState.levels.getValue(PLevel.Type.Y);
+		if(penManager!=null && levelsOnScreen)
+			penManager.penOwner.getPenClip().evalLocationOnScreen(clipLocationOnScreen);
 		for(PLevel level:levels) {
 			if(level.value==lastScheduledState.getLevelValue(level.typeNumber))
 				continue;
@@ -78,28 +88,35 @@ final class PenScheduler{
 				continue;
 			if(pen.getLevelFilter().filterPenLevel(level))
 				continue;
-			switch(level.getType()){
+			PLevel.Type levelType=level.getType();
+			switch(levelType){
 			case X:
 				scheduledMovement=true;
-				if(!evalLevelValueIsInRange(level.value, minX, maxX, penManagerPlayer))
-					continue;
+				if(levelsOnScreen)
+					level.value=level.value-clipLocationOnScreen.x;
+				scheduledLocation.x=level.value;
 				break;
 			case Y:
 				scheduledMovement=true;
-				if(!evalLevelValueIsInRange(level.value, minY, maxY, penManagerPlayer))
-					continue;
+				if(levelsOnScreen)
+					level.value=level.value-clipLocationOnScreen.y;
+				scheduledLocation.y=level.value;
 				break;
 			default:
 			}
 			scheduledLevels.add(level);
-			lastScheduledState.levels.setValue(level.typeNumber, level.value);
 		}
 		if(scheduledLevels.isEmpty())
 			return false;
-		if(device!=null && scheduledMovement &&
-		        lastScheduledState.getKind().typeNumber!=
-		        device.getKindTypeNumber()){
-			if(device.getKindTypeNumber()!=PKind.Type.IGNORE.ordinal()){
+
+		if(scheduledMovement){
+			if(penManager!=null && !penManager.penOwner.getPenClip().contains(scheduledLocation)
+							&& !penManager.penOwner.isDraggingOut())
+				return false;
+
+			if(device!=null &&
+							device.getKindTypeNumber() !=lastScheduledState.getKind().typeNumber &&
+							device.getKindTypeNumber()!=PKind.Type.IGNORE.ordinal() ){
 				PKind newKind=PKind.valueOf(device.getKindTypeNumber());
 				if(L.isLoggable(Level.FINE)){
 					L.fine("changing kind to:"+newKind);
@@ -110,20 +127,15 @@ final class PenScheduler{
 				schedule(new PKindEvent(pen, newKind));
 			}
 		}
-		PLevelEvent levelEvent=new PLevelEvent(pen,
-		    scheduledLevels.toArray(new PLevel[scheduledLevels.size()]), device==null? -1: device.getId(), penDeviceTime);
-		phantomLevelFilter.setLastEvent(levelEvent);
-		schedule(levelEvent);
-		scheduledLevels.clear();
-		return true;
-	}
 
-	private boolean evalLevelValueIsInRange(float levelValue, int min , int max, PenManagerPlayer penManagerPlayer){
-		if(levelValue<min || levelValue>max){
-			if(penManagerPlayer!=null &&
-			        penManagerPlayer.stopPlayingIfNotDragOut())
-				return false;
-		}
+		lastScheduledState.levels.setValues(scheduledLevels);
+		PLevelEvent levelEvent=new PLevelEvent(pen,
+				scheduledLevels.toArray(new PLevel[scheduledLevels.size()]),
+				device==null? -1: device.getId(),
+				penDeviceTime);
+		phantomLevelFilter.setLastEvent(levelEvent);
+		scheduledLevels.clear();
+		schedule(levelEvent);
 		return true;
 	}
 

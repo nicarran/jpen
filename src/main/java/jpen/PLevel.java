@@ -39,7 +39,7 @@ public class PLevel
 
 	public enum Type{
 		/**
-		X axis value in pixels. The X axis points to the right of the screen. It's a left handed coordinate system: the Z axis points upside.  
+		X axis value in pixels. The X axis points to the right of the screen. It's a left handed coordinate system: the Z axis points upside.
 		*/
 		X,
 		/**
@@ -51,7 +51,7 @@ public class PLevel
 		*/
 		PRESSURE,
 		/**
-		Angle between the Z axis and the projection of the pen against the X-Z plane. Range: -pi/2 to pi/2 (radians). 
+		Angle between the Z axis and the projection of the pen against the X-Z plane. Range: -pi/2 to pi/2 (radians).
 		*/
 		TILT_X,
 		/**
@@ -129,7 +129,10 @@ public class PLevel
 	public boolean isMovement() {
 		return Type.MOVEMENT_TYPES.contains(getType());
 	}
-
+	/**
+	@deprecated No replacement.
+	*/
+	@Deprecated
 	public static final float getCoordinateValueForComponent( Dimension componentSize, Point2D.Float componentLocation, PLevel.Type coordinate, float coordinateValue) {
 		if(L.isLoggable(Level.FINE)){
 			L.fine("componentSize="+componentSize+", componentLocation="+componentLocation+", coordinate="+coordinate+", coordinateValue="+coordinateValue);

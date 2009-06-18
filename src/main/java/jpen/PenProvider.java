@@ -24,7 +24,7 @@ public interface PenProvider {
 	public interface Constructor {
 		PenManager getPenManager();
 		String getName();
-		boolean constructable();
+		boolean constructable(PenManager pm);
 		boolean construct(PenManager pm);
 		ConstructionException getConstructionException();
 		PenProvider getConstructed();

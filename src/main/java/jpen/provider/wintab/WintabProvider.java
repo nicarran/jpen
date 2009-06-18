@@ -74,7 +74,7 @@ public class WintabProvider
 			return "Wintab";
 		}
 		//@Override
-		public boolean constructable() {
+		public boolean constructable(PenManager penManager) {
 			return System.getProperty("os.name").toLowerCase().contains("windows");
 		}
 
@@ -100,19 +100,19 @@ public class WintabProvider
 		}
 
 		thread=new Thread("jpen-WintabProvider") {
-			       public void run() {
-				       while(true) {
-					       processQuedEvents();
-					       jpen.Utils.synchronizedWait(this, PERIOD);
-					       while(getPaused()){
-						       L.fine("going to wait...");
-						       jpen.Utils.synchronizedWait(this, 0);
-						       L.fine("notified");
-					       }
-				       }
-			       }
-		       }
-		       ;
+						 public void run() {
+							 while(true) {
+								 processQuedEvents();
+								 jpen.Utils.synchronizedWait(this, PERIOD);
+								 while(getPaused()){
+									 L.fine("going to wait...");
+									 jpen.Utils.synchronizedWait(this, 0);
+									 L.fine("notified");
+								 }
+							 }
+						 }
+					 }
+					 ;
 		thread.setDaemon(true);
 		thread.setPriority(Thread.MAX_PRIORITY);
 		thread.start();

@@ -54,7 +54,7 @@ public class XinputProvider
 			return "XInput";
 		}
 		//@Override
-		public boolean constructable() {
+		public boolean constructable(PenManager penManager) {
 			return System.getProperty("os.name").toLowerCase().contains("linux");
 		}
 
@@ -87,17 +87,17 @@ public class XinputProvider
 		}
 
 		thread=new Thread("jpen-XinputProvider") {
-			       public void run() {
-				       while(true) {
-					       processQuedEvents();
-					       jpen.Utils.synchronizedWait(this, PERIOD);
-					       while(getPenManager().getPaused()){
-						       jpen.Utils.synchronizedWait(this, 0);
-					       }
-				       }
-			       }
-		       }
-		       ;
+						 public void run() {
+							 while(true) {
+								 processQuedEvents();
+								 jpen.Utils.synchronizedWait(this, PERIOD);
+								 while(getPenManager().getPaused()){
+									 jpen.Utils.synchronizedWait(this, 0);
+								 }
+							 }
+						 }
+					 }
+					 ;
 		thread.setDaemon(true);
 		thread.setPriority(Thread.MAX_PRIORITY);
 		thread.start();

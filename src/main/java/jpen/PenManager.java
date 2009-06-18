@@ -29,44 +29,66 @@ import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Set;
 import jpen.event.PenManagerListener;
-import jpen.provider.osx.CocoaProvider;
+import jpen.owner.awt.AwtPenOwner;
+import jpen.owner.PenOwner;
 import jpen.provider.system.SystemProvider;
-import jpen.provider.wintab.WintabProvider;
-import jpen.provider.xinput.XinputProvider;
 
 public final class PenManager {
 	private static final Logger L=Logger.getLogger(PenManager.class.getName());
 
 	final PLevelEmulator levelEmulator=new PLevelEmulator(this);
 	public final Pen  pen=new Pen(levelEmulator);
+	/**
+	@deprecated Use {@link #penOwner}.
+	*/
+	@Deprecated
 	public final Component component;
+	public final PenOwner penOwner;
 	private final Set<PenProvider.Constructor> providerConstructors=new HashSet<PenProvider.Constructor>();
 	private final Set<PenProvider.Constructor> providerConstructorsA=Collections.unmodifiableSet(providerConstructors);
 	private final Map<Byte, PenDevice> deviceIdToDevice=new HashMap<Byte, PenDevice>();
 	private final Collection<PenDevice> devicesA=Collections.unmodifiableCollection(deviceIdToDevice.values());
 	private byte nextDeviceId;
-	private volatile boolean paused;
+	private volatile boolean paused=true;
 	private final List<PenManagerListener> listeners=new ArrayList<PenManagerListener>();
 	private PenManagerListener[] listenersArray;
-	final PenManagerPlayer penManagerPlayer;
+	@Deprecated
 	private PenDevice systemMouseDevice;
 
-
 	public PenManager(Component component) {
-		this.component=component;
-		addProvider(new SystemProvider.Constructor());
-		addProvider(new XinputProvider.Constructor());
-		addProvider(new WintabProvider.Constructor());
-		addProvider(new CocoaProvider.Constructor());
-		penManagerPlayer=new PenManagerPlayer(this);
+		this(new AwtPenOwner(component));
+	}
+
+	public PenManager(PenOwner penOwner){
+		this.penOwner=penOwner;
+		penOwner.setPenManagerHandle(new PenOwner.PenManagerHandle(){
+					//@Override
+					public final PenManager getPenManager(){
+						return PenManager.this;
+					}
+					//@Override
+					public final Object getPenSchedulerLock(){
+						return pen.scheduler;
+					}
+					//@Override
+					public final void setPenManagerPaused(boolean paused){
+						PenManager.this.setPaused(paused);
+					}
+				});
+		this.component=penOwner instanceof AwtPenOwner?
+									 ((AwtPenOwner)penOwner).component: null;
+		for(PenProvider.Constructor penProviderConstructor: penOwner.getPenProviderConstructors())
+			addProvider(penProviderConstructor);
 	}
 
 	/**
-	Constructs and adds provider if {@link PenProvider.Constructor#constructable()} is true.
+	Constructs and adds provider if {@link PenProvider.Constructor#constructable(PenManager)} is true.
 	@return The {@link PenProvider} added or null if it couldn't be constructed.
+	@deprecated Thre is no replacement. The {@link PenProvider.Constructor}s are now taken  from the {@link PenOwner}.
 	*/
+	@Deprecated
 	public PenProvider addProvider(PenProvider.Constructor providerConstructor) {
-		if(providerConstructor.constructable()) {
+		if(providerConstructor.constructable(this)) {
 			if(!this.providerConstructors.add(providerConstructor))
 				throw new IllegalArgumentException("constructor already added");
 			if(providerConstructor.construct(this)){
@@ -135,6 +157,10 @@ public final class PenManager {
 		return devicesA;
 	}
 
+	/**
+	@deprecated There is no replacement.
+	*/
+	@Deprecated
 	public PenDevice getSystemMouseDevice(){
 		return systemMouseDevice;
 	}
@@ -177,16 +203,12 @@ public final class PenManager {
 	}
 
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long deviceTime) {
-		if(paused)
-			return false;
-		return pen.scheduler.scheduleLevelEvent(device, deviceTime, levels, 0, component.getWidth(), 0, component.getHeight(), penManagerPlayer);
+		return scheduleLevelEvent(device, levels, deviceTime, false);
 	}
 
-	@Deprecated // experimental:
-	public void setIsRelaxedPlayer(boolean isRelaxedPlayer){
-		penManagerPlayer.setPauseOnWindowDeactivation(!isRelaxedPlayer);
-		penManagerPlayer.setWaitMotionToPlay(!isRelaxedPlayer);
-		//penManagerPlayer.setDragOutMode(isRelaxedPlayer? PenManagerPlayer.DragOutMode.DISABLED:
-		//														PenManagerPlayer.DragOutMode.ENABLED);
+	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long deviceTime, boolean levelsOnScreen) {
+		if(paused)
+			return false;
+		return pen.scheduler.scheduleLevelEvent(this, device, deviceTime, levels, levelsOnScreen);
 	}
 }

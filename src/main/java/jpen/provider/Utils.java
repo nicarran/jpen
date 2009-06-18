@@ -37,7 +37,9 @@ public final class Utils {
 
 	/**
 	@return the container window or null.
+	@deprecated Use {@link javax.swing.SwingUtilities#convertPointToScreen(Point, Component)}.
 	*/
+	@Deprecated
 	public static final Window getLocationOnScreen(Component c, Point2D.Float location) {
 		if(location!=null)
 			location.x=location.y=0;
@@ -71,7 +73,7 @@ public final class Utils {
 		}
 		return moduleProperties;
 	}
-	
+
 	public static final String getModuleId(){
 		return getModuleProperties().getString("module.id");
 	}

@@ -21,6 +21,7 @@ package jpen.provider;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
+import jpen.owner.PenOwner;
 import jpen.PButton;
 import jpen.PButtonEvent;
 import jpen.Pen;
@@ -43,12 +44,12 @@ public abstract class AbstractPenDevice
 	protected AbstractPenDevice(PenProvider provider) {
 		this.provider=provider;
 	}
-	
+
 	//@Override
 	public byte getId(){
 		return id;
 	}
-	
+
 	//@Override
 	public void setId(byte id){
 		this.id=id;
@@ -63,7 +64,7 @@ public abstract class AbstractPenDevice
 	public int getKindTypeNumber() {
 		return kindTypeNumber;
 	}
-	
+
 	//@Override
 	public void setKindTypeNumber(int kindTypeNumber) {
 		if(kindTypeNumber<0)
@@ -85,7 +86,7 @@ public abstract class AbstractPenDevice
 	public void setEnabled(boolean enabled) {
 		this.enabled=enabled;
 	}
-	
+
 	//@Override
 	public String getPhysicalId(){
 		String physicalId=this.physicalId;
@@ -97,7 +98,7 @@ public abstract class AbstractPenDevice
 			}
 		return physicalId;
 	}
-	
+
 	protected String evalPhysicalId(){
 		return getName().trim()+"@"+provider.getConstructor().getName().trim();
 	}
@@ -110,6 +111,10 @@ public abstract class AbstractPenDevice
 		return getPenManager().pen;
 	}
 
+	/**
+	@deprecated Use the {@link PenOwner#getPenClip()}.
+	*/
+	@Deprecated
 	public final Component getComponent() {
 		return getPenManager().component;
 	}
@@ -118,7 +123,7 @@ public abstract class AbstractPenDevice
 	public String toString() {
 		return "[PenDevice: provider="+getProvider()+", name="+getName()+", kind="+getOrNull(PKind.Type.VALUES, getKindTypeNumber())+"("+getKindTypeNumber()+")]";
 	}
-	
+
 	private static final <T> T getOrNull(List<T> l, int index){
 		if(index<0 || index>=l.size())
 			return null;

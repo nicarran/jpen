@@ -48,50 +48,50 @@ class MouseDevice
 	//static {L.setLevel(Level.ALL);	}
 
 	private final MouseListener mouseL=new MouseAdapter() {
-		    @Override
-		    public void mousePressed(MouseEvent ev) {
-			    mouseButtonChanged(ev, true);
-		    }
+				@Override
+				public void mousePressed(MouseEvent ev) {
+					mouseButtonChanged(ev, true);
+				}
 
-		    @Override
-		    public void mouseReleased(MouseEvent ev) {
-			    mouseButtonChanged(ev, false);
-		    }
-	    };
+				@Override
+				public void mouseReleased(MouseEvent ev) {
+					mouseButtonChanged(ev, false);
+				}
+			};
 	private final MouseMotionListener mouseMotionL=new MouseMotionListener(){
-		    //@Override
-		    public void mouseMoved(MouseEvent ev) {
-			    scheduleMove(ev.getX(), ev.getY(), ev.getWhen());
-		    }
-		    //@Override
-		    public void mouseDragged(MouseEvent ev) {
-			    scheduleMove(ev.getX(), ev.getY(), ev.getWhen());
-		    }
-	    };
+				//@Override
+				public void mouseMoved(MouseEvent ev) {
+					scheduleMove(ev.getX(), ev.getY(), ev.getWhen());
+				}
+				//@Override
+				public void mouseDragged(MouseEvent ev) {
+					scheduleMove(ev.getX(), ev.getY(), ev.getWhen());
+				}
+			};
 	private final MouseWheelListener mouseWheelL=new MouseWheelListener(){
-		    //@Override
-		    public void mouseWheelMoved(MouseWheelEvent ev) {
-			    int value=ev.getWheelRotation();
-			    PScroll.Type type=PScroll.Type.DOWN;
-			    if(value<0) {
-				    type=PScroll.Type.UP;
-				    value=-value;
-			    }
-			    if(ev.getScrollType()==ev.WHEEL_UNIT_SCROLL && ev.getScrollAmount()>0) // > 0 : is because windows bug workaround, sometimes it is 0.
-				    value*=ev.getScrollAmount();
-			    getPenManager().scheduleScrollEvent(MouseDevice.this, new PScroll(type.ordinal(), value));
-		    }
-	    };
+				//@Override
+				public void mouseWheelMoved(MouseWheelEvent ev) {
+					int value=ev.getWheelRotation();
+					PScroll.Type type=PScroll.Type.DOWN;
+					if(value<0) {
+						type=PScroll.Type.UP;
+						value=-value;
+					}
+					if(ev.getScrollType()==ev.WHEEL_UNIT_SCROLL && ev.getScrollAmount()>0) // > 0 : is because windows bug workaround, sometimes it is 0.
+						value*=ev.getScrollAmount();
+					getPenManager().scheduleScrollEvent(MouseDevice.this, new PScroll(type.ordinal(), value));
+				}
+			};
 	private final SystemProvider systemProvider;
 
 	MouseDevice(SystemProvider systemProvider) {
 		super(systemProvider);
 		this.systemProvider=systemProvider;
-		getComponent().addMouseListener(mouseL);
-		getComponent().addMouseWheelListener(mouseWheelL);
+		systemProvider.component.addMouseListener(mouseL);
+		systemProvider.component.addMouseWheelListener(mouseWheelL);
 		setEnabled(true);
 	}
-	
+
 	@Override
 	public boolean isDigitizer(){
 		return false;
@@ -107,10 +107,10 @@ class MouseDevice
 		if(getEnabled()==enabled)
 			return;
 		if(getEnabled())
-			getComponent().removeMouseMotionListener(mouseMotionL);
+			systemProvider.component.removeMouseMotionListener(mouseMotionL);
 		super.setEnabled(enabled);
 		if(getEnabled())
-			getComponent().addMouseMotionListener(mouseMotionL);
+			systemProvider.component.addMouseMotionListener(mouseMotionL);
 	}
 
 	private final PLevel[] changedLevelsA=new PLevel[2];

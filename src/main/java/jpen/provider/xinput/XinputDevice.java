@@ -125,18 +125,12 @@ class XinputDevice extends AbstractPenDevice {
 
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();
 	private void scheduleLevelEvent() {
-		Utils.getLocationOnScreen(getComponent(), componentLocation);
 		for(int i=PLevel.Type.VALUES.size(); --i>=0;) {
 			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
-			float value=PLevel.getCoordinateValueForComponent(
-			              getComponent().getSize(componentSize), componentLocation,  levelType, getMultRangedValue(levelType));
-			/*if(levelType.isMovement && value<0) {
-				changedLevels.clear();
-				return;
-		}*/
+			float value=getMultRangedValue(levelType);
 			changedLevels.add(new PLevel(levelType.ordinal(), value));
 		}
-		getPenManager().scheduleLevelEvent(this, changedLevels, device.getLastEventTime());
+		getPenManager().scheduleLevelEvent(this, changedLevels, device.getLastEventTime(), true);
 		changedLevels.clear();
 	}
 
@@ -160,7 +154,7 @@ class XinputDevice extends AbstractPenDevice {
 
 		if(PLevel.Type.MOVEMENT_TYPES.contains(levelType))
 			devValue=xinputProvider.screenBounds.getLevelRangeOffset(levelType)+
-			         devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);
+							 devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);
 
 		return devValue;
 	}

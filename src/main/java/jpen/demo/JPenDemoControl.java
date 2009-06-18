@@ -53,19 +53,19 @@ public class JPenDemoControl{
 	public JPenDemoControl(){
 		penCanvas=new PenCanvas();
 		mainPanel=new MainPanel(penCanvas);
-		
+
 		setSupportCustomPKinds(true);
 		penCanvas.penManager.pen.levelEmulator.setPressureTriggerForLeftCursorButton(0.5f);
 
 		statusReportButton.addActionListener(new ActionListener(){
-			    //@Override
-			    public void actionPerformed(ActionEvent ev){
-				    StatusReportPanel statusReportPanel=new StatusReportPanel(
-				          new StatusReport(penCanvas.penManager));
-				    //statusReportPanel.panel.setPreferredSize(SIZE);
-				    JOptionPane.showMessageDialog(mainPanel.panel, statusReportPanel.panel, "JPen Status Report", JOptionPane.INFORMATION_MESSAGE);
-			    }
-		    });
+					//@Override
+					public void actionPerformed(ActionEvent ev){
+						StatusReportPanel statusReportPanel=new StatusReportPanel(
+									new StatusReport(penCanvas.penManager));
+						//statusReportPanel.panel.setPreferredSize(SIZE);
+						JOptionPane.showMessageDialog(mainPanel.panel, statusReportPanel.panel, "JPen Status Report", JOptionPane.INFORMATION_MESSAGE);
+					}
+				});
 
 		/*JFrame f=new JFrame("JPen Demo");
 		f.getContentPane().add(mainPanel.panel);
@@ -92,8 +92,8 @@ public class JPenDemoControl{
 		String closeOption="Close";
 		Object[] options=new Object[]{statusReportButton, closeOption};
 		JOptionPane.showOptionDialog(null, getMainPanelComponent(), title,
-		    JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
-		    null, options, closeOption);
+				JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
+				null, options, closeOption);
 	}
 
 	public static void main(String... args) throws IOException, NumberFormatException{
@@ -103,14 +103,14 @@ public class JPenDemoControl{
 			else
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}catch(Exception ex){
-			L.warning("The \"system\" look and feel couldn't be setted.");
+			L.warning("The \"system\" look and feel couldn't be set.");
 		}
 		JPenDemoControl jpenDemoControl=new JPenDemoControl();
 		startInspector(jpenDemoControl.penCanvas.penManager);
 		jpenDemoControl.showDialog(null, "JPen Demo");
 		System.exit(0);
 	}
-	
+
 	static void startInspector(PenManager penManager) throws IOException{
 		String inspectorPeriodProperty=System.getProperty("jpen.demo.inspectorPeriod");
 		if(inspectorPeriodProperty!=null){

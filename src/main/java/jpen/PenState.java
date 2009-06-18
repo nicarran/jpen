@@ -18,6 +18,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +51,12 @@ public class PenState
 			setValues(ev.levels);
 		}
 
+		public final void setValues(Collection<PLevel> levels){
+			for(PLevel level: levels){
+				setValue(level);
+			}
+		}
+
 		public final void setValues(PLevel[] levels){
 			for(int i=levels.length; --i>=0; )
 				setValue(levels[i]);
@@ -64,7 +71,7 @@ public class PenState
 		}
 
 		public final void setValue(int levelTypeNumber, float value){
-			if(levelTypeNumber<values.length) 
+			if(levelTypeNumber<values.length)
 				values[levelTypeNumber]=value;
 			else
 				setExtValue(levelTypeNumber, value);
@@ -72,7 +79,7 @@ public class PenState
 
 		public float getValue(int levelTypeNumber) {
 			return levelTypeNumber<values.length ?
-			       values[levelTypeNumber]: getExtValue(levelTypeNumber);
+						 values[levelTypeNumber]: getExtValue(levelTypeNumber);
 		}
 
 		public float getValue(PLevel.Type levelType){
@@ -83,7 +90,7 @@ public class PenState
 			Float value=extTypeNumberToValue.get(extLevelTypeNumber);
 			return value==null? 0f: value;
 		}
-		
+
 		private final void setExtValue(int levelTypeNumber, float value){
 			extTypeNumberToValue.put(levelTypeNumber, value);
 		}

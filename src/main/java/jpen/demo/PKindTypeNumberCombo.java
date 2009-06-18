@@ -31,16 +31,16 @@ class PKindTypeNumberCombo{
 	{
 		update();
 		comboBox.setRenderer(new BasicComboBoxRenderer(){
-			    {
-				    setHorizontalAlignment(JLabel.CENTER);
-			    }
-			    @Override
-			    public Component 	getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus){
-				    super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-				    setText(getPKindTypeStringValue((Integer)value));
-				    return this;
-			    }
-		    });
+					{
+						setHorizontalAlignment(JLabel.CENTER);
+					}
+					@Override
+					public Component 	getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus){
+						super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+						setText(getPKindTypeStringValue((Integer)value));
+						return this;
+					}
+				});
 	}
 
 
@@ -54,7 +54,7 @@ class PKindTypeNumberCombo{
 
 	private void update(){
 		comboBox.removeAllItems();
-		for(int i=0; i<=maxPKindTypeNumber; i++)// the CUSTOM PKind can not be setted directly.
+		for(int i=0; i<=maxPKindTypeNumber; i++)// the CUSTOM PKind can not be set directly.
 				comboBox.addItem(Integer.valueOf(i));
 	}
 

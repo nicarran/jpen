@@ -18,14 +18,16 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.provider.system;
 
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import jpen.provider.AbstractPenProvider;
 import jpen.PenDevice;
 import jpen.PenManager;
 import jpen.PenProvider;
+import jpen.provider.AbstractPenProvider;
+import jpen.owner.awt.AwtPenOwner;
 
 public class SystemProvider
 	extends AbstractPenProvider {
@@ -38,17 +40,21 @@ public class SystemProvider
 			return NAME;
 		}
 		//@Override
-		public boolean constructable() {
-			return true;
+		public boolean constructable(PenManager penManager) {
+			return penManager.penOwner instanceof AwtPenOwner;
 		}
 		//@Override
 		protected PenProvider constructProvider() throws Throwable {
-			return new SystemProvider(this);
+			Component component=((AwtPenOwner)getPenManager().penOwner).component;
+			return new SystemProvider(this, component);
 		}
 	}
 
-	private SystemProvider(Constructor constructor) {
+	final Component component;
+
+	private SystemProvider(Constructor constructor, Component component) {
 		super(constructor);
+		this.component=component;
 		devices.add(new MouseDevice(this));
 	}
 

@@ -28,17 +28,17 @@ import jpen.provider.NativeLibraryLoader;
 import jpen.provider.Utils;
 
 public class CocoaProvider extends AbstractPenProvider {
-	
-	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(); 
-	
-	public static class Constructor 
+
+	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader();
+
+	public static class Constructor
 	extends AbstractPenProvider.AbstractConstructor{
 
 		public String getName() {
 			return "Cocoa";
 		}
 
-		public boolean constructable() {
+		public boolean constructable(PenManager penManager) {
 			return System.getProperty("os.name").toLowerCase().contains("mac");
 		}
 
