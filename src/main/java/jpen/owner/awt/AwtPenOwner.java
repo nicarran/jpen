@@ -1,9 +1,28 @@
+/* [{
+Copyright 2007, 2008, 2009 Nicolas Carranza <nicarran at gmail.com>
+
+This file is part of jpen.
+
+jpen is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License,
+or (at your option) any later version.
+
+jpen is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with jpen.  If not, see <http://www.gnu.org/licenses/>.
+}] */
 package jpen.owner.awt;
 
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.Arrays;
 import java.util.Collection;
 import jpen.owner.AbstractPenOwner;
@@ -23,8 +42,10 @@ public final class AwtPenOwner
 				@Override
 				public void mouseExited(MouseEvent ev) {
 					synchronized(penManagerHandle.getPenSchedulerLock()){
-						if(!startDraggingOut())
+						if(!startDraggingOut()){
+							unpauser.deactivate();
 							penManagerHandle.setPenManagerPaused(true);
+						}
 					}
 				}
 
@@ -32,10 +53,37 @@ public final class AwtPenOwner
 				public void mouseEntered(MouseEvent ev) {
 					synchronized(penManagerHandle.getPenSchedulerLock()){
 						if(!stopDraggingOut())
-							penManagerHandle.setPenManagerPaused(false);
+							unpauser.activate(); // unpauses when mouse motion is detected.
 					}
 				}
 			};
+	Unpauser unpauser=new Unpauser();
+	final class Unpauser
+		implements MouseMotionListener{
+
+		private volatile boolean enabled;
+
+		void activate(){
+			component.addMouseMotionListener(unpauser); // unpauses only when mouse motion is detected.
+			enabled=true;
+		}
+
+		void deactivate(){
+			component.removeMouseMotionListener(unpauser);
+			enabled=false;
+		}
+
+		//@Override
+		public void mouseMoved(MouseEvent ev){
+			synchronized(penManagerHandle.getPenSchedulerLock()){
+				if(enabled)
+					penManagerHandle.setPenManagerPaused(false);
+			}
+		}
+		//@Override
+		public void mouseDragged(MouseEvent ev){
+		}
+	}
 
 	public AwtPenOwner(Component component){
 		this.component=component;
