@@ -40,6 +40,9 @@ Based on code by Jerry Huxtable. See http://www.jhlabs.com/java/tablet/ .
 
 #include <jni.h>
 #include <Cocoa/Cocoa.h>
+#import <objc/runtime.h>
+#include "JRSwizzle.h"
+
 
 /* Our global variables */
 static JavaVM *g_jvm;
@@ -50,17 +53,18 @@ static jmethodID g_methodID_prox;
 static bool enabled = 0;
 
 /*
-** A subclass of NSApplication which overrides sendEvent and calls back into Java with the event data for mouse events.
-** We don't handle tablet proximity events yet.
-*/
-@interface CustomApplication : NSApplication 
+ ** A subclass of NSApplication which overrides sendEvent and calls back into Java with the event data for mouse events.
+ ** We don't handle tablet proximity events yet.
+ */
+@interface NSApplication (JPen)
+- (void) JPen_sendEvent:(NSEvent *)event;
 @end
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 {
-  g_jvm = vm;
-  
-  return JNI_VERSION_1_4;
+	g_jvm = vm;
+	
+	return JNI_VERSION_1_4;
 }
 
 static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
@@ -78,82 +82,89 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
     return getEnvErr;
 }
 
-@implementation CustomApplication
-- (void) sendEvent:(NSEvent *)event
+@implementation NSApplication (JPen)
+- (void) JPen_sendEvent:(NSEvent *)event
 {
-	if (! enabled) {
-		[super sendEvent: event];
-		return;
+	if (enabled) {
+//		NSLog(@"Swizzled event... %@", [event description]);
+		
+		
+		JNIEnv *env;
+		bool shouldDetach = false;
+		
+		if (GetJNIEnv(&env, &shouldDetach) != JNI_OK) {
+			NSLog(@"Couldn't attach to JVM");
+			return;
+		}
+		
+		switch ( [event type] ) {
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
+			case NSTabletProximity:
+			{
+				(*env)->CallVoidMethod(env, g_object, g_methodID_prox,
+									   [event capabilityMask],
+									   [event deviceID],
+									   [event isEnteringProximity],
+									   [event pointingDeviceID],
+									   [event pointingDeviceSerialNumber],
+									   [event pointingDeviceType],
+									   [event systemTabletID],
+									   [event tabletID],
+									   [event uniqueID],
+									   [event vendorID],
+									   [event vendorPointingDeviceType]
+									   );
+			}
+				break;
+#endif
+			case NSMouseMoved:
+			case NSLeftMouseDown:
+			case NSLeftMouseUp:
+			case NSLeftMouseDragged:
+			case NSRightMouseDown:
+			case NSRightMouseUp:
+			case NSRightMouseDragged:
+			case NSOtherMouseDown:
+			case NSOtherMouseUp:
+			case NSOtherMouseDragged:
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
+			case NSTabletPoint:
+#endif
+			{
+				bool tablet = NSTabletPointEventSubtype == [event subtype];
+				NSPoint tilt = [event tilt];
+				NSPoint location = [event locationInWindow];
+				(*env)->CallVoidMethod( env, g_object, g_methodID,
+									   [event type],
+									   //[event pointingDeviceType],
+									   tablet ? 1 : NSMouseMoved == [event type] ? 2 : 0,
+									   location.x,
+									   location.y,
+									   [event absoluteX],
+									   [event absoluteY],
+									   [event absoluteZ],
+									   tablet ? [event buttonMask] : [event buttonNumber],
+									   [event pressure],
+									   [event rotation],
+									   tilt.x,
+									   tilt.y,
+									   [event tangentialPressure],
+									   0.0f, 0.0f, 0.0f
+									   );
+			}
+				break;
+			default:
+				break;
+		}
+		
+		if (shouldDetach) {
+			(*g_jvm)->DetachCurrentThread(g_jvm);
+		}
 	}
-	
-    JNIEnv *env;
-    bool shouldDetach = false;
-
-    if (GetJNIEnv(&env, &shouldDetach) != JNI_OK) {
-        NSLog(@"Couldn't attach to JVM");
-        return;
-    }
     
-    switch ( [event type] ) {
-    case NSTabletProximity:
-	    {
-	    	(*env)->CallVoidMethod(env, g_object, g_methodID_prox,
-	    			[event capabilityMask],
-	    			[event deviceID],
-	    			[event isEnteringProximity],
-	    			[event pointingDeviceID],
-	    			[event pointingDeviceSerialNumber],
-	    			[event pointingDeviceType],
-	    			[event systemTabletID],
-	    			[event tabletID],
-	    			[event uniqueID],
-	    			[event vendorID],
-	    			[event vendorPointingDeviceType]
-	    		);
-	    }
-	    break;
-    case NSMouseMoved:
-	case NSLeftMouseDown:
-	case NSLeftMouseUp:
-	case NSLeftMouseDragged:
-	case NSRightMouseDown:
-	case NSRightMouseUp:
-	case NSRightMouseDragged:
-	case NSOtherMouseDown:
-	case NSOtherMouseUp:
-	case NSOtherMouseDragged:
-//    case NSTabletPoint:
-        {
-        	bool tablet = NSTabletPointEventSubtype == [event subtype];
-            NSPoint tilt = [event tilt];
-            NSPoint location = [event locationInWindow];
-            (*env)->CallVoidMethod( env, g_object, g_methodID,
-                    [event type],
-					//[event pointingDeviceType],
-                    tablet ? 1 : NSMouseMoved == [event type] ? 2 : 0,
-                    location.x,
-                    location.y,
-                    [event absoluteX],
-                    [event absoluteY],
-                    [event absoluteZ],
-                    tablet ? [event buttonMask] : [event buttonNumber],
-                    [event pressure],
-                    [event rotation],
-                    tilt.x,
-                    tilt.y,
-                    [event tangentialPressure],
-                    0.0f, 0.0f, 0.0f
-                );
-        }
-        break;
-    default:
-        break;
-    }
-    
-    if (shouldDetach)
-        (*g_jvm)->DetachCurrentThread(g_jvm);
-    
-    [super sendEvent: event];
+	// believe it or not, this is not recursive... when we swap NSApplication's sendEvent method with this one, 
+	// JPen_sendEvent points to the original NSApplication sendEvent
+    [self JPen_sendEvent:event];
 }
 @end
 
@@ -170,10 +181,21 @@ JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_disable(JNIEnv *env, j
 
 
 /*
-** Start up: use poseAsClass to subclass the NSApplication object on the fly.
-*/
+ ** Start up: use poseAsClass to subclass the NSApplication object on the fly.
+ */
 JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_startup(JNIEnv *env, jobject this) {
-    [CustomApplication poseAsClass: [NSApplication class]];
+	
+	NSLog(@"! Swizzling [NSApplication sendEvent:]");
+	
+	NSError *error = nil;
+	[NSApplication jr_swizzleMethod:@selector(sendEvent:)
+						 withMethod:@selector(JPen_sendEvent:)
+							  error:&error];
+	
+	if (error != nil) {
+		NSLog(@"error: %@", [error description]);
+	}
+	
     g_object = (*env)->NewGlobalRef( env, this );
     g_class = (*env)->GetObjectClass( env, this );
     g_class = (*env)->NewGlobalRef( env, g_class );
@@ -184,8 +206,8 @@ JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_startup(JNIEnv *env, j
 }
 
 /*
-** Shut down: release our data.
-*/
+ ** Shut down: release our data.
+ */
 JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_shutdown(JNIEnv *env, jobject this) {
     if ( g_object )
         (*env)->DeleteGlobalRef( env, g_object );
@@ -210,10 +232,10 @@ JNIEXPORT jintArray Java_jpen_provider_osx_CocoaAccess_getPointingDeviceTypes(JN
 	
 	return types;
 	
-//NSUnknownPointingDevice = NX_TABLET_POINTER_UNKNOWN,
-//NSPenPointingDevice     = NX_TABLET_POINTER_PEN,
-//NSCursorPointingDevice  = NX_TABLET_POINTER_CURSOR,
-//NSEraserPointingDevice  = NX_TABLET_POINTER_ERASER
+	//NSUnknownPointingDevice = NX_TABLET_POINTER_UNKNOWN,
+	//NSPenPointingDevice     = NX_TABLET_POINTER_PEN,
+	//NSCursorPointingDevice  = NX_TABLET_POINTER_CURSOR,
+	//NSEraserPointingDevice  = NX_TABLET_POINTER_ERASER
 }
 
 // NOTE: also want this for button masks
@@ -223,15 +245,15 @@ JNIEXPORT jintArray Java_jpen_provider_osx_CocoaAccess_getButtonMasks(JNIEnv *en
 	a[0] = NSPenTipMask;
 	a[1] = NSPenLowerSideMask;
 	a[2] = NSPenUpperSideMask;
-		
+	
 	jintArray types = (*env)->NewIntArray(env, 3);
 	(*env)->SetIntArrayRegion(env, types, 0, 3, (jint*) a);
-		
+	
 	return types;
 	
-//NSPenTipMask =       NX_TABLET_BUTTON_PENTIPMASK,
-//NSPenLowerSideMask = NX_TABLET_BUTTON_PENLOWERSIDEMASK,
-//NSPenUpperSideMask = NX_TABLET_BUTTON_PENUPPERSIDEMASK
+	//NSPenTipMask =       NX_TABLET_BUTTON_PENTIPMASK,
+	//NSPenLowerSideMask = NX_TABLET_BUTTON_PENLOWERSIDEMASK,
+	//NSPenUpperSideMask = NX_TABLET_BUTTON_PENUPPERSIDEMASK
 }
 
 
