@@ -49,8 +49,8 @@ class ScrollsPanel{
 			component.setText(String.valueOf(value));
 		}
 
-		void increase(){
-			value++;
+		void increase(int value){
+			this.value+=value;
 			setIsDirty(true);
 		}
 	}
@@ -59,29 +59,29 @@ class ScrollsPanel{
 	{
 		for(PScroll.Type scrollType: PScroll.Type.VALUES){
 			panel.add(Utils.labelComponent(
-			            scrollType.toString(), scrollTypeToDisplay.get(scrollType).component
-			          ));
+									scrollType.toString(), scrollTypeToDisplay.get(scrollType).component
+								));
 		}
 	}
 
 	ScrollsPanel(Pen pen){
 		pen.addListener(new PenAdapter(){
-			                private Pen pen;
-			                @Override
-			                public void penScrollEvent(PScrollEvent ev){
-				                pen=ev.pen;
-				                Display display=scrollTypeToDisplay.get(ev.scroll.getType());
+											private Pen pen;
+											@Override
+											public void penScrollEvent(PScrollEvent ev){
+												pen=ev.pen;
+												Display display=scrollTypeToDisplay.get(ev.scroll.getType());
 												if(display!=null)
-													display.increase();
-			                }
-			                @Override
-			                public void penTock(long availableMillis){
-				                if(pen==null)
-					                return;
-				                for(Display display: scrollTypeToDisplay.values())
-					                display.update(pen);
-				                pen=null;
-			                }
-		                });
+													display.increase(ev.scroll.value);
+											}
+											@Override
+											public void penTock(long availableMillis){
+												if(pen==null)
+													return;
+												for(Display display: scrollTypeToDisplay.values())
+													display.update(pen);
+												pen=null;
+											}
+										});
 	}
 }
