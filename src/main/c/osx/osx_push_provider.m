@@ -1,5 +1,6 @@
 /* [{
-Copyright 2008 Brien Colwell
+Copyright 2008 Brien Colwell <xcolwell at users.sourceforge.net>
+Copyright 2009 Marcello Bastea-Forte <marcello3d at users.sourceforge.net>
 
 This file is part of jpen.
 
