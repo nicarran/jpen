@@ -87,9 +87,9 @@
           <skip>true</skip>
         </configuration>
       </plugin>
-    <plugin>
-    <artifactId>maven-antrun-plugin</artifactId>
-    </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
   <dependencies>
@@ -105,7 +105,7 @@
   </properties>
   <profiles>
     <profile>
-      <id>linux-amd64</id>
+      <id>amd64</id>
       <activation>
         <os>
           <arch>amd64</arch>
@@ -120,7 +120,62 @@
             <extensions>true</extensions>
             <configuration>
               <output>jpen-2-x86_64</output>
+              <linker>
+                <name>g++</name>
+                <sysLibs>
+                  <sysLib>
+                    <name>Xi</name>
+                    <type>shared</type>
+                  </sysLib>
+                </sysLibs>
+              </linker>
             </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>i386-on-amd64</id>
+      <activation>
+        <file>
+          <exists>/usr/include/gnu/stubs-32.h</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <!--
+    Also build i386 lib under amd64
+  -->
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>process-classes</phase>
+                <configuration>
+                  <tasks>
+                    <mkdir dir="target/nar/lib/i386-Linux-g++/jni/"/>
+                    <exec executable="gcc" dir="target/nar/lib/i386-Linux-g++/jni/">
+                      <arg value="-m32"/>
+                      <arg value="-fpic"/>
+                      <arg value="-shared"/>
+                      <arg value="-o"/>
+                      <arg value="libjpen-2.so"/>
+                      <arg value="-LXi"/>
+                      <arg value="../../../../../src/main/c/linux/Bus.c"/>
+                      <arg value="../../../../../src/main/c/linux/Device.c"/>
+                      <arg value="../../../../../src/main/c/linux/jpen_cFramework_TestType.c"/>
+                      <arg value="../../../../../src/main/c/linux/jpen_provider_xinput_XiBus.c"/>
+                      <arg value="../../../../../src/main/c/linux/jpen_provider_xinput_XiDevice.c"/>
+                      <arg value="../../../../../src/main/c/linux/macros.c"/>
+                      <arg value="../../../../../src/main/c/linux/TestType.c"/>
+                    </exec>
+                  </tasks>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
@@ -165,7 +220,7 @@
             </configuration>
           </plugin>
           <plugin>
-  <!--
+            <!--
     For whatever reason the NAR plugin fails to link this properly under
     Win32.
     
@@ -177,31 +232,31 @@
     
     Therefore, we have to re-link using the proper command line.
   -->
-    <artifactId>maven-antrun-plugin</artifactId>
-    <executions>
-      <execution>
-        <phase>process-classes</phase>
-        <configuration>
-          <tasks>
-            <exec executable="gcc" dir="target/nar/lib/x86-Windows-g++/jni/">
-            <arg value="-shared" />
-            <arg value="-o" />
-            <arg value="jpen-2.dll" />
-            <arg value="../../../obj/x86-Windows-g++/jpen_provider_wintab_WintabAccess.o" />
-            <arg value="../../../obj/x86-Windows-g++/Access.o"/>
-            <arg value="../../../obj/x86-Windows-g++/macros.o"/>
-            <arg value="-L../../../../../src/main/c/windows/lib"/>
-            <arg value="-Wl,-kill-at"/>
-            <arg value="-lWINTAB32"/>
-            </exec>
-          </tasks>
-        </configuration>
-        <goals>
-          <goal>run</goal>
-        </goals>
-      </execution>
-    </executions>
-  </plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>process-classes</phase>
+                <configuration>
+                  <tasks>
+                    <exec executable="gcc" dir="target/nar/lib/x86-Windows-g++/jni/">
+                      <arg value="-shared"/>
+                      <arg value="-o"/>
+                      <arg value="jpen-2.dll"/>
+                      <arg value="../../../obj/x86-Windows-g++/jpen_provider_wintab_WintabAccess.o"/>
+                      <arg value="../../../obj/x86-Windows-g++/Access.o"/>
+                      <arg value="../../../obj/x86-Windows-g++/macros.o"/>
+                      <arg value="-L../../../../../src/main/c/windows/lib"/>
+                      <arg value="-Wl,-kill-at"/>
+                      <arg value="-lWINTAB32"/>
+                    </exec>
+                  </tasks>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
       </build>
     </profile>
