@@ -97,6 +97,10 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
           <c>
             <sourceDirectory>${source.dir}</sourceDirectory>
           </c>
+          <environmentVariables>
+            <!-- Required for test to work on Unix -->
+            <DISPLAY>${env.DISPLAY}</DISPLAY>
+          </environmentVariables>
         </configuration>
       </plugin>
       <plugin>
