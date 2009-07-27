@@ -111,14 +111,6 @@ public abstract class AbstractPenDevice
 		return getPenManager().pen;
 	}
 
-	/**
-	@deprecated Use the {@link PenOwner#getPenClip()}.
-	*/
-	@Deprecated
-	public final Component getComponent() {
-		return getPenManager().component;
-	}
-
 	@Override
 	public String toString() {
 		return "[PenDevice: provider="+getProvider()+", name="+getName()+", kind="+getOrNull(PKind.Type.VALUES, getKindTypeNumber())+"("+getKindTypeNumber()+")]";

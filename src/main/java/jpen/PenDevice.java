@@ -36,7 +36,7 @@ public interface PenDevice {
 
 	String getName();
 	/**
-	@return A unique and constant id. This id is assigned at runtime and can change between restarts.
+	@return A unique and constant id. This id is assigned at runtime by the {@link PenManager} and can change between restarts.
 	
 	@see #getPhysicalId()
 	*/

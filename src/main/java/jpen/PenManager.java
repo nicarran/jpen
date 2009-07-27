@@ -84,10 +84,8 @@ public final class PenManager {
 	/**
 	Constructs and adds provider if {@link PenProvider.Constructor#constructable(PenManager)} is true.
 	@return The {@link PenProvider} added or null if it couldn't be constructed.
-	@deprecated Thre is no replacement. The {@link PenProvider.Constructor}s are now taken  from the {@link PenOwner}.
 	*/
-	@Deprecated
-	public PenProvider addProvider(PenProvider.Constructor providerConstructor) {
+	private  PenProvider addProvider(PenProvider.Constructor providerConstructor) {
 		if(providerConstructor.constructable(this)) {
 			if(!this.providerConstructors.add(providerConstructor))
 				throw new IllegalArgumentException("constructor already added");
@@ -186,12 +184,18 @@ public final class PenManager {
 		return paused;
 	}
 
+	/**
+	Schedules button events. You must construct a new {@code PButton} each time you call this method (do not reuse).
+	*/
 	public void scheduleButtonEvent(PButton button) {
 		if(paused)
 			return;
 		pen.scheduler.scheduleButtonEvent(button);
 	}
 
+	/**
+	Schedules scroll events. You must construct a new {@code PScroll} each time you call this method (do not reuse).
+	*/
 	public void scheduleScrollEvent(PenDevice device, PScroll scroll) {
 		if(paused)
 			return;
@@ -206,6 +210,9 @@ public final class PenManager {
 		return scheduleLevelEvent(device, levels, deviceTime, false);
 	}
 
+	/**
+	Schedules level events. You can reuse the levels {@code Collection} but you must construct new {@code PLevel}s each time you call this method.
+	*/
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long deviceTime, boolean levelsOnScreen) {
 		if(paused)
 			return false;

@@ -129,22 +129,4 @@ public class PLevel
 	public boolean isMovement() {
 		return Type.MOVEMENT_TYPES.contains(getType());
 	}
-	/**
-	@deprecated No replacement.
-	*/
-	@Deprecated
-	public static final float getCoordinateValueForComponent( Dimension componentSize, Point2D.Float componentLocation, PLevel.Type coordinate, float coordinateValue) {
-		if(L.isLoggable(Level.FINE)){
-			L.fine("componentSize="+componentSize+", componentLocation="+componentLocation+", coordinate="+coordinate+", coordinateValue="+coordinateValue);
-		}
-		switch(coordinate) {
-		case X:
-			coordinateValue-=componentLocation.x;
-			break;
-		case Y:
-			coordinateValue-=componentLocation.y;
-			break;
-		}
-		return coordinateValue;
-	}
 }
