@@ -28,7 +28,12 @@ public class PButton
 	public static final long serialVersionUID=1l;
 
 	public enum Type{
-		LEFT, CENTER, RIGHT, CUSTOM;
+		LEFT, CENTER, RIGHT,
+		/**
+		Used whenever the {@link Pen} {@link PLevel.Type#PRESSURE} level value changes from/to 0.
+		*/
+		ON_PRESSURE, 
+		CUSTOM;
 		public static final List<Type> ALL_VALUES=Collections.unmodifiableList(Arrays.asList(values()));
 		public static final List<Type> VALUES=TypedClass.createStandardTypes(ALL_VALUES);
 	}

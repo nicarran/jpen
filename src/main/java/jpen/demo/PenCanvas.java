@@ -91,8 +91,12 @@ class PenCanvas
 		penManager.pen.addListener(new PenAdapter() {
 			    @Override
 			    public void penLevelEvent(PLevelEvent ev) {
-				    if(!penManager.pen.getButtonValue(PButton.Type.LEFT))
+				    if(!penManager.pen.getButtonValue(PButton.Type.ON_PRESSURE)){
+					    float pressure=penManager.pen.getLevelValue(PLevel.Type.PRESSURE);
+					    if(pressure>0)
+					    	throw new AssertionError();
 					    return;
+				    }
 				    for(PLevel.Type levelType: PLevel.Type.MOVEMENT_TYPES){
 					    float value=penManager.pen.getLevelValue(levelType);
 					    switch(levelType) {

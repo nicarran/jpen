@@ -105,6 +105,10 @@ public final class AwtPenOwner
 		}
 	}
 
+	/*
+	The component does not get a mouseExited event when a new JOptionPane dialog appears... jdk bug?
+	As workaround a focusedWindowListener is installed and it pauses the penManager. 
+	*/
 	private KeyboardFocusManager keyboardFocusManager;
 	private Window focusedWindow;
 	private final PropertyChangeListener focusedWindowListener=new PropertyChangeListener(){
@@ -115,9 +119,8 @@ public final class AwtPenOwner
 					    focusedWindow=(Window)ev.getNewValue();
 					    return;
 				    }
-				    pause(); // unpress buttons
+				    pause(); // release buttons
 				    unpauser.enable();
-				    //unpauser.unpause();
 			    }
 		    }
 	    };
