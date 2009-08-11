@@ -23,6 +23,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.KeyboardFocusManager;
+import java.awt.Window;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.Collection;
 import jpen.owner.AbstractPenOwner;
@@ -39,51 +43,84 @@ public final class AwtPenOwner
 	public final Component component;
 	final PenClipOnComponent penClipOnComponent;
 	private final MouseListener mouseListener=new MouseAdapter(){
-				@Override
-				public void mouseExited(MouseEvent ev) {
-					synchronized(penManagerHandle.getPenSchedulerLock()){
-						if(!startDraggingOut()){
-							unpauser.deactivate();
-							penManagerHandle.setPenManagerPaused(true);
-						}
-					}
-				}
+		    @Override
+		    public void mouseExited(MouseEvent ev) {
+			    synchronized(penManagerHandle.getPenSchedulerLock()){
+				    if(!startDraggingOut()){
+					    pause();
+					    unpauser.disable();
+					  }
+			    }
+		    }
 
-				@Override
-				public void mouseEntered(MouseEvent ev) {
-					synchronized(penManagerHandle.getPenSchedulerLock()){
-						if(!stopDraggingOut())
-							unpauser.activate(); // unpauses when mouse motion is detected.
-					}
-				}
-			};
+		    @Override
+		    public void mouseEntered(MouseEvent ev) {
+			    synchronized(penManagerHandle.getPenSchedulerLock()){
+				    if(!stopDraggingOut())
+					    unpauser.enable(); // unpauses when mouse motion is detected.
+			    }
+		    }
+	    };
 	Unpauser unpauser=new Unpauser();
 	final class Unpauser
 		implements MouseMotionListener{
 
 		private volatile boolean enabled;
 
-		void activate(){
+		void enable(){
+			if(enabled)
+				return;
 			component.addMouseMotionListener(unpauser); // unpauses only when mouse motion is detected.
 			enabled=true;
 		}
 
-		void deactivate(){
+		void disable(){
+			if(!enabled)
+				return;
 			component.removeMouseMotionListener(unpauser);
 			enabled=false;
 		}
 
 		//@Override
 		public void mouseMoved(MouseEvent ev){
+			unpause();
+		}
+
+		void unpause(){
 			synchronized(penManagerHandle.getPenSchedulerLock()){
-				if(enabled)
+				if(!penManagerHandle.getPenManager().getPaused())
+					return;
+				if(enabled){
+					keyboardFocusManager=KeyboardFocusManager.getCurrentKeyboardFocusManager();
+					keyboardFocusManager.addPropertyChangeListener("focusedWindow", focusedWindowListener);
+					focusedWindow=keyboardFocusManager.getFocusedWindow();
 					penManagerHandle.setPenManagerPaused(false);
+					disable();
+				}
 			}
 		}
+
 		//@Override
 		public void mouseDragged(MouseEvent ev){
 		}
 	}
+
+	private KeyboardFocusManager keyboardFocusManager;
+	private Window focusedWindow;
+	private final PropertyChangeListener focusedWindowListener=new PropertyChangeListener(){
+		    //@Override
+		    public void propertyChange(PropertyChangeEvent ev){
+			    synchronized(penManagerHandle.getPenSchedulerLock()){
+				    if(focusedWindow==null){
+					    focusedWindow=(Window)ev.getNewValue();
+					    return;
+				    }
+				    pause(); // unpress buttons
+				    unpauser.enable();
+				    //unpauser.unpause();
+			    }
+		    }
+	    };
 
 	public AwtPenOwner(Component component){
 		this.component=component;
@@ -93,13 +130,21 @@ public final class AwtPenOwner
 	//@Override
 	public Collection<PenProvider.Constructor> getPenProviderConstructors(){
 		return Arrays.asList(
-						 new PenProvider.Constructor[]{
-							 new SystemProvider.Constructor(),
-							 new XinputProvider.Constructor(),
-							 new WintabProvider.Constructor(),
-							 new CocoaProvider.Constructor(),
-						 }
-					 );
+		         new PenProvider.Constructor[]{
+		           new SystemProvider.Constructor(),
+		           new XinputProvider.Constructor(),
+		           new WintabProvider.Constructor(),
+		           new CocoaProvider.Constructor(),
+		         }
+		       );
+	}
+
+	private void pause(){
+		if(penManagerHandle.getPenManager().getPaused())
+			return;
+		keyboardFocusManager.removePropertyChangeListener("focusedWindow", focusedWindowListener);
+		focusedWindow=null;
+		penManagerHandle.setPenManagerPaused(true);
 	}
 
 	//@Override

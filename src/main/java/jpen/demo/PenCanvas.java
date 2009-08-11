@@ -21,6 +21,9 @@ package jpen.demo;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -33,6 +36,7 @@ import java.awt.RenderingHints;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import jpen.event.PenAdapter;
 import jpen.PButton;
@@ -89,8 +93,8 @@ class PenCanvas
 			    public void penLevelEvent(PLevelEvent ev) {
 				    if(!penManager.pen.getButtonValue(PButton.Type.LEFT))
 					    return;
-						for(PLevel.Type levelType: PLevel.Type.MOVEMENT_TYPES){
-							float value=penManager.pen.getLevelValue(levelType);
+				    for(PLevel.Type levelType: PLevel.Type.MOVEMENT_TYPES){
+					    float value=penManager.pen.getLevelValue(levelType);
 					    switch(levelType) {
 					    case X:
 						    cursorCenter.x=value;
@@ -109,6 +113,14 @@ class PenCanvas
 				    if(isDirty)
 					    repaint(dirtyArea.x, dirtyArea.y, dirtyArea.width, dirtyArea.height);
 				    isDirty=false;
+			    }
+		    });
+
+		addMouseListener(new MouseAdapter(){
+			    @Override
+			    public void mousePressed(MouseEvent ev){
+				    if(ev.isShiftDown() && ev.isControlDown())
+					    JOptionPane.showMessageDialog(null, "<html>Testing dialog window:<p> the pen buttons must be disabled when this dialog appears.</html>");
 			    }
 		    });
 	}

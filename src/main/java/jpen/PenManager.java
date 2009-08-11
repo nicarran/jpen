@@ -170,14 +170,14 @@ public final class PenManager {
 	void setPaused(boolean paused) {
 		if(this.paused==paused)
 			return;
+		if(paused)
+			pen.scheduler.scheduleButtonReleasedEvents();
 		this.paused=paused;
 		for(PenProvider.Constructor providerConstructor: providerConstructors){
 			PenProvider penProvider=providerConstructor.getConstructed();
 			if(penProvider!=null)
 				penProvider.penManagerPaused(paused);
 		}
-		if(paused)
-			pen.scheduler.scheduleButtonReleasedEvents();
 	}
 
 	public boolean getPaused() {

@@ -110,8 +110,9 @@ public final class PLevelEmulator{
 			emulatedLevel=emulateOnPress(buttonEvent.button.typeNumber);
 		else
 			emulatedLevel=emulateOnRelease(buttonEvent.button.typeNumber);
-		if(emulatedLevel!=null)
+		if(emulatedLevel!=null){
 			penManager.scheduleLevelEvent(null, Collections.singleton(emulatedLevel), buttonEvent.time);
+		}
 	}
 
 	private PLevel emulateOnPress(int buttonTypeNumber){
@@ -119,12 +120,12 @@ public final class PLevelEmulator{
 		ButtonTriggerPolicy triggerPolicy=getButtonTriggerPolicy(
 		      lastScheduledState.getKind().typeNumber,
 		      buttonTypeNumber);
-		if(L.isLoggable(Level.FINE)) L.fine("triggerPolicy: "+triggerPolicy);
+		if(L.isLoggable(Level.FINE)) L.fine("triggerPolicy: "+triggerPolicy+", buttonTypeNumber: "+buttonTypeNumber);
 		if(triggerPolicy!=null){
+			setActiveButtonTriggerPolicy(buttonTypeNumber, triggerPolicy);
 			if(lastScheduledState.getLevelValue(triggerPolicy.levelTypeNumber)==
 			        triggerPolicy.onPressValue)
 				return null;
-			setActiveButtonTriggerPolicy(buttonTypeNumber, triggerPolicy);
 			return new PLevel(triggerPolicy.levelTypeNumber, triggerPolicy.onPressValue);
 		}
 		return null;
@@ -132,9 +133,9 @@ public final class PLevelEmulator{
 
 	private void setActiveButtonTriggerPolicy(int buttonTypeNumber, ButtonTriggerPolicy policy){
 		ensureListSize(activeButtonTriggerPolicies, buttonTypeNumber);
-		ButtonTriggerPolicy oldValue=activeButtonTriggerPolicies.set(buttonTypeNumber, policy);
-		if(oldValue!=null)
-			activeLevelTypes.set(oldValue.levelTypeNumber, false);
+		ButtonTriggerPolicy oldPolicy=activeButtonTriggerPolicies.set(buttonTypeNumber, policy);
+		if(oldPolicy!=null)
+			activeLevelTypes.set(oldPolicy.levelTypeNumber, false);
 		if(policy!=null){
 			activeLevelTypes.set(policy.levelTypeNumber, true);
 		}
@@ -143,16 +144,19 @@ public final class PLevelEmulator{
 	private PLevel emulateOnRelease(int buttonTypeNumber){
 		ensureListSize(activeButtonTriggerPolicies, buttonTypeNumber);
 		ButtonTriggerPolicy triggerPolicy=getActiveButtonTriggerPolicy(buttonTypeNumber);
+		if(L.isLoggable(Level.FINE)) L.fine("triggerPolicy: "+triggerPolicy+", buttonTypeNumber: "+buttonTypeNumber);
 		if(triggerPolicy!=null){
 			setActiveButtonTriggerPolicy(buttonTypeNumber, null);
-			return new PLevel(triggerPolicy.levelTypeNumber, triggerPolicy.onReleaseValue);
+			PLevel pLevel=new PLevel(triggerPolicy.levelTypeNumber, triggerPolicy.onReleaseValue);
+			return pLevel;
 		}
 		return null;
 	}
 
 	private ButtonTriggerPolicy getActiveButtonTriggerPolicy(int buttonTypeNumber){
 		ensureListSize(activeButtonTriggerPolicies, buttonTypeNumber);
-		return activeButtonTriggerPolicies.get(buttonTypeNumber);
+		ButtonTriggerPolicy buttonTriggerPolicy=activeButtonTriggerPolicies.get(buttonTypeNumber);
+		return buttonTriggerPolicy;
 	}
 
 	boolean isActiveLevel(int levelTypeNumber){
