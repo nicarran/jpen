@@ -157,14 +157,16 @@ final class PenScheduler{
 		    penDeviceTime);
 		phantomLevelFilter.setLastEvent(levelEvent);
 		scheduledLevels.clear();
-		
+		scheduleOnPressureButtonEvent(lastScheduledPressure, scheduledPressure);
+		schedule(levelEvent);
+		return true;
+	}
+	
+	private void scheduleOnPressureButtonEvent(float lastScheduledPressure, float scheduledPressure){
 		if(lastScheduledPressure==0 && scheduledPressure>0)
 			scheduleButtonEvent(new PButton(PButton.Type.ON_PRESSURE.ordinal(), true));
-		schedule(levelEvent);
-		if(lastScheduledPressure>0 && scheduledPressure==0)
+		else if(lastScheduledPressure>0 && scheduledPressure==0)
 			scheduleButtonEvent(new PButton(PButton.Type.ON_PRESSURE.ordinal(), false));
-		
-		return true;
 	}
 
 	synchronized void scheduleButtonReleasedEvents(){
