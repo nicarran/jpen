@@ -85,13 +85,15 @@ class XinputDevice extends AbstractPenDevice {
 	}
 
 	private int getDefaultKindTypeNumber() {
-		if(getName().indexOf("raser")!=-1)
+		String lowerCaseName=getName().toLowerCase();
+		if(lowerCaseName.indexOf("eraser")!=-1)
 			return PKind.Type.ERASER.ordinal();
-		else if(getName().indexOf("ursor")!=-1)
+		else if(lowerCaseName.indexOf("cursor")!=-1)
 			return PKind.Type.CURSOR.ordinal();
-		else if(getName().indexOf("tylus")!=-1)
+		else if(lowerCaseName.indexOf("pad")!=-1)
+			return PKind.Type.IGNORE.ordinal();
+		else 
 			return PKind.Type.STYLUS.ordinal();
-		return PKind.Type.IGNORE.ordinal();
 	}
 
 	void processQuedEvents() {
