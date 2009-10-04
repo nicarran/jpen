@@ -61,24 +61,26 @@ public final class PenManager {
 
 	public PenManager(PenOwner penOwner){
 		this.penOwner=penOwner;
-		penOwner.setPenManagerHandle(new PenOwner.PenManagerHandle(){
-			    //@Override
-			    public final PenManager getPenManager(){
-				    return PenManager.this;
-			    }
-			    //@Override
-			    public final Object getPenSchedulerLock(){
-				    return pen.scheduler;
-			    }
-			    //@Override
-			    public final void setPenManagerPaused(boolean paused){
-				    PenManager.this.setPaused(paused);
-			    }
-		    });
 		this.component=penOwner instanceof AwtPenOwner?
 		               ((AwtPenOwner)penOwner).component: null;
-		for(PenProvider.Constructor penProviderConstructor: penOwner.getPenProviderConstructors())
-			addProvider(penProviderConstructor);
+		synchronized(pen.scheduler){
+			for(PenProvider.Constructor penProviderConstructor: penOwner.getPenProviderConstructors())
+				addProvider(penProviderConstructor);
+			penOwner.setPenManagerHandle(new PenOwner.PenManagerHandle(){
+				    //@Override
+				    public final PenManager getPenManager(){
+					    return PenManager.this;
+				    }
+				    //@Override
+				    public final Object getPenSchedulerLock(){
+					    return pen.scheduler;
+				    }
+				    //@Override
+				    public final void setPenManagerPaused(boolean paused){
+					    PenManager.this.setPaused(paused);
+				    }
+			    });
+		}
 	}
 
 	/**

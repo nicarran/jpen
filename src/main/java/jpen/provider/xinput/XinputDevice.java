@@ -92,7 +92,7 @@ class XinputDevice extends AbstractPenDevice {
 			return PKind.Type.CURSOR.ordinal();
 		else if(lowerCaseName.indexOf("pad")!=-1)
 			return PKind.Type.IGNORE.ordinal();
-		else 
+		else
 			return PKind.Type.STYLUS.ordinal();
 	}
 
@@ -156,7 +156,7 @@ class XinputDevice extends AbstractPenDevice {
 
 		if(PLevel.Type.MOVEMENT_TYPES.contains(levelType))
 			devValue=xinputProvider.screenBounds.getLevelRangeOffset(levelType)+
-							 devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);
+			         devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);
 
 		return devValue;
 	}

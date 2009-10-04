@@ -112,17 +112,17 @@ public class CocoaAccess {
 
 	// IIBIIIIIIII
 	private void postProximityEvent(
-		final int capabilityMask,
-		final int deviceID,
-		final boolean enteringProximity,
-		final int pointingDeviceID,
-		final int pointingDeviceSerialNumber,
-		final int pointingDeviceType,
-		final int systemTabletID,
-		final int tabletID,
-		final int uniqueID,
-		final int vendorID,
-		final int vendorPointingDeviceType
+	  final int capabilityMask,
+	  final int deviceID,
+	  final boolean enteringProximity,
+	  final int pointingDeviceID,
+	  final int pointingDeviceSerialNumber,
+	  final int pointingDeviceType,
+	  final int systemTabletID,
+	  final int tabletID,
+	  final int uniqueID,
+	  final int vendorID,
+	  final int vendorPointingDeviceType
 	) {
 		//    	System.out.println(String.format("[postProximityEvent] device type: %d", pointingDeviceType));
 
@@ -142,80 +142,76 @@ public class CocoaAccess {
 	 *
 	 */
 	private void postEvent(
-		final int type,
-		final int special_pointingDeviceType,
-		final float x,
-		// Note: Cocoa gives the y-coordinate inverted, i.e. "opengl coordinates"
-		final float y,
-		final int absoluteX, final int absoluteY,  final int absoluteZ,
-		final int buttonMask,
-		final float pressure, final float rotation,
-		final float tiltX, final float tiltY,
-		final float tangentialPressure,
-		final float vendorDefined1,
-		final float vendorDefined2,
-		final float vendorDefined3
+	  final int type,
+	  final int special_pointingDeviceType,
+	  final float x,
+	  // Note: Cocoa gives the y-coordinate inverted, i.e. "opengl coordinates"
+	  final float y,
+	  final int absoluteX, final int absoluteY,  final int absoluteZ,
+	  final int buttonMask,
+	  final float pressure, final float rotation,
+	  final float tiltX, final float tiltY,
+	  final float tangentialPressure,
+	  final float vendorDefined1,
+	  final float vendorDefined2,
+	  final float vendorDefined3
 	) {
 		if (SwingUtilities.isEventDispatchThread()) {
 			postEvent_swing(
-				type, special_pointingDeviceType,
-				x, y, absoluteX, absoluteY, absoluteZ,
-				buttonMask, pressure, rotation,
-				tiltX, tiltY,
-				tangentialPressure,
-				vendorDefined1, vendorDefined2, vendorDefined3
+			  type, special_pointingDeviceType,
+			  x, y, absoluteX, absoluteY, absoluteZ,
+			  buttonMask, pressure, rotation,
+			  tiltX, tiltY,
+			  tangentialPressure,
+			  vendorDefined1, vendorDefined2, vendorDefined3
 			);
 		}
 		else {
 			SwingUtilities.invokeLater(new Runnable() {public void run() {
-							postEvent_swing(
-								type, special_pointingDeviceType,
-								x, y, absoluteX, absoluteY, absoluteZ,
-								buttonMask, pressure, rotation,
-								tiltX, tiltY,
-								tangentialPressure,
-								vendorDefined1, vendorDefined2, vendorDefined3
-							);
-						}});
+					    postEvent_swing(
+					      type, special_pointingDeviceType,
+					      x, y, absoluteX, absoluteY, absoluteZ,
+					      buttonMask, pressure, rotation,
+					      tiltX, tiltY,
+					      tangentialPressure,
+					      vendorDefined1, vendorDefined2, vendorDefined3
+					    );
+				    }});
 		}
 	}
 
 	private void postEvent_swing(
-		final int type,
-		final int special_pointingDeviceType,
-		float x,
-		// Note: Cocoa gives the y-coordinate inverted, i.e. "opengl coordinates"
-		float y,
-		final int absoluteX, final int absoluteY,  final int absoluteZ,
-		final int buttonMask,
-		final float pressure, final float rotation,
-		float tiltX, float tiltY,
-		final float tangentialPressure,
-		final float vendorDefined1,
-		final float vendorDefined2,
-		final float vendorDefined3
+	  final int type,
+	  final int special_pointingDeviceType,
+	  float x,
+	  // Note: Cocoa gives the y-coordinate inverted, i.e. "opengl coordinates"
+	  float y,
+	  final int absoluteX, final int absoluteY,  final int absoluteZ,
+	  final int buttonMask,
+	  final float pressure, final float rotation,
+	  float tiltX, float tiltY,
+	  final float tangentialPressure,
+	  final float vendorDefined1,
+	  final float vendorDefined2,
+	  final float vendorDefined3
 	) {
 		//		System.out.println(String.format("[postEvent] device type: %d; %d; %d", special_pointingDeviceType, type, buttonMask));
 
-		final Component c = cocoaProvider.getPenManager().component;
-		if(c==null){
-			L.warning("Component not available... ignoring osx event");
+		// vvv UNTESTED CODE vvv
+		// I assumed that x and y are coordinates relative to the window
+		Window w=KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+		if(w==null){
+			L.warning("Window not available... ignoring osx event");
 			return;
 		}
-		//		final Component r = SwingUtilities.getRoot(c);
-		final Window w = SwingUtilities.getWindowAncestor(c);
-		assert w == KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-		if (null != w) {
-			final Insets insets = w.getInsets();
-			y = -y + (w.getHeight() - insets.bottom);
-			x = x - insets.left;
-		}
-
-		Point origin = new Point(0, 0);
-		origin = SwingUtilities.convertPoint(w, origin, c);
-
-		x += origin.x;
-		y += origin.y;
+		final Insets insets = w.getInsets(); // Is it reallly necessary to take the insets into account?
+		y = -y + (w.getHeight() - insets.bottom);
+		x = x - insets.left;
+		
+		Point wLocationOnScreen=w.getLocationOnScreen();
+		y+=wLocationOnScreen.x;
+		x+=wLocationOnScreen.y;
+		// ^^^
 
 		// JPen expects tilt to be -pi/2 to pi/2 from vertical;
 		// Cocoa delivers tilt as -1 to 1 from vertical
@@ -245,7 +241,7 @@ public class CocoaAccess {
 		levels.add(new PLevel(PLevel.Type.TILT_Y.ordinal(), tiltY));
 		levels.add(new PLevel(PLevel.Type.PRESSURE.ordinal(), pressure));
 
-		cocoaProvider.getPenManager().scheduleLevelEvent(device, levels);
+		cocoaProvider.getPenManager().scheduleLevelEvent(device, levels, System.currentTimeMillis(), true);
 
 
 
