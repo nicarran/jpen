@@ -197,7 +197,7 @@ public class CocoaAccess {
 	) {
 		//		System.out.println(String.format("[postEvent] device type: %d; %d; %d", special_pointingDeviceType, type, buttonMask));
 
-		// vvv UNTESTED CODE vvv
+		// vvv UNTESTED vvv
 		// I assumed that x and y are coordinates relative to the window
 		Window w=KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
 		if(w==null){
