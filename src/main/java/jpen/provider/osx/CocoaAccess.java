@@ -201,7 +201,7 @@ public class CocoaAccess {
 		// I assumed that x and y are coordinates relative to the window
 		Window w=KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
 		if(w==null){
-			L.warning("Window not available... ignoring osx event");
+			L.warning("No focused window found... ignoring CocoaAccess event");
 			return;
 		}
 		final Insets insets = w.getInsets(); // Is it reallly necessary to take the insets into account?
