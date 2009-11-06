@@ -25,7 +25,7 @@ public abstract class PenEvent
 	implements java.io.Serializable {
 	public static final long serialVersionUID=1l;
 
-	long time=-1;
+	protected long time=-1;
 	transient PenEvent next;
 	public final transient Pen pen;
 	

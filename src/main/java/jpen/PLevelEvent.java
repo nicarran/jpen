@@ -31,7 +31,7 @@ public class PLevelEvent
 	private final long deviceTime;
 	private final byte deviceId;
 
-	PLevelEvent(Pen pen, PLevel[] levels, byte deviceId, long deviceTime) {
+	public PLevelEvent(Pen pen, PLevel[] levels, byte deviceId, long deviceTime) {
 		super(pen);
 		this.levels=levels;
 		this.deviceTime=deviceTime;

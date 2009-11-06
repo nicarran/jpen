@@ -35,6 +35,7 @@ public class Pen extends PenState {
 
 	public static final int DEFAULT_FREQUENCY=60; // TODO: 50 is a better default or less??
 
+	public final PenManager penManager;
 	private int frequency;
 	private volatile MyThread thread;
 
@@ -161,10 +162,11 @@ public class Pen extends PenState {
 	}
 
 	Pen(){
-		this(null);
+		this(null, null);
 	}
 
-	Pen(PLevelEmulator levelEmulator) {
+	Pen(PenManager penManager, PLevelEmulator levelEmulator) {
+		this.penManager=penManager;
 		this.levelEmulator=levelEmulator;
 		setFrequencyLater(DEFAULT_FREQUENCY);
 	}

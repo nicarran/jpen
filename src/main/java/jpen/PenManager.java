@@ -37,7 +37,7 @@ public final class PenManager {
 	private static final Logger L=Logger.getLogger(PenManager.class.getName());
 
 	final PLevelEmulator levelEmulator=new PLevelEmulator(this);
-	public final Pen  pen=new Pen(levelEmulator);
+	public final Pen  pen=new Pen(this, levelEmulator);
 	/**
 	@deprecated Use {@link #penOwner}.
 	*/
