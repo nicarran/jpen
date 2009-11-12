@@ -44,7 +44,7 @@ public class XinputProvider
 	}
 
 	private final  Thread thread;
-	private final XinputDevice[] xipDevices;
+	private final XinputDevice[] xinputDevices;
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 
 	public static class Constructor
@@ -69,21 +69,21 @@ public class XinputProvider
 		super(constructor);
 		L.fine("start");
 
-		XiBus bus=new XiBus();
+		XiBus xiBus=new XiBus();
 
-		for(int i=bus.getDevicesSize(); --i>=0; ) {
-			XiBus bus2=new XiBus();
+		for(int xiDeviceIndex=xiBus.getXiDevicesSize(); --xiDeviceIndex>=0; ) {
+			XiBus xiBus2=new XiBus(); // each device has a connection to the X server.
 			try {
-				bus2.setDevice(i);
+				xiBus2.setXiDevice(xiDeviceIndex);
 			} catch(Exception ex) {
 				continue;
 			}
-			devices.add(new XinputDevice(this, bus2.getDevice()));
+			devices.add(new XinputDevice(this, xiBus2.getXiDevice()));
 		}
 
-		xipDevices=devices.toArray(new XinputDevice[devices.size()]);
+		xinputDevices=devices.toArray(new XinputDevice[devices.size()]);
 		if(devices.size()==1){
-			xipDevices[0].setKindTypeNumber(PKind.Type.STYLUS.ordinal());
+			xinputDevices[0].setKindTypeNumber(PKind.Type.STYLUS.ordinal());
 		}
 
 		thread=new Thread("jpen-XinputProvider") {
@@ -105,26 +105,26 @@ public class XinputProvider
 	}
 
 	private void processQuedEvents() {
-		for(int i=xipDevices.length; --i>=0;)
-			xipDevices[i].processQuedEvents();
+		for(int i=xinputDevices.length; --i>=0;)
+			xinputDevices[i].processQuedEvents();
 	}
 
-	private void resetDevices(){
-		for(int i=xipDevices.length; --i>=0;)
-			xipDevices[i].reset();
+	private void resetXinputDevices(){
+		for(int i=xinputDevices.length; --i>=0;)
+			xinputDevices[i].reset();
 	}
 
-	private void pauseDevices(boolean paused){
-		for(int i=xipDevices.length; --i>=0;)
-			xipDevices[i].device.setIsListening(!paused);
+	private void pauseXinputDevices(boolean paused){
+		for(int i=xinputDevices.length; --i>=0;)
+			xinputDevices[i].xiDevice.setIsListening(!paused);
 	}
 
 	//@Override
 	public void penManagerPaused(boolean paused) {
-		pauseDevices(paused);
+		pauseXinputDevices(paused);
 		if(!paused){
 			screenBounds.reset();
-			resetDevices();
+			resetXinputDevices();
 			synchronized(thread) {
 				thread.notifyAll();
 			}

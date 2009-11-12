@@ -28,7 +28,7 @@ class XiBus {
 	static final Object XLIB_LOCK=new Object();
 
 	private final int cellIndex;
-	private XiDevice device;
+	private XiDevice xiDevice;
 	private static long bootTimeUtc=-1;
 
 	XiBus() throws Exception {
@@ -43,7 +43,7 @@ class XiBus {
 	private static native int create();
 	private static native  String getError();
 
-	public int getDevicesSize() {
+	public int getXiDevicesSize() {
 		synchronized(XLIB_LOCK){
 			return getDevicesSize(cellIndex);
 		}
@@ -51,36 +51,36 @@ class XiBus {
 
 	private static native int getDevicesSize(int cellIndex);
 
-	public String getDeviceName(int deviceIndex) {
+	public String getXiDeviceName(int xiDeviceIndex) {
 		synchronized(XLIB_LOCK){
-			return getDeviceName(cellIndex, deviceIndex);
+			return getDeviceName(cellIndex, xiDeviceIndex);
 		}
 	}
 
-	private static native String getDeviceName(int cellIndex, int deviceIndex);
+	private static native String getDeviceName(int cellIndex, int xiDeviceIndex);
 
-	public XiDevice getDevice() {
+	public XiDevice getXiDevice() {
 		synchronized(XLIB_LOCK){
-			return device;
+			return xiDevice;
 		}
 	}
 
-	public void setDevice(int deviceIndex) throws Exception {
+	public void setXiDevice(int xiDeviceIndex) throws Exception {
 		synchronized(XLIB_LOCK){
-			if(deviceIndex==-1) {
-				device=null;
+			if(xiDeviceIndex==-1) {
+				xiDevice=null;
 				return;
 			}
-			int deviceCellIndex=setDevice(cellIndex, deviceIndex);
-			if(deviceCellIndex<0)
+			int xiDeviceCellIndex=setDevice(cellIndex, xiDeviceIndex);
+			if(xiDeviceCellIndex<0)
 				throw new Exception(getError());
-			device=new XiDevice(this, deviceCellIndex, deviceIndex);
+			xiDevice=new XiDevice(this, xiDeviceCellIndex, xiDeviceIndex);
 		}
 	}
 
 	private static native int setDevice(int cellIndex, int deviceIndex);
 
-	public void refreshDeviceInfo(){
+	public void refreshXiDeviceInfo(){
 		synchronized(XLIB_LOCK){
 			if(refreshDeviceInfo(cellIndex)!=0)
 				throw new IllegalStateException(getError());
@@ -121,6 +121,6 @@ class XiBus {
 
 	@Override
 	public String toString() {
-		return "{Bus: device="+device+"}";
+		return "{Bus: xiDevice="+xiDevice+"}";
 	}
 }

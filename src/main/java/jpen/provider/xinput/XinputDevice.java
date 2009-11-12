@@ -49,15 +49,15 @@ class XinputDevice extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(XinputDevice.class.getName());
 	//static{L.setLevel(Level.ALL);}
 
-	public final XiDevice device;
+	public final XiDevice xiDevice;
 	private final PLevel.Range[] levelRanges;
 	private final XinputProvider xinputProvider;
 	private final Point2D.Float componentLocation=new Point2D.Float();
 	private final Dimension componentSize=new Dimension();
 
-	XinputDevice(XinputProvider xinputProvider, XiDevice device) {
+	XinputDevice(XinputProvider xinputProvider, XiDevice xiDevice) {
 		super(xinputProvider);
-		this.device=device;
+		this.xiDevice=xiDevice;
 		this.xinputProvider=xinputProvider;
 		levelRanges=new PLevel.Range[PLevel.Type.VALUES.size()];
 		resetLevelRanges();
@@ -67,19 +67,19 @@ class XinputDevice extends AbstractPenDevice {
 
 	//@Override
 	public String getName() {
-		return device.getName();
+		return xiDevice.getName();
 	}
 
 	void resetLevelRanges(){
-		device.refreshLevelRanges();
+		xiDevice.refreshLevelRanges();
 		for(int i=PLevel.Type.VALUES.size(); --i>=0; ){
 			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
-			levelRanges[levelType.ordinal()]=device.getLevelRange(levelType);
+			levelRanges[levelType.ordinal()]=xiDevice.getLevelRange(levelType);
 		}
 	}
 
 	void reset(){
-		while(device.nextEvent())
+		while(xiDevice.nextEvent())
 			;
 		resetLevelRanges();
 	}
@@ -99,11 +99,11 @@ class XinputDevice extends AbstractPenDevice {
 	void processQuedEvents() {
 		if(!getEnabled())
 			return;
-		while(device.nextEvent()) {
-			EventType eventType=device.getLastEventType();
+		while(xiDevice.nextEvent()) {
+			EventType eventType=xiDevice.getLastEventType();
 			switch(eventType) {
 			case BUTTON_PRESS:
-				int lastEventButton=device.getLastEventButton();
+				int lastEventButton=xiDevice.getLastEventButton();
 				if( lastEventButton ==4 || lastEventButton ==5 ){
 					//scheduleScrollEvent(lastEventButton); nicarran: the mouse provider catches this.
 				}
@@ -111,7 +111,7 @@ class XinputDevice extends AbstractPenDevice {
 					scheduleButtonEvent(lastEventButton-1, true);
 				break;
 			case BUTTON_RELEASE:
-				lastEventButton=device.getLastEventButton();
+				lastEventButton=xiDevice.getLastEventButton();
 				if( lastEventButton !=4 && lastEventButton !=5)
 					scheduleButtonEvent(lastEventButton, false);
 				break;
@@ -126,13 +126,14 @@ class XinputDevice extends AbstractPenDevice {
 	}
 
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();
+	
 	private void scheduleLevelEvent() {
 		for(int i=PLevel.Type.VALUES.size(); --i>=0;) {
 			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
 			float value=getMultRangedValue(levelType);
 			changedLevels.add(new PLevel(levelType.ordinal(), value));
 		}
-		getPenManager().scheduleLevelEvent(this, changedLevels, device.getLastEventTime(), true);
+		getPenManager().scheduleLevelEvent(this, changedLevels, xiDevice.getLastEventTime(), true);
 		changedLevels.clear();
 	}
 
@@ -147,7 +148,7 @@ class XinputDevice extends AbstractPenDevice {
 	private static final float RADS_PER_DEG=(float)(Math.PI/180);
 
 	private final float getMultRangedValue(PLevel.Type levelType) {
-		float devValue=device.getValue(levelType);
+		float devValue=xiDevice.getValue(levelType);
 
 		if(PLevel.Type.TILT_TYPES.contains(levelType))
 			return devValue*RADS_PER_DEG;

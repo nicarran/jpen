@@ -35,18 +35,18 @@ final class XiDevice{
 	}
 
 	final int cellIndex;
-	final XiBus bus;
-	final int deviceIndex;
+	final XiBus xiBus;
+	final int xiDeviceIndex;
 
-	XiDevice(XiBus bus, int cellIndex, int deviceIndex) {
+	XiDevice(XiBus xiBus, int cellIndex, int xiDeviceIndex) {
 			XinputProvider.loadLibrary();
-			this.bus=bus;
 			this.cellIndex=cellIndex;
-			this.deviceIndex=deviceIndex;
+			this.xiBus=xiBus;
+			this.xiDeviceIndex=xiDeviceIndex;
 	}
 
 	public String getName() {
-		return bus.getDeviceName(deviceIndex);
+		return xiBus.getXiDeviceName(xiDeviceIndex);
 	}
 
 	public boolean getIsListening(){
@@ -99,8 +99,8 @@ final class XiDevice{
 
 	public boolean nextEvent() {
 		synchronized(XLIB_LOCK){
-			if(bus.getDevice()!=this)
-				throw new IllegalStateException("This device is not the bus owner.");
+			if(xiBus.getXiDevice()!=this)
+				throw new IllegalStateException("This device is not the xiBus owner.");
 			return nextEvent(cellIndex);
 		}
 	}
@@ -116,7 +116,7 @@ final class XiDevice{
 	private static native long getLastEventTime(int cellIndex);
 
 	public long getLastEventTimeUtc(){
-		return bus.getBootTimeUtc()+getLastEventTime();
+		return xiBus.getBootTimeUtc()+getLastEventTime();
 	}
 
 	public EventType getLastEventType() {
