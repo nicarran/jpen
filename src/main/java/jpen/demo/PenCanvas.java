@@ -75,6 +75,7 @@ class PenCanvas
 		this.penManager=new PenManager(this);
 		penManager.pen.setFirePenTockOnSwing(true);
 		penManager.pen.setFrequencyLater(40);
+		penManager.pen.levelEmulator.setPressureTriggerForLeftCursorButton(0.5f);
 		Utils.freezeSize(this, SIZE);
 		setDoubleBuffered(false);
 		setOpaque(true);

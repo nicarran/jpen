@@ -27,7 +27,6 @@ import jpen.provider.Utils;
 final class XiBus {
 	private final int cellIndex;
 	private XiDevice xiDevice;
-	private static long bootTimeUtc=-1;
 
 	XiBus() throws Exception {
 		XinputProvider.loadLibrary();
@@ -74,25 +73,6 @@ final class XiBus {
 	}
 
 	private static native int refreshDeviceInfo(int cellIndex);
-
-	public synchronized long getBootTimeUtc(){
-			if(bootTimeUtc==-1)
-				bootTimeUtc=getBootTimeUtc(cellIndex);
-			return bootTimeUtc;
-	}
-
-	long getBootTimeUtcNotCached(){
-		return getBootTimeUtc(cellIndex);
-	}
-
-	private static native long getBootTimeUtc(int cellIndex);
-
-	/*public long getBootTimeUtc(){
-		if(bootTimeUtc==-1)
-			bootTimeUtc=System.currentTimeMillis()-getCurrentServerTime();
-		return bootTimeUtc;
-}*/
-
 
 	@Override
 	protected synchronized void finalize() {

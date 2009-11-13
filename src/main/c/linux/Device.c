@@ -168,59 +168,39 @@ static void Device_refreshValuatorValues(struct Device *pDevice, char first_axis
 @return 1 if an event was received, 0 otherwise.
 */
 int Device_nextEvent(struct Device *pDevice ) {
+	
 	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
+	if(!XPending(pBus->pDisplay))
+		return false;
+	XNextEvent(pBus->pDisplay, &pDevice->event);
+	
 	register int i;
-	pDevice->lastEventType=-1;
-	pDevice->lastEventTime=-1;
-	for(i=E_EventType_size; --i>=0;) { // check all event types to get only the first (in time) event
-		if(XCheckTypedEvent(pBus->pDisplay,
-		        pDevice->eventTypeIds[i],
-		        &pDevice->event)) {
-			switch(i) {
+	for(i=E_EventType_size; --i>=0;) {
+		if(pDevice->eventTypeIds[i]==pDevice->event.type){
+			pDevice->lastEventType=i;
+			pDevice->lastEvent=pDevice->event;
+			switch(i){
 			case E_EventType_ButtonPress:
 			case E_EventType_ButtonRelease:
 				{
 					XDeviceButtonEvent *pEvent = (XDeviceButtonEvent *)&pDevice->event;
-					pDevice->eventTime=pEvent->time;
+					pDevice->lastEventTime=pEvent->time;
+					pDevice->lastEventButton=pEvent->button;
 				}
 				break;
 			case E_EventType_MotionNotify:
 				{
 					XDeviceMotionEvent *pEvent=(XDeviceMotionEvent *)&pDevice->event;
-					pDevice->eventTime=pEvent->time;
+					pDevice->lastEventTime=pEvent->time;
+					Device_refreshValuatorValues(pDevice, pEvent->first_axis, pEvent->axes_count, pEvent->axis_data);
 				}
 				break;
 			default:
-				printf("unhandled event!!\n");
+				printf("unhandled event!\n");
 			}
-			//printf(" event timestamp: %li \n", pDevice->eventTime);
-			if(pDevice->lastEventTime==-1 || pDevice->eventTime<pDevice->lastEventTime){
-				pDevice->lastEventType=i;
-				if(pDevice->lastEventTime!=-1)
-					XPutBackEvent(pBus->pDisplay, &pDevice->lastEvent);
-				pDevice->lastEventTime=pDevice->eventTime;
-				pDevice->lastEvent=pDevice->event;
-			}else{
-				XPutBackEvent(pBus->pDisplay, &pDevice->event);
-			}
+			return true;
 		}
 	}
-	if(pDevice->lastEventType==-1)
-		return false;
-	switch(pDevice->lastEventType){
-	case E_EventType_ButtonPress:
-	case E_EventType_ButtonRelease:
-		{
-			XDeviceButtonEvent *pEvent = (XDeviceButtonEvent *)&pDevice->lastEvent;
-			pDevice->lastEventButton=pEvent->button;
-		}
-		break;
-	case E_EventType_MotionNotify:
-		{
-			XDeviceMotionEvent *pEvent=(XDeviceMotionEvent *)&pDevice->lastEvent;
-			Device_refreshValuatorValues(pDevice, pEvent->first_axis, pEvent->axes_count, pEvent->axis_data);
-		}
-		break;
-	}
-	return true;
+	printf("uninteresting event!\n");
+	return false;
 }

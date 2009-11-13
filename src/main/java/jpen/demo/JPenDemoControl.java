@@ -55,7 +55,6 @@ public class JPenDemoControl{
 		mainPanel=new MainPanel(penCanvas);
 
 		setSupportCustomPKinds(true);
-		penCanvas.penManager.pen.levelEmulator.setPressureTriggerForLeftCursorButton(0.5f);
 
 		statusReportButton.addActionListener(new ActionListener(){
 					//@Override

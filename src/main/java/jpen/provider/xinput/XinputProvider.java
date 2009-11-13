@@ -35,7 +35,7 @@ import jpen.provider.VirtualScreenBounds;
 public class XinputProvider
 	extends AbstractPenProvider {
 	private static final Logger L=Logger.getLogger(XinputProvider.class.getName());
-	public static final int PERIOD=10;
+	private static final int MIN_PERIOD=5; // TODO: take this from the device
 
 	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""}, new String[]{"x86_64", "ia64"});
 
@@ -90,11 +90,21 @@ public class XinputProvider
 						 public void run() {
 							 while(true) {
 								 processQuedEvents();
-								 jpen.Utils.synchronizedWait(this, PERIOD);
+								 sleep();
 								 while(getPenManager().getPaused()){
 									 jpen.Utils.synchronizedWait(this, 0);
 								 }
 							 }
+						 }
+						 private void sleep(){
+						 	 	 try{
+									 sleep(//MIN_PERIOD
+									 	 Math.max(MIN_PERIOD, 
+									 	 1000/getPenManager().pen.getFrequency()-1)
+									 	 );
+								 }catch(InterruptedException ex){
+								 	 throw new AssertionError(ex);
+								 }
 						 }
 					 }
 					 ;
@@ -103,7 +113,7 @@ public class XinputProvider
 		thread.start();
 		L.fine("end");
 	}
-
+	
 	private void processQuedEvents() {
 		for(int i=xinputDevices.length; --i>=0;)
 			xinputDevices[i].processQuedEvents();

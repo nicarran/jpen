@@ -113,10 +113,6 @@ final class XiDevice{
 
 	private static native long getLastEventTime(int cellIndex);
 
-	public long getLastEventTimeUtc(){
-		return xiBus.getBootTimeUtc()+getLastEventTime();
-	}
-
 	public EventType getLastEventType() {
 		synchronized(xiBus){
 			int lastEventTypeOrdinal=getLastEventType(cellIndex);
