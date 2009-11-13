@@ -97,13 +97,21 @@ final class XiDevice{
 
 	public boolean nextEvent() {
 		synchronized(xiBus){
-			if(xiBus.getXiDevice()!=this)
-				throw new IllegalStateException("This device is not the xiBus owner.");
+			//if(xiBus.getXiDevice()!=this)
+				//throw new IllegalStateException("This device is not the xiBus owner.");
 			return nextEvent(cellIndex);
 		}
 	}
 
 	private static native boolean nextEvent(int cellIndex);
+	
+	public boolean waitNextEventOrTimeout(int timeoutMillis){
+		synchronized(xiBus){
+			return waitNextEventOrTimeout(cellIndex, timeoutMillis);
+		}
+	}
+	
+	private static native boolean waitNextEventOrTimeout(int cellIndex, int timeoutMillis);
 	
 	public long getLastEventTime(){
 		synchronized(xiBus){

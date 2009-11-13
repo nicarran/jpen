@@ -92,6 +92,9 @@ class PenCanvas
 		penManager.pen.addListener(new PenAdapter() {
 			    @Override
 			    public void penLevelEvent(PLevelEvent ev) {
+			    	//System.out.println("current time="+System.currentTimeMillis());
+			    	//System.out.println("ev time="+ev.getTime());
+			    	//System.out.println("ev device time="+ev.getDeviceTime());
 				    if(!penManager.pen.getButtonValue(PButton.Type.ON_PRESSURE)){
 					    float pressure=penManager.pen.getLevelValue(PLevel.Type.PRESSURE);
 					    if(pressure>0)
@@ -113,6 +116,7 @@ class PenCanvas
 			    }
 			    @Override
 			    public void penTock(long availableTime) {
+			    	//System.out.println("tock="+System.currentTimeMillis());
 				    if(availableTime<0)
 					    L.warning("no time to repaint... but this is a test, so I continue.");
 				    if(isDirty)

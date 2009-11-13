@@ -34,10 +34,10 @@ struct Bus {
 	XDeviceInfo *pDeviceInfo;
 	int deviceInfoSize;
 	int deviceCellIndex;
+	int displayConnectionNumber;
 };
 m_declareRow(Bus);
 extern int Bus_setDevice(SBus *pBus, int deviceIndex);
 extern int Bus_refreshDeviceInfo(SBus *pBus);
-extern jlong Bus_getBootTimeUtc(SBus *pBus);
 
 #endif

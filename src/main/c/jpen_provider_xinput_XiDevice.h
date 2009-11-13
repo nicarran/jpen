@@ -1,5 +1,5 @@
 /* [{
-Copyright 2007, 2008 Nicolas Carranza <nicarran at gmail.com>
+Copyright 2007, 2008, 2009 Nicolas Carranza <nicarran at gmail.com>
 
 This file is part of jpen.
 
@@ -88,6 +88,14 @@ JNIEXPORT jstring JNICALL Java_jpen_provider_xinput_XiDevice_getError
  */
 JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_nextEvent
   (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    waitNextEventOrTimeout
+ * Signature: (II)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_waitNextEventOrTimeout
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     jpen_provider_xinput_XiDevice

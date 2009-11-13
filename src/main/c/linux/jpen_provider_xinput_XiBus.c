@@ -70,16 +70,6 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_setDevice
 }
 
 /*
- * Class:     jpen_provider_xinput_XiBus
- * Method:    getBootTimeUtc
- * Signature: (I)J
- */
-JNIEXPORT jlong JNICALL Java_jpen_provider_xinput_XiBus_getBootTimeUtc
-(JNIEnv *pEnv, jclass class, jint cellIndex){
-	return Bus_getBootTimeUtc(Bus_getP(cellIndex));
-}
-
-/*
  * Class:     jpen_provider_xinput_Bus
  * Method:    destroy
  * Signature: (I)I

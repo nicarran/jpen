@@ -57,9 +57,8 @@ public class Pen extends PenState {
 
 	private final class MyThread
 		extends Thread {
-		final int period;
+		final int periodMillis;
 		long beforeTime;
-		long procTime;
 		long waitTime;
 		long availablePeriod;
 		PenEvent event;
@@ -81,15 +80,15 @@ public class Pen extends PenState {
 		}
 
 		MyThread(Thread oldThread){
-			period=1000/Pen.this.frequency;
+			periodMillis=1000/Pen.this.frequency;
 			this.oldThread=oldThread;
-			setName("jpen-Pen-"+period+"ms");
+			setName("jpen-Pen-"+periodMillis+"ms");
 		}
 		private final Runnable penTockFirer=new Runnable(){
 			    //@Override
 			    public void run(){
 				    for(PenListener l:getListenersArray())
-					    l.penTock( availablePeriod - (System.currentTimeMillis()-beforeTime) );
+					    l.penTock( availablePeriod - evalCurrentProcTime());
 			    }
 		    };
 
@@ -106,18 +105,18 @@ public class Pen extends PenState {
 						waitTime=0;
 					else
 						yield();
-					while((event=lastDispatchedEvent.next)!=null) {
+					while((event=lastDispatchedEvent.next)!=null && event.getTime()<=beforeTime) {
 						event.copyTo(Pen.this);
 						event.dispatch();
 						lastDispatchedEvent.next=null;
 						lastDispatchedEvent=event;
 					}
-					availablePeriod=period+waitTime;
+					availablePeriod=periodMillis+waitTime;
 					firePenTock();
-					procTime=System.currentTimeMillis()-beforeTime;
-					waitTime=period-procTime;
+					waitTime=periodMillis-evalCurrentProcTime();
 					if(waitTime>0) {
-						waiter.doWait(waitTime);
+						//System.out.println("going to wait: "+waitTime);
+						Utils.sleepUninterrupted(waitTime);
 						waitTime=0;
 					}
 				}
@@ -126,6 +125,10 @@ public class Pen extends PenState {
 				exception=ex;
 			}
 			L.finest("^");
+		}
+		
+		private long evalCurrentProcTime(){
+			return System.currentTimeMillis()-beforeTime;
 		}
 
 		private boolean waitNewEvents() throws InterruptedException {
@@ -237,6 +240,10 @@ public class Pen extends PenState {
 
 	public int getFrequency() {
 		return frequency;
+	}
+	
+	public int getPeriodMillis(){
+		return thread.periodMillis;
 	}
 	
 	public synchronized Exception getThreadException(){

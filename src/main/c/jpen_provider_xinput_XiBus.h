@@ -1,5 +1,5 @@
 /* [{
-Copyright 2007, 2008 Nicolas Carranza <nicarran at gmail.com>
+Copyright 2007, 2008, 2009 Nicolas Carranza <nicarran at gmail.com>
 
 This file is part of jpen.
 
@@ -25,7 +25,6 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* Inaccessible static: bootTimeUtc */
 /*
  * Class:     jpen_provider_xinput_XiBus
  * Method:    create
@@ -72,14 +71,6 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_setDevice
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_refreshDeviceInfo
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     jpen_provider_xinput_XiBus
- * Method:    getBootTimeUtc
- * Signature: (I)J
- */
-JNIEXPORT jlong JNICALL Java_jpen_provider_xinput_XiBus_getBootTimeUtc
   (JNIEnv *, jclass, jint);
 
 /*

@@ -43,7 +43,7 @@ public class XinputProvider
 		LIB_LOADER.load();
 	}
 
-	private final  Thread thread;
+	//private final  Thread thread;
 	private final XinputDevice[] xinputDevices;
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 
@@ -86,6 +86,7 @@ public class XinputProvider
 			xinputDevices[0].setKindTypeNumber(PKind.Type.STYLUS.ordinal());
 		}
 
+		/*
 		thread=new Thread("jpen-XinputProvider") {
 						 public void run() {
 							 while(true) {
@@ -111,13 +112,15 @@ public class XinputProvider
 		thread.setDaemon(true);
 		thread.setPriority(Thread.MAX_PRIORITY);
 		thread.start();
+		*/
 		L.fine("end");
 	}
 	
+	/*
 	private void processQuedEvents() {
 		for(int i=xinputDevices.length; --i>=0;)
 			xinputDevices[i].processQuedEvents();
-	}
+	}*/
 
 	private void resetXinputDevices(){
 		for(int i=xinputDevices.length; --i>=0;)
@@ -135,9 +138,9 @@ public class XinputProvider
 		if(!paused){
 			screenBounds.reset();
 			resetXinputDevices();
-			synchronized(thread) {
+			/*synchronized(thread) {
 				thread.notifyAll();
-			}
+			}*/
 		}
 	}
 }

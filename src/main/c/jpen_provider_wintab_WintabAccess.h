@@ -1,5 +1,5 @@
 /* [{
-Copyright 2007, 2008 Nicolas Carranza <nicarran at gmail.com>
+Copyright 2007, 2008, 2009 Nicolas Carranza <nicarran at gmail.com>
 
 This file is part of jpen.
 
@@ -25,6 +25,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef __cplusplus
 extern "C" {
 #endif
+/* Inaccessible static: LOCK */
 /* Inaccessible static: bootTimeUtc */
 /*
  * Class:     jpen_provider_wintab_WintabAccess

@@ -26,10 +26,10 @@ int Device_preCreate(SDevice *pDevice) {
 }
 
 static int EventClassAndOffsets[][2]={
-      {ButtonClass,_deviceButtonPress},
-      {ButtonClass,_deviceButtonRelease},
-      {ValuatorClass, _deviceMotionNotify},
-    };
+			{ButtonClass,_deviceButtonPress},
+			{ButtonClass,_deviceButtonRelease},
+			{ValuatorClass, _deviceMotionNotify},
+		};
 
 void Device_setIsListening(SDevice *pDevice, int isListening) {
 	if(pDevice->isListening==isListening)
@@ -60,13 +60,13 @@ void Device_setIsListening(SDevice *pDevice, int isListening) {
 		    eventClassesSize);*/
 
 		XGrabDevice(pBus->pDisplay, pDevice->pXdevice, DefaultRootWindow(pBus->pDisplay),
-		            0,
-		            eventClassesSize,
-		            eventClasses,
-		            GrabModeAsync,
-		            GrabModeAsync,
-		            CurrentTime
-		           );
+								0,
+								eventClassesSize,
+								eventClasses,
+								GrabModeAsync,
+								GrabModeAsync,
+								CurrentTime
+							 );
 	}else{
 		XUngrabDevice(pBus->pDisplay, pDevice->pXdevice, CurrentTime);
 		XSync(pBus->pDisplay, 1);
@@ -139,10 +139,10 @@ int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex) {
 		return errorState;
 	}
 	if(Device_getNumAxes(pDevice)<3){
-		Device_setError("Not enough axis data on device."); // TODO: change this criteria when supporting tablet buttons. 
+		Device_setError("Not enough axis data on device."); // TODO: change this criteria when supporting tablet buttons.
 		return errorState;
 	}
-	
+
 	pDevice->pXdevice=XOpenDevice(pBus->pDisplay, deviceInfo.id);
 	if(!pDevice->pXdevice) {
 		Device_setError("Couldn't open the device.");
@@ -164,33 +164,51 @@ static void Device_refreshValuatorValues(struct Device *pDevice, char first_axis
 	}
 }
 
+int Device_waitNextEventOrTimeout(struct Device *pDevice, int timeoutMillis){
+	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
+	FD_ZERO(&pDevice->displayConnectionFileDesc);
+	FD_SET(pBus->displayConnectionNumber, &pDevice->displayConnectionFileDesc);
+
+	pDevice->timeVal.tv_sec=0;
+	pDevice->timeVal.tv_usec=timeoutMillis*1000;
+	
+	//printf("going to wait for event on %i\n", pDevice->cellIndex);
+	if (select(pBus->displayConnectionNumber+1,
+						 &pDevice->displayConnectionFileDesc, NULL, NULL,
+						 &pDevice->timeVal))
+		return Device_nextEvent(pDevice);
+	else{
+		//printf("timeout on  %i\n", pDevice->cellIndex);
+		return false;
+	}
+}
+
 /**
 @return 1 if an event was received, 0 otherwise.
 */
 int Device_nextEvent(struct Device *pDevice ) {
-	
+
 	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
 	if(!XPending(pBus->pDisplay))
 		return false;
-	XNextEvent(pBus->pDisplay, &pDevice->event);
-	
+	XNextEvent(pBus->pDisplay, &pDevice->lastEvent);
+
 	register int i;
 	for(i=E_EventType_size; --i>=0;) {
-		if(pDevice->eventTypeIds[i]==pDevice->event.type){
+		if(pDevice->eventTypeIds[i]==pDevice->lastEvent.type){
 			pDevice->lastEventType=i;
-			pDevice->lastEvent=pDevice->event;
 			switch(i){
 			case E_EventType_ButtonPress:
 			case E_EventType_ButtonRelease:
 				{
-					XDeviceButtonEvent *pEvent = (XDeviceButtonEvent *)&pDevice->event;
+					XDeviceButtonEvent *pEvent = (XDeviceButtonEvent *)&pDevice->lastEvent;
 					pDevice->lastEventTime=pEvent->time;
 					pDevice->lastEventButton=pEvent->button;
 				}
 				break;
 			case E_EventType_MotionNotify:
 				{
-					XDeviceMotionEvent *pEvent=(XDeviceMotionEvent *)&pDevice->event;
+					XDeviceMotionEvent *pEvent=(XDeviceMotionEvent *)&pDevice->lastEvent;
 					pDevice->lastEventTime=pEvent->time;
 					Device_refreshValuatorValues(pDevice, pEvent->first_axis, pEvent->axes_count, pEvent->axis_data);
 				}

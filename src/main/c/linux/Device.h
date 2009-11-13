@@ -49,15 +49,16 @@ struct Device {
 
 	int valuatorValues[E_Valuators_size];
 	int eventTypeIds[E_EventType_size];
-	XEvent event;
-	Time eventTime;
 	XEvent lastEvent;
 	int lastEventType;
 	Time lastEventTime;
 	int lastEventButton;
+	fd_set displayConnectionFileDesc;
+	struct timeval timeVal;
 };
 m_declareRow(Device);
 extern int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex);
+extern int Device_waitNextEventOrTimeout(SDevice *pDevice, int timeoutMillis);
 extern int Device_nextEvent(SDevice *pDevice );
 extern void Device_refreshValuatorRanges(SDevice *pDevice);
 extern void Device_setIsListening(SDevice *pDevice, int isListening);

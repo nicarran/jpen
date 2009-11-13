@@ -54,6 +54,8 @@ class XinputDevice extends AbstractPenDevice {
 	private final XinputProvider xinputProvider;
 	private final Point2D.Float componentLocation=new Point2D.Float();
 	private final Dimension componentSize=new Dimension();
+	private final Thread thread;
+	private volatile boolean isListening;
 
 	XinputDevice(XinputProvider xinputProvider, XiDevice xiDevice) {
 		super(xinputProvider);
@@ -62,30 +64,70 @@ class XinputDevice extends AbstractPenDevice {
 		levelRanges=new PLevel.Range[PLevel.Type.VALUES.size()];
 		resetLevelRanges();
 		setKindTypeNumber(getDefaultKindTypeNumber());
+		thread=new Thread("jpen-XinputDevice-"+getName()){
+						 @Override
+						 public void run(){
+							 while(true){
+								 while( !isListening || !getEnabled())
+									 jpen.Utils.synchronizedWait(this, 0);
+								 if(XinputDevice.this.xiDevice.waitNextEventOrTimeout(
+											(Math.max(
+												 15,
+												 getPen().getPeriodMillis()
+											 ))
+										))
+									 processLastEvent();
+								 jpen.Utils.sleepUninterrupted(1l);
+							 }
+						 }
+					 };
+		thread.setPriority(Thread.MAX_PRIORITY);
+		thread.setDaemon(true);
+		thread.start();
 		setEnabled(true);
 	}
-	
+
 	void setIsListening(boolean isListening){
+		if(this.isListening==isListening)
+			return;
+		this.isListening=isListening;
 		xiDevice.setIsListening(isListening);
+		synchronized(thread){
+			thread.notify();
+		}
 	}
+
+	@Override
+	public synchronized void setEnabled(boolean enabled){
+		super.setEnabled(enabled);
+		synchronized(thread){
+			thread.notify();
+		}
+	}
+
+	@Override
+	public synchronized boolean getEnabled(){
+		return super.getEnabled();
+	}
+
 
 	//@Override
 	public String getName() {
 		return xiDevice.getName();
 	}
 
-	void resetLevelRanges(){
+	void reset(){
+		while(xiDevice.nextEvent())
+			;
+		resetLevelRanges();
+	}
+
+	private void resetLevelRanges(){
 		xiDevice.refreshLevelRanges();
 		for(int i=PLevel.Type.VALUES.size(); --i>=0; ){
 			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
 			levelRanges[levelType.ordinal()]=xiDevice.getLevelRange(levelType);
 		}
-	}
-
-	void reset(){
-		while(xiDevice.nextEvent())
-			;
-		resetLevelRanges();
 	}
 
 	private int getDefaultKindTypeNumber() {
@@ -100,11 +142,20 @@ class XinputDevice extends AbstractPenDevice {
 			return PKind.Type.STYLUS.ordinal();
 	}
 
+	/*
 	void processQuedEvents() {
-		if(!getEnabled())
+		if(!getEnabled()) // TODO
 			return;
 		while(xiDevice.nextEvent())
 			processLastEvent();
+}*/
+
+	private void _sleep(int millis){
+		try{
+			Thread.currentThread().sleep(millis);
+		}catch(InterruptedException ex){
+			throw new AssertionError(ex);
+		}
 	}
 
 	private void processLastEvent(){

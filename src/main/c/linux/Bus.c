@@ -47,6 +47,7 @@ int Bus_preCreate(SBus *pBus) {
 		XCloseDisplay(pBus->pDisplay);
 		return errorState;
 	}
+	pBus->displayConnectionNumber=ConnectionNumber(pBus->pDisplay);
 
 	return Bus_refreshDeviceInfo(pBus);
 }
@@ -91,43 +92,4 @@ int Bus_setDevice(SBus *pBus, int deviceIndex) {
 		return errorState;
 	}
 	return pBus->deviceCellIndex=deviceCellIndex;
-}
-
-static jlong currentTimeMillis()
-{
-	struct timeval t;
-	gettimeofday(&t, NULL);
-	return ((jlong)t.tv_sec) * 1000 + (jlong)(t.tv_usec/1000);
-}
-
-/**
-Inspired by: xcommon.c - Ogle Video Player:
----
-Get the current timestamp by causing an event to be generated
-by the X server.  This is only a single round-trip to the
-X server.  Inspired by kapplication::updateUserTimestamp().
----
-
-And: jdk/src/solaris/native/sun/awt/awt_util.c
-*/
-jlong Bus_getBootTimeUtc(SBus *pBus){
-	Window w = XCreateSimpleWindow( pBus->pDisplay, 
-																 DefaultRootWindow( pBus->pDisplay ), 0, 0, 1, 1, 0, 0, 0 );
-	jlong minBootTime=-1, bootTime;
-	unsigned char data[0];
-	XEvent ev;
-	int i=10; // do this 10 times to get the best result
-	while(--i>=0){ 
-		XSelectInput( pBus->pDisplay, w, PropertyChangeMask );
-		if(i%2)
-			XFlush(pBus->pDisplay);
-		XChangeProperty(pBus->pDisplay, w, XA_ATOM, XA_ATOM, 8,
-		    PropModeAppend, data, 0 );
-		XWindowEvent( pBus->pDisplay, w, PropertyChangeMask, &ev );
-		bootTime=currentTimeMillis()-ev.xproperty.time;
-		if(minBootTime==-1 || bootTime<minBootTime)
-			minBootTime=bootTime;
-	}
-	XDestroyWindow(pBus->pDisplay, w);
-	return minBootTime;
 }

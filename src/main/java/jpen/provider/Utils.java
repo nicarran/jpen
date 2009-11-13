@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.ResourceBundle;
 
-public final class Utils {
+public final class Utils{
 	private static final Logger L=Logger.getLogger(Utils.class.getName());
 	private static ResourceBundle moduleProperties;
 

@@ -39,4 +39,12 @@ public final class Utils{
 			}
 		}
 	}
+	
+	public static void sleepUninterrupted(long millis){
+		try{
+			Thread.currentThread().sleep(millis);
+		}catch(InterruptedException ex){
+			throw new AssertionError(ex);
+		}
+	}
 }
