@@ -49,7 +49,7 @@ class XinputDevice extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(XinputDevice.class.getName());
 	//static{L.setLevel(Level.ALL);}
 
-	public final XiDevice xiDevice;
+	private final XiDevice xiDevice;
 	private final PLevel.Range[] levelRanges;
 	private final XinputProvider xinputProvider;
 	private final Point2D.Float componentLocation=new Point2D.Float();
@@ -63,6 +63,10 @@ class XinputDevice extends AbstractPenDevice {
 		resetLevelRanges();
 		setKindTypeNumber(getDefaultKindTypeNumber());
 		setEnabled(true);
+	}
+	
+	void setIsListening(boolean isListening){
+		xiDevice.setIsListening(isListening);
 	}
 
 	//@Override
@@ -99,25 +103,28 @@ class XinputDevice extends AbstractPenDevice {
 	void processQuedEvents() {
 		if(!getEnabled())
 			return;
-		while(xiDevice.nextEvent()) {
-			EventType eventType=xiDevice.getLastEventType();
-			switch(eventType) {
-			case BUTTON_PRESS:
-				int lastEventButton=xiDevice.getLastEventButton();
-				if( lastEventButton ==4 || lastEventButton ==5 ){
-					//scheduleScrollEvent(lastEventButton); nicarran: the mouse provider catches this.
-				}
-				else
-					scheduleButtonEvent(lastEventButton-1, true);
-				break;
-			case BUTTON_RELEASE:
-				lastEventButton=xiDevice.getLastEventButton();
-				if( lastEventButton !=4 && lastEventButton !=5)
-					scheduleButtonEvent(lastEventButton, false);
-				break;
-			case MOTION_NOTIFY:
-				scheduleLevelEvent();
+		while(xiDevice.nextEvent())
+			processLastEvent();
+	}
+
+	private void processLastEvent(){
+		EventType eventType=xiDevice.getLastEventType();
+		switch(eventType) {
+		case BUTTON_PRESS:
+			int lastEventButton=xiDevice.getLastEventButton();
+			if( lastEventButton ==4 || lastEventButton ==5 ){
+				//scheduleScrollEvent(lastEventButton); nicarran: the mouse provider catches this.
 			}
+			else
+				scheduleButtonEvent(lastEventButton-1, true);
+			break;
+		case BUTTON_RELEASE:
+			lastEventButton=xiDevice.getLastEventButton();
+			if( lastEventButton !=4 && lastEventButton !=5)
+				scheduleButtonEvent(lastEventButton, false);
+			break;
+		case MOTION_NOTIFY:
+			scheduleLevelEvent();
 		}
 	}
 
@@ -126,7 +133,7 @@ class XinputDevice extends AbstractPenDevice {
 	}
 
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();
-	
+
 	private void scheduleLevelEvent() {
 		for(int i=PLevel.Type.VALUES.size(); --i>=0;) {
 			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
@@ -157,7 +164,7 @@ class XinputDevice extends AbstractPenDevice {
 
 		if(PLevel.Type.MOVEMENT_TYPES.contains(levelType))
 			devValue=xinputProvider.screenBounds.getLevelRangeOffset(levelType)+
-			         devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);
+							 devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);
 
 		return devValue;
 	}

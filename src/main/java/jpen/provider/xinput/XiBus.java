@@ -24,77 +24,61 @@ import java.util.List;
 import jpen.PenManager;
 import jpen.provider.Utils;
 
-class XiBus {
-	static final Object XLIB_LOCK=new Object();
-
+final class XiBus {
 	private final int cellIndex;
 	private XiDevice xiDevice;
 	private static long bootTimeUtc=-1;
 
 	XiBus() throws Exception {
-		synchronized(XLIB_LOCK){
-			XinputProvider.loadLibrary();
-			this.cellIndex=create();
-			if(cellIndex==-1)
-				throw new Exception(getError());
-		}
+		XinputProvider.loadLibrary();
+		this.cellIndex=create();
+		if(cellIndex==-1)
+			throw new Exception(getError());
 	}
 
 	private static native int create();
 	private static native  String getError();
 
-	public int getXiDevicesSize() {
-		synchronized(XLIB_LOCK){
-			return getDevicesSize(cellIndex);
-		}
+	public synchronized int getXiDevicesSize() {
+		return getDevicesSize(cellIndex);
 	}
 
 	private static native int getDevicesSize(int cellIndex);
 
-	public String getXiDeviceName(int xiDeviceIndex) {
-		synchronized(XLIB_LOCK){
-			return getDeviceName(cellIndex, xiDeviceIndex);
-		}
+	public synchronized String getXiDeviceName(int xiDeviceIndex) {
+		return getDeviceName(cellIndex, xiDeviceIndex);
 	}
 
 	private static native String getDeviceName(int cellIndex, int xiDeviceIndex);
 
-	public XiDevice getXiDevice() {
-		synchronized(XLIB_LOCK){
-			return xiDevice;
-		}
+	public synchronized XiDevice getXiDevice() {
+		return xiDevice;
 	}
 
-	public void setXiDevice(int xiDeviceIndex) throws Exception {
-		synchronized(XLIB_LOCK){
-			if(xiDeviceIndex==-1) {
-				xiDevice=null;
-				return;
-			}
-			int xiDeviceCellIndex=setDevice(cellIndex, xiDeviceIndex);
-			if(xiDeviceCellIndex<0)
-				throw new Exception(getError());
-			xiDevice=new XiDevice(this, xiDeviceCellIndex, xiDeviceIndex);
+	public synchronized void setXiDevice(int xiDeviceIndex) throws Exception {
+		if(xiDeviceIndex==-1) {
+			xiDevice=null;
+			return;
 		}
+		int xiDeviceCellIndex=setDevice(cellIndex, xiDeviceIndex);
+		if(xiDeviceCellIndex<0)
+			throw new Exception(getError());
+		xiDevice=new XiDevice(this, xiDeviceCellIndex, xiDeviceIndex);
 	}
 
 	private static native int setDevice(int cellIndex, int deviceIndex);
 
-	public void refreshXiDeviceInfo(){
-		synchronized(XLIB_LOCK){
+	public synchronized void refreshXiDeviceInfo(){
 			if(refreshDeviceInfo(cellIndex)!=0)
 				throw new IllegalStateException(getError());
-		}
 	}
 
 	private static native int refreshDeviceInfo(int cellIndex);
 
-	public long getBootTimeUtc(){
-		synchronized(XLIB_LOCK){
+	public synchronized long getBootTimeUtc(){
 			if(bootTimeUtc==-1)
 				bootTimeUtc=getBootTimeUtc(cellIndex);
 			return bootTimeUtc;
-		}
 	}
 
 	long getBootTimeUtcNotCached(){
@@ -111,11 +95,9 @@ class XiBus {
 
 
 	@Override
-	protected void finalize() {
-		synchronized(XLIB_LOCK){
+	protected synchronized void finalize() {
 			if(cellIndex!=-1)
 				destroy(cellIndex);
-		}
 	}
 	static native int destroy(int cellIndex);
 

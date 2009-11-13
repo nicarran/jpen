@@ -116,7 +116,7 @@ public class XinputProvider
 
 	private void pauseXinputDevices(boolean paused){
 		for(int i=xinputDevices.length; --i>=0;)
-			xinputDevices[i].xiDevice.setIsListening(!paused);
+			xinputDevices[i].setIsListening(!paused);
 	}
 
 	//@Override

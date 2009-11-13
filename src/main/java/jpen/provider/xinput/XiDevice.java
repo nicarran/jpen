@@ -27,8 +27,6 @@ import jpen.PLevel;
 import jpen.provider.Utils;
 
 final class XiDevice{
-	public static final Object XLIB_LOCK=XiBus.XLIB_LOCK;
-
 	enum EventType{
 	  BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY;
 	  public static final List<EventType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
@@ -50,7 +48,7 @@ final class XiDevice{
 	}
 
 	public boolean getIsListening(){
-		synchronized(XLIB_LOCK){
+		synchronized(xiBus){
 			return getIsListening(cellIndex);
 		}
 	}
@@ -58,7 +56,7 @@ final class XiDevice{
 	private static native boolean getIsListening(int cellIndex);
 
 	public void setIsListening(boolean isListening){
-		synchronized(XLIB_LOCK){
+		synchronized(xiBus){
 			setIsListening(cellIndex, isListening);
 		}
 	}
@@ -66,7 +64,7 @@ final class XiDevice{
 	private static native void setIsListening(int cellIndex, boolean isListening);
 
 	public PLevel.Range getLevelRange(PLevel.Type levelType) {
-		synchronized(XLIB_LOCK){
+		synchronized(xiBus){
 			int typeIndex=getLevelTypeValueIndex(levelType);
 			return new PLevel.Range(getLevelRangeMin(cellIndex, typeIndex), getLevelRangeMax(cellIndex, typeIndex));
 		}
@@ -80,7 +78,7 @@ final class XiDevice{
 	private static native int getLevelRangeMax(int cellIndex, int levelTypeOrdinal);
 
 	public int getValue(PLevel.Type levelType) {
-		synchronized(XLIB_LOCK){
+		synchronized(xiBus){
 			return getValue(cellIndex, getLevelTypeValueIndex(levelType));
 		}
 	}
@@ -89,7 +87,7 @@ final class XiDevice{
 
 	@Override
 	protected void finalize() {
-		synchronized(XLIB_LOCK){
+		synchronized(xiBus){
 			if(cellIndex!=-1)
 				destroy(cellIndex);
 		}
@@ -98,7 +96,7 @@ final class XiDevice{
 	private static native String getError();
 
 	public boolean nextEvent() {
-		synchronized(XLIB_LOCK){
+		synchronized(xiBus){
 			if(xiBus.getXiDevice()!=this)
 				throw new IllegalStateException("This device is not the xiBus owner.");
 			return nextEvent(cellIndex);
@@ -106,9 +104,9 @@ final class XiDevice{
 	}
 
 	private static native boolean nextEvent(int cellIndex);
-
+	
 	public long getLastEventTime(){
-		synchronized(XLIB_LOCK){
+		synchronized(xiBus){
 			return getLastEventTime(cellIndex);
 		}
 	}
@@ -120,7 +118,7 @@ final class XiDevice{
 	}
 
 	public EventType getLastEventType() {
-		synchronized(XLIB_LOCK){
+		synchronized(xiBus){
 			int lastEventTypeOrdinal=getLastEventType(cellIndex);
 			if(lastEventTypeOrdinal<0)
 				return null;
@@ -131,7 +129,7 @@ final class XiDevice{
 	private static native int getLastEventType(int cellIndex);
 
 	public int getLastEventButton() {
-		synchronized(XLIB_LOCK){
+		synchronized(xiBus){
 			return getLastEventButton(cellIndex);
 		}
 	}
@@ -139,7 +137,7 @@ final class XiDevice{
 	private static native int getLastEventButton(int cellIndex);
 
 	public void refreshLevelRanges(){
-		synchronized(XLIB_LOCK){
+		synchronized(xiBus){
 			refreshLevelRanges(cellIndex);
 		}
 	}
@@ -148,7 +146,7 @@ final class XiDevice{
 
 	@Override
 	public String toString() {
-		synchronized(XLIB_LOCK){
+		synchronized(xiBus){
 			StringBuffer sb=new StringBuffer();
 			sb.append("{Device: name=");
 			sb.append(getName());
