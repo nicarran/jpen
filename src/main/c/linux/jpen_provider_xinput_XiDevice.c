@@ -110,6 +110,27 @@ JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_waitNextEventOrTim
 
 /*
  * Class:     jpen_provider_xinput_XiDevice
+ * Method:    stopWaitingNextEvent
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_jpen_provider_xinput_XiDevice_stopWaitingNextEvent
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	Device_stopWaitingNextEvent(Device_getP(cellIndex));
+}
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    waitNextEvent
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_waitNextEvent
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Device_waitNextEvent(Device_getP(cellIndex));
+}
+
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
  * Method:    getLastEventTime
  * Signature: (I)J
  */

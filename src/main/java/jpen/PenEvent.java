@@ -26,7 +26,7 @@ public abstract class PenEvent
 	public static final long serialVersionUID=1l;
 
 	protected long time=-1;
-	transient PenEvent next;
+	transient volatile PenEvent next;
 	public final transient Pen pen;
 	
 	PenEvent(Pen pen) {

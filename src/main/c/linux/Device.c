@@ -67,10 +67,11 @@ void Device_setIsListening(SDevice *pDevice, int isListening) {
 								GrabModeAsync,
 								CurrentTime
 							 );
+		XSelectInput(pBus->pDisplay,DefaultRootWindow(pBus->pDisplay),PropertyChangeMask); // hack to signal Device_waitNextEventOrTimeOut through Device_stopWaitingNextEvent
 	}else{
 		XUngrabDevice(pBus->pDisplay, pDevice->pXdevice, CurrentTime);
-		XSync(pBus->pDisplay, 1);
 	}
+	XSync(pBus->pDisplay, 1);
 	// TODO: error handling?
 	pDevice->isListening=isListening;
 }
@@ -164,33 +165,23 @@ static void Device_refreshValuatorValues(struct Device *pDevice, char first_axis
 	}
 }
 
-int Device_waitNextEventOrTimeout(struct Device *pDevice, int timeoutMillis){
+/**
+@return 1 if an event was received, 0 otherwise.
+*/
+int Device_nextEvent(struct Device *pDevice) {
 	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
-	FD_ZERO(&pDevice->displayConnectionFileDesc);
-	FD_SET(pBus->displayConnectionNumber, &pDevice->displayConnectionFileDesc);
 
-	pDevice->timeVal.tv_sec=0;
-	pDevice->timeVal.tv_usec=timeoutMillis*1000;
-	
-	//printf("going to wait for event on %i\n", pDevice->cellIndex);
-	if (select(pBus->displayConnectionNumber+1,
-						 &pDevice->displayConnectionFileDesc, NULL, NULL,
-						 &pDevice->timeVal))
-		return Device_nextEvent(pDevice);
-	else{
-		//printf("timeout on  %i\n", pDevice->cellIndex);
-		return false;
-	}
+	if(XPending(pBus->pDisplay))
+		return Device_waitNextEvent(pDevice);
+	return false;
 }
 
 /**
 @return 1 if an event was received, 0 otherwise.
 */
-int Device_nextEvent(struct Device *pDevice ) {
-
+int Device_waitNextEvent(struct Device *pDevice) {
 	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
-	if(!XPending(pBus->pDisplay))
-		return false;
+
 	XNextEvent(pBus->pDisplay, &pDevice->lastEvent);
 
 	register int i;
@@ -214,11 +205,49 @@ int Device_nextEvent(struct Device *pDevice ) {
 				}
 				break;
 			default:
-				printf("unhandled event!\n");
+				printf("assertion error: Device_waitNextEvent: unexpected unhandled event\n");
+				return false;
 			}
 			return true;
 		}
 	}
-	printf("uninteresting event!\n");
 	return false;
+}
+
+/**
+@return 1 if an event was received, 0 otherwise.
+
+Thanks to AngryLlama ( http://www.linuxquestions.org/questions/programming-9/xnextevent-select-409355/ ) for the timeout procedure.
+*/
+int Device_waitNextEventOrTimeout(struct Device *pDevice, int timeoutMillis){
+	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
+
+	FD_ZERO(&pDevice->displayConnectionFileDesc);
+	FD_SET(pBus->displayConnectionNumber, &pDevice->displayConnectionFileDesc);
+
+	pDevice->timeVal.tv_sec=0;
+	pDevice->timeVal.tv_usec=timeoutMillis*1000;
+
+	if(select(pBus->displayConnectionNumber+1,
+						&pDevice->displayConnectionFileDesc, NULL, NULL,
+						&pDevice->timeVal))
+		return Device_nextEvent(pDevice);
+	return false;
+}
+
+Display *pAuxDisplay;
+
+void Device_stopWaitingNextEvent(SDevice *pDevice){
+	if(!pAuxDisplay){
+		pAuxDisplay=XOpenDisplay(NULL);
+		if(!pAuxDisplay) {
+			printf("Failed to connect to X server!\n");
+			return;
+		}
+	}
+
+	unsigned char data[0];
+	XChangeProperty(pAuxDisplay, DefaultRootWindow(pAuxDisplay), XA_ATOM, XA_ATOM, 8,
+									PropModeAppend, data, 0 );
+	XFlush(pAuxDisplay);
 }

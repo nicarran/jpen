@@ -58,6 +58,16 @@ public class PLevel
 		Angle between the Z axis and the projection of the pen against the Y-Z plane. Range: -pi/2 to pi/2.
 		*/
 		TILT_Y,
+		/**
+		 Airbrush wheel "pressure". Range: -1 to 1.<p>
+		 <b>Warning:</b> this feature is currently implemented only on Mac OS X.
+		 */ 
+		TANGENTIAL_PRESSURE,
+		/**
+		 Device rotation in radians. <p>
+		 <b>Warning:</b> this feature is currently implemented only on Mac OS X. This is an untested feature, please give us feedback on how it works for you. TODO: give a URL for feedback.
+		 */
+		ROTATION,
 		CUSTOM;
 
 		public static final List<Type> ALL_VALUES=Collections.unmodifiableList(Arrays.asList(values()));

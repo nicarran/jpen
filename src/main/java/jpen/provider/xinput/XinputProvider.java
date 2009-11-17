@@ -32,7 +32,7 @@ import jpen.provider.NativeLibraryLoader;
 import jpen.provider.Utils;
 import jpen.provider.VirtualScreenBounds;
 
-public class XinputProvider
+public final class XinputProvider
 	extends AbstractPenProvider {
 	private static final Logger L=Logger.getLogger(XinputProvider.class.getName());
 	private static final int MIN_PERIOD=5; // TODO: take this from the device

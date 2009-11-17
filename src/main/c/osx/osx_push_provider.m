@@ -1,6 +1,6 @@
 /* [{
 Copyright 2008 Brien Colwell <xcolwell at users.sourceforge.net>
-Copyright 2009 Marcello Bastea-Forte <marcello3d at users.sourceforge.net>
+Copyright 2009 Marcello Bastea-Forte <marcello at cellosoft.com>
 
 This file is part of jpen.
 
@@ -128,6 +128,7 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 			case NSOtherMouseDown:
 			case NSOtherMouseUp:
 			case NSOtherMouseDragged:
+			case NSScrollWheel:
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
 			case NSTabletPoint:
 #endif
@@ -135,10 +136,31 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 				bool tablet = NSTabletPointEventSubtype == [event subtype];
 				NSPoint tilt = [event tilt];
 				NSPoint location = [event locationInWindow];
+				
+				// Transform to screen coordinates...
+				NSWindow *w = [event window];
+				if (w != nil) {
+					NSRect f = [w frame];
+					
+					location.x += f.origin.x;
+					location.y += f.origin.y;
+				}	
+				
+				// Flip Y axis 
+				
+					// Note: [NSScreen mainScreen] references the screen that has keyboard focus, 
+					//  You need [NSScreen screens][0] for the origin/menubar screen
+					// see http://developer.apple.com/mac/library/documentation/Cocoa/Reference/ApplicationKit/Classes/NSScreen_Class/Reference/Reference.html#//apple_ref/doc/uid/20000333-mainScreen
+					// and http://developer.apple.com/mac/library/documentation/Cocoa/Reference/ApplicationKit/Classes/NSScreen_Class/Reference/Reference.html#//apple_ref/doc/uid/20000333-screens
+				NSScreen *originScreen = [[NSScreen screens] objectAtIndex:0];
+				location.y = [originScreen frame].size.height - location.y;
 				(*env)->CallVoidMethod( env, g_object, g_methodID,
 									   [event type],
 									   //[event pointingDeviceType],
-									   tablet ? 1 : NSMouseMoved == [event type] ? 2 : 0,
+									   tablet ? 1 
+									          : NSMouseMoved == [event type] ? 2 
+									          : NSScrollWheel == [event type] ? 3 
+									          : 0,
 									   location.x,
 									   location.y,
 									   [event absoluteX],
@@ -185,8 +207,6 @@ JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_disable(JNIEnv *env, j
  ** Start up: use poseAsClass to subclass the NSApplication object on the fly.
  */
 JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_startup(JNIEnv *env, jobject this) {
-	
-	NSLog(@"! Swizzling [NSApplication sendEvent:]");
 	
 	NSError *error = nil;
 	[NSApplication jr_swizzleMethod:@selector(sendEvent:)

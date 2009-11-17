@@ -40,6 +40,7 @@ public final class VirtualScreenBounds{
 		new Thread(){
 			{
 				setName("jpen-VirtualScreenBounds");
+				setDaemon(true);
 			}
 			@Override
 			public void run(){

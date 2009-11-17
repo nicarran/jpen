@@ -37,6 +37,7 @@ public class CocoaAccess {
 	static final Logger L=Logger.getLogger(CocoaAccess.class.getName());
 	//static { L.setLevel(Level.ALL); }
 
+	private static final float RADIANS_PER_DEGREE = (float)(Math.PI / 180);
 	private static final float HALF_PI = (float) (Math.PI / 2);
 
 	private boolean active = false;
@@ -195,24 +196,6 @@ public class CocoaAccess {
 	  final float vendorDefined2,
 	  final float vendorDefined3
 	) {
-		//		System.out.println(String.format("[postEvent] device type: %d; %d; %d", special_pointingDeviceType, type, buttonMask));
-
-		// vvv UNTESTED vvv
-		// I assumed that x and y are coordinates relative to the window
-		Window w=KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-		if(w==null){
-			L.warning("No focused window found... ignoring CocoaAccess event");
-			return;
-		}
-		final Insets insets = w.getInsets(); // Is it reallly necessary to take the insets into account?
-		y = -y + (w.getHeight() - insets.bottom);
-		x = x - insets.left;
-		
-		Point wLocationOnScreen=w.getLocationOnScreen();
-		y+=wLocationOnScreen.x;
-		x+=wLocationOnScreen.y;
-		// ^^^
-
 		// JPen expects tilt to be -pi/2 to pi/2 from vertical;
 		// Cocoa delivers tilt as -1 to 1 from vertical
 		tiltX *= HALF_PI;
@@ -240,6 +223,9 @@ public class CocoaAccess {
 		levels.add(new PLevel(PLevel.Type.TILT_X.ordinal(), tiltX));
 		levels.add(new PLevel(PLevel.Type.TILT_Y.ordinal(), tiltY));
 		levels.add(new PLevel(PLevel.Type.PRESSURE.ordinal(), pressure));
+		levels.add(new PLevel(PLevel.Type.TANGENTIAL_PRESSURE.ordinal(), tangentialPressure));
+		// Cocoa tablet rotation is in degrees
+		levels.add(new PLevel(PLevel.Type.ROTATION.ordinal(), RADIANS_PER_DEGREE * rotation));
 
 		cocoaProvider.getPenManager().scheduleLevelEvent(device, levels, System.currentTimeMillis(), true);
 

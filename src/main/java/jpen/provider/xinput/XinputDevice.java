@@ -45,7 +45,7 @@ import jpen.PScroll;
 import jpen.PScrollEvent;
 import static jpen.provider.xinput.XiDevice.*;
 
-class XinputDevice extends AbstractPenDevice {
+final class XinputDevice extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(XinputDevice.class.getName());
 	//static{L.setLevel(Level.ALL);}
 
@@ -55,7 +55,7 @@ class XinputDevice extends AbstractPenDevice {
 	private final Point2D.Float componentLocation=new Point2D.Float();
 	private final Dimension componentSize=new Dimension();
 	private final Thread thread;
-	private volatile boolean isListening;
+	private boolean isListening;
 
 	XinputDevice(XinputProvider xinputProvider, XiDevice xiDevice) {
 		super(xinputProvider);
@@ -68,16 +68,13 @@ class XinputDevice extends AbstractPenDevice {
 						 @Override
 						 public void run(){
 							 while(true){
-								 while( !isListening || !getEnabled())
+								 while(!isWorking())
 									 jpen.Utils.synchronizedWait(this, 0);
-								 if(XinputDevice.this.xiDevice.waitNextEventOrTimeout(
-											(Math.max(
-												 15,
-												 getPen().getPeriodMillis()
-											 ))
-										))
+								 if(XinputDevice.this.xiDevice.waitNextEvent())
 									 processLastEvent();
-								 jpen.Utils.sleepUninterrupted(1l);
+								 else
+									 synchronized(XinputDevice.this){
+									 }
 							 }
 						 }
 					 };
@@ -87,18 +84,29 @@ class XinputDevice extends AbstractPenDevice {
 		setEnabled(true);
 	}
 
-	void setIsListening(boolean isListening){
+	private boolean isWorking(){
+		return getIsListening() && getEnabled();
+	}
+
+	synchronized void  setIsListening(boolean isListening){
 		if(this.isListening==isListening)
 			return;
 		this.isListening=isListening;
-		xiDevice.setIsListening(isListening);
+		xiDevice.stopWaitingNextEvent();
+		xiDevice.setIsListening(isListening); // blocks until waitNextEvent() returns
 		synchronized(thread){
 			thread.notify();
 		}
 	}
 
-	@Override
+	private synchronized boolean getIsListening(){
+		return isListening;
+	}
+
+	//@Override
 	public synchronized void setEnabled(boolean enabled){
+		if(getEnabled()==enabled)
+			return;
 		super.setEnabled(enabled);
 		synchronized(thread){
 			thread.notify();
@@ -112,11 +120,13 @@ class XinputDevice extends AbstractPenDevice {
 
 
 	//@Override
-	public String getName() {
+	public synchronized String getName() {
+		xiDevice.stopWaitingNextEvent();
 		return xiDevice.getName();
 	}
 
-	void reset(){
+	synchronized void reset(){
+		xiDevice.stopWaitingNextEvent();
 		while(xiDevice.nextEvent())
 			;
 		resetLevelRanges();
@@ -142,23 +152,8 @@ class XinputDevice extends AbstractPenDevice {
 			return PKind.Type.STYLUS.ordinal();
 	}
 
-	/*
-	void processQuedEvents() {
-		if(!getEnabled()) // TODO
-			return;
-		while(xiDevice.nextEvent())
-			processLastEvent();
-}*/
-
-	private void _sleep(int millis){
-		try{
-			Thread.currentThread().sleep(millis);
-		}catch(InterruptedException ex){
-			throw new AssertionError(ex);
-		}
-	}
-
 	private void processLastEvent(){
+		//L.fine("processing last event "+System.currentTimeMillis());
 		EventType eventType=xiDevice.getLastEventType();
 		switch(eventType) {
 		case BUTTON_PRESS:

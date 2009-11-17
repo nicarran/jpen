@@ -41,12 +41,12 @@ public class Pen extends PenState {
 
 	/** Tail of event queue. */
 	private PenEvent lastDispatchedEvent=new PenEvent(this) {
-		    public static final long serialVersionUID=1l;
-		    @Override
-		    void dispatch() { }
-		    @Override
-		    void copyTo(PenState penState){}
-	    };
+				public static final long serialVersionUID=1l;
+				@Override
+				void dispatch() { }
+				@Override
+				void copyTo(PenState penState){}
+			};
 	final PenScheduler scheduler=new PenScheduler(this);
 	public final PenState lastScheduledState=scheduler.lastScheduledState;
 	private final List<PenListener> listeners=new ArrayList<PenListener>();
@@ -83,14 +83,16 @@ public class Pen extends PenState {
 			periodMillis=1000/Pen.this.frequency;
 			this.oldThread=oldThread;
 			setName("jpen-Pen-"+periodMillis+"ms");
+			setDaemon(true);
 		}
 		private final Runnable penTockFirer=new Runnable(){
-			    //@Override
-			    public void run(){
-				    for(PenListener l:getListenersArray())
-					    l.penTock( availablePeriod - evalCurrentProcTime());
-			    }
-		    };
+					//@Override
+					public void run(){
+						//System.out.println("firing tocks "+System.currentTimeMillis());
+						for(PenListener l:getListenersArray())
+							l.penTock( availablePeriod - evalCurrentProcTime());
+					}
+				};
 
 		public void run() {
 			try {
@@ -112,6 +114,7 @@ public class Pen extends PenState {
 						lastDispatchedEvent=event;
 					}
 					availablePeriod=periodMillis+waitTime;
+					//System.out.println("going to fire tock "+System.currentTimeMillis());
 					firePenTock();
 					waitTime=periodMillis-evalCurrentProcTime();
 					if(waitTime>0) {
@@ -121,12 +124,12 @@ public class Pen extends PenState {
 					}
 				}
 			} catch(Exception ex) {
-				L.warning("jpen-Pen thread threw an exception: "+Utils.evalStackTrace(ex));
+				L.severe("jpen-Pen thread threw an exception: "+Utils.evalStackTrace(ex));
 				exception=ex;
 			}
 			L.finest("^");
 		}
-		
+
 		private long evalCurrentProcTime(){
 			return System.currentTimeMillis()-beforeTime;
 		}
@@ -173,11 +176,11 @@ public class Pen extends PenState {
 		this.levelEmulator=levelEmulator;
 		setFrequencyLater(DEFAULT_FREQUENCY);
 	}
-	
+
 	void processNewEvents(){
 		thread.processNewEvents();
 	}
-	
+
 	PenEvent getLastDispatchedEvent(){
 		return lastDispatchedEvent;
 	}
@@ -241,11 +244,11 @@ public class Pen extends PenState {
 	public int getFrequency() {
 		return frequency;
 	}
-	
+
 	public int getPeriodMillis(){
 		return thread.periodMillis;
 	}
-	
+
 	public synchronized Exception getThreadException(){
 		return thread.exception;
 	}

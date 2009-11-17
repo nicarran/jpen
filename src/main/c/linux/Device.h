@@ -37,6 +37,7 @@ enum {
 	E_Valuators_tilty,
 	E_Valuators_size,
 };
+
 struct Device {
 	int cellIndex;
 	int busCellIndex;
@@ -59,7 +60,9 @@ struct Device {
 m_declareRow(Device);
 extern int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex);
 extern int Device_waitNextEventOrTimeout(SDevice *pDevice, int timeoutMillis);
-extern int Device_nextEvent(SDevice *pDevice );
+extern int Device_nextEvent(SDevice *pDevice);
+extern int Device_waitNextEvent(SDevice *pDevice);
+extern void Device_stopWaitingNextEvent(SDevice *pDevice);
 extern void Device_refreshValuatorRanges(SDevice *pDevice);
 extern void Device_setIsListening(SDevice *pDevice, int isListening);
 

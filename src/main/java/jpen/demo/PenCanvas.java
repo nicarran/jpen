@@ -116,7 +116,8 @@ class PenCanvas
 			    }
 			    @Override
 			    public void penTock(long availableTime) {
-			    	//System.out.println("tock="+System.currentTimeMillis());
+			    	//System.out.println("tock="+System.currentTimeMillis()+", available time="+availableTime);
+			    	//System.out.println("paused? "+penManager.getPaused());
 				    if(availableTime<0)
 					    L.warning("no time to repaint... but this is a test, so I continue.");
 				    if(isDirty)

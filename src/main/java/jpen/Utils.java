@@ -32,14 +32,22 @@ public final class Utils{
 
 	public static void synchronizedWait(Object lock, long timeout){
 		synchronized(lock){
-			try{
-				lock.wait(timeout);
-			}catch(InterruptedException ex){
-				throw new AssertionError(ex);
-			}
+			waitUninterrupted(lock, timeout);
+		}
+	}
+
+	public static void waitUninterrupted(Object lock, long timeout){
+		try{
+			lock.wait(timeout);
+		}catch(InterruptedException ex){
+			throw new AssertionError(ex);
 		}
 	}
 	
+	public static void waitUninterrupted(Object lock){
+		waitUninterrupted(lock, 0l);
+	}
+
 	public static void sleepUninterrupted(long millis){
 		try{
 			Thread.currentThread().sleep(millis);

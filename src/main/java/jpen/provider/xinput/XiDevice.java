@@ -28,8 +28,8 @@ import jpen.provider.Utils;
 
 final class XiDevice{
 	enum EventType{
-	  BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY;
-	  public static final List<EventType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
+		BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY;
+		public static final List<EventType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
 	}
 
 	final int cellIndex;
@@ -37,10 +37,10 @@ final class XiDevice{
 	final int xiDeviceIndex;
 
 	XiDevice(XiBus xiBus, int cellIndex, int xiDeviceIndex) {
-			XinputProvider.loadLibrary();
-			this.cellIndex=cellIndex;
-			this.xiBus=xiBus;
-			this.xiDeviceIndex=xiDeviceIndex;
+		XinputProvider.loadLibrary();
+		this.cellIndex=cellIndex;
+		this.xiBus=xiBus;
+		this.xiDeviceIndex=xiDeviceIndex;
 	}
 
 	public String getName() {
@@ -69,7 +69,7 @@ final class XiDevice{
 			return new PLevel.Range(getLevelRangeMin(cellIndex, typeIndex), getLevelRangeMax(cellIndex, typeIndex));
 		}
 	}
-	
+
 	static int getLevelTypeValueIndex(PLevel.Type levelType){
 		return levelType.ordinal();
 	}
@@ -98,21 +98,35 @@ final class XiDevice{
 	public boolean nextEvent() {
 		synchronized(xiBus){
 			//if(xiBus.getXiDevice()!=this)
-				//throw new IllegalStateException("This device is not the xiBus owner.");
+			//throw new IllegalStateException("This device is not the xiBus owner.");
 			return nextEvent(cellIndex);
 		}
 	}
 
 	private static native boolean nextEvent(int cellIndex);
-	
+
 	public boolean waitNextEventOrTimeout(int timeoutMillis){
 		synchronized(xiBus){
 			return waitNextEventOrTimeout(cellIndex, timeoutMillis);
 		}
 	}
-	
+
 	private static native boolean waitNextEventOrTimeout(int cellIndex, int timeoutMillis);
+
+	public void stopWaitingNextEvent(){
+			stopWaitingNextEvent(cellIndex);
+	}
+
+	private synchronized static native void stopWaitingNextEvent(int cellIndex);
 	
+	public boolean waitNextEvent(){
+		synchronized(xiBus){
+			return waitNextEvent(cellIndex);
+		}
+	}
+	
+	private static native boolean waitNextEvent(int cellIndex);
+
 	public long getLastEventTime(){
 		synchronized(xiBus){
 			return getLastEventTime(cellIndex);
