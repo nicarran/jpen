@@ -18,22 +18,17 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.provider.osx;
 
-import java.awt.Component;
-import java.awt.Insets;
-import java.awt.KeyboardFocusManager;
-import java.awt.Point;
-import java.awt.Window;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Logger;
+
 import javax.swing.SwingUtilities;
-import jpen.PButton;
+
 import jpen.PKind;
 import jpen.PLevel;
 
+public class CocoaAccess { 
 
-
-public class CocoaAccess {
 	static final Logger L=Logger.getLogger(CocoaAccess.class.getName());
 	//static { L.setLevel(Level.ALL); }
 
@@ -43,23 +38,16 @@ public class CocoaAccess {
 	private boolean active = false;
 	private CocoaProvider cocoaProvider = null;
 
-	private int[] buttonMasks = {};
-	private int[] pointingDeviceTypes = {};
-
-	private int activePointingDeviceType = -1;
-
-
-	public CocoaAccess() {
-	}
+	public CocoaAccess() {}
 
 
 	public void start() {
 		if (! active) {
 			active = true;
 			startup();
-
-			buttonMasks = getButtonMasks();
-			pointingDeviceTypes = getPointingDeviceTypes();
+			// we need to monitor this regardless of whether the mouse is on the component, 
+			// or we'll likely miss transitions to stylus/eraser
+			setProximityEventsEnabled(true);
 		}
 	}
 
@@ -70,195 +58,263 @@ public class CocoaAccess {
 		}
 	}
 
-	public void dispose() {
+	public void finalize() {
 		stop();
 	}
 
+	public void enable() {
+		setTabletEventsEnabled(true);
+	}
+	public void disable() {
+		setTabletEventsEnabled(false);
+	}
 
-	public native void enable();
-	public native void disable();
+	protected native void setTabletEventsEnabled(boolean enabled);
+	protected native void setProximityEventsEnabled(boolean enabled);
+	protected native void setScrollEventsEnabled(boolean enabled);
+	protected native void setGestureEventsEnabled(boolean enabled);
 
 
 	public void setProvider(final CocoaProvider _cocoaProvider) {
 		cocoaProvider = _cocoaProvider;
 	}
 
-
-	/**
-	 * @return
-	 * The following Cocoa constants:
-	 * {
-	 * NSPenTipMask,
-	 * NSPenLowerSideMask,
-	 * NSPenUpperSideMask
-	 * }
-	 */
-	private native int[] getButtonMasks();
-
-	/**
-	 * @return
-	 * The following Cocoa constants:
-	 * {
-	 * NSUnknownPointingDevice,
-	 * NSPenPointingDevice,
-	 * NSCursorPointingDevice,
-	 * NSEraserPointingDevice
-	 * }
-	 */
-	private native int[] getPointingDeviceTypes();
-
 	private native void startup();
 	private native void shutdown();
 
 
-	// IIBIIIIIIII
-	private void postProximityEvent(
-	  final int capabilityMask,
-	  final int deviceID,
-	  final boolean enteringProximity,
-	  final int pointingDeviceID,
-	  final int pointingDeviceSerialNumber,
-	  final int pointingDeviceType,
-	  final int systemTabletID,
-	  final int tabletID,
-	  final int uniqueID,
-	  final int vendorID,
-	  final int vendorPointingDeviceType
-	) {
-		//    	System.out.println(String.format("[postProximityEvent] device type: %d", pointingDeviceType));
+	public static final int WACOM_VENDOR_ID = 0x56A;
+	
+	public static final int WACOM_CAPABILITY_DEVICEIDMASK           = 0x0001;
+	public static final int WACOM_CAPABILITY_ABSXMASK               = 0x0002;
+	public static final int WACOM_CAPABILITY_ABSYMASK               = 0x0004;
+	public static final int WACOM_CAPABILITY_VENDOR1MASK            = 0x0008;
+	public static final int WACOM_CAPABILITY_VENDOR2MASK            = 0x0010;
+	public static final int WACOM_CAPABILITY_VENDOR3MASK            = 0x0020;
+	public static final int WACOM_CAPABILITY_BUTTONSMASK            = 0x0040;
+	public static final int WACOM_CAPABILITY_TILTXMASK              = 0x0080;
+	public static final int WACOM_CAPABILITY_TILTYMASK              = 0x0100;
+	public static final int WACOM_CAPABILITY_ABSZMASK               = 0x0200;
+	public static final int WACOM_CAPABILITY_PRESSUREMASK           = 0x0400;
+	public static final int WACOM_CAPABILITY_TANGENTIALPRESSUREMASK = 0x0800;
+	public static final int WACOM_CAPABILITY_ORIENTINFOMASK         = 0x1000;
+	public static final int WACOM_CAPABILITY_ROTATIONMASK           = 0x2000;
+	
 
-		activePointingDeviceType = pointingDeviceType;
+	public static final int WACOM_POINTER_TYPE_MASK					= 0xF06;
+	public static final int WACOM_POINTER_TYPE_GENERAL_STYLUS		= 0x804;
+	public static final int WACOM_POINTER_TYPE_AIRBRUSH 			= 0x802;
+	public static final int WACOM_POINTER_TYPE_GENERAL_MOUSE 		= 0x902;
+	public static final int WACOM_POINTER_TYPE_PRO_MOUSE 			= 0x006;
+	public static final int WACOM_POINTER_TYPE_ROTATION_STYLUS 		= 0x004;
+	
+	// Intuos
+    public static final int WACOM_POINTER_TYPE_I_Standard_Stylus	= 0x822;
+    public static final int WACOM_POINTER_TYPE_I_Inking_Stylus		= 0x812;
+    public static final int WACOM_POINTER_TYPE_I_Stroke_Stylus		= 0x832;
+    public static final int WACOM_POINTER_TYPE_I_Grip_Stylus		= 0x842;
+    public static final int WACOM_POINTER_TYPE_I_Airbrush			= 0x912;
+    public static final int WACOM_POINTER_TYPE_I_4D_Mouse			= 0x094;
+    public static final int WACOM_POINTER_TYPE_I_Lens_Cursor		= 0x096;  
+    // Intuos 2 
+    public static final int WACOM_POINTER_TYPE_I2_Standard_Grip_Stylus = 0x852;
+    public static final int WACOM_POINTER_TYPE_I2_Classic_Stylus	= 0x822;
+    public static final int WACOM_POINTER_TYPE_I2_Inking_Stylus		= 0x812;
+    public static final int WACOM_POINTER_TYPE_I2_Stroke_Stylus		= 0x832;
+    public static final int WACOM_POINTER_TYPE_I2_Designer_Stylus 	= 0x842;
+    public static final int WACOM_POINTER_TYPE_I2_Airbrush   		= 0x912;
+    public static final int WACOM_POINTER_TYPE_I2_2D_Mouse  		= 0x007;
+    public static final int WACOM_POINTER_TYPE_I2_4D_Mouse  		= 0x094;
+    public static final int WACOM_POINTER_TYPE_I2_Lens_Cursor  		= 0x096;
+    // Intous 3 
+    public static final int WACOM_POINTER_TYPE_I3_Standard_Grip_Stylus = 0x823;
+    public static final int WACOM_POINTER_TYPE_I3_Rotation_Stylus_Art_Pen = 0x885;
+    public static final int WACOM_POINTER_TYPE_I3_Inking_Stylus  	= 0x801; 
+    public static final int WACOM_POINTER_TYPE_I3_Airbrush   		= 0x913;
+    public static final int WACOM_POINTER_TYPE_I3_2D_mouse  		= 0x017;
+    public static final int WACOM_POINTER_TYPE_I3_Lens_Cursor  		= 0x097;
+    // Graphire & Graphire 2 & Graphire 3 & Bamboo
+    public static final int WACOM_POINTER_TYPE_Graphire_Stylus 		= 0x022; 
+    public static final int WACOM_POINTER_TYPE_Graphire_Mouse 		= 0x296;
+
+
+	protected static final int NS_MODIFIER_AlphaShiftKeyMask = 1 << 16;
+	protected static final int NS_MODIFIER_ShiftKeyMask      = 1 << 17;
+	protected static final int NS_MODIFIER_ControlKeyMask    = 1 << 18;
+	protected static final int NS_MODIFIER_AlternateKeyMask  = 1 << 19;
+	protected static final int NS_MODIFIER_CommandKeyMask    = 1 << 20;
+	protected static final int NS_MODIFIER_NumericPadKeyMask = 1 << 21;
+	protected static final int NS_MODIFIER_HelpKeyMask       = 1 << 22;
+	protected static final int NS_MODIFIER_FunctionKeyMask   = 1 << 23;
+	
+    protected static final int NS_EVENT_TYPE_LeftMouseDown             = 1;            
+    protected static final int NS_EVENT_TYPE_LeftMouseUp               = 2;
+    protected static final int NS_EVENT_TYPE_RightMouseDown            = 3;
+    protected static final int NS_EVENT_TYPE_RightMouseUp              = 4;
+    protected static final int NS_EVENT_TYPE_MouseMoved                = 5;
+    protected static final int NS_EVENT_TYPE_LeftMouseDragged          = 6;
+    protected static final int NS_EVENT_TYPE_RightMouseDragged         = 7;
+    protected static final int NS_EVENT_TYPE_MouseEntered              = 8;
+    protected static final int NS_EVENT_TYPE_MouseExited               = 9;
+    protected static final int NS_EVENT_TYPE_ScrollWheel               = 22;
+    protected static final int NS_EVENT_TYPE_TabletPoint               = 23;
+    protected static final int NS_EVENT_TYPE_TabletProximity           = 24;
+    protected static final int NS_EVENT_TYPE_OtherMouseDown            = 25;
+    protected static final int NS_EVENT_TYPE_OtherMouseUp              = 26;
+    protected static final int NS_EVENT_TYPE_OtherMouseDragged         = 27;
+    protected static final int NS_EVENT_TYPE_EventTypeGesture          = 29;
+    protected static final int NS_EVENT_TYPE_EventTypeMagnify          = 30;
+    protected static final int NS_EVENT_TYPE_EventTypeSwipe            = 31;
+    protected static final int NS_EVENT_TYPE_EventTypeRotate           = 18;
+    protected static final int NS_EVENT_TYPE_EventTypeBeginGesture     = 19;
+    protected static final int NS_EVENT_TYPE_EventTypeEndGesture       = 20;
+
+    
+
+	protected static final int NSUnknownPointingDevice = 0;
+	protected static final int NSPenPointingDevice     = 1;
+	protected static final int NSCursorPointingDevice  = 2;
+	protected static final int NSEraserPointingDevice  = 3;
+	
+	protected static final int NSPenTipMask =       1;
+	protected static final int NSPenLowerSideMask = 2;
+	protected static final int NSPenUpperSideMask = 4;
+
+
+	private CocoaDevice device = null;
+	
+	protected void postProximityEvent(
+	  final double eventTimeSeconds,
+	  final float x, float y,
+	  final int capabilityMask, // UInt32
+	  final int deviceID, // UInt16
+	  final boolean enteringProximity,
+	  final int pointingDeviceID, // UInt16
+	  final int pointingDeviceSerialNumber, // UInt32
+	  final int pointingDeviceType, // UInt8
+	  final int systemTabletID, // UInt16
+	  final int tabletID, // UInt16
+	  final long uniqueID, // UInt64
+	  final int vendorID, // UInt16
+	  final int vendorPointingDeviceType // UInt16
+	) {
+
+
+		switch (pointingDeviceType) {
+			case NSPenPointingDevice:
+				device = cocoaProvider.getDevice(PKind.Type.STYLUS);
+				break;
+			case NSCursorPointingDevice:
+				device = cocoaProvider.getDevice(PKind.Type.CURSOR);
+				break;
+			case NSEraserPointingDevice:
+				device = cocoaProvider.getDevice(PKind.Type.ERASER);
+				break;
+			case NSUnknownPointingDevice:
+			default:
+				device = cocoaProvider.getDevice(PKind.Type.CURSOR);
+				break;
+		}
+		
+		// This works on my Intuos2:
+		if (vendorID == WACOM_VENDOR_ID) {
+			
+			// vendorPointingDeviceType seems to always be zero (even if I print out the value in Objective-C)
+//			switch (vendorPointingDeviceType & WACOM_POINTER_TYPE_MASK) {
+//				case WACOM_POINTER_TYPE_GENERAL_STYLUS:
+//				case WACOM_POINTER_TYPE_AIRBRUSH:
+//				case WACOM_POINTER_TYPE_GENERAL_MOUSE:
+//				case WACOM_POINTER_TYPE_PRO_MOUSE:
+//				case WACOM_POINTER_TYPE_ROTATION_STYLUS:
+//					break;
+//			}
+
+		}
 	}
 
 
 	private Collection<PLevel> levels = new ArrayList<PLevel>(8);
-	private Collection<PButton> buttons = new ArrayList<PButton>(8);
+	
 	/**
-	 *
-	 * @param special_pointingDeviceType
-	 * indicates whether this event came from the mouse or the tablet.
-	 * A value of <code>0</code> indicates the mouse;
-	 * a value of <code>1</code> indicates the tablet.
 	 * Note that proximity events are not generated when switching between the mouse and tablet.
-	 *
 	 */
-	private void postEvent(
+	protected void postEvent(
 	  final int type,
-	  final int special_pointingDeviceType,
-	  final float x,
-	  // Note: Cocoa gives the y-coordinate inverted, i.e. "opengl coordinates"
-	  final float y,
+	  final double eventTimeSeconds,
+	  final int cocoaModifierFlags,
+	  final float screenX, final float screenY,
 	  final int absoluteX, final int absoluteY,  final int absoluteZ,
 	  final int buttonMask,
 	  final float pressure, final float rotation,
 	  final float tiltX, final float tiltY,
-	  final float tangentialPressure,
-	  final float vendorDefined1,
-	  final float vendorDefined2,
-	  final float vendorDefined3
+	  final float tangentialPressure
 	) {
-		if (SwingUtilities.isEventDispatchThread()) {
-			postEvent_swing(
-			  type, special_pointingDeviceType,
-			  x, y, absoluteX, absoluteY, absoluteZ,
-			  buttonMask, pressure, rotation,
-			  tiltX, tiltY,
-			  tangentialPressure,
-			  vendorDefined1, vendorDefined2, vendorDefined3
-			);
-		}
-		else {
-			SwingUtilities.invokeLater(new Runnable() {public void run() {
-					    postEvent_swing(
-					      type, special_pointingDeviceType,
-					      x, y, absoluteX, absoluteY, absoluteZ,
-					      buttonMask, pressure, rotation,
-					      tiltX, tiltY,
-					      tangentialPressure,
-					      vendorDefined1, vendorDefined2, vendorDefined3
-					    );
-				    }});
-		}
+		invokeOnEventThread(new Runnable() {
+			public void run() {
+				
+				levels.clear();
+				levels.add(new PLevel(PLevel.Type.X.ordinal(), screenX));
+				levels.add(new PLevel(PLevel.Type.Y.ordinal(), screenY));
+				
+
+				// JPen expects tilt to be -pi/2 to pi/2 from vertical;
+				// Cocoa delivers tilt as -1 to 1 from vertical
+				levels.add(new PLevel(PLevel.Type.TILT_X.ordinal(), tiltX * HALF_PI));
+				levels.add(new PLevel(PLevel.Type.TILT_Y.ordinal(), tiltY * HALF_PI));
+				
+				levels.add(new PLevel(PLevel.Type.PRESSURE.ordinal(), pressure));
+				levels.add(new PLevel(PLevel.Type.TANGENTIAL_PRESSURE.ordinal(), tangentialPressure));
+				// Cocoa tablet rotation is in degrees
+				levels.add(new PLevel(PLevel.Type.ROTATION.ordinal(), RADIANS_PER_DEGREE * rotation));
+
+				cocoaProvider.getPenManager().scheduleLevelEvent(device, levels, System.currentTimeMillis(), true);
+
+				levels.clear();
+			}
+		});
 	}
-
-	private void postEvent_swing(
-	  final int type,
-	  final int special_pointingDeviceType,
-	  float x,
-	  // Note: Cocoa gives the y-coordinate inverted, i.e. "opengl coordinates"
-	  float y,
-	  final int absoluteX, final int absoluteY,  final int absoluteZ,
-	  final int buttonMask,
-	  final float pressure, final float rotation,
-	  float tiltX, float tiltY,
-	  final float tangentialPressure,
-	  final float vendorDefined1,
-	  final float vendorDefined2,
-	  final float vendorDefined3
-	) {
-		// JPen expects tilt to be -pi/2 to pi/2 from vertical;
-		// Cocoa delivers tilt as -1 to 1 from vertical
-		tiltX *= HALF_PI;
-		tiltY *= HALF_PI;
-
-		final CocoaDevice device;
-		if (0 == special_pointingDeviceType || 2 == special_pointingDeviceType) {
-			device = cocoaProvider.getDevice(PKind.Type.CURSOR);
+	protected void postScrollEvent(
+			  int type,
+			  double eventTimeSeconds,
+			  int cocoaModifierFlags,
+			  float screenX, float screenY,
+			  float deltaX, float deltaY
+			) {
+	}
+	protected void postMagnifyEvent(
+			  int type,
+			  double eventTimeSeconds,
+			  int cocoaModifierFlags,
+			  float screenX, float screenY,
+			  float magnificationFactor
+			) {
+	}
+	protected void postSwipeEvent(
+			  int type,
+			  double eventTimeSeconds,
+			  int cocoaModifierFlags,
+			  float screenX, float screenY,
+			  float deltaX, float deltaY
+			) {
+			// deltaX will be -1 or 1
+			// deltaY will be -1 or 1
+			// but not both
+	}
+	protected void postRotateEvent(
+			  int type,
+			  double eventTimeSeconds,
+			  int cocoaModifierFlags,
+			  float screenX, float screenY,
+			  float rotationDegrees
+			) {
+		
+	}
+	
+	protected void invokeOnEventThread(Runnable r) {
+		if (SwingUtilities.isEventDispatchThread()) {
+			r.run();
+		} else {
+			SwingUtilities.invokeLater(r);
 		}
-		else if (pointingDeviceTypes[1] == activePointingDeviceType) {
-			device = cocoaProvider.getDevice(PKind.Type.STYLUS);
-		}
-		else if (pointingDeviceTypes[3] == activePointingDeviceType) {
-			device = cocoaProvider.getDevice(PKind.Type.ERASER);
-		}
-		else {
-			assert false;
-			device = cocoaProvider.getDevice(PKind.Type.STYLUS);
-		}
-
-
-		levels.clear();
-		levels.add(new PLevel(PLevel.Type.X.ordinal(), x));
-		levels.add(new PLevel(PLevel.Type.Y.ordinal(), y));
-		levels.add(new PLevel(PLevel.Type.TILT_X.ordinal(), tiltX));
-		levels.add(new PLevel(PLevel.Type.TILT_Y.ordinal(), tiltY));
-		levels.add(new PLevel(PLevel.Type.PRESSURE.ordinal(), pressure));
-		levels.add(new PLevel(PLevel.Type.TANGENTIAL_PRESSURE.ordinal(), tangentialPressure));
-		// Cocoa tablet rotation is in degrees
-		levels.add(new PLevel(PLevel.Type.ROTATION.ordinal(), RADIANS_PER_DEGREE * rotation));
-
-		cocoaProvider.getPenManager().scheduleLevelEvent(device, levels, System.currentTimeMillis(), true);
-
-
-
-		buttons.clear();
-
-		if (2 == special_pointingDeviceType) {
-			buttons.add(new PButton(PButton.Type.LEFT.ordinal(), false));
-			buttons.add(new PButton(PButton.Type.CENTER.ordinal(), false));
-			buttons.add(new PButton(PButton.Type.RIGHT.ordinal(), false));
-		}
-		else if (0 == special_pointingDeviceType) {
-			// 0: left
-			// 1: right
-			// 2: middle
-			buttons.add(new PButton(PButton.Type.LEFT.ordinal(), 0 == buttonMask));
-			buttons.add(new PButton(PButton.Type.CENTER.ordinal(), 2 == buttonMask));
-			buttons.add(new PButton(PButton.Type.RIGHT.ordinal(), 1 == buttonMask));
-		}
-		else {
-			// Consult the button masks
-			// TODO: is the barrel button handled correctly?
-			buttons.add(new PButton(PButton.Type.LEFT.ordinal(), 0 != (buttonMask & buttonMasks[0])));
-			buttons.add(new PButton(PButton.Type.CENTER.ordinal(), 0 != (buttonMask & buttonMasks[1])));
-			buttons.add(new PButton(PButton.Type.RIGHT.ordinal(), 0 != (buttonMask & buttonMasks[2])));
-		}
-
-		for (PButton button : buttons) {
-			cocoaProvider.getPenManager().scheduleButtonEvent(button);
-		}
-
-		levels.clear();
-		buttons.clear();
 	}
 }

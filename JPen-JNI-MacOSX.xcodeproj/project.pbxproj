@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AD945F9D10B65ED100DBDA5B /* NSDate_Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = AD945F9B10B65ED100DBDA5B /* NSDate_Additions.h */; };
+		AD945F9E10B65ED100DBDA5B /* NSDate_Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = AD945F9C10B65ED100DBDA5B /* NSDate_Additions.m */; };
 		ADD73C480FFAEEB1000FFF71 /* JRSwizzle.h in Headers */ = {isa = PBXBuildFile; fileRef = ADD73C450FFAEEB1000FFF71 /* JRSwizzle.h */; };
 		ADD73C490FFAEEB1000FFF71 /* JRSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = ADD73C460FFAEEB1000FFF71 /* JRSwizzle.m */; };
 		ADD73C4A0FFAEEB1000FFF71 /* osx_push_provider.m in Sources */ = {isa = PBXBuildFile; fileRef = ADD73C470FFAEEB1000FFF71 /* osx_push_provider.m */; };
@@ -29,6 +31,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AD945F9B10B65ED100DBDA5B /* NSDate_Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSDate_Additions.h; path = src/main/c/osx/NSDate_Additions.h; sourceTree = "<group>"; };
+		AD945F9C10B65ED100DBDA5B /* NSDate_Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSDate_Additions.m; path = src/main/c/osx/NSDate_Additions.m; sourceTree = "<group>"; };
 		ADD73C450FFAEEB1000FFF71 /* JRSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JRSwizzle.h; path = src/main/c/osx/JRSwizzle.h; sourceTree = "<group>"; };
 		ADD73C460FFAEEB1000FFF71 /* JRSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JRSwizzle.m; path = src/main/c/osx/JRSwizzle.m; sourceTree = "<group>"; };
 		ADD73C470FFAEEB1000FFF71 /* osx_push_provider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = osx_push_provider.m; path = src/main/c/osx/osx_push_provider.m; sourceTree = "<group>"; };
@@ -67,6 +71,8 @@
 				ADD73C450FFAEEB1000FFF71 /* JRSwizzle.h */,
 				ADD73C460FFAEEB1000FFF71 /* JRSwizzle.m */,
 				ADD73C470FFAEEB1000FFF71 /* osx_push_provider.m */,
+				AD945F9B10B65ED100DBDA5B /* NSDate_Additions.h */,
+				AD945F9C10B65ED100DBDA5B /* NSDate_Additions.m */,
 			);
 			name = "Cocoa Sources";
 			sourceTree = "<group>";
@@ -110,6 +116,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ADD73C480FFAEEB1000FFF71 /* JRSwizzle.h in Headers */,
+				AD945F9D10B65ED100DBDA5B /* NSDate_Additions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -159,6 +166,7 @@
 			files = (
 				ADD73C490FFAEEB1000FFF71 /* JRSwizzle.m in Sources */,
 				ADD73C4A0FFAEEB1000FFF71 /* osx_push_provider.m in Sources */,
+				AD945F9E10B65ED100DBDA5B /* NSDate_Additions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -182,7 +190,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
 				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
 				COPY_PHASE_STRIP = YES;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
 				VALID_ARCHS = "i386 ppc x86_64";
 			};
 			name = Release;

@@ -45,17 +45,42 @@ Based on code by Jerry Huxtable. See http://www.jhlabs.com/java/tablet/ .
 #include "JRSwizzle.h"
 
 
+/* these are not defined in 10.5 */
+#if MAC_OS_X_VERSION_MAX_ALLOWED == MAC_OS_X_VERSION_10_5
+enum {
+    NSEventTypeGesture          = 29,
+    NSEventTypeMagnify          = 30,
+    NSEventTypeSwipe            = 31,
+    NSEventTypeRotate           = 18,
+    NSEventTypeBeginGesture     = 19,
+    NSEventTypeEndGesture       = 20
+};
+@interface NSEvent (JPen)
+- (CGFloat)magnification;       
+@end
+
+#endif
+
 /* Our global variables */
 static JavaVM *g_jvm;
 static jobject g_object;
 static jclass g_class;
 static jmethodID g_methodID;
 static jmethodID g_methodID_prox;
+static jmethodID g_methodID_scroll;
+static jmethodID g_methodID_swipe;
+static jmethodID g_methodID_magnify;
+static jmethodID g_methodID_rotate;
 static bool enabled = 0;
+static jboolean watchTabletEvents = false;
+static jboolean watchProximityEvents = false;
+static jboolean watchScrollEvents = false;
+static jboolean watchGestureEvents = false;
+static jboolean watchingEvents = false;
+static double systemStartTime = 0;
 
 /*
  ** A subclass of NSApplication which overrides sendEvent and calls back into Java with the event data for mouse events.
- ** We don't handle tablet proximity events yet.
  */
 @interface NSApplication (JPen)
 - (void) JPen_sendEvent:(NSEvent *)event;
@@ -83,105 +108,217 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
     return getEnvErr;
 }
 
+
+
+bool throwException(JNIEnv *env, const char *message) {
+//	env->ExceptionDescribe();
+//	env->ExceptionClear();
+	
+//	jclass newExcCls = env->FindClass("cello/tablet/JTabletException");
+//	if (newExcCls == 0) // Unable to find the new exception class, give up.
+//		return false;
+//	
+//	env->ThrowNew(newExcCls, message);
+	return true;
+}
+
+
+static NSPoint getLocation(NSEvent *event) {
+	
+	NSPoint location = [event locationInWindow];
+	
+	// Transform to screen coordinates...
+	NSWindow *w = [event window];
+	if (w != nil) {
+		NSRect f = [w frame];
+		
+		location.x += f.origin.x;
+		location.y += f.origin.y;
+	}	
+	
+	
+	
+	// Flip Y axis 
+	
+	// At this point the location is relative to the bottom left of the main screen 
+	// (the actual bottom left is 0,1, not 0,0, 
+	//  so we can flip with screen.height - y and get 0,0 as the top-left corner)
+	
+		// Note: [NSScreen mainScreen] references the screen that has keyboard focus, 
+		//  You need [NSScreen screens][0] for the origin/menubar screen
+		// see http://developer.apple.com/mac/library/documentation/Cocoa/Reference/ApplicationKit/Classes/NSScreen_Class/Reference/Reference.html#//apple_ref/doc/uid/20000333-mainScreen
+		// and http://developer.apple.com/mac/library/documentation/Cocoa/Reference/ApplicationKit/Classes/NSScreen_Class/Reference/Reference.html#//apple_ref/doc/uid/20000333-screens
+		// the documentation recommends against caching this
+		NSScreen *originScreen = [[NSScreen screens] objectAtIndex:0];
+	
+	location.y = [originScreen frame].size.height - location.y;
+	
+	return location;
+}
+
+static void postProximityEvent(JNIEnv *env, NSEvent* event) {
+	
+	NSPoint location = getLocation(event);
+	(*env)->CallVoidMethod(env, g_object, g_methodID_prox,
+						   [event timestamp]+systemStartTime,
+						   location.x, location.y,
+						   [event capabilityMask],
+						   [event deviceID],
+						   [event isEnteringProximity],
+						   [event pointingDeviceID],
+						   [event pointingDeviceSerialNumber],
+						   [event pointingDeviceType],
+						   [event systemTabletID],
+						   [event tabletID],
+						   [event uniqueID],
+						   [event vendorID],
+						   [event vendorPointingDeviceType]
+						   );
+	
+}
+
+
 @implementation NSApplication (JPen)
 - (void) JPen_sendEvent:(NSEvent *)event
 {
-	if (enabled) {
-//		NSLog(@"Swizzled event... %@", [event description]);
-		
-		
+	if (watchingEvents) {
 		JNIEnv *env;
 		bool shouldDetach = false;
 		
-		if (GetJNIEnv(&env, &shouldDetach) != JNI_OK) {
-			NSLog(@"Couldn't attach to JVM");
-			return;
-		}
-		
-		switch ( [event type] ) {
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
-			case NSTabletProximity:
-			{
-				(*env)->CallVoidMethod(env, g_object, g_methodID_prox,
-									   [event capabilityMask],
-									   [event deviceID],
-									   [event isEnteringProximity],
-									   [event pointingDeviceID],
-									   [event pointingDeviceSerialNumber],
-									   [event pointingDeviceType],
-									   [event systemTabletID],
-									   [event tabletID],
-									   [event uniqueID],
-									   [event vendorID],
-									   [event vendorPointingDeviceType]
-									   );
-			}
-				break;
-#endif
-			case NSMouseMoved:
-			case NSLeftMouseDown:
-			case NSLeftMouseUp:
-			case NSLeftMouseDragged:
-			case NSRightMouseDown:
-			case NSRightMouseUp:
-			case NSRightMouseDragged:
-			case NSOtherMouseDown:
-			case NSOtherMouseUp:
-			case NSOtherMouseDragged:
-			case NSScrollWheel:
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
-			case NSTabletPoint:
-#endif
-			{
-				bool tablet = NSTabletPointEventSubtype == [event subtype];
-				NSPoint tilt = [event tilt];
-				NSPoint location = [event locationInWindow];
-				
-				// Transform to screen coordinates...
-				NSWindow *w = [event window];
-				if (w != nil) {
-					NSRect f = [w frame];
+		if (GetJNIEnv(&env, &shouldDetach) == JNI_OK) {			
+			switch ( [event type] ) {
+				case NSTabletProximity:
+					if (watchProximityEvents) {
+						postProximityEvent(env, event);
+					}
+					break;
+				case NSScrollWheel:
+					if (watchScrollEvents) {
+						float dx = [event deltaX];
+						float dy = [event deltaY];
+						if (dx != 0 || dy != 0) {
+							NSPoint location = getLocation(event);
+							(*env)->CallVoidMethod(env, g_object, g_methodID_scroll,
+												[event type],
+												[event timestamp]+systemStartTime,
+												[event modifierFlags],
+												location.x,
+												location.y,
+												dx,
+												dy
+												   );
+						}
+						
+					}
+					break;
+				case NSEventTypeMagnify:
+					if (watchGestureEvents) {
+						float magnification =  [event magnification];
+						if (magnification != 0) {
+							NSPoint location = getLocation(event);
+							(*env)->CallVoidMethod(env, g_object, g_methodID_magnify,
+												   [event type],
+												   [event timestamp]+systemStartTime,
+												   [event modifierFlags],
+												   location.x,
+												   location.y,
+												   magnification
+												   );
+						}
+						
+					}
+					break;
+				case NSEventTypeSwipe:
+					if (watchGestureEvents) {
+						float dx = [event deltaX];
+						float dy = [event deltaY];
+						if (dx != 0 || dy != 0) {
+							NSPoint location = getLocation(event);		
+							(*env)->CallVoidMethod(env, g_object, g_methodID_swipe,
+												   [event type],
+												   [event timestamp]+systemStartTime,
+												   [event modifierFlags],
+												   location.x,
+												   location.y,
+												   dx,
+												   dy
+												   );
+						}
+						
+					}
+					break;
+				case NSEventTypeRotate:
+					if (watchGestureEvents) {
+						float rotation = [event rotation];
+						if (rotation != 0) {
+							NSPoint location = getLocation(event);		
+							(*env)->CallVoidMethod(env, g_object, g_methodID_rotate,
+												   [event type],
+												   [event timestamp]+systemStartTime,
+												   [event modifierFlags],
+												   location.x,
+												   location.y,
+												   rotation
+												   );
+						}
+						
+					}
+					break;
+				case NSEventTypeGesture:
+				case NSEventTypeBeginGesture:
+				case NSEventTypeEndGesture:
+					break;
 					
-					location.x += f.origin.x;
-					location.y += f.origin.y;
-				}	
-				
-				// Flip Y axis 
-				
-					// Note: [NSScreen mainScreen] references the screen that has keyboard focus, 
-					//  You need [NSScreen screens][0] for the origin/menubar screen
-					// see http://developer.apple.com/mac/library/documentation/Cocoa/Reference/ApplicationKit/Classes/NSScreen_Class/Reference/Reference.html#//apple_ref/doc/uid/20000333-mainScreen
-					// and http://developer.apple.com/mac/library/documentation/Cocoa/Reference/ApplicationKit/Classes/NSScreen_Class/Reference/Reference.html#//apple_ref/doc/uid/20000333-screens
-				NSScreen *originScreen = [[NSScreen screens] objectAtIndex:0];
-				location.y = [originScreen frame].size.height - location.y;
-				(*env)->CallVoidMethod( env, g_object, g_methodID,
-									   [event type],
-									   //[event pointingDeviceType],
-									   tablet ? 1 
-									          : NSMouseMoved == [event type] ? 2 
-									          : NSScrollWheel == [event type] ? 3 
-									          : 0,
-									   location.x,
-									   location.y,
-									   [event absoluteX],
-									   [event absoluteY],
-									   [event absoluteZ],
-									   tablet ? [event buttonMask] : [event buttonNumber],
-									   [event pressure],
-									   [event rotation],
-									   tilt.x,
-									   tilt.y,
-									   [event tangentialPressure],
-									   0.0f, 0.0f, 0.0f
-									   );
+				case NSMouseMoved:
+				case NSLeftMouseDown:
+				case NSLeftMouseUp:
+				case NSLeftMouseDragged:
+				case NSRightMouseDown:
+				case NSRightMouseUp:
+				case NSRightMouseDragged:
+				case NSOtherMouseDown:
+				case NSOtherMouseUp:
+				case NSOtherMouseDragged:
+				case NSTabletPoint:
+				{
+					bool tablet = NSTabletPoint == [event type] || NSTabletPointEventSubtype == [event subtype];
+					
+					if (watchProximityEvents && NSTabletPoint != [event type] && [event subtype] == NSTabletProximityEventSubtype) {
+						postProximityEvent(env, event);
+					}
+					if (watchTabletEvents) {
+						NSPoint location = getLocation(event);				
+						NSPoint tilt;
+						if (tablet) {
+							tilt = [event tilt];
+						}
+						
+						(*env)->CallVoidMethod( env, g_object, g_methodID,
+											   [event type],
+											   [event timestamp]+systemStartTime,
+											   [event modifierFlags],
+											   location.x,
+											   location.y,
+											   tablet ? [event absoluteX] : 0 ,
+											   tablet ? [event absoluteY] : 0 ,
+											   tablet ? [event absoluteZ] : 0 ,
+											   tablet ? [event buttonMask] : 0,
+											   tablet ? [event pressure] : 0,
+											   tablet ? [event rotation] : 0,
+											   tablet ? tilt.x : 0,
+											   tablet ? tilt.y : 0,
+											   tablet ? [event tangentialPressure] : 0
+											   );
+					}
+					break;
+				}
 			}
-				break;
-			default:
-				break;
-		}
-		
-		if (shouldDetach) {
-			(*g_jvm)->DetachCurrentThread(g_jvm);
+			
+			if (shouldDetach) {
+				(*g_jvm)->DetachCurrentThread(g_jvm);
+			}
+		} else {
+			NSLog(@"Couldn't attach to JVM");
 		}
 	}
     
@@ -191,39 +328,60 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 }
 @end
 
-
-
-JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_enable(JNIEnv *env, jobject this) {
-    enabled = 1;
+static void updateWatchingEvents() {	
+	watchingEvents = watchTabletEvents || watchProximityEvents || watchScrollEvents || watchGestureEvents;
 }
 
-JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_disable(JNIEnv *env, jobject this) {
-	enabled = 0;
+JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_setTabletEventsEnabled(JNIEnv *env, jobject this, jboolean enabled) {
+    watchTabletEvents = enabled;
+	updateWatchingEvents();
+}
+JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_setProximityEventsEnabled(JNIEnv *env, jobject this, jboolean enabled) {
+	watchProximityEvents = enabled;
+	updateWatchingEvents();
+}
+JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_setScrollEventsEnabled(JNIEnv *env, jobject this, jboolean enabled) {
+	watchScrollEvents = enabled;
+	updateWatchingEvents();
+}
+JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_setGestureEventsEnabled(JNIEnv *env, jobject this, jboolean enabled) {
+	watchGestureEvents = enabled;
+	updateWatchingEvents();
 }
 
 
 
 /*
- ** Start up: use poseAsClass to subclass the NSApplication object on the fly.
+ ** Start up: use jrswizzle to subclass the NSApplication object on the fly.
  */
 JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_startup(JNIEnv *env, jobject this) {
 	
+	// Swap the original sendEvent method with our custom one so we can monitor events
 	NSError *error = nil;
 	[NSApplication jr_swizzleMethod:@selector(sendEvent:)
 						 withMethod:@selector(JPen_sendEvent:)
 							  error:&error];
 	
 	if (error != nil) {
-		NSLog(@"error: %@", [error description]);
+		NSLog(@"error overriding [NSApplication sendEvent]: %@", [error description]);
+		throwException(env,"Error initializing event monitor");
+	} else {
+		NSDate *startDate = [[NSDate alloc] initWithDateOfSystemStartup];
+		systemStartTime = [startDate timeIntervalSince1970];
+		[startDate release];
+		
+		g_object = (*env)->NewGlobalRef( env, this );
+		g_class = (*env)->GetObjectClass( env, this );
+		g_class = (*env)->NewGlobalRef( env, g_class );
+		if ( g_class != (jclass)0 ) {
+			g_methodID =	     (*env)->GetMethodID( env, g_class, "postEvent",		  "(IDIFFIIIIFFFFF)V" );
+			g_methodID_prox =    (*env)->GetMethodID( env, g_class, "postProximityEvent", "(DFFIIZIIIIIJII)V" );
+			g_methodID_scroll =  (*env)->GetMethodID( env, g_class, "postScrollEvent",    "(IDIFFFF)V" );
+			g_methodID_magnify = (*env)->GetMethodID( env, g_class, "postMagnifyEvent",   "(IDIFFF)V" );
+			g_methodID_swipe =   (*env)->GetMethodID( env, g_class, "postSwipeEvent",     "(IDIFFFF)V" );
+			g_methodID_rotate =  (*env)->GetMethodID( env, g_class, "postRotateEvent",    "(IDIFFF)V" );
+		}
 	}
-	
-    g_object = (*env)->NewGlobalRef( env, this );
-    g_class = (*env)->GetObjectClass( env, this );
-    g_class = (*env)->NewGlobalRef( env, g_class );
-    if ( g_class != (jclass)0 ) {
-        g_methodID = (*env)->GetMethodID( env, g_class, "postEvent", "(IIFFIIIIFFFFFFFF)V" );
-        g_methodID_prox = (*env)->GetMethodID( env, g_class, "postProximityEvent", "(IIZIIIIIIII)V" );
-    }
 }
 
 /*
@@ -241,42 +399,42 @@ JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_shutdown(JNIEnv *env, 
 
 // CONSTANTS
 
-JNIEXPORT jintArray Java_jpen_provider_osx_CocoaAccess_getPointingDeviceTypes(JNIEnv *env, jobject this) {
-	jint a[4];
-	a[0] = NSUnknownPointingDevice;
-	a[1] = NSPenPointingDevice;
-	a[2] = NSCursorPointingDevice;
-	a[3] = NSEraserPointingDevice;
-	
-	jintArray types = (*env)->NewIntArray(env, 4);
-	(*env)->SetIntArrayRegion(env, types, 0, 4, (jint*) a);
-	
-	return types;
-	
-	//NSUnknownPointingDevice = NX_TABLET_POINTER_UNKNOWN,
-	//NSPenPointingDevice     = NX_TABLET_POINTER_PEN,
-	//NSCursorPointingDevice  = NX_TABLET_POINTER_CURSOR,
-	//NSEraserPointingDevice  = NX_TABLET_POINTER_ERASER
-}
-
-// NOTE: also want this for button masks
-
-JNIEXPORT jintArray Java_jpen_provider_osx_CocoaAccess_getButtonMasks(JNIEnv *env, jobject this) {
-	jint a[3];
-	a[0] = NSPenTipMask;
-	a[1] = NSPenLowerSideMask;
-	a[2] = NSPenUpperSideMask;
-	
-	jintArray types = (*env)->NewIntArray(env, 3);
-	(*env)->SetIntArrayRegion(env, types, 0, 3, (jint*) a);
-	
-	return types;
-	
-	//NSPenTipMask =       NX_TABLET_BUTTON_PENTIPMASK,
-	//NSPenLowerSideMask = NX_TABLET_BUTTON_PENLOWERSIDEMASK,
-	//NSPenUpperSideMask = NX_TABLET_BUTTON_PENUPPERSIDEMASK
-}
-
+//JNIEXPORT jintArray Java_jpen_provider_osx_CocoaAccess_getPointingDeviceTypes(JNIEnv *env, jobject this) {
+//	jint a[4];
+//	a[0] = NSUnknownPointingDevice;
+//	a[1] = NSPenPointingDevice;
+//	a[2] = NSCursorPointingDevice;
+//	a[3] = NSEraserPointingDevice;
+//	
+//	jintArray types = (*env)->NewIntArray(env, 4);
+//	(*env)->SetIntArrayRegion(env, types, 0, 4, (jint*) a);
+//	
+//	return types;
+//	
+//	//NSUnknownPointingDevice = NX_TABLET_POINTER_UNKNOWN,
+//	//NSPenPointingDevice     = NX_TABLET_POINTER_PEN,
+//	//NSCursorPointingDevice  = NX_TABLET_POINTER_CURSOR,
+//	//NSEraserPointingDevice  = NX_TABLET_POINTER_ERASER
+//}
+//
+//// NOTE: also want this for button masks
+//
+//JNIEXPORT jintArray Java_jpen_provider_osx_CocoaAccess_getButtonMasks(JNIEnv *env, jobject this) {
+//	jint a[3];
+//	a[0] = NSPenTipMask;
+//	a[1] = NSPenLowerSideMask;
+//	a[2] = NSPenUpperSideMask;
+//	
+//	jintArray types = (*env)->NewIntArray(env, 3);
+//	(*env)->SetIntArrayRegion(env, types, 0, 3, (jint*) a);
+//	
+//	return types;
+//	
+//	//NSPenTipMask =       NX_TABLET_BUTTON_PENTIPMASK,
+//	//NSPenLowerSideMask = NX_TABLET_BUTTON_PENLOWERSIDEMASK,
+//	//NSPenUpperSideMask = NX_TABLET_BUTTON_PENUPPERSIDEMASK
+//}
+//
 
 
 
