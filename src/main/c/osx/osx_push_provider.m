@@ -43,7 +43,7 @@ Based on code by Jerry Huxtable. See http://www.jhlabs.com/java/tablet/ .
 #include <Cocoa/Cocoa.h>
 #import <objc/runtime.h>
 #include "JRSwizzle.h"
-
+#include "NSDate_Additions.h"
 
 /* these are not defined in 10.5 */
 #if MAC_OS_X_VERSION_MAX_ALLOWED == MAC_OS_X_VERSION_10_5
@@ -161,6 +161,7 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 	NSPoint location = getLocation(event);
 	(*env)->CallVoidMethod(env, g_object, g_methodID_prox,
 						   [event timestamp]+systemStartTime,
+						   [event modifierFlags],
 						   location.x, location.y,
 						   [event capabilityMask],
 						   [event deviceID],
@@ -199,7 +200,6 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 						if (dx != 0 || dy != 0) {
 							NSPoint location = getLocation(event);
 							(*env)->CallVoidMethod(env, g_object, g_methodID_scroll,
-												[event type],
 												[event timestamp]+systemStartTime,
 												[event modifierFlags],
 												location.x,
@@ -217,7 +217,6 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 						if (magnification != 0) {
 							NSPoint location = getLocation(event);
 							(*env)->CallVoidMethod(env, g_object, g_methodID_magnify,
-												   [event type],
 												   [event timestamp]+systemStartTime,
 												   [event modifierFlags],
 												   location.x,
@@ -235,7 +234,6 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 						if (dx != 0 || dy != 0) {
 							NSPoint location = getLocation(event);		
 							(*env)->CallVoidMethod(env, g_object, g_methodID_swipe,
-												   [event type],
 												   [event timestamp]+systemStartTime,
 												   [event modifierFlags],
 												   location.x,
@@ -253,7 +251,6 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 						if (rotation != 0) {
 							NSPoint location = getLocation(event);		
 							(*env)->CallVoidMethod(env, g_object, g_methodID_rotate,
-												   [event type],
 												   [event timestamp]+systemStartTime,
 												   [event modifierFlags],
 												   location.x,
@@ -375,11 +372,11 @@ JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_startup(JNIEnv *env, j
 		g_class = (*env)->NewGlobalRef( env, g_class );
 		if ( g_class != (jclass)0 ) {
 			g_methodID =	     (*env)->GetMethodID( env, g_class, "postEvent",		  "(IDIFFIIIIFFFFF)V" );
-			g_methodID_prox =    (*env)->GetMethodID( env, g_class, "postProximityEvent", "(DFFIIZIIIIIJII)V" );
-			g_methodID_scroll =  (*env)->GetMethodID( env, g_class, "postScrollEvent",    "(IDIFFFF)V" );
-			g_methodID_magnify = (*env)->GetMethodID( env, g_class, "postMagnifyEvent",   "(IDIFFF)V" );
-			g_methodID_swipe =   (*env)->GetMethodID( env, g_class, "postSwipeEvent",     "(IDIFFFF)V" );
-			g_methodID_rotate =  (*env)->GetMethodID( env, g_class, "postRotateEvent",    "(IDIFFF)V" );
+			g_methodID_prox =    (*env)->GetMethodID( env, g_class, "postProximityEvent", "(DIFFIIZIIIIIJII)V" );
+			g_methodID_scroll =  (*env)->GetMethodID( env, g_class, "postScrollEvent",    "(DIFFFF)V" );
+			g_methodID_magnify = (*env)->GetMethodID( env, g_class, "postMagnifyEvent",   "(DIFFF)V" );
+			g_methodID_swipe =   (*env)->GetMethodID( env, g_class, "postSwipeEvent",     "(DIFFFF)V" );
+			g_methodID_rotate =  (*env)->GetMethodID( env, g_class, "postRotateEvent",    "(DIFFF)V" );
 		}
 	}
 }

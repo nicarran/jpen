@@ -32,8 +32,8 @@ public class CocoaAccess {
 	static final Logger L=Logger.getLogger(CocoaAccess.class.getName());
 	//static { L.setLevel(Level.ALL); }
 
-	private static final float RADIANS_PER_DEGREE = (float)(Math.PI / 180);
-	private static final float HALF_PI = (float) (Math.PI / 2);
+	protected static final float RADIANS_PER_DEGREE = (float)(Math.PI / 180);
+	protected static final float HALF_PI = (float) (Math.PI / 2);
 
 	private boolean active = false;
 	private CocoaProvider cocoaProvider = null;
@@ -184,19 +184,20 @@ public class CocoaAccess {
 	private CocoaDevice device = null;
 	
 	protected void postProximityEvent(
-	  final double eventTimeSeconds,
-	  final float x, float y,
-	  final int capabilityMask, // UInt32
-	  final int deviceID, // UInt16
-	  final boolean enteringProximity,
-	  final int pointingDeviceID, // UInt16
-	  final int pointingDeviceSerialNumber, // UInt32
-	  final int pointingDeviceType, // UInt8
-	  final int systemTabletID, // UInt16
-	  final int tabletID, // UInt16
-	  final long uniqueID, // UInt64
-	  final int vendorID, // UInt16
-	  final int vendorPointingDeviceType // UInt16
+	  double eventTimeSeconds,
+	  int cocoaModifierFlags,
+	  float screenX, float screenY,
+	  int capabilityMask, // UInt32
+	  int deviceID, // UInt16
+	  boolean enteringProximity,
+	  int pointingDeviceID, // UInt16
+	  int pointingDeviceSerialNumber, // UInt32
+	  int pointingDeviceType, // UInt8
+	  int systemTabletID, // UInt16
+	  int tabletID, // UInt16
+	  long uniqueID, // UInt64
+	  int vendorID, // UInt16
+	  int vendorPointingDeviceType // UInt16
 	) {
 
 
@@ -274,7 +275,6 @@ public class CocoaAccess {
 		});
 	}
 	protected void postScrollEvent(
-			  int type,
 			  double eventTimeSeconds,
 			  int cocoaModifierFlags,
 			  float screenX, float screenY,
@@ -282,7 +282,6 @@ public class CocoaAccess {
 			) {
 	}
 	protected void postMagnifyEvent(
-			  int type,
 			  double eventTimeSeconds,
 			  int cocoaModifierFlags,
 			  float screenX, float screenY,
@@ -290,7 +289,6 @@ public class CocoaAccess {
 			) {
 	}
 	protected void postSwipeEvent(
-			  int type,
 			  double eventTimeSeconds,
 			  int cocoaModifierFlags,
 			  float screenX, float screenY,
@@ -301,7 +299,6 @@ public class CocoaAccess {
 			// but not both
 	}
 	protected void postRotateEvent(
-			  int type,
 			  double eventTimeSeconds,
 			  int cocoaModifierFlags,
 			  float screenX, float screenY,
