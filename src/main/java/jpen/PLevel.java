@@ -62,12 +62,12 @@ public class PLevel
 		 Airbrush wheel "pressure". Range: -1 to 1.<p>
 		 <b>Warning:</b> this feature is currently implemented only on Mac OS X.
 		 */ 
-		TANGENTIAL_PRESSURE,
+		//TANGENTIAL_PRESSURE,
 		/**
 		 Device rotation in radians. <p>
 		 <b>Warning:</b> this feature is currently implemented only on Mac OS X. This is an untested feature, please give us feedback on how it works for you. TODO: give a URL for feedback.
 		 */
-		ROTATION,
+		//ROTATION,
 		CUSTOM;
 
 		public static final List<Type> ALL_VALUES=Collections.unmodifiableList(Arrays.asList(values()));

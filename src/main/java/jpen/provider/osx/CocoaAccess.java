@@ -223,9 +223,9 @@ public class CocoaAccess {
 		levels.add(new PLevel(PLevel.Type.TILT_X.ordinal(), tiltX));
 		levels.add(new PLevel(PLevel.Type.TILT_Y.ordinal(), tiltY));
 		levels.add(new PLevel(PLevel.Type.PRESSURE.ordinal(), pressure));
-		levels.add(new PLevel(PLevel.Type.TANGENTIAL_PRESSURE.ordinal(), tangentialPressure));
+		//levels.add(new PLevel(PLevel.Type.TANGENTIAL_PRESSURE.ordinal(), tangentialPressure));
 		// Cocoa tablet rotation is in degrees
-		levels.add(new PLevel(PLevel.Type.ROTATION.ordinal(), RADIANS_PER_DEGREE * rotation));
+		//levels.add(new PLevel(PLevel.Type.ROTATION.ordinal(), RADIANS_PER_DEGREE * rotation));
 
 		cocoaProvider.getPenManager().scheduleLevelEvent(device, levels, System.currentTimeMillis(), true);
 

@@ -64,8 +64,9 @@ public class WintabProvider
 	private final Map<Integer, WintabDevice> cursorToDevice=new HashMap<Integer, WintabDevice>();
 	private final PLevel.Range[] levelRanges=new PLevel.Range[PLevel.Type.VALUES.size()];
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
-	private final Thread thread;
+	//private final Thread thread;
 	private boolean paused=true;
+	private final Object packetsLock=new Object();
 
 	public static class Constructor
 		extends AbstractPenProvider.AbstractConstructor{
@@ -81,29 +82,27 @@ public class WintabProvider
 		//@Override
 		public PenProvider constructProvider() throws Throwable {
 			loadLibrary();
-			WintabAccess wintabAccess=new WintabAccess();
-			return new WintabProvider(this, wintabAccess);
+			return new WintabProvider(this);
 		}
 	}
 
 
-
-	private WintabProvider(Constructor constructor, WintabAccess wintabAccess) {
+	private WintabProvider(Constructor constructor) throws Throwable{
 		super(constructor);
 		L.fine("start");
-		this.wintabAccess=wintabAccess;
-		//this.mouseLocator=new MouseLocator();
+		this.wintabAccess=new WintabAccess(this);
 
 		for(int i=PLevel.Type.VALUES.size(); --i>=0;){
 			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
 			levelRanges[levelType.ordinal()]=wintabAccess.getLevelRange(levelType);
 		}
 
-		thread=new Thread("jpen-WintabProvider") {
+		/*thread=new Thread("jpen-WintabProvider") {
 						 public void run() {
 							 while(true) {
-								 processQuedEvents();
-								 jpen.Utils.synchronizedWait(this, PERIOD);
+								 processQueuedEvents();
+								 if(!wintabAccess.hasPackets())
+								 	 jpen.Utils.synchronizedWait(packetsLock, 300);
 								 while(getPaused()){
 									 L.fine("going to wait...");
 									 jpen.Utils.synchronizedWait(this, 0);
@@ -111,11 +110,10 @@ public class WintabProvider
 								 }
 							 }
 						 }
-					 }
-					 ;
+					 };
 		thread.setDaemon(true);
 		thread.setPriority(Thread.MAX_PRIORITY);
-		thread.start();
+		thread.start();*/
 
 		L.fine("end");
 	}
@@ -123,15 +121,28 @@ public class WintabProvider
 	PLevel.Range getLevelRange(PLevel.Type type) {
 		return levelRanges[type.ordinal()];
 	}
+	
+	/**
+	Called by WintabAccess.
+	*/
+	void packetReady(){
+		//System.out.println("packet ready!");
+		if(getPaused())
+			return;
+		/*synchronized(packetsLock){
+			packetsLock.notify();
+		}*/
+		processQueuedEvents();
+	}
 
-	private void processQuedEvents() {
+	private void processQueuedEvents() {
 		L.finer("start");
-		while(wintabAccess.nextPacket()) {
-			WintabDevice device=getDevice(wintabAccess.getCursor());
-			L.finer("device: ");
-			L.fine(device.getName());
-			device.scheduleEvents();
-		}
+		//while(wintabAccess.nextPacket()) {
+		WintabDevice device=getDevice(wintabAccess.getCursor());
+			//L.finer("device: ");
+			//L.fine(device.getName());
+		device.scheduleEvents();
+		//}
 		L.finer("end");
 	}
 
@@ -170,11 +181,11 @@ public class WintabProvider
 			//mouseLocator.reset();
 			screenBounds.reset();
 			clearEventQueues();
-			synchronized(thread) {
+			/*synchronized(thread) {
 				L.fine("going to notify all...");
 				thread.notifyAll();
 				L.fine("done notifying ");
-			}
+			}*/
 		}
 		wintabAccess.setEnabled(!paused);
 		L.fine("end");

@@ -128,6 +128,7 @@ class WintabDevice
 	}
 
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();
+	
 	private void scheduleLevelEvent() {
 		for(int i=PLevel.Type.VALUES.size(); --i>=0;) {
 			PLevel.Type levelType=PLevel.Type.VALUES.get(i);

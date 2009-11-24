@@ -31,6 +31,28 @@ JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_create
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    init
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_jpen_provider_wintab_WintabAccess_init
+(JNIEnv *pEnv, jobject object, jint cellIndex){
+	Access_init(Access_getP(cellIndex), pEnv, object);
+}
+
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getInitialized
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getInitialized
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Access_getP(cellIndex)->initialized? JNI_TRUE: JNI_FALSE;
+}
+
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
  * Method:    getError
  * Signature: ()Ljava/lang/String;
  */

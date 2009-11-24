@@ -20,6 +20,7 @@ package jpen.provider.wintab;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.List;
 import jpen.PLevel;
 import jpen.provider.Utils;
@@ -33,22 +34,79 @@ final class WintabAccess {
 	This must be like E_csrTypes enumeration.
 	*/
 	public enum CursorType{UNDEF, PENTIP, PUCK, PENERASER;
-	    public static final List<CursorType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
-	                      }
+			public static final List<CursorType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
+												}
 
+	private final WintabProvider wintabProvider;
 	private final int cellIndex;
+	private final Thread packetNotifierThread;
+	private volatile int consumiblePackets;
 
-	WintabAccess() throws Exception {
+	WintabAccess(WintabProvider wintabProvider) throws Exception {
 		synchronized(LOCK){
+			this.wintabProvider=wintabProvider;
 			WintabProvider.loadLibrary();
 			this.cellIndex=create();
 			if(cellIndex==-1)
+				throw new Exception(getError());
+			packetNotifierThread=new Thread("jpen-WintabProvider-Packet Notifier"){
+						@Override
+						public void run(){
+							init();
+						}
+					};
+			packetNotifierThread.setPriority(Thread.MAX_PRIORITY);
+			packetNotifierThread.setDaemon(true);
+			synchronized(packetNotifierThread){
+				packetNotifierThread.start();
+				packetNotifierThread.wait();
+			}
+			if(!getInitialized())
 				throw new Exception(getError());
 		}
 	}
 
 	private static native int create();
 	private static native String getError();
+
+	private void init(){
+		//synchronized(LOCK){
+		init(cellIndex);
+		//}
+	}
+
+	private native void init(int cellIndex);
+
+	private boolean getInitialized(){
+		//synchronized(LOCK){
+		return getInitialized(cellIndex);
+		//}
+	}
+
+	private static native boolean getInitialized(int cellIndex);
+
+	/**
+	Called by the native side.
+	*/
+	private void initEnded(){
+		synchronized(packetNotifierThread){
+			packetNotifierThread.notify();
+		}
+	}
+
+	/**
+	Called by the native side.
+	*/
+	private void packetReady(){
+		consumiblePackets++;
+		if(wintabProvider==null) // can be null when testing...
+			return;
+		wintabProvider.packetReady();
+	}
+	
+	boolean hasPackets(){
+		return consumiblePackets>0;
+	}
 
 	int getValue(PLevel.Type levelType) {
 		synchronized(LOCK){
@@ -61,7 +119,15 @@ final class WintabAccess {
 
 	public boolean nextPacket() {
 		synchronized(LOCK){
-			return nextPacket(cellIndex);
+			if(consumiblePackets>0){
+				consumiblePackets--;
+				if(nextPacket(cellIndex)){
+					return true;
+				}//else
+					//System.out.println("packet lost!");
+			}
+			//System.out.println("no packet in queue");
+			return false;
 		}
 	}
 
@@ -78,6 +144,7 @@ final class WintabAccess {
 
 	public void setEnabled(boolean enabled) {
 		synchronized(LOCK){
+			consumiblePackets=0;
 			setEnabled(cellIndex, enabled);
 		}
 	}
@@ -90,7 +157,7 @@ final class WintabAccess {
 			return new PLevel.Range(minMax[0], minMax[1]);
 		}
 	}
-	
+
 	static int getLevelTypeValueIndex(PLevel.Type levelType){
 		return levelType.ordinal();
 	}

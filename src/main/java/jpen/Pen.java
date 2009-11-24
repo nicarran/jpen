@@ -119,7 +119,7 @@ public class Pen extends PenState {
 					waitTime=periodMillis-evalCurrentProcTime();
 					if(waitTime>0) {
 						//System.out.println("going to wait: "+waitTime);
-						Utils.sleepUninterrupted(waitTime);
+						Utils.sleepUninterrupted(waitTime); 
 						waitTime=0;
 					}
 				}

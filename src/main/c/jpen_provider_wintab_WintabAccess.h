@@ -27,6 +27,22 @@ JNIEXPORT jstring JNICALL Java_jpen_provider_wintab_WintabAccess_getError
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    init
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_jpen_provider_wintab_WintabAccess_init
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getInitialized
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getInitialized
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
  * Method:    getValue
  * Signature: (II)I
  */

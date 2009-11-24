@@ -49,9 +49,8 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 	((jlong)(ft).dwHighDateTime << 32 | (jlong)(ft).dwLowDateTime)
 //^^^
 
-#define MAX_WINTAB_QUEUE_SIZE 64
-#define MIN_WINTAB_QUEUE_SIZE 16
-#define QUEUE_SIZE 16
+#define WINTAB_WINDOW_CLASS "jpen-wintab"
+#define WINTAB_WINDOW_NAME "JPen Wintab Window"
 
 /* This must be like PLevel.Type enumeration: */
 enum{
@@ -71,14 +70,15 @@ enum{
 };
 struct Access {
 	int cellIndex;
+	HWND hWintabWindow;
 	LOGCONTEXT lc;
 	HCTX ctx;
 	UINT device;
+	int initialized;
 	int enabled;
 	int valuatorValues[E_Valuators_size];
-	PACKET queue[QUEUE_SIZE]; // buffer to save some WTPacketsGet calls
-	int queueSize;
-	int queueConsumableIndex;
+	PACKET packet;
+	int packetReady;
 	UINT cursor;
 	DWORD buttons;
 	UINT status;
@@ -86,6 +86,7 @@ struct Access {
 	int tiltExtSupported; // not used if not def PACKETTILT (see above)
 };
 m_declareRow(Access);
+extern void Access_init(SAccess *pAccess, JNIEnv *pEnv, jobject object);
 extern int Access_nextPacket(SAccess *pAccess);
 extern int Access_refreshLc(SAccess *pAccess);
 extern int Access_getEnabled(SAccess *pAccess);
@@ -96,5 +97,4 @@ extern UINT Access_getFirstCursor(SAccess *pAccess);
 extern UINT Access_getCursorsCount(SAccess *pAccess);
 //extern static int Access_fillPacketQueue(SAccess *pAccess);
 extern jlong Access_getBootTimeUtc();
-
 #endif
