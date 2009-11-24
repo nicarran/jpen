@@ -144,7 +144,7 @@ static void Access_wintabWindowEventLoop(SAccess *pAccess, JNIEnv *pEnv, jobject
 	{
 		//TranslateMessage(&msg);
 		//DispatchMessage(&msg);
-		// WARNING: Wacom's wintab does not fire events inmediately after being generated. It sends two events almost at the same time... this issue invalidates the whole propose of the pull method!!! (tested on Intuos 3)
+		// WARNING: Wacom's wintab does not fire events immediately after being generated. It sends two events almost at the same time... this issue invalidates the whole propose of the pull method!!! (tested on Intuos 3)
 		// I'm suspecting that the driver does some magic to make appear a hardware 100fps like a 200fps . device.
 		if(msg.message==WT_PACKET){
 			WTPacket((HCTX)(msg.lParam), msg.wParam, &pAccess->packet); 
