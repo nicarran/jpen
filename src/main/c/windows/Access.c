@@ -20,12 +20,14 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 
 m_implementRow(Access);
 
-int registerWintabWindowClass();
-int createWintabWindow();
-int initWintab();
-void wintabWindowEventLoop(SAccess *pAccess, JNIEnv *pEnv, jobject object);
-LRESULT CALLBACK wintabWindowEventCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-void Access_callInitEnded(JNIEnv *pEnv, jobject object);
+static int Access_registerWintabWindowClass();
+static int Access_createWintabWindow();
+static int Access_initWintab();
+static void Access_wintabWindowEventLoop(SAccess *pAccess, JNIEnv *pEnv, jobject object);
+static LRESULT CALLBACK Access_wintabWindowEventCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+static void Access_callInitEnded(JNIEnv *pEnv, jobject object);
+static int Access_nextPacket(SAccess *pAccess);
+static int Access_refreshLc(SAccess *pAccess);
 
 int Access_preCreate(SAccess *pAccess) {
 	return cleanState;
@@ -33,19 +35,19 @@ int Access_preCreate(SAccess *pAccess) {
 
 void Access_init(SAccess *pAccess, JNIEnv *pEnv, jobject object){
 	pAccess->initialized=true;
-	if(registerWintabWindowClass()
-		 ||createWintabWindow(pAccess)
-		 || initWintab()){
+	if(Access_registerWintabWindowClass()
+		 ||Access_createWintabWindow(pAccess)
+		 || Access_initWintab()){
 		pAccess->initialized=false;
 	}
-	pAccess->packetReady=false;
+	
 	Access_callInitEnded(pEnv, object);
 
 	if(pAccess->initialized)
-		wintabWindowEventLoop(pAccess, pEnv, object);
+		Access_wintabWindowEventLoop(pAccess, pEnv, object);
 }
 
-void Access_callInitEnded(JNIEnv *pEnv, jobject object){
+static void Access_callInitEnded(JNIEnv *pEnv, jobject object){
 	jclass cls = (*pEnv)->GetObjectClass(pEnv, object);
 	jmethodID mid =
 		(*pEnv)->GetMethodID(pEnv, cls, "initEnded", "()V");
@@ -56,31 +58,31 @@ void Access_callInitEnded(JNIEnv *pEnv, jobject object){
 	(*pEnv)->CallVoidMethod(pEnv, object, mid);
 }
 
-int registerWintabWindowClass(){
+static int Access_registerWintabWindowClass(){
 	WNDCLASS     wndclass ;
 	wndclass.style=0; //CS_HREDRAW | CS_VREDRAW;
-	wndclass.lpfnWndProc=wintabWindowEventCallback;
+	wndclass.lpfnWndProc=Access_wintabWindowEventCallback;
 	wndclass.cbClsExtra=0 ;
 	wndclass.cbWndExtra=0 ;
 	wndclass.hInstance=GetModuleHandle(NULL);
-	wndclass.hIcon=LoadIcon (NULL, IDI_APPLICATION) ;
-	wndclass.hCursor=LoadCursor (NULL, IDC_ARROW) ;
+	wndclass.hIcon=NULL; //LoadIcon (NULL, IDI_APPLICATION) ;
+	wndclass.hCursor=NULL; //LoadCursor (NULL, IDC_ARROW) ;
 	wndclass.hbrBackground=NULL;//(HBRUSH)GetStockObject(WHITE_BRUSH) ;
 	wndclass.lpszMenuName=NULL ;
 	wndclass.lpszClassName=TEXT(WINTAB_WINDOW_CLASS) ;
 	if(!RegisterClass(&wndclass)){
-		printf("couldnt register wintab window class, error code %i\n", GetLastError());
+		printf("couldn't register wintab window class, error code %i\n", GetLastError());
 		return errorState;
 	}
 	//printf("wintab window class registered\n");
 	return cleanState;
 }
 
-LRESULT CALLBACK wintabWindowEventCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
+static LRESULT CALLBACK Access_wintabWindowEventCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-int createWintabWindow(SAccess *pAccess){
+static int Access_createWintabWindow(SAccess *pAccess){
 	pAccess->hWintabWindow = CreateWindow (
 				TEXT(WINTAB_WINDOW_CLASS),                   // window class name
 				TEXT (WINTAB_WINDOW_NAME), // window caption
@@ -104,7 +106,7 @@ int createWintabWindow(SAccess *pAccess){
 	return cleanState;
 }
 
-int initWintab(SAccess *pAccess){
+static int Access_initWintab(SAccess *pAccess){
 	WTInfo(WTI_DEFCONTEXT , 0, &(pAccess->lc));
 	pAccess->device=pAccess->lc.lcDevice;
 
@@ -126,7 +128,7 @@ int initWintab(SAccess *pAccess){
 	return cleanState;
 }
 
-void wintabWindowEventLoop(SAccess *pAccess, JNIEnv *pEnv, jobject object){
+static void Access_wintabWindowEventLoop(SAccess *pAccess, JNIEnv *pEnv, jobject object){
 	//printf("entering event loop...\n");
 
 	jclass cls = (*pEnv)->GetObjectClass(pEnv, object);
@@ -142,13 +144,15 @@ void wintabWindowEventLoop(SAccess *pAccess, JNIEnv *pEnv, jobject object){
 	{
 		//TranslateMessage(&msg);
 		//DispatchMessage(&msg);
+		// WARNING: Wacom's wintab does not fire events inmediately after being generated. It sends two events almost at the same time... this issue invalidates the whole propose of the pull method!!! (tested on Intuos 3)
+		// I'm suspecting that the driver does some magic to make appear a hardware 100fps like a 200fps . device.
 		if(msg.message==WT_PACKET){
-			WTPacket((HCTX)(msg.lParam), msg.wParam, &pAccess->packet); // slower?
-			pAccess->packetReady=true;
+			WTPacket((HCTX)(msg.lParam), msg.wParam, &pAccess->packet); 
 			Access_nextPacket(pAccess);
 			(*pEnv)->CallVoidMethod(pEnv, object, packetReadyMethodId);
-		}else
-			printf("uninteresting event received\n");
+		}
+		//else
+			//printf("uninteresting event received\n");
 	}
 	//printf("leaving event loop\n");
 }
@@ -179,7 +183,7 @@ void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange) {
 	}
 }
 
-int Access_refreshLc(SAccess *pAccess){
+static int Access_refreshLc(SAccess *pAccess){
 	if(!WTGet(pAccess->ctx, &(pAccess->lc))) {
 		Access_setError("Couldn't get LOGCONTEXT info.");
 		return errorState;
@@ -212,36 +216,18 @@ int Access_preDestroy(SAccess *pAccess) {
 	return cleanState;
 }
 
-int Access_nextPacket(SAccess *pAccess) {
+static int Access_nextPacket(SAccess *pAccess) {
 	PACKET p=pAccess->packet;
-	if(!pAccess->packetReady)
-		return 0;
-	pAccess->packetReady=false;
-	//if (WTPacketsGet(pAccess->ctx, 1, &p) > 0) { /* received a packet */
-		pAccess->valuatorValues[E_Valuators_x]= p.pkX;
-		pAccess->valuatorValues[E_Valuators_y]= p.pkY;
-		pAccess->valuatorValues[E_Valuators_press]= p.pkNormalPressure;
-		pAccess->valuatorValues[E_Valuators_orAzimuth]=p.pkOrientation.orAzimuth;
-		pAccess->valuatorValues[E_Valuators_orAltitude]=p.pkOrientation.orAltitude;
-		pAccess->cursor=p.pkCursor;
-		pAccess->buttons=p.pkButtons;
-		pAccess->status=p.pkStatus;
-		pAccess->time=p.pkTime;
-		return 1;
-	//}
-	return 0;
-}
-
-UINT Access_getFirstCursor(SAccess *pAccess) {
-	UINT r;
-	WTInfo(WTI_DEVICES+pAccess->device, DVC_FIRSTCSR, &r);
-	return r;
-}
-
-UINT Access_getCursorsCount(SAccess *pAccess) {
-	UINT r;
-	WTInfo(WTI_DEVICES+pAccess->device, DVC_NCSRTYPES, &r);
-	return r;
+	pAccess->valuatorValues[E_Valuators_x]= p.pkX;
+	pAccess->valuatorValues[E_Valuators_y]= p.pkY;
+	pAccess->valuatorValues[E_Valuators_press]= p.pkNormalPressure;
+	pAccess->valuatorValues[E_Valuators_orAzimuth]=p.pkOrientation.orAzimuth;
+	pAccess->valuatorValues[E_Valuators_orAltitude]=p.pkOrientation.orAltitude;
+	pAccess->cursor=p.pkCursor;
+	pAccess->buttons=p.pkButtons;
+	pAccess->status=p.pkStatus;
+	pAccess->time=p.pkTime;
+	return 1;
 }
 
 int Access_getCsrType(int cursor) {
@@ -259,36 +245,4 @@ int Access_getCsrType(int cursor) {
 	}
 
 	return E_csrTypes_undef;
-}
-
-/**
-Taken from the jdk demo jvmti/hprof/src/windows/hprof_md.c
-*/
-static jlong currentTimeMillis(void)
-{
-	static jlong fileTime_1_1_70 = 0;
-	SYSTEMTIME st0;
-	FILETIME   ft0;
-
-	if (fileTime_1_1_70 == 0) {
-		/* Initialize fileTime_1_1_70 -- the Win32 file time of midnight
-		* 1/1/70.
-		 */ 
-
-		memset(&st0, 0, sizeof(st0));
-		st0.wYear  = 1970;
-		st0.wMonth = 1;
-		st0.wDay   = 1;
-		SystemTimeToFileTime(&st0, &ft0);
-		fileTime_1_1_70 = FT2JLONG(ft0);
-	}
-
-	GetSystemTime(&st0);
-	SystemTimeToFileTime(&st0, &ft0);
-
-	return (FT2JLONG(ft0) - fileTime_1_1_70) / 10000;
-}
-
-jlong Access_getBootTimeUtc(){
-	return currentTimeMillis()-GetTickCount();
 }

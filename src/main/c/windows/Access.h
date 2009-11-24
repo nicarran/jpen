@@ -22,12 +22,9 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 #include <jni.h>
 #include <windows.h>
 #include "INCLUDE/WINTAB.H"
-//#ifdef USE_X_LIB
-//#include "INCLUDE/WINTABX.h"
-//#endif
 #define PACKETDATA	(PK_STATUS | PK_TIME | PK_X | PK_Y | PK_NORMAL_PRESSURE | PK_CURSOR | PK_BUTTONS | PK_ORIENTATION /* ToDo: | PK_ROTATION*/)
 #define PACKETMODE	0
-// #define PACKETTILT PKEXT_ABSOLUTE // TILT extension is not widely implemented (wacom), so I disable it and use pkOrientation to get tilt data 
+// #define PACKETTILT PKEXT_ABSOLUTE // TILT extension is not widely implemented (wacom): use pkOrientation to get tilt data 
 #include "INCLUDE/PKTDEF.H"
 
 //vvv Taken from csrmaskex wacom example.
@@ -42,11 +39,6 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef CSR_TYPE
 #	define CSR_TYPE 20
 #endif
-//^^^
-
-//vvv Taken from the jdk demo jvmti/hprof/src/windows/hprof_md.c
-#define FT2JLONG(ft) \
-	((jlong)(ft).dwHighDateTime << 32 | (jlong)(ft).dwLowDateTime)
 //^^^
 
 #define WINTAB_WINDOW_CLASS "jpen-wintab"
@@ -78,23 +70,15 @@ struct Access {
 	int enabled;
 	int valuatorValues[E_Valuators_size];
 	PACKET packet;
-	int packetReady;
 	UINT cursor;
 	DWORD buttons;
 	UINT status;
 	LONG time;
-	int tiltExtSupported; // not used if not def PACKETTILT (see above)
 };
 m_declareRow(Access);
 extern void Access_init(SAccess *pAccess, JNIEnv *pEnv, jobject object);
-extern int Access_nextPacket(SAccess *pAccess);
-extern int Access_refreshLc(SAccess *pAccess);
 extern int Access_getEnabled(SAccess *pAccess);
 extern void Access_setEnabled(SAccess *pAccess, int enabled);
 extern void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange);
 extern int Access_getCsrType(int cursor);
-extern UINT Access_getFirstCursor(SAccess *pAccess);
-extern UINT Access_getCursorsCount(SAccess *pAccess);
-//extern static int Access_fillPacketQueue(SAccess *pAccess);
-extern jlong Access_getBootTimeUtc();
 #endif

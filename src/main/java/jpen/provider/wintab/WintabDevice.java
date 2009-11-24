@@ -90,8 +90,8 @@ class WintabDevice
 			L.fine("disabled");
 			return;
 		}
-		//if(L.isLoggable(Level.FINE))
-		//L.fine(wintabProvider.wintabAccess.toString());
+		if(L.isLoggable(Level.FINE))
+			L.fine(wintabProvider.wintabAccess.toString());
 		scheduleLevelEvent();
 		// scheduleButtonEvents(); nicarran:  TODO use this to support extra buttons.
 	}

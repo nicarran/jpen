@@ -64,7 +64,6 @@ public class WintabProvider
 	private final Map<Integer, WintabDevice> cursorToDevice=new HashMap<Integer, WintabDevice>();
 	private final PLevel.Range[] levelRanges=new PLevel.Range[PLevel.Type.VALUES.size()];
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
-	//private final Thread thread;
 	private boolean paused=true;
 	private final Object packetsLock=new Object();
 
@@ -96,26 +95,6 @@ public class WintabProvider
 			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
 			levelRanges[levelType.ordinal()]=wintabAccess.getLevelRange(levelType);
 		}
-
-		/*thread=new Thread("jpen-WintabProvider") {
-						 public void run() {
-							 while(true) {
-								 processQueuedEvents();
-								 if(!wintabAccess.hasPackets())
-								 	 jpen.Utils.synchronizedWait(packetsLock, 300);
-								 while(getPaused()){
-									 L.fine("going to wait...");
-									 jpen.Utils.synchronizedWait(this, 0);
-									 L.fine("notified");
-								 }
-							 }
-						 }
-					 };
-		thread.setDaemon(true);
-		thread.setPriority(Thread.MAX_PRIORITY);
-		thread.start();*/
-
-		L.fine("end");
 	}
 
 	PLevel.Range getLevelRange(PLevel.Type type) {
@@ -126,23 +105,15 @@ public class WintabProvider
 	Called by WintabAccess.
 	*/
 	void packetReady(){
-		//System.out.println("packet ready!");
 		if(getPaused())
 			return;
-		/*synchronized(packetsLock){
-			packetsLock.notify();
-		}*/
 		processQueuedEvents();
 	}
 
 	private void processQueuedEvents() {
 		L.finer("start");
-		//while(wintabAccess.nextPacket()) {
 		WintabDevice device=getDevice(wintabAccess.getCursor());
-			//L.finer("device: ");
-			//L.fine(device.getName());
 		device.scheduleEvents();
-		//}
 		L.finer("end");
 	}
 
@@ -162,11 +133,6 @@ public class WintabProvider
 		setPaused(paused);
 	}
 
-	private void clearEventQueues(){
-		while(wintabAccess.nextPacket())
-			;
-	}
-
 	private synchronized boolean getPaused(){
 		return paused;
 	}
@@ -178,14 +144,7 @@ public class WintabProvider
 		this.paused=paused;
 		if(!paused){
 			L.fine("false paused value");
-			//mouseLocator.reset();
 			screenBounds.reset();
-			clearEventQueues();
-			/*synchronized(thread) {
-				L.fine("going to notify all...");
-				thread.notifyAll();
-				L.fine("done notifying ");
-			}*/
 		}
 		wintabAccess.setEnabled(!paused);
 		L.fine("end");

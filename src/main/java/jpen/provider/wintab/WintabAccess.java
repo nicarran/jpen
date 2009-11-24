@@ -39,8 +39,7 @@ final class WintabAccess {
 
 	private final WintabProvider wintabProvider;
 	private final int cellIndex;
-	private final Thread packetNotifierThread;
-	private volatile int consumiblePackets;
+	private final Thread packetPusherThread;
 
 	WintabAccess(WintabProvider wintabProvider) throws Exception {
 		synchronized(LOCK){
@@ -49,17 +48,17 @@ final class WintabAccess {
 			this.cellIndex=create();
 			if(cellIndex==-1)
 				throw new Exception(getError());
-			packetNotifierThread=new Thread("jpen-WintabProvider-Packet Notifier"){
+			packetPusherThread=new Thread("jpen-WintabProvider-Packet Pusher"){
 						@Override
 						public void run(){
-							init();
+							init(); // calls my initEnded method from the native side
 						}
 					};
-			packetNotifierThread.setPriority(Thread.MAX_PRIORITY);
-			packetNotifierThread.setDaemon(true);
-			synchronized(packetNotifierThread){
-				packetNotifierThread.start();
-				packetNotifierThread.wait();
+			packetPusherThread.setPriority(Thread.MAX_PRIORITY);
+			packetPusherThread.setDaemon(true);
+			synchronized(packetPusherThread){
+				packetPusherThread.start();
+				packetPusherThread.wait();
 			}
 			if(!getInitialized())
 				throw new Exception(getError());
@@ -70,69 +69,45 @@ final class WintabAccess {
 	private static native String getError();
 
 	private void init(){
-		//synchronized(LOCK){
 		init(cellIndex);
-		//}
 	}
-
-	private native void init(int cellIndex);
-
-	private boolean getInitialized(){
-		//synchronized(LOCK){
-		return getInitialized(cellIndex);
-		//}
-	}
-
-	private static native boolean getInitialized(int cellIndex);
 
 	/**
 	Called by the native side.
 	*/
 	private void initEnded(){
-		synchronized(packetNotifierThread){
-			packetNotifierThread.notify();
+		synchronized(packetPusherThread){
+			packetPusherThread.notify();
 		}
 	}
+
+	private native void init(int cellIndex);
+
+	private boolean getInitialized(){
+		return getInitialized(cellIndex);
+	}
+
+	private static native boolean getInitialized(int cellIndex);
+
 
 	/**
 	Called by the native side.
 	*/
 	private void packetReady(){
-		consumiblePackets++;
+		//System.out.println("packeReady at "+System.currentTimeMillis());
 		if(wintabProvider==null) // can be null when testing...
 			return;
 		wintabProvider.packetReady();
 	}
-	
-	boolean hasPackets(){
-		return consumiblePackets>0;
-	}
 
 	int getValue(PLevel.Type levelType) {
+		// tilt data is really azimuth and altitude and must be transformed!
 		synchronized(LOCK){
-			// tilt data is really azimuth and altitude and must be transformed!
 			return getValue(cellIndex, getLevelTypeValueIndex(levelType));
 		}
 	}
 
 	private static native int getValue(int cellIndex, int valueIndex);
-
-	public boolean nextPacket() {
-		synchronized(LOCK){
-			if(consumiblePackets>0){
-				consumiblePackets--;
-				if(nextPacket(cellIndex)){
-					return true;
-				}//else
-					//System.out.println("packet lost!");
-			}
-			//System.out.println("no packet in queue");
-			return false;
-		}
-	}
-
-	private static native boolean nextPacket(int cellIndex);
-
 
 	public boolean getEnabled() {
 		synchronized(LOCK){
@@ -144,7 +119,6 @@ final class WintabAccess {
 
 	public void setEnabled(boolean enabled) {
 		synchronized(LOCK){
-			consumiblePackets=0;
 			setEnabled(cellIndex, enabled);
 		}
 	}
@@ -180,12 +154,6 @@ final class WintabAccess {
 
 	private static native long getTime(int cellIndex);
 
-	public long getTimeUtc(){
-		synchronized(LOCK){
-			return getBootTimeUtc()+getTime();
-		}
-	}
-
 	public int getButtons() {
 		synchronized(LOCK){
 			return getButtons(cellIndex);
@@ -202,45 +170,9 @@ final class WintabAccess {
 
 	static native int getCursorTypeOrdinal(int cursor);
 
-	public int getFirstCursor() {
-		synchronized(LOCK){
-			return getFirstCursor(cellIndex);
-		}
-	}
+	static native String getCursorName(int cursor);
 
-	private static native int getFirstCursor(int cellIndex);
-
-	public int getCursorsCount() {
-		synchronized(LOCK){
-			return getCursorsCount(cellIndex);
-		}
-	}
-
-	private static native int getCursorsCount(int cellIndex);
-
-	public static native boolean getCursorActive(int cursor);
-
-	public static native String getCursorName(int cursor);
-
-	public static native long getPhysicalId(int cursor);
-
-	public static native int getCursorMode(int cursor);
-
-	public String getDeviceName() {
-		synchronized(LOCK){
-			return getDeviceName(cellIndex);
-		}
-	}
-
-	private static native String getDeviceName(int cellIndex);
-
-	public static native boolean getDefCtxSysMode();
-
-	public boolean getDDCtxSysMode(){
-		return getDDCtxSysMode(cellIndex);
-	}
-
-	private static native boolean getDDCtxSysMode(int cellIndex);
+	static native long getPhysicalId(int cursor);
 
 	@Override
 	protected void finalize() {
@@ -251,43 +183,6 @@ final class WintabAccess {
 	}
 
 	private static native int destroy(int cellIndex);
-
-	public static native int[] getButtonMap(int cursor);
-
-	public int getStatus(){
-		synchronized(LOCK){
-			return getStatus(cellIndex);
-		}
-	}
-
-	public static native int getStatus(int cellIndex);
-
-	public boolean getTiltExtSupported() {
-		synchronized(LOCK){
-			return getTiltExtSupported(cellIndex);
-		}
-	}
-
-	private static native boolean getTiltExtSupported(int cellIndex);
-
-
-	public boolean getLcSysMode(){
-		synchronized(LOCK){
-			return getLcSysMode(cellIndex);
-		}
-	}
-
-	private static native boolean getLcSysMode(int cellIndex);
-
-	public long getBootTimeUtc(){
-		synchronized(LOCK){
-			if(bootTimeUtc==-1)
-				bootTimeUtc=getBootTimeUtc(cellIndex);
-			return bootTimeUtc;
-		}
-	}
-
-	private static native long getBootTimeUtc(int cellIndex);
 
 	@Override
 	public String toString() {
@@ -314,10 +209,6 @@ final class WintabAccess {
 			sb.append(", id="+getPhysicalId(getCursor()));
 			sb.append(", buttons=");
 			sb.append(getButtons());
-			sb.append(", defCtxSysMode="+getDefCtxSysMode());
-			sb.append(", DDCtxSysMode="+getDDCtxSysMode());
-			sb.append(", lcSysMode="+getLcSysMode());
-			sb.append(", status="+getStatus());
 			sb.append("]");
 			return sb.toString();
 		}
