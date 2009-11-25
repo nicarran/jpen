@@ -40,6 +40,10 @@ final class WintabAccess {
 	private final WintabProvider wintabProvider;
 	private final int cellIndex;
 	private final Thread packetPusherThread;
+	
+	WintabAccess() throws Exception {
+		this(null);
+	}
 
 	WintabAccess(WintabProvider wintabProvider) throws Exception {
 		synchronized(LOCK){

@@ -81,6 +81,7 @@ int type##_create(void){\
 		type##_setError("Insuficient memory to create new "#type ".");\
 		return -1;\
 	}\
+	memset(pNew, 0, sizeof(struct type));\
 	if(type##_preCreate(pNew)){\
 		type##_setError("Initialization of created "#type" failed.");\
 		free(pNew);\
@@ -92,7 +93,7 @@ int type##_create(void){\
 		reusing=0;\
 		struct type##Cell *pNewCells=realloc(type##_row.pCells,\
 																							 (type##_row.size+1)*sizeof(struct type##Cell));\
-	if(!pNewCells){\
+		if(!pNewCells){\
 			type##_setError("Insuficient memory to reallocate for "#type".");\
 			free(pNew);\
 			return -1;\
