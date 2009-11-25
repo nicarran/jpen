@@ -103,7 +103,10 @@ public class WintabProvider
 						 public void run() {
 							 while(true) {
 								 processQuedEvents();
-								 jpen.Utils.synchronizedWait(this, PERIOD);
+								 jpen.Utils.synchronizedWait(this,
+										 Math.max(10,
+															getConstructor().getPenManager().pen.getPeriodMillis())
+																						);
 								 while(getPaused()){
 									 L.fine("going to wait...");
 									 jpen.Utils.synchronizedWait(this, 0);
@@ -128,8 +131,10 @@ public class WintabProvider
 		L.finer("start");
 		while(wintabAccess.nextPacket()) {
 			WintabDevice device=getDevice(wintabAccess.getCursor());
-			L.finer("device: ");
-			L.fine(device.getName());
+			if(L.isLoggable(Level.FINE)){
+				L.finer("device: ");
+				L.finer(device.getName());
+			}
 			device.scheduleEvents();
 		}
 		L.finer("end");
@@ -151,11 +156,6 @@ public class WintabProvider
 		setPaused(paused);
 	}
 
-	private void clearEventQueues(){
-		while(wintabAccess.nextPacket())
-			;
-	}
-
 	private synchronized boolean getPaused(){
 		return paused;
 	}
@@ -167,16 +167,14 @@ public class WintabProvider
 		this.paused=paused;
 		if(!paused){
 			L.fine("false paused value");
-			//mouseLocator.reset();
 			screenBounds.reset();
-			clearEventQueues();
 			synchronized(thread) {
 				L.fine("going to notify all...");
 				thread.notifyAll();
 				L.fine("done notifying ");
 			}
 		}
-		wintabAccess.setEnabled(!paused);
+		wintabAccess.setEnabled(!paused); // this clears the queue
 		L.fine("end");
 	}
 }

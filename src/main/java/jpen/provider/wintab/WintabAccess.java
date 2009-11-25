@@ -30,7 +30,7 @@ final class WintabAccess {
 	private static long bootTimeUtc=-1;
 
 	/**
-	This must be like E_csrTypes enumeration.
+	This must correspond to Access.h: E_csrTypes enumeration.
 	*/
 	public enum CursorType{UNDEF, PENTIP, PUCK, PENERASER;
 	    public static final List<CursorType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
@@ -75,6 +75,8 @@ final class WintabAccess {
 	}
 
 	private static native boolean getEnabled(int cellIndex);
+	
+	private static native int getStatus(int cellIndex);
 
 	public void setEnabled(boolean enabled) {
 		synchronized(LOCK){
@@ -113,12 +115,6 @@ final class WintabAccess {
 
 	private static native long getTime(int cellIndex);
 
-	public long getTimeUtc(){
-		synchronized(LOCK){
-			return getBootTimeUtc()+getTime();
-		}
-	}
-
 	public int getButtons() {
 		synchronized(LOCK){
 			return getButtons(cellIndex);
@@ -135,45 +131,9 @@ final class WintabAccess {
 
 	static native int getCursorTypeOrdinal(int cursor);
 
-	public int getFirstCursor() {
-		synchronized(LOCK){
-			return getFirstCursor(cellIndex);
-		}
-	}
-
-	private static native int getFirstCursor(int cellIndex);
-
-	public int getCursorsCount() {
-		synchronized(LOCK){
-			return getCursorsCount(cellIndex);
-		}
-	}
-
-	private static native int getCursorsCount(int cellIndex);
-
-	public static native boolean getCursorActive(int cursor);
-
 	public static native String getCursorName(int cursor);
 
 	public static native long getPhysicalId(int cursor);
-
-	public static native int getCursorMode(int cursor);
-
-	public String getDeviceName() {
-		synchronized(LOCK){
-			return getDeviceName(cellIndex);
-		}
-	}
-
-	private static native String getDeviceName(int cellIndex);
-
-	public static native boolean getDefCtxSysMode();
-
-	public boolean getDDCtxSysMode(){
-		return getDDCtxSysMode(cellIndex);
-	}
-
-	private static native boolean getDDCtxSysMode(int cellIndex);
 
 	@Override
 	protected void finalize() {
@@ -185,42 +145,11 @@ final class WintabAccess {
 
 	private static native int destroy(int cellIndex);
 
-	public static native int[] getButtonMap(int cursor);
-
 	public int getStatus(){
 		synchronized(LOCK){
 			return getStatus(cellIndex);
 		}
 	}
-
-	public static native int getStatus(int cellIndex);
-
-	public boolean getTiltExtSupported() {
-		synchronized(LOCK){
-			return getTiltExtSupported(cellIndex);
-		}
-	}
-
-	private static native boolean getTiltExtSupported(int cellIndex);
-
-
-	public boolean getLcSysMode(){
-		synchronized(LOCK){
-			return getLcSysMode(cellIndex);
-		}
-	}
-
-	private static native boolean getLcSysMode(int cellIndex);
-
-	public long getBootTimeUtc(){
-		synchronized(LOCK){
-			if(bootTimeUtc==-1)
-				bootTimeUtc=getBootTimeUtc(cellIndex);
-			return bootTimeUtc;
-		}
-	}
-
-	private static native long getBootTimeUtc(int cellIndex);
 
 	@Override
 	public String toString() {
@@ -247,9 +176,6 @@ final class WintabAccess {
 			sb.append(", id="+getPhysicalId(getCursor()));
 			sb.append(", buttons=");
 			sb.append(getButtons());
-			sb.append(", defCtxSysMode="+getDefCtxSysMode());
-			sb.append(", DDCtxSysMode="+getDDCtxSysMode());
-			sb.append(", lcSysMode="+getLcSysMode());
 			sb.append(", status="+getStatus());
 			sb.append("]");
 			return sb.toString();

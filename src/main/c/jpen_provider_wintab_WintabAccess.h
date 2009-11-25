@@ -51,6 +51,14 @@ JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getEnabled
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getStatus
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getStatus
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
  * Method:    setEnabled
  * Signature: (IZ)V
  */
@@ -99,30 +107,6 @@ JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorTypeOrdin
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getFirstCursor
- * Signature: (I)I
- */
-JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getFirstCursor
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getCursorsCount
- * Signature: (I)I
- */
-JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorsCount
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getCursorActive
- * Signature: (I)Z
- */
-JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorActive
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     jpen_provider_wintab_WintabAccess
  * Method:    getCursorName
  * Signature: (I)Ljava/lang/String;
  */
@@ -139,82 +123,10 @@ JNIEXPORT jlong JNICALL Java_jpen_provider_wintab_WintabAccess_getPhysicalId
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getCursorMode
- * Signature: (I)I
- */
-JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorMode
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getDeviceName
- * Signature: (I)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_jpen_provider_wintab_WintabAccess_getDeviceName
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getDefCtxSysMode
- * Signature: ()Z
- */
-JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getDefCtxSysMode
-  (JNIEnv *, jclass);
-
-/*
- * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getDDCtxSysMode
- * Signature: (I)Z
- */
-JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getDDCtxSysMode
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     jpen_provider_wintab_WintabAccess
  * Method:    destroy
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_destroy
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getButtonMap
- * Signature: (I)[I
- */
-JNIEXPORT jintArray JNICALL Java_jpen_provider_wintab_WintabAccess_getButtonMap
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getStatus
- * Signature: (I)I
- */
-JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getStatus
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getTiltExtSupported
- * Signature: (I)Z
- */
-JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getTiltExtSupported
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getLcSysMode
- * Signature: (I)Z
- */
-JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getLcSysMode
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getBootTimeUtc
- * Signature: (I)J
- */
-JNIEXPORT jlong JNICALL Java_jpen_provider_wintab_WintabAccess_getBootTimeUtc
   (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus

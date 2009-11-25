@@ -44,11 +44,6 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 //^^^
 
-//vvv Taken from the jdk demo jvmti/hprof/src/windows/hprof_md.c
-#define FT2JLONG(ft) \
-	((jlong)(ft).dwHighDateTime << 32 | (jlong)(ft).dwLowDateTime)
-//^^^
-
 #define MAX_WINTAB_QUEUE_SIZE 64
 #define MIN_WINTAB_QUEUE_SIZE 16
 #define QUEUE_SIZE 16
@@ -76,25 +71,18 @@ struct Access {
 	UINT device;
 	int enabled;
 	int valuatorValues[E_Valuators_size];
-	PACKET queue[QUEUE_SIZE]; // buffer to save some WTPacketsGet calls
-	int queueSize;
-	int queueConsumableIndex;
+	PACKET queue[QUEUE_SIZE]; // buffer to get many packets at once on WTPacketsGet
+	int queueSize;// index of the next to last packet usable (consumable) on queue
+	int queueConsumableIndex; // index of queue element not yet consumed from the queue
 	UINT cursor;
 	DWORD buttons;
 	UINT status;
 	LONG time;
-	int tiltExtSupported; // not used if not def PACKETTILT (see above)
 };
 m_declareRow(Access);
 extern int Access_nextPacket(SAccess *pAccess);
-extern int Access_refreshLc(SAccess *pAccess);
 extern int Access_getEnabled(SAccess *pAccess);
 extern void Access_setEnabled(SAccess *pAccess, int enabled);
 extern void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange);
 extern int Access_getCsrType(int cursor);
-extern UINT Access_getFirstCursor(SAccess *pAccess);
-extern UINT Access_getCursorsCount(SAccess *pAccess);
-//extern static int Access_fillPacketQueue(SAccess *pAccess);
-extern jlong Access_getBootTimeUtc();
-
 #endif
