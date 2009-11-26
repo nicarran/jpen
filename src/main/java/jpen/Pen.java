@@ -119,7 +119,8 @@ public class Pen extends PenState {
 					waitTime=periodMillis-evalCurrentProcTime();
 					if(waitTime>0) {
 						//System.out.println("going to wait: "+waitTime);
-						Utils.sleepUninterrupted(waitTime); 
+						Utils.sleepUninterrupted(waitTime);
+						//waiter.doWait(waitTime); -> using this method instead of sleepUninterrupted degrades performance... it is strange that it does not degrades performance on wintab-pull : S
 						waitTime=0;
 					}
 				}
