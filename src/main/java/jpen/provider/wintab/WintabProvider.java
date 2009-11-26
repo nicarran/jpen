@@ -92,7 +92,6 @@ public class WintabProvider
 		super(constructor);
 		L.fine("start");
 		this.wintabAccess=wintabAccess;
-		//this.mouseLocator=new MouseLocator();
 
 		for(int i=PLevel.Type.VALUES.size(); --i>=0;){
 			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
@@ -100,13 +99,15 @@ public class WintabProvider
 		}
 
 		thread=new Thread("jpen-WintabProvider") {
+						 private long getPeriod(){
+						 	 return PERIOD;
+							 //return Math.max(10,
+									//						 getConstructor().getPenManager().pen.getPeriodMillis()/2);
+						 }
 						 public void run() {
 							 while(true) {
 								 processQuedEvents();
-								 jpen.Utils.synchronizedWait(this,
-										 Math.max(10,
-															getConstructor().getPenManager().pen.getPeriodMillis())
-																						);
+								 jpen.Utils.synchronizedWait(this, getPeriod());
 								 while(getPaused()){
 									 L.fine("going to wait...");
 									 jpen.Utils.synchronizedWait(this, 0);

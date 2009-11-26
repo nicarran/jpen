@@ -120,6 +120,7 @@ public class Pen extends PenState {
 					if(waitTime>0) {
 						//System.out.println("going to wait: "+waitTime);
 						Utils.sleepUninterrupted(waitTime);
+						//waiter.doWait(waitTime); // in some cases, this (instead of sleepUninterrupted ^ ) gives better overall performance (wintab-pulling, jpen demo). We can put this as an alternate behavior if  needed.
 						waitTime=0;
 					}
 				}

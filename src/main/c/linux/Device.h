@@ -54,12 +54,9 @@ struct Device {
 	int lastEventType;
 	Time lastEventTime;
 	int lastEventButton;
-	fd_set displayConnectionFileDesc;
-	struct timeval timeVal;
 };
 m_declareRow(Device);
 extern int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex);
-extern int Device_waitNextEventOrTimeout(SDevice *pDevice, int timeoutMillis);
 extern int Device_nextEvent(SDevice *pDevice);
 extern int Device_waitNextEvent(SDevice *pDevice);
 extern void Device_stopWaitingNextEvent(SDevice *pDevice);

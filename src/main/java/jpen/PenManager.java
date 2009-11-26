@@ -218,6 +218,6 @@ public final class PenManager {
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long deviceTime, boolean levelsOnScreen) {
 		if(paused)
 			return false;
-		return pen.scheduler.scheduleLevelEvent(this, device, deviceTime, levels, levelsOnScreen);
+		return pen.scheduler.scheduleLevelEvent(device, deviceTime, levels, levelsOnScreen);
 	}
 }

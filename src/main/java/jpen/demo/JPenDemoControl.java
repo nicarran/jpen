@@ -96,6 +96,14 @@ public class JPenDemoControl{
 	}
 
 	public static void main(String... args) throws IOException, NumberFormatException{
+		setupLookAndFeel();
+		JPenDemoControl jpenDemoControl=new JPenDemoControl();
+		startInspector(jpenDemoControl.penCanvas.penManager);
+		jpenDemoControl.showDialog(null, "JPen Demo");
+		System.exit(0);
+	}
+
+	static void setupLookAndFeel(){
 		try{
 			if(System.getProperty("os.name").toLowerCase().contains("linux"))
 				UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
@@ -104,10 +112,6 @@ public class JPenDemoControl{
 		}catch(Exception ex){
 			L.warning("The \"system\" look and feel couldn't be set.");
 		}
-		JPenDemoControl jpenDemoControl=new JPenDemoControl();
-		startInspector(jpenDemoControl.penCanvas.penManager);
-		jpenDemoControl.showDialog(null, "JPen Demo");
-		System.exit(0);
 	}
 
 	static void startInspector(PenManager penManager) throws IOException{

@@ -88,19 +88,19 @@ class PenCanvas
 		rectangle.setFrame(0, 0, SIZE.width, SIZE.height);
 		g.fill(rectangle);
 		setupRenderingHints(g);
-
+		
 		penManager.pen.addListener(new PenAdapter() {
 			    @Override
 			    public void penLevelEvent(PLevelEvent ev) {
 			    	//System.out.println("current time="+System.currentTimeMillis());
 			    	//System.out.println("ev time="+ev.getTime());
 			    	//System.out.println("ev device time="+ev.getDeviceTime());
-				    if(!penManager.pen.getButtonValue(PButton.Type.ON_PRESSURE)){
+				    /*if(!penManager.pen.getButtonValue(PButton.Type.ON_PRESSURE)){
 					    float pressure=penManager.pen.getLevelValue(PLevel.Type.PRESSURE);
 					    if(pressure>0)
 					    	throw new AssertionError();
 					    return;
-				    }
+				    }*/
 				    for(PLevel.Type levelType: PLevel.Type.MOVEMENT_TYPES){
 					    float value=penManager.pen.getLevelValue(levelType);
 					    switch(levelType) {

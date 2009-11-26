@@ -67,7 +67,7 @@ void Device_setIsListening(SDevice *pDevice, int isListening) {
 								GrabModeAsync,
 								CurrentTime
 							 );
-		XSelectInput(pBus->pDisplay,DefaultRootWindow(pBus->pDisplay),PropertyChangeMask); // hack to signal Device_waitNextEventOrTimeOut through Device_stopWaitingNextEvent
+		XSelectInput(pBus->pDisplay,DefaultRootWindow(pBus->pDisplay),PropertyChangeMask); //hack to signal Device_waitNextEventOrTimeOut through Device_stopWaitingNextEvent
 	}else{
 		XUngrabDevice(pBus->pDisplay, pDevice->pXdevice, CurrentTime);
 	}
@@ -211,27 +211,6 @@ int Device_waitNextEvent(struct Device *pDevice) {
 			return true;
 		}
 	}
-	return false;
-}
-
-/**
-@return 1 if an event was received, 0 otherwise.
-
-Thanks to AngryLlama ( http://www.linuxquestions.org/questions/programming-9/xnextevent-select-409355/ ) for the timeout procedure.
-*/
-int Device_waitNextEventOrTimeout(struct Device *pDevice, int timeoutMillis){
-	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
-
-	FD_ZERO(&pDevice->displayConnectionFileDesc);
-	FD_SET(pBus->displayConnectionNumber, &pDevice->displayConnectionFileDesc);
-
-	pDevice->timeVal.tv_sec=0;
-	pDevice->timeVal.tv_usec=timeoutMillis*1000;
-
-	if(select(pBus->displayConnectionNumber+1,
-						&pDevice->displayConnectionFileDesc, NULL, NULL,
-						&pDevice->timeVal))
-		return Device_nextEvent(pDevice);
 	return false;
 }
 

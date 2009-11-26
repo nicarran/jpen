@@ -72,9 +72,11 @@ final class XinputDevice extends AbstractPenDevice {
 									 jpen.Utils.synchronizedWait(this, 0);
 								 if(XinputDevice.this.xiDevice.waitNextEvent())
 									 processLastEvent();
-								 else
-									 synchronized(XinputDevice.this){
+								 else {// then a call to xiDevice.stopWaitingNextEvent was made
+								 	 //System.out.println("stopWaitingNextEvent was called");
+									 synchronized(XinputDevice.this){ // try to aquire this lock to wait until the XinputDevice.this sync methods return 
 									 }
+								 }
 							 }
 						 }
 					 };
@@ -84,7 +86,7 @@ final class XinputDevice extends AbstractPenDevice {
 		setEnabled(true);
 	}
 
-	private boolean isWorking(){
+	private synchronized boolean isWorking(){
 		return getIsListening() && getEnabled();
 	}
 
@@ -92,8 +94,8 @@ final class XinputDevice extends AbstractPenDevice {
 		if(this.isListening==isListening)
 			return;
 		this.isListening=isListening;
-		xiDevice.stopWaitingNextEvent();
-		xiDevice.setIsListening(isListening); // blocks until waitNextEvent() returns
+		xiDevice.stopWaitingNextEvent(); // xiDevice.waitNextEvent has the xiDevice sync lock. stopWaitingNextEvent force xiDevice.waitNextEvent to return and release the xiDevice lock.
+		xiDevice.setIsListening(isListening); // blocks until xiDevice.waitNextEvent() returns
 		synchronized(thread){
 			thread.notify();
 		}
@@ -126,9 +128,9 @@ final class XinputDevice extends AbstractPenDevice {
 	}
 
 	synchronized void reset(){
-		xiDevice.stopWaitingNextEvent();
-		while(xiDevice.nextEvent())
-			;
+		xiDevice.stopWaitingNextEvent(); 
+		while(xiDevice.nextEvent()) // flush pending events 
+				;
 		resetLevelRanges();
 	}
 

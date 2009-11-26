@@ -73,14 +73,6 @@ JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_nextEvent
 
 /*
  * Class:     jpen_provider_xinput_XiDevice
- * Method:    waitNextEventOrTimeout
- * Signature: (II)Z
- */
-JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_waitNextEventOrTimeout
-  (JNIEnv *, jclass, jint, jint);
-
-/*
- * Class:     jpen_provider_xinput_XiDevice
  * Method:    stopWaitingNextEvent
  * Signature: (I)V
  */

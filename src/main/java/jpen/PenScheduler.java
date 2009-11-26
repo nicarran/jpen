@@ -56,10 +56,10 @@ final class PenScheduler{
 			if(!device.isDigitizer()) {
 				time=System.currentTimeMillis();
 				if(lastDevice!=null &&
-				        lastDevice!=device &&
-				        lastEvent!=null &&
-				        time-lastEvent.time<=THRESHOLD_PERIOD
-				  )
+					 lastDevice!=device &&
+					 lastEvent!=null &&
+					 time-lastEvent.time<=THRESHOLD_PERIOD
+					)
 					return true;
 				if(!filteredFirstInSecuence) {
 					L.fine("filtered first in sequence to prioritize digitized input in race");
@@ -90,7 +90,7 @@ final class PenScheduler{
 	private final Point clipLocationOnScreen=new Point();
 	private final Point2D.Float scheduledLocation=new Point2D.Float();
 
-	synchronized boolean scheduleLevelEvent(PenManager penManager, PenDevice device, long penDeviceTime, Collection<PLevel> levels, boolean levelsOnScreen) {
+	synchronized boolean scheduleLevelEvent(PenDevice device, long penDeviceTime, Collection<PLevel> levels, boolean levelsOnScreen) {
 		// if device == null then this is an emulated event request
 		if(device!=null && phantomLevelFilter.filter(device))
 			return false;
@@ -98,12 +98,14 @@ final class PenScheduler{
 		boolean scheduledMovement=false;
 		scheduledLocation.x=lastScheduledState.levels.getValue(PLevel.Type.X);
 		scheduledLocation.y=lastScheduledState.levels.getValue(PLevel.Type.Y);
-		if(penManager!=null && levelsOnScreen)
-			penManager.penOwner.getPenClip().evalLocationOnScreen(clipLocationOnScreen);
+		if(pen.penManager!=null && levelsOnScreen)
+			pen.penManager.penOwner.getPenClip().evalLocationOnScreen(clipLocationOnScreen);
 		for(PLevel level:levels) {
 			if(level.value==lastScheduledState.getLevelValue(level.typeNumber))
 				continue;
-			if(device!=null && pen.levelEmulator!=null && pen.levelEmulator.isActiveLevel(level.typeNumber))
+			if(device!=null && pen.levelEmulator!=null &&
+				 pen.levelEmulator.onActivePolicy(lastScheduledState.getKind().getType().ordinal(),
+						 level.typeNumber))
 				continue;
 			if(pen.getLevelFilter().filterPenLevel(level))
 				continue;
@@ -130,15 +132,15 @@ final class PenScheduler{
 		}
 		if(scheduledLevels.isEmpty())
 			return false;
-		
+
 		if(scheduledMovement){
-			if(penManager!=null && !penManager.penOwner.getPenClip().contains(scheduledLocation)
-			        && !penManager.penOwner.isDraggingOut())
+			if(pen.penManager!=null && !pen.penManager.penOwner.getPenClip().contains(scheduledLocation)
+				 && !pen.penManager.penOwner.isDraggingOut())
 				return false;
 
 			if(device!=null &&
-			        device.getKindTypeNumber() !=lastScheduledState.getKind().typeNumber &&
-			        device.getKindTypeNumber()!=PKind.Type.IGNORE.ordinal() ){
+				 device.getKindTypeNumber() !=lastScheduledState.getKind().typeNumber &&
+				 device.getKindTypeNumber()!=PKind.Type.IGNORE.ordinal() ){
 				PKind newKind=PKind.valueOf(device.getKindTypeNumber());
 				if(L.isLoggable(Level.FINE)){
 					L.fine("changing kind to:"+newKind);
@@ -152,16 +154,16 @@ final class PenScheduler{
 
 		lastScheduledState.levels.setValues(scheduledLevels);
 		PLevelEvent levelEvent=new PLevelEvent(pen,
-		    scheduledLevels.toArray(new PLevel[scheduledLevels.size()]),
-		    device==null? -1: device.getId(),
-		    penDeviceTime);
+				scheduledLevels.toArray(new PLevel[scheduledLevels.size()]),
+				device==null? -1: device.getId(),
+				penDeviceTime);
 		phantomLevelFilter.setLastEvent(levelEvent);
 		scheduledLevels.clear();
 		scheduleOnPressureButtonEvent(lastScheduledPressure, scheduledPressure);
 		schedule(levelEvent);
 		return true;
 	}
-	
+
 	private void scheduleOnPressureButtonEvent(float lastScheduledPressure, float scheduledPressure){
 		if(lastScheduledPressure==0 && scheduledPressure>0)
 			scheduleButtonEvent(new PButton(PButton.Type.ON_PRESSURE.ordinal(), true));

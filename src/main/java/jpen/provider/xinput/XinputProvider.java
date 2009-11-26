@@ -35,7 +35,6 @@ import jpen.provider.VirtualScreenBounds;
 public final class XinputProvider
 	extends AbstractPenProvider {
 	private static final Logger L=Logger.getLogger(XinputProvider.class.getName());
-	private static final int MIN_PERIOD=5; // TODO: take this from the device
 
 	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""}, new String[]{"x86_64", "ia64"});
 
@@ -43,7 +42,6 @@ public final class XinputProvider
 		LIB_LOADER.load();
 	}
 
-	//private final  Thread thread;
 	private final XinputDevice[] xinputDevices;
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 
@@ -72,7 +70,7 @@ public final class XinputProvider
 		XiBus xiBus=new XiBus();
 
 		for(int xiDeviceIndex=xiBus.getXiDevicesSize(); --xiDeviceIndex>=0; ) {
-			XiBus xiBus2=new XiBus(); // each device has a connection to the X server.
+			XiBus xiBus2=new XiBus(); // each XiBus opens a connection to the X server.
 			try {
 				xiBus2.setXiDevice(xiDeviceIndex);
 			} catch(Exception ex) {
@@ -86,42 +84,9 @@ public final class XinputProvider
 			xinputDevices[0].setKindTypeNumber(PKind.Type.STYLUS.ordinal());
 		}
 
-		/*
-		thread=new Thread("jpen-XinputProvider") {
-						 public void run() {
-							 while(true) {
-								 processQuedEvents();
-								 sleep();
-								 while(getPenManager().getPaused()){
-									 jpen.Utils.synchronizedWait(this, 0);
-								 }
-							 }
-						 }
-						 private void sleep(){
-						 	 	 try{
-									 sleep(//MIN_PERIOD
-									 	 Math.max(MIN_PERIOD, 
-									 	 1000/getPenManager().pen.getFrequency()-1)
-									 	 );
-								 }catch(InterruptedException ex){
-								 	 throw new AssertionError(ex);
-								 }
-						 }
-					 }
-					 ;
-		thread.setDaemon(true);
-		thread.setPriority(Thread.MAX_PRIORITY);
-		thread.start();
-		*/
 		L.fine("end");
 	}
 	
-	/*
-	private void processQuedEvents() {
-		for(int i=xinputDevices.length; --i>=0;)
-			xinputDevices[i].processQuedEvents();
-	}*/
-
 	private void resetXinputDevices(){
 		for(int i=xinputDevices.length; --i>=0;)
 			xinputDevices[i].reset();
@@ -138,9 +103,6 @@ public final class XinputProvider
 		if(!paused){
 			screenBounds.reset();
 			resetXinputDevices();
-			/*synchronized(thread) {
-				thread.notifyAll();
-			}*/
 		}
 	}
 }

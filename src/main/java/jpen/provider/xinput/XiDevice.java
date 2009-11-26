@@ -46,9 +46,9 @@ final class XiDevice{
 	public String getName() {
 		return xiBus.getXiDeviceName(xiDeviceIndex);
 	}
-
+	
 	public boolean getIsListening(){
-		synchronized(xiBus){
+		synchronized(xiBus){ // x server is not thread safe... requests must be made one at a time (per connectionx) 
 			return getIsListening(cellIndex);
 		}
 	}
@@ -70,7 +70,7 @@ final class XiDevice{
 		}
 	}
 
-	static int getLevelTypeValueIndex(PLevel.Type levelType){
+	private static int getLevelTypeValueIndex(PLevel.Type levelType){
 		return levelType.ordinal();
 	}
 
@@ -105,18 +105,6 @@ final class XiDevice{
 
 	private static native boolean nextEvent(int cellIndex);
 
-	public boolean waitNextEventOrTimeout(int timeoutMillis){
-		synchronized(xiBus){
-			return waitNextEventOrTimeout(cellIndex, timeoutMillis);
-		}
-	}
-
-	private static native boolean waitNextEventOrTimeout(int cellIndex, int timeoutMillis);
-
-	public void stopWaitingNextEvent(){
-			stopWaitingNextEvent(cellIndex);
-	}
-
 	private synchronized static native void stopWaitingNextEvent(int cellIndex);
 	
 	public boolean waitNextEvent(){
@@ -126,7 +114,11 @@ final class XiDevice{
 	}
 	
 	private static native boolean waitNextEvent(int cellIndex);
-
+	
+	public void stopWaitingNextEvent(){
+			stopWaitingNextEvent(cellIndex);
+	}
+	
 	public long getLastEventTime(){
 		synchronized(xiBus){
 			return getLastEventTime(cellIndex);
