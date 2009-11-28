@@ -52,10 +52,10 @@ public final class PLevelEmulator{
 		}
 	}
 
-	final PenManager penManager;
+	final Pen pen;
 
-	PLevelEmulator(PenManager penManager){
-		this.penManager=penManager;
+	PLevelEmulator(Pen pen){
+		this.pen=pen;
 	}
 
 	private final List<List<ButtonTriggerPolicy>> kindTypeToButtonTypeToButtonTriggerPolicy=new ArrayList<List<ButtonTriggerPolicy>>();
@@ -125,12 +125,12 @@ public final class PLevelEmulator{
 		else
 			emulatedLevel=emulateOnRelease(buttonEvent.button.typeNumber);
 		if(emulatedLevel!=null){
-			penManager.scheduleLevelEvent(null, Collections.singleton(emulatedLevel), buttonEvent.time);
+			pen.penManager.scheduleLevelEvent(pen.penManager.emulationDevice, buttonEvent.time, Collections.singleton(emulatedLevel));
 		}
 	}
 
 	private PLevel emulateOnPress(int buttonType){
-		PenState lastScheduledState=penManager.pen.lastScheduledState;
+		PenState lastScheduledState=pen.lastScheduledState;
 		ButtonTriggerPolicy triggerPolicy=getButtonTriggerPolicy(
 					lastScheduledState.getKind().typeNumber,
 					buttonType);

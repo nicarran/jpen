@@ -61,11 +61,11 @@ class MouseDevice
 	private final MouseMotionListener mouseMotionL=new MouseMotionListener(){
 				//@Override
 				public void mouseMoved(MouseEvent ev) {
-					scheduleMove(ev.getX(), ev.getY(), ev.getWhen());
+					scheduleMove(ev.getWhen(), ev.getX(), ev.getY());
 				}
 				//@Override
 				public void mouseDragged(MouseEvent ev) {
-					scheduleMove(ev.getX(), ev.getY(), ev.getWhen());
+					scheduleMove(ev.getWhen(), ev.getX(), ev.getY());
 				}
 			};
 	private final MouseWheelListener mouseWheelL=new MouseWheelListener(){
@@ -79,7 +79,7 @@ class MouseDevice
 					}
 					if(ev.getScrollType()==ev.WHEEL_UNIT_SCROLL && ev.getScrollAmount()>0) // > 0 : is because windows bug workaround, sometimes it is 0.
 						value*=ev.getScrollAmount();
-					getPenManager().scheduleScrollEvent(MouseDevice.this, new PScroll(type.ordinal(), value));
+					getPenManager().scheduleScrollEvent(MouseDevice.this, ev.getWhen(), new PScroll(type.ordinal(), value));
 				}
 			};
 	private final SystemProvider systemProvider;
@@ -115,10 +115,10 @@ class MouseDevice
 
 	private final PLevel[] changedLevelsA=new PLevel[2];
 	private final List<PLevel> changedLevels=Arrays.asList(changedLevelsA);
-	private void scheduleMove(int x, int y, long time) {
+	private void scheduleMove(long time, int x, int y) {
 		changedLevelsA[0]=new PLevel(PLevel.Type.X.ordinal(), x);
 		changedLevelsA[1]=new PLevel(PLevel.Type.Y.ordinal(), y);
-		getPenManager().scheduleLevelEvent(this, changedLevels, time);
+		getPenManager().scheduleLevelEvent(this, time, changedLevels);
 	}
 
 	private void mouseButtonChanged(MouseEvent ev, boolean state) {
@@ -127,7 +127,7 @@ class MouseDevice
 			return;
 		if(L.isLoggable(Level.FINE))
 			L.fine("scheduling button event: "+buttonType+", "+state);
-		getPenManager().scheduleButtonEvent(new PButton(buttonType.ordinal(), state));
+		getPenManager().scheduleButtonEvent(this, ev.getWhen(), new PButton(buttonType.ordinal(), state));
 	}
 
 	private static PButton.Type getButtonType(int buttonNumber) {

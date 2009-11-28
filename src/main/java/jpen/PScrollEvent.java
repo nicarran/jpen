@@ -27,8 +27,8 @@ public class PScrollEvent
 
 	public final PScroll scroll;
 
-	PScrollEvent(Pen pen, PScroll scroll) {
-		super(pen);
+	PScrollEvent(PenDevice device, long deviceTime, PScroll scroll) {
+		super(device, deviceTime);
 		this.scroll=scroll;
 	}
 
@@ -43,6 +43,6 @@ public class PScrollEvent
 
 	@Override
 	public String toString(){
-		return "[PScrollEvent: time="+time+", scroll="+scroll+"]";
+		return "[PScrollEvent: super="+super.toString()+", scroll="+scroll+"]";
 	}
 }

@@ -27,8 +27,8 @@ public class PKindEvent
 
 	public final PKind kind;
 
-	PKindEvent(Pen pen, PKind kind) {
-		super(pen);
+	PKindEvent(PenDevice penDevice, long deviceTime, PKind kind) {
+		super(penDevice, deviceTime);
 		this.kind=kind;
 	}
 
@@ -45,6 +45,6 @@ public class PKindEvent
 
 	@Override
 	public String toString(){
-		return "[PKindEvent: time="+time+", kind="+kind+"]";
+		return "[PKindEvent: super="+super.toString()+", kind="+kind+"]";
 	}
 }

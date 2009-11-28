@@ -27,8 +27,8 @@ public class PButtonEvent
 
 	public final PButton button;
 
-	PButtonEvent(Pen pen, PButton button) {
-		super(pen);
+	PButtonEvent(PenDevice device, long deviceTime, PButton button) {
+		super(device, deviceTime);
 		this.button=button;
 	}
 
@@ -45,6 +45,6 @@ public class PButtonEvent
 
 	@Override
 	public String toString() {
-		return "[PButtonEvent: time="+time+", button="+button+"]";
+		return "[PButtonEvent: super="+super.toString()+", button="+button+"]";
 	}
 }

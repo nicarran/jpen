@@ -1,5 +1,23 @@
+/* [{
+Copyright 2009 Marcello Bastea-Forte <marcello at cellosoft.com>
+Copyright 2009 Nicolas Carranza <nicarran at gmail.com>
+
+This file is part of jpen.
+
+jpen is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License,
+or (at your option) any later version.
+
+jpen is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with jpen.  If not, see <http://www.gnu.org/licenses/>.
+}] */
 package jpen.owner;
-import java.awt.Component;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
@@ -51,9 +69,5 @@ public class ScreenPenOwner implements PenOwner {
 //	@Override
 	public boolean isDraggingOut() {
 		return false;
-	}
-
-	public Component getComponent() {
-		return null;
 	}
 }

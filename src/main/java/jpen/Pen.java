@@ -40,13 +40,7 @@ public class Pen extends PenState {
 	private volatile MyThread thread;
 
 	/** Tail of event queue. */
-	private PenEvent lastDispatchedEvent=new PenEvent(this) {
-				public static final long serialVersionUID=1l;
-				@Override
-				void dispatch() { }
-				@Override
-				void copyTo(PenState penState){}
-			};
+	private PenEvent lastDispatchedEvent=new PenEvent.Dummy();
 	final PenScheduler scheduler=new PenScheduler(this);
 	public final PenState lastScheduledState=scheduler.lastScheduledState;
 	private final List<PenListener> listeners=new ArrayList<PenListener>();
@@ -169,12 +163,12 @@ public class Pen extends PenState {
 	}
 
 	Pen(){
-		this(null, null);
+		this(null);
 	}
 
-	Pen(PenManager penManager, PLevelEmulator levelEmulator) {
+	Pen(PenManager penManager) {
 		this.penManager=penManager;
-		this.levelEmulator=levelEmulator;
+		this.levelEmulator=new PLevelEmulator(this);
 		setFrequencyLater(DEFAULT_FREQUENCY);
 	}
 

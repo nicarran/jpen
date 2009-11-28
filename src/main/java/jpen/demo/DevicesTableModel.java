@@ -24,6 +24,7 @@ import java.util.List;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -45,67 +46,73 @@ class DevicesTableModel
 	private boolean supportCustomPKinds;
 
 	private final Column[] columns=new Column[]{
-	      new Column<String>("Name (Physical Id)", String.class){
-		      @Override
-		      Object getValue(PenDevice device){
-			      return device.getName()+" ("+device.getPhysicalId()+")";
-		      }
-	      },
-	      /*new Column<String>("Provider", String.class){
-	       @Override
-	       Object getValue(PenDevice device){
-	        return device.getProvider().getConstructor().getName();
-	       }
-      },*/
-	      /*new Column<Boolean>("Enabled", Boolean.class, true){
-	       @Override
-	       Object getValue(PenDevice device){
-	        return device.getEnabled();
-	       }
-	       @Override
-	       void setValue(Boolean val, PenDevice device){
-	        device.setEnabled(val);
-	       }
-      },*/	
-	      new Column<Integer>("Kind", Integer.class, true){
-		      private final MyCellRenderer myCellRenderer=new MyCellRenderer();
-		      private final TableCellEditor myCellEditor=new DefaultCellEditor(kindTypeNumberCombo.comboBox);
+				new Column<String>("Name (Physical Id)", String.class){
+					@Override
+					Object getValue(PenDevice device){
+						return device.getName()+" ("+device.getPhysicalId()+")";
+					}
+				},
+				/*new Column<String>("Provider", String.class){
+				 @Override
+				 Object getValue(PenDevice device){
+				  return device.getProvider().getConstructor().getName();
+				 }
+			},*/
+				/*new Column<Boolean>("Enabled", Boolean.class, true){
+				 @Override
+				 Object getValue(PenDevice device){
+				  return device.getEnabled();
+				 }
+				 @Override
+				 void setValue(Boolean val, PenDevice device){
+				  device.setEnabled(val);
+				 }
+			},*/	
+				new Column<Integer>("Kind", Integer.class, true){
+					private final MyCellRenderer myCellRenderer=new MyCellRenderer();
+					private final TableCellEditor myCellEditor=new DefaultCellEditor(kindTypeNumberCombo.comboBox);
 
-		      class MyCellRenderer
-			      extends DefaultTableCellRenderer{
-			      {
-				      setHorizontalAlignment(JLabel.CENTER);
-			      }
-			      @Override
-			      public Component 	getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-				      super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-				      setText(PKindTypeNumberCombo.getPKindTypeStringValue((Integer)value));
-				      return this;
-			      }
-		      }
+					class MyCellRenderer
+						extends DefaultTableCellRenderer{
+						{
+							setHorizontalAlignment(JLabel.CENTER);
+						}
+						@Override
+						public Component 	getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+							super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+							setText(PKindTypeNumberCombo.getPKindTypeStringValue((Integer)value));
+							return this;
+						}
+					}
 
-		      @Override
-		      Object getValue(PenDevice device){
-			      return device.getKindTypeNumber();
-		      }
+					@Override
+					Object getValue(PenDevice device){
+						return device.getKindTypeNumber();
+					}
 
-		      @Override
-		      void setValue(Integer val, PenDevice device){
-			      device.setKindTypeNumber(val);
-			      updateKindTypeNumberCombo();
-		      }
+					@Override
+					void setValue(Integer val, PenDevice device){
+						try{
+							if(device.getKindTypeNumber()==val)
+							return;
+							device.setKindTypeNumber(val);
+						}catch(Exception ex){
+							JOptionPane.showMessageDialog(null, ex.getMessage());
+						}
+						updateKindTypeNumberCombo();
+					}
 
-		      @Override
-		      TableCellRenderer getCellRenderer(){
-			      return myCellRenderer;
-		      }
+					@Override
+					TableCellRenderer getCellRenderer(){
+						return myCellRenderer;
+					}
 
-		      @Override
-		      TableCellEditor getCellEditor(){
-			      return myCellEditor;
-		      }
-	      },
-	    };
+					@Override
+					TableCellEditor getCellEditor(){
+						return myCellEditor;
+					}
+				},
+			};
 
 	private abstract class Column<C>{
 		final String name;

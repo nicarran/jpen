@@ -177,7 +177,7 @@ final class XinputDevice extends AbstractPenDevice {
 	}
 
 	private void scheduleScrollEvent(int number) {
-		getPenManager().scheduleScrollEvent(this, new PScroll(number==5? PScroll.Type.DOWN.ordinal(): PScroll.Type.UP.ordinal(),1));
+		getPenManager().scheduleScrollEvent(this, xiDevice.getLastEventTime(), new PScroll(number==5? PScroll.Type.DOWN.ordinal(): PScroll.Type.UP.ordinal(),1));
 	}
 
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();
@@ -188,7 +188,7 @@ final class XinputDevice extends AbstractPenDevice {
 			float value=getMultRangedValue(levelType);
 			changedLevels.add(new PLevel(levelType.ordinal(), value));
 		}
-		getPenManager().scheduleLevelEvent(this, changedLevels, xiDevice.getLastEventTime(), true);
+		getPenManager().scheduleLevelEvent(this, xiDevice.getLastEventTime(), changedLevels, true);
 		changedLevels.clear();
 	}
 

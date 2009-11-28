@@ -18,6 +18,9 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamClass;
 import java.util.Arrays;
 import java.util.Set;
 import jpen.event.PenListener;
@@ -25,38 +28,15 @@ import jpen.event.PenListener;
 public class PLevelEvent
 			extends PenEvent
 	implements java.io.Serializable {
-	public static final long serialVersionUID=1l;
+	public static final long serialVersionUID=2l;
 
 	public final PLevel[] levels;
-	private final long deviceTime;
-	private final byte deviceId;
 
-	public PLevelEvent(Pen pen, PLevel[] levels, byte deviceId, long deviceTime) {
-		super(pen);
+	PLevelEvent(PenDevice device, long deviceTime, PLevel[] levels) {
+		super(device, deviceTime);
 		this.levels=levels;
-		this.deviceTime=deviceTime;
-		this.deviceId=deviceId;
 	}
 
-	/**
-	Returns the timestamp in milliseconds of when this event ocurred in the {@link PenDevice}. The value returned was measured since some fixed but arbitrary time imposed by the {@link PenDevice}.
-
-	@see #getDeviceId()
-	@see #getTime()
-	*/
-	public long getDeviceTime(){
-		return deviceTime;
-	}
-	
-	/**
-	Returns the id of the {@link PenDevice} which generated this event.
-	
-	@see PenManager#getDevice(byte)
-	*/
-	public byte getDeviceId(){
-		return deviceId;
-	}
-	
 	@Override
 	void copyTo(PenState penState){
 		penState.levels.setValues(this);
@@ -81,7 +61,28 @@ public class PLevelEvent
 
 	@Override
 	public String toString() {
-		return "[PLevelEvent: time="+time+", levels="+Arrays.asList(levels)+", deviceId="+deviceId+", deviceTime="+deviceTime+"]";
+		return "[PLevelEvent: super="+super.toString()+", levels="+Arrays.asList(levels)+"]";
 	}
+
+	private void readObject(ObjectInputStream in)
+	throws IOException, ClassNotFoundException {
+		try{
+			ObjectInputStream.GetField fields = in.readFields();
+			levelsField.getField().set(this, fields.get("levels", null));
+			//v Backwards compatibility:
+			//vv deviceId and deviceTime were moved to the super class PenEvent:
+			ObjectStreamClass objectStreamClass=fields.getObjectStreamClass();
+			if(objectStreamClass.getField("deviceId")!=null)
+				PenEvent.deviceIdField.getField().set(this, fields.get("deviceId", (byte)0));
+			if(objectStreamClass.getField("deviceTime")!=null)
+				PenEvent.deviceTimeField.getField().set(this, fields.get("deviceTime", 0l));
+			//^^
+			//^
+		}catch(IllegalAccessException ex){
+			throw new AssertionError(ex);
+		}
+	}
+
+	private static final Utils.AccessibleField levelsField=new Utils.AccessibleField(PLevelEvent.class, "levels");
 
 }

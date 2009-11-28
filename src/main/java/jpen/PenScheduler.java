@@ -90,9 +90,9 @@ final class PenScheduler{
 	private final Point clipLocationOnScreen=new Point();
 	private final Point2D.Float scheduledLocation=new Point2D.Float();
 
-	synchronized boolean scheduleLevelEvent(PenDevice device, long penDeviceTime, Collection<PLevel> levels, boolean levelsOnScreen) {
+	synchronized boolean scheduleLevelEvent(PenDevice device, long deviceTime, Collection<PLevel> levels, boolean levelsOnScreen) {
 		// if device == null then this is an emulated event request
-		if(device!=null && phantomLevelFilter.filter(device))
+		if(device!=getEmulationDevice() && phantomLevelFilter.filter(device))
 			return false;
 		float scheduledPressure=-1, lastScheduledPressure=-1;
 		boolean scheduledMovement=false;
@@ -103,7 +103,7 @@ final class PenScheduler{
 		for(PLevel level:levels) {
 			if(level.value==lastScheduledState.getLevelValue(level.typeNumber))
 				continue;
-			if(device!=null && pen.levelEmulator!=null &&
+			if(device!=getEmulationDevice() && pen.levelEmulator!=null &&
 				 pen.levelEmulator.onActivePolicy(lastScheduledState.getKind().getType().ordinal(),
 						 level.typeNumber))
 				continue;
@@ -138,9 +138,8 @@ final class PenScheduler{
 				 && !pen.penManager.penOwner.isDraggingOut())
 				return false;
 
-			if(device!=null &&
-				 device.getKindTypeNumber() !=lastScheduledState.getKind().typeNumber &&
-				 device.getKindTypeNumber()!=PKind.Type.IGNORE.ordinal() ){
+			if(device.getKindTypeNumber()!=PKind.Type.IGNORE.ordinal() &&
+				 device.getKindTypeNumber() !=lastScheduledState.getKind().typeNumber){
 				PKind newKind=PKind.valueOf(device.getKindTypeNumber());
 				if(L.isLoggable(Level.FINE)){
 					L.fine("changing kind to:"+newKind);
@@ -148,15 +147,13 @@ final class PenScheduler{
 					L.fine("device: "+device);
 				}
 				lastScheduledState.setKind(newKind);
-				schedule(new PKindEvent(pen, newKind));
+				schedule(new PKindEvent(device, deviceTime, newKind));
 			}
 		}
 
 		lastScheduledState.levels.setValues(scheduledLevels);
-		PLevelEvent levelEvent=new PLevelEvent(pen,
-				scheduledLevels.toArray(new PLevel[scheduledLevels.size()]),
-				device==null? -1: device.getId(),
-				penDeviceTime);
+		PLevelEvent levelEvent=new PLevelEvent(device, deviceTime,
+				scheduledLevels.toArray(new PLevel[scheduledLevels.size()]));
 		phantomLevelFilter.setLastEvent(levelEvent);
 		scheduledLevels.clear();
 		scheduleOnPressureButtonEvent(lastScheduledPressure, scheduledPressure);
@@ -166,31 +163,39 @@ final class PenScheduler{
 
 	private void scheduleOnPressureButtonEvent(float lastScheduledPressure, float scheduledPressure){
 		if(lastScheduledPressure==0 && scheduledPressure>0)
-			scheduleButtonEvent(new PButton(PButton.Type.ON_PRESSURE.ordinal(), true));
+			scheduleEmulatedButtonEvent(new PButton(PButton.Type.ON_PRESSURE.ordinal(), true));
 		else if(lastScheduledPressure>0 && scheduledPressure==0)
-			scheduleButtonEvent(new PButton(PButton.Type.ON_PRESSURE.ordinal(), false));
+			scheduleEmulatedButtonEvent(new PButton(PButton.Type.ON_PRESSURE.ordinal(), false));
 	}
 
 	synchronized void scheduleButtonReleasedEvents(){
 		for(int i=PButton.Type.VALUES.size(); --i>=0;)
-			scheduleButtonEvent(new PButton(i, false));
+			scheduleEmulatedButtonEvent(new PButton(i, false));
 		for(Integer extButtonTypeNumber: lastScheduledState.extButtonTypeNumberToValue.keySet())
-			scheduleButtonEvent(new PButton(extButtonTypeNumber, false));
+			scheduleEmulatedButtonEvent(new PButton(extButtonTypeNumber, false));
 	}
 
-	synchronized void scheduleButtonEvent(PButton button) {
+	private void scheduleEmulatedButtonEvent(PButton button){
+		scheduleButtonEvent(getEmulationDevice(), System.currentTimeMillis(), button);
+	}
+
+	private PenDevice getEmulationDevice(){
+		return pen.penManager.emulationDevice;
+	}
+
+	synchronized void scheduleButtonEvent(PenDevice device, long deviceTime, PButton button) {
 		if(lastScheduledState.setButtonValue(button.typeNumber, button.value)){
 			if(L.isLoggable(Level.FINE))
 				L.fine("scheduling button event: "+button);
-			PButtonEvent buttonEvent=new PButtonEvent(pen, button);
+			PButtonEvent buttonEvent=new PButtonEvent(device, deviceTime, button);
 			schedule(buttonEvent);
 			if(pen.levelEmulator!=null)
 				pen.levelEmulator.scheduleEmulatedEvent(buttonEvent);
 		}
 	}
 
-	synchronized void scheduleScrollEvent(PenDevice device, PScroll scroll) {
-		schedule(new PScrollEvent(pen, scroll));
+	synchronized void scheduleScrollEvent(PenDevice device, long deviceTime, PScroll scroll) {
+		schedule(new PScrollEvent(device, deviceTime, scroll));
 	}
 
 	private void schedule(PenEvent ev) {

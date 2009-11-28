@@ -20,6 +20,10 @@ package jpen;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 public final class Utils{
 	public static String evalStackTrace(Throwable t){
@@ -43,7 +47,7 @@ public final class Utils{
 			throw new AssertionError(ex);
 		}
 	}
-	
+
 	public static void waitUninterrupted(Object lock){
 		waitUninterrupted(lock, 0l);
 	}
@@ -53,6 +57,38 @@ public final class Utils{
 			Thread.currentThread().sleep(millis);
 		}catch(InterruptedException ex){
 			throw new AssertionError(ex);
+		}
+	}
+
+	public static final class AccessibleField{
+		private final Class clazz;
+		private final String fieldName;
+		private Field field;
+		AccessibleField(Class clazz, String fieldName){
+			this.clazz=clazz;
+			this.fieldName=fieldName;
+		}
+
+		Field getField(){
+			if(field==null)
+				try{
+					field=getAccessibleField(clazz, fieldName);
+				}catch(PrivilegedActionException ex){
+					throw new AssertionError(ex);
+				}
+			return field;
+		}
+
+		private static Field getAccessibleField(final Class clazz, final String fieldName)
+		throws PrivilegedActionException{
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<Field>(){
+							 //@Override
+							 public Field run() throws Exception{
+								 Field field=clazz.getDeclaredField(fieldName);
+								 field.setAccessible(true);
+								 return field;
+							 }
+						 });
 		}
 	}
 }
