@@ -143,12 +143,17 @@ class WintabDevice
 	private static final double PI_over_2_over_900=PI_over_2/900; // (/10) and (/90)
 
 	private float getMultRangedValue(PLevel.Type type) {
+		// v Under Construction! We need feedback: somebody with rotation support please tell us about the max/min values (range), are they in degrees?. 
+		//if(type.equals(PLevel.Type.ROTATION))
+			//return wintabProvider.wintabAccess.getValue(type);
+		//^
+		
 		if(PLevel.Type.TILT_TYPES.contains(type)) {
 			// see tiltOnWintab.xoj
 			int altitude=wintabProvider.wintabAccess.getValue(PLevel.Type.TILT_Y);
 			if(altitude<0)
 				altitude=-altitude; // when using the eraser the altitude is upside down
-			if(altitude==900) // altitude values are given (in deg) multiplied by 10. Always 900 when tilt no supported by tablet.
+			if(altitude==900) // altitude values are given (in deg) multiplied by 10. Always 900 when tilt is not supported by the tablet.
 				return 0;
 			double betha=
 				altitude*PI_over_2_over_900;
@@ -164,7 +169,7 @@ class WintabDevice
 				throw new AssertionError();
 			}
 		}
-
+		
 		float rangedValue=wintabProvider.getLevelRange(type).getRangedValue(
 					wintabProvider.wintabAccess.getValue(type));
 

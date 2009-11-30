@@ -28,13 +28,14 @@ enum{
 	E_EventType_MotionNotify,
 	E_EventType_size
 };
-/* This must be like PLevel.Type enumeration: */
+/* Warning: this enumeration is not equal to the PLevel.Type enumeration. */
 enum {
 	E_Valuators_x,
 	E_Valuators_y,
 	E_Valuators_press,
 	E_Valuators_tiltx,
 	E_Valuators_tilty,
+	E_Valuators_wheel,
 	E_Valuators_size,
 };
 

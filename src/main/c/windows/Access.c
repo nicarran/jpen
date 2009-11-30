@@ -33,7 +33,7 @@ int Access_preCreate(SAccess *pAccess) {
 
 	WTInfo(WTI_DEFCONTEXT , 0, &(pAccess->lc));
 	pAccess->device=pAccess->lc.lcDevice;
-	
+
 	strcpy(pAccess->lc.lcName, "JPen Access");
 	pAccess->lc.lcOptions |= CXO_SYSTEM;
 	pAccess->lc.lcPktData = PACKETDATA;
@@ -46,13 +46,13 @@ int Access_preCreate(SAccess *pAccess) {
 		Access_setError("Couldn't open default context.");
 		return errorState;
 	}
-	
+
 	// assertion:
 	if(pAccess->queueSize!=0 || pAccess->queueConsumableIndex!=0){
-		Access_setError("assertion failed... pointer to access is not clean.");
+		Access_setError("Assertion failed... pointer to access is not clean.");
 		return errorState;
 	}
-	
+
 	// Set queue size on wintab:
 	int wintabQueueSize=MAX_WINTAB_QUEUE_SIZE;
 	for(; wintabQueueSize>=MIN_WINTAB_QUEUE_SIZE; wintabQueueSize-=16)
@@ -80,6 +80,14 @@ void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange) {
 		{
 			AXIS axis;
 			WTInfo(WTI_DEVICES+pAccess->device, DVC_NPRESSURE, &axis);
+			pRange[0]=axis.axMin;
+			pRange[1]=axis.axMax;
+		}
+		break;
+	case E_Valuators_tanPress:
+		{
+			AXIS axis;
+			WTInfo(WTI_DEVICES+pAccess->device, DVC_TPRESSURE, &axis);
 			pRange[0]=axis.axMin;
 			pRange[1]=axis.axMax;
 		}
@@ -151,13 +159,12 @@ int Access_nextPacket(SAccess *pAccess) {
 	pAccess->valuatorValues[E_Valuators_press]= p.pkNormalPressure;
 	pAccess->valuatorValues[E_Valuators_orAzimuth]=p.pkOrientation.orAzimuth;
 	pAccess->valuatorValues[E_Valuators_orAltitude]=p.pkOrientation.orAltitude;
+	//pAccess->valuatorValues[E_Valuators_tanPress]=p.pkTangentPressure;
+	//pAccess->valuatorValues[E_Valuators_rotRoll]=p.pkRotation.roRoll;
 	pAccess->cursor=p.pkCursor;
 	pAccess->buttons=p.pkButtons;
 	pAccess->status=p.pkStatus;
 	pAccess->time=p.pkTime;
-	// vvv EXPERIMENTAL
-	//printf("pitch=%li, roll=%li, yaw=%li\n", p.pkRotation.roPitch, p.pkRotation.roRoll, p.pkRotation.roYaw);
-	//^^^
 	return 1;
 }
 

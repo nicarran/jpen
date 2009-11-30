@@ -61,7 +61,7 @@ final class EmulationProvider
 		}
 		@Override
 		public void setKindTypeNumber(int kindType){
-			throw new UnsupportedOperationException("kind can not be changed on Emulation device");
+			throw new UnsupportedOperationException("the pen kind can not be changed on the Emulation device");
 		}
 	}
 

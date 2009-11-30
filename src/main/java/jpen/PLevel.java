@@ -51,23 +51,32 @@ public class PLevel
 		*/
 		PRESSURE,
 		/**
-		Angle between the Z axis and the projection of the pen against the X-Z plane. Range: -pi/2 to pi/2 (radians).
+		Angle between the Z axis and the projection of the pen against the X-Z plane. Range: -pi/2 to pi/2 radians.
 		*/
 		TILT_X,
 		/**
-		Angle between the Z axis and the projection of the pen against the Y-Z plane. Range: -pi/2 to pi/2.
+		Angle between the Z axis and the projection of the pen against the Y-Z plane. Range: -pi/2 to pi/2 radians.
 		*/
 		TILT_Y,
 		/**
-		 Airbrush wheel "pressure". Range: -1 to 1.<p>
-		 <b>Warning:</b> this feature is currently implemented only on Mac OS X.
-		 */ 
-		TANGENTIAL_PRESSURE,
-		/**
-		 Device rotation in radians. <p>
-		 <b>Warning:</b> this feature is currently implemented only on Mac OS X. This is an untested feature, please give us feedback on how it works for you. TODO: give a URL for feedback.
+		Barrel button or wheel "pressure". Range: 0 to 1.<p>
+		@deprecated The development team does not have an airbrush to test on all platforms. Please help us giving feedback:
+			<ul>
+				<li>Which operating system are you using?</li>
+				<li>Does the value grow when the wheel is moved towards the tip of the pen?</li>
+			</ul>
 		 */
-		ROTATION,
+		//TAN_PRESSURE,
+		/**
+		Pen rotation angle. Range: ?? (clockwise?) radians. To do: verify for all platforms.<p>
+		@deprecated The development team does not have an airbrush to test on all platforms. Please help us giving feedback:
+		<ul>
+			<li>Which operating system are you using?</li>
+			<li>Which are the maximum and minimum values?</li>
+			<li>Does the value grow when the rotation is clockwise?</li>
+		</ul>
+		 */
+		//ROTATION,
 		CUSTOM;
 
 		public static final List<Type> ALL_VALUES=Collections.unmodifiableList(Arrays.asList(values()));

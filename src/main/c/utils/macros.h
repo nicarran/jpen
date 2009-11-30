@@ -58,7 +58,8 @@ extern int type##_preCreate(struct type *pCreated);\
 extern int type##_destroy(int cellIndex);\
 extern int type##_preDestroy(struct type *pToDestroy);\
 extern void type##_setError(char *error);\
-extern void type##_appendError(char *error)
+extern void type##_appendError(char *error);\
+extern void type##_clearError(void);
 
 	#define m_implementRow(type) \
 \
@@ -82,8 +83,9 @@ int type##_create(void){\
 		return -1;\
 	}\
 	memset(pNew, 0, sizeof(struct type));\
+	type##_clearError();\
 	if(type##_preCreate(pNew)){\
-		type##_setError("Initialization of created "#type" failed.");\
+		type##_appendError(" Initialization of created "#type" failed.");\
 		free(pNew);\
 		return -1;\
 	}\
@@ -128,8 +130,9 @@ int type##_destroy(int cellIndex){\
 		type##_setError("Cell content already destroyed.");\
 		return -1;\
 	}\
+	type##_clearError();\
 	if(type##_preDestroy(pCell->pContent)){\
-		type##_setError("preDestroy failed.");\
+		type##_appendError(" Destroy failed.");\
 		return -1;\
 	}\
 	if(pCell->prevCell==-1 && pCell->nextCell==-1 ){\
@@ -157,13 +160,17 @@ int type##_destroy(int cellIndex){\
 }\
 \
 void type##_setError(char *error){\
-	/*printf("--- jni: "#type": %s \n", error);*/\
-	m_newstr(type##_row.error, #type ": ");\
-	type##_appendError(error);\
+	printf("--- jni setError: "#type": %s \n", error);\
+	type##_clearError();\
+	m_concat(type##_row.error, error);\
 }\
 \
 void type##_appendError(char *toAppend){\
+	printf("--- jni appendError: "#type": %s \n", toAppend);\
 	m_concat(type##_row.error, toAppend);\
+}\
+void type##_clearError(void){\
+	m_newstr(type##_row.error, #type ": ");\
 }
 
 #endif

@@ -140,7 +140,7 @@ int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex) {
 		return errorState;
 	}
 	if(Device_getNumAxes(pDevice)<3){
-		Device_setError("Not enough axis data on device."); // TODO: change this criteria when supporting tablet buttons.
+		Device_setError("Not enough axis data on device."); // TODO: change this criteria when supporting tablet buttons?
 		return errorState;
 	}
 
