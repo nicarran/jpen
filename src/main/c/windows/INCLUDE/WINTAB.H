@@ -616,7 +616,7 @@ typedef struct tagEXPKEYSDATA { /* 1.4 */
 typedef struct tagSLIDERDATA { /* 1.4 */
 	BYTE		nTablet;
 	BYTE		nControl;
-	BYTE		nMode;
+	BYTE		nFunction;
 	BYTE		nReserved;
 	DWORD		nPosition;
 } SLIDERDATA;
@@ -639,7 +639,14 @@ typedef struct tagEXTPROPERTY { /* 1.4 */
 #define TABLET_PROPERTY_MAX				 4			// UINT32: maximum value
 #define TABLET_PROPERTY_OVERRIDE			 5			// BOOL: control is overridden
 #define TABLET_PROPERTY_OVERRIDE_NAME	 6			// UTF-8: Displayable name when control is overridden
-#define TABLET_PROPERTY_LOCATION			 11		// UINT32: Physical location of control (see TABLET_LOC_*)
+#define TABLET_PROPERTY_OVERRIDE_ICON	 7			// Image: Icon to show when control is overridden
+#define TABLET_PROPERTY_ICON_WIDTH		 8			// UINT32: Pixel width of icon display
+#define TABLET_PROPERTY_ICON_HEIGHT		 9			// UINT32: Pixel height of icon display
+#define TABLET_PROPERTY_ICON_FORMAT		10			// UINT32: Pixel format of icon display (see TABLET_ICON_FMT_*)
+#define TABLET_PROPERTY_LOCATION			11			// UINT32: Physical location of control (see TABLET_LOC_*)
+
+#define TABLET_ICON_FMT_NONE				 0			// No display
+#define TABLET_ICON_FMT_4BPP_GRAY		 1			// 4bpp grayscale
 
 #define TABLET_LOC_LEFT				0
 #define TABLET_LOC_RIGHT			1

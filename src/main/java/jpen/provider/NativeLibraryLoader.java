@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.prefs.Preferences;
-import jpen.provider.Utils;
+import jpen.Utils;
 
 public class NativeLibraryLoader{
 	private static final Logger L=Logger.getLogger(NativeLibraryLoader.class.getName());
@@ -35,6 +35,7 @@ public class NativeLibraryLoader{
 
 	private final Map<String, Collection<String>> dataModelToArchitectures=new HashMap<String, Collection<String>>();
 	private boolean loaded;
+	public final int nativeVersion;
 
 	public NativeLibraryLoader(){
 		this(new String[]{""});
@@ -43,10 +44,15 @@ public class NativeLibraryLoader{
 	public NativeLibraryLoader(String[] architectures){
 		this(architectures, architectures);
 	}
-
+	
 	public NativeLibraryLoader(String[] architectures32, String[] architectures64){
+		this(architectures32, architectures64, 0);
+	}
+
+	public NativeLibraryLoader(String[] architectures32, String[] architectures64, int nativeVersion){
 		dataModelToArchitectures.put("32", Arrays.asList(architectures32));
 		dataModelToArchitectures.put("64", Arrays.asList(architectures64));
+		this.nativeVersion=nativeVersion;
 	}
 
 	public synchronized void load(){
@@ -69,7 +75,7 @@ public class NativeLibraryLoader{
 		String preferredArchitecture=getPreferredArchitecture();
 		if(preferredArchitecture!=null){
 			try{
-				loadLibrary(preferredArchitecture);
+				loadLibrary(preferredArchitecture, nativeVersion);
 				return null;
 			}catch(Throwable t){
 				setPreferredArchitecture(null);
@@ -83,7 +89,7 @@ public class NativeLibraryLoader{
 			throw new IllegalStateException("Unsupported data model: "+dataModel);
 		for(String architecture: architectures){
 			try{
-				loadLibrary(architecture);
+				loadLibrary(architecture, nativeVersion);
 				setPreferredArchitecture(architecture);
 				loadExceptionCause=null;
 				break;
@@ -141,26 +147,10 @@ public class NativeLibraryLoader{
 			    }
 		    });
 	}
-
-	private static final String getJniLibName(String architecture) {
-		StringBuilder jniLibName=new StringBuilder(64);
-		jniLibName.append(Utils.getModuleId());
-		jniLibName.append("-");
-		jniLibName.append(Utils.getVersion());
-		if(architecture!=null && architecture.trim().length()!=0){
-			jniLibName.append("-");
-			jniLibName.append(architecture);
-		}
-		return jniLibName.toString();
-	}
-
-	public static final void loadLibrary() {
-		loadLibrary(null);
-	}
-
-	static final void loadLibrary(final String architecture) {
+	
+	public static final void loadLibrary(final String architecture, final int nativeVersion) {
 		AccessController.doPrivileged(new PrivilegedAction<Object>() {
-			    final String jniLibName=getJniLibName(architecture);
+			    final String jniLibName=getJniLibName(architecture, nativeVersion);
 			    //@Override
 			    public Object run() {
 				    try{
@@ -180,5 +170,21 @@ public class NativeLibraryLoader{
 				    L.info(jniLibName+" couldn't be loaded");
 			    }
 		    });
+	}
+	
+	private static final String getJniLibName(String architecture, int nativeVersion) {
+		StringBuilder jniLibName=new StringBuilder(64);
+		jniLibName.append(Utils.getModuleId());
+		jniLibName.append("-");
+		jniLibName.append(Utils.getVersion());
+		if(nativeVersion!=0){ // backwards compatibility
+			jniLibName.append("-");
+			jniLibName.append(nativeVersion);
+		}
+		if(architecture!=null && architecture.trim().length()!=0){
+			jniLibName.append("-");
+			jniLibName.append(architecture);
+		}
+		return jniLibName.toString();
 	}
 }

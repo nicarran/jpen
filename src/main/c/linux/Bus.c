@@ -57,8 +57,9 @@ int Bus_refreshDeviceInfo(SBus *pBus){
 		XFreeDeviceList(pBus->pDeviceInfo);
 	pBus->pDeviceInfo = XListInputDevices(pBus->pDisplay, &pBus->deviceInfoSize);
 	if (!pBus->pDeviceInfo) {
-		Bus_setError("Failed to get input device information; ");
+		Bus_setError("Failed to get input device information:");
 		Bus_appendError(xerror);
+		Bus_appendError(".");
 		XCloseDisplay(pBus->pDisplay);
 		return errorState;
 	}
@@ -85,8 +86,9 @@ int Bus_setDevice(SBus *pBus, int deviceIndex) {
 	}
 	SDevice *pDevice=Device_getP(deviceCellIndex);
 	if(Device_init(pDevice, pBus, deviceIndex)==errorState) {
-		Bus_setError("Device init failed; ");
+		Bus_setError("Device init failed:");
 		Bus_appendError(Device_row.error);
+		Bus_appendError(".");
 		if(Device_destroy(deviceCellIndex))
 			Bus_appendError(Device_row.error);
 		return errorState;

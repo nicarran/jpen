@@ -37,7 +37,6 @@ import jpen.PKind;
 import jpen.PLevel;
 import jpen.PLevelEvent;
 import jpen.provider.AbstractPenDevice;
-import jpen.provider.Utils;
 import static java.lang.Math.*;
 
 class WintabDevice
@@ -132,7 +131,7 @@ class WintabDevice
 		for(int i=PLevel.Type.VALUES.size(); --i>=0;) {
 			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
 			float value=getMultRangedValue(levelType);
-			changedLevels.add(new PLevel(levelType.ordinal(), value));
+			changedLevels.add(new PLevel(levelType, value));
 		}
 
 		getPenManager().scheduleLevelEvent(this, wintabProvider.wintabAccess.getTime(), changedLevels, true);
@@ -143,11 +142,6 @@ class WintabDevice
 	private static final double PI_over_2_over_900=PI_over_2/900; // (/10) and (/90)
 
 	private float getMultRangedValue(PLevel.Type type) {
-		// v Under Construction! We need feedback: somebody with rotation support please tell us about the max/min values (range), are they in degrees?. 
-		//if(type.equals(PLevel.Type.ROTATION))
-			//return wintabProvider.wintabAccess.getValue(type);
-		//^
-		
 		if(PLevel.Type.TILT_TYPES.contains(type)) {
 			// see tiltOnWintab.xoj
 			int altitude=wintabProvider.wintabAccess.getValue(PLevel.Type.TILT_Y);

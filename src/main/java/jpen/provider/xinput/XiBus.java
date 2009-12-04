@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import jpen.PenManager;
-import jpen.provider.Utils;
 
 final class XiBus {
 	private final int cellIndex;
@@ -34,6 +33,8 @@ final class XiBus {
 		if(cellIndex==-1)
 			throw new Exception(getError());
 	}
+	
+	public static native int getNativeBuild();
 
 	private static native int create();
 	private static native  String getError();

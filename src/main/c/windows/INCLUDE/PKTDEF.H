@@ -13,13 +13,13 @@ with portions copyright 1991-1998 by LCS/Telegraphics.
 How to use pktdef.h:
 
 1. Include wintab.h
-2. if using just one packet format:
+2. if using just one packet format: (see example 1)
 	a. Define PACKETDATA and PACKETMODE as or'ed combinations of WTPKT bits
 	   (use the PK_* identifiers).
 	b. Include pktdef.h.
 	c. The generated structure typedef will be called PACKET.  Use PACKETDATA
 	   and PACKETMODE to fill in the LOGCONTEXT structure.
-3. If using multiple packet formats, for each one:
+3. If using multiple packet formats, for each one: (see example 2)
 	a. Define PACKETNAME. Its text value will be a prefix for this packet's
 	   parameters and names.
 	b. Define <PACKETNAME>PACKETDATA and <PACKETNAME>PACKETMODE similar to
@@ -27,97 +27,107 @@ How to use pktdef.h:
 	c. Include pktdef.h.
 	d. The generated structure typedef will be called
 	   <PACKETNAME>PACKET. Compare with 2.c. above and example #2 below.
-4. If using extension data for extensions that report thier data in the packet,
-   do the following additional steps for each extension:
-	a. Before including pktdef.h, define <PACKETNAME>PACKET<EXTENSION>
-	   as either PKEXT_ABSOLUTE or PKEXT_RELATIVE.
-	b. The generated structure typedef will contain a field for the
-	   extension data.
-	c. Scan the WTI_EXTENSION categories to find the extension's
-	   packet mask bit.
-	d. OR the packet mask bit with <PACKETNAME>PACKETDATA and use the
-	   result in the lcPktData field of the LOGCONTEXT structure.
-	e. If <PACKETNAME>PACKET<EXTENSION> was PKEXT_RELATIVE, OR the
-	   packet mask bit with <PACKETNAME>PACKETMODE and use the result
-	   in the lcPktMode field of the LOGCONTEXT structure.
-5. If using extension data for extensions that report thier data in the extensions packet,
-   do the following additional steps for each extension:
-	a. Before including pktdef.h, define <PACKETNAME>PACKET<EXTENSION> as PKEXT_ABSOLUTE.
-	b. The generated extension structure typedef will contain a field for the
-	   extension data.
-	c. Call WTExtSet to activate the extention.  Use the context id in the WT_PACKETEXT
-	   message to retrieve the extension data <PACKETNAME>PACKETEXT.
+4. If using extension data, do the following additional steps for each
+   extension: (see example 3)
+	a. Before including pktdef.h, define PACKET<EXTENSION> as either 
+	   PKEXT_ABSOLUTE or PKEXT_RELATIVE.
+	b. The generated structure typedef will contain a field for the extension
+	   data.
+	c. Scan the WTI_EXTENSION categories to find the extension's packet
+	   mask bit.
+	d. OR the packet mask bit with PACKETDATA and use the result in the
+	   lcPktData field of the LOGCONTEXT structure.
+	e. If PACKET<EXTENSION> was PKEXT_RELATIVE, OR the packet mask bit
+	   with PACKETMODE and use the result in the lcPktMode field of the
+	   LOGCONTEXT structure.
+	c. If the extension provides data via the WT_PACKETEXT message then use
+	   the context id in the WT_PACKETEXT message to retrieve the extension
+	   data PACKETEXT.
 
 
 Example #1.	-- single packet format
 
 #include <wintab.h>
-#define PACKETDATA	PK_X | PK_Y | PK_BUTTONS	/@ x, y, buttons @/
-#define PACKETMODE	PK_BUTTONS					/@ buttons relative mode @/
+#define PACKETDATA PK_X | PK_Y | PK_BUTTONS // x, y, buttons
+#define PACKETMODE PK_BUTTONS               // buttons relative mode
 #include <pktdef.h>
+
 ...
+
 	lc.lcPktData = PACKETDATA;
 	lc.lcPktMode = PACKETMODE;
 
 Example #2. -- multiple formats
 
 #include <wintab.h>
-#define PACKETNAME		MOE
-#define MOEPACKETDATA	PK_X | PK_Y | PK_BUTTONS	/@ x, y, buttons @/
-#define MOEPACKETMODE	PK_BUTTONS					/@ buttons relative mode @/
+#define PACKETNAME      MOE
+#define MOEPACKETDATA   PK_X | PK_Y | PK_BUTTONS // x, y, buttons
+#define MOEPACKETMODE   PK_BUTTONS               // buttons relative mode
 #include <pktdef.h>
-#define PACKETNAME		LARRY
-#define LARRYPACKETDATA	PK_Y | PK_Z | PK_BUTTONS	/@ y, z, buttons @/
-#define LARRYPACKETMODE	PK_BUTTONS					/@ buttons relative mode @/
+#define PACKETNAME      LARRY
+#define LARRYPACKETDATA PK_Y | PK_Z | PK_BUTTONS // y, z, buttons
+#define LARRYPACKETMODE PK_BUTTONS               // buttons relative mode
 #include <pktdef.h>
-#define PACKETNAME		CURLY
-#define CURLYPACKETDATA	PK_X | PK_Z | PK_BUTTONS	/@ x, z, buttons @/
-#define CURLYPACKETMODE	PK_BUTTONS					/@ buttons relative mode @/
+#define PACKETNAME      CURLY
+#define CURLYPACKETDATA PK_X | PK_Z | PK_BUTTONS // x, z, buttons
+#define CURLYPACKETMODE PK_BUTTONS               // buttons relative mode
 #include <pktdef.h>
+
 ...
+
 	lcMOE.lcPktData = MOEPACKETDATA;
 	lcMOE.lcPktMode = MOEPACKETMODE;
+
 ...
+
 	lcLARRY.lcPktData = LARRYPACKETDATA;
 	lcLARRY.lcPktMode = LARRYPACKETMODE;
+
 ...
+
 	lcCURLY.lcPktData = CURLYPACKETDATA;
 	lcCURLY.lcPktMode = CURLYPACKETMODE;
 
 Example #3. -- extension packet data "XFOO".
-	
+
 #include <wintab.h>
-#define PACKETDATA	PK_X | PK_Y | PK_BUTTONS	/@ x, y, buttons @/
-#define PACKETMODE	PK_BUTTONS					/@ buttons relative mode @/
-#define PACKETXFOO	PKEXT_ABSOLUTE				/@ XFOO absolute mode @/
+#define PACKETDATA PK_X | PK_Y | PK_BUTTONS // x, y, buttons
+#define PACKETMODE PK_BUTTONS               // buttons relative mode
+#define PACKETXFOO PKEXT_ABSOLUTE           // XFOO absolute mode
 #include <pktdef.h>
+
 ...
+
 UINT ScanExts(UINT wTag)
 {
 	UINT i;
 	UINT wScanTag;
 
-	/@ scan for wTag's info category. @/
-	for (i = 0; WTInfo(WTI_EXTENSIONS + i, EXT_TAG, &wScanTag); i++) {
-		 if (wTag == wScanTag) {
-			/@ return category offset from WTI_EXTENSIONS. @/
+	// scan for wTag's info category.
+	for (i = 0; WTInfo(WTI_EXTENSIONS + i, EXT_TAG, &wScanTag); i++)
+	{
+		if (wTag == wScanTag)
+		{
+			// return category offset from WTI_EXTENSIONS.
 			return i;
 		}
 	}
-	/@ return error code. @/
+	// return error code.
 	return 0xFFFF;
 }
+
 ...
+
 	lc.lcPktData = PACKETDATA;
 	lc.lcPktMode = PACKETMODE;
-#ifdef PACKETXFOO
+
 	categoryXFOO = ScanExts(WTX_XFOO);
 	WTInfo(WTI_EXTENSIONS + categoryXFOO, EXT_MASK, &maskXFOO);
 	lc.lcPktData |= maskXFOO;
 #if PACKETXFOO == PKEXT_RELATIVE
 	lc.lcPktMode |= maskXFOO;
 #endif
-#endif
+
 	WTOpen(hWnd, &lc, TRUE);
 
 

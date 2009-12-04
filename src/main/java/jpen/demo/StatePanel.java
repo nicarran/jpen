@@ -65,7 +65,7 @@ class StatePanel{
 																		"Sample Period:", sampleRatePanel.panel
 																		));
 		column.add(Utils.labelComponent(
-		             "JPen Version:", new JLabel(jpen.provider.Utils.getFullVersion())
+		             "JPen Version:", new JLabel(jpen.Utils.getFullVersion())
 		           ));
 
 		mainLine.add(Utils.createHorizontalStrut());

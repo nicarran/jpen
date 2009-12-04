@@ -18,6 +18,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 #include "../jpen_provider_wintab_WintabAccess.h"
 #include "Access.h"
+#include "BuildNumber.h"
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
@@ -38,6 +39,17 @@ JNIEXPORT jstring JNICALL Java_jpen_provider_wintab_WintabAccess_getError
 (JNIEnv *pEnv, jclass class) {
 	return (*pEnv)->NewStringUTF(pEnv, Access_row.error);
 }
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getNativeBuild
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getNativeBuild
+(JNIEnv *pEnv, jclass class){
+	return BUILD_NUMBER;
+}
+
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess

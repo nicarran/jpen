@@ -67,6 +67,7 @@ void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange) {
 	if(Access_refreshLc(pAccess)){
 		Access_appendError(" Couldn't get status.");
 	}
+	pRange[0]=pRange[1]=0;
 	switch(valuator){
 	case E_Valuators_x:
 		pRange[0]=pRange[1]=pAccess->lc.lcOutOrgX;
@@ -79,21 +80,30 @@ void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange) {
 	case E_Valuators_press:
 		{
 			AXIS axis;
-			WTInfo(WTI_DEVICES+pAccess->device, DVC_NPRESSURE, &axis);
-			pRange[0]=axis.axMin;
-			pRange[1]=axis.axMax;
+			if(WTInfo(WTI_DEVICES+pAccess->device, DVC_NPRESSURE, &axis)){
+				pRange[0]=axis.axMin;
+				pRange[1]=axis.axMax;
+			}
 		}
 		break;
 	case E_Valuators_tanPress:
 		{
 			AXIS axis;
-			WTInfo(WTI_DEVICES+pAccess->device, DVC_TPRESSURE, &axis);
-			pRange[0]=axis.axMin;
-			pRange[1]=axis.axMax;
+			if(WTInfo(WTI_DEVICES+pAccess->device, DVC_TPRESSURE, &axis)){
+				pRange[0]=axis.axMin;
+				pRange[1]=axis.axMax;
+			}
 		}
 		break;
-	default:
-		pRange[0]=pRange[1]=0;
+	case E_Valuators_twist:
+		{
+			AXIS axises[3];
+			if(WTInfo(WTI_DEVICES+pAccess->device, DVC_ORIENTATION, &axises)){
+				pRange[0]=axises[2].axMin;
+				pRange[1]=axises[2].axMax;
+			}
+		}
+		break;
 	}
 
 	// E_Valuators_orAzimuth, y E_Valuators_orAltitude
@@ -159,8 +169,8 @@ int Access_nextPacket(SAccess *pAccess) {
 	pAccess->valuatorValues[E_Valuators_press]= p.pkNormalPressure;
 	pAccess->valuatorValues[E_Valuators_orAzimuth]=p.pkOrientation.orAzimuth;
 	pAccess->valuatorValues[E_Valuators_orAltitude]=p.pkOrientation.orAltitude;
-	//pAccess->valuatorValues[E_Valuators_tanPress]=p.pkTangentPressure;
-	//pAccess->valuatorValues[E_Valuators_rotRoll]=p.pkRotation.roRoll;
+	pAccess->valuatorValues[E_Valuators_tanPress]=p.pkTangentPressure;
+	pAccess->valuatorValues[E_Valuators_twist]=p.pkOrientation.orTwist;
 	pAccess->cursor=p.pkCursor;
 	pAccess->buttons=p.pkButtons;
 	pAccess->status=p.pkStatus;

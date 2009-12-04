@@ -25,7 +25,6 @@ import jpen.PenProvider;
 import jpen.PKind;
 import jpen.provider.AbstractPenProvider;
 import jpen.provider.NativeLibraryLoader;
-import jpen.provider.Utils;
 
 public class CocoaProvider extends AbstractPenProvider {
 

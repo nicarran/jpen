@@ -24,7 +24,6 @@ import java.util.List;
 import jpen.PenDevice;
 import jpen.PenManager;
 import jpen.PLevel;
-import jpen.provider.Utils;
 
 final class XiDevice{
 	enum EventType{

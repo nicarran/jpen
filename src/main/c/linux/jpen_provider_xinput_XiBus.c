@@ -18,6 +18,17 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 #include "../jpen_provider_xinput_XiBus.h"
 #include "Bus.h"
+#include "BuildNumber.h"
+
+/*
+ * Class:     jpen_provider_xinput_XiBus
+ * Method:    getNativeBuild
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_getNativeBuild
+(JNIEnv *pEnv, jclass class){
+	return BUILD_NUMBER;
+}
 
 /*
  * Class:     jpen_provider_xinput_Bus

@@ -89,7 +89,20 @@ public abstract class AbstractPenProvider
 			}
 			return true;
 		}
-
+		
 		protected abstract PenProvider constructProvider() throws Throwable;
+		
+		//@Override
+		public int getNativeVersion(){
+			return -1;
+		}
+		//@Override
+		public int getNativeBuild(){
+			return -1;
+		}
+		//@Override
+		public int getExpectedNativeBuild(){
+			return -1;
+		}
 	}
 }

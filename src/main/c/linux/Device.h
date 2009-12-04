@@ -28,7 +28,7 @@ enum{
 	E_EventType_MotionNotify,
 	E_EventType_size
 };
-/* Warning: this enumeration is not equal to the PLevel.Type enumeration. */
+/* Warning: this enumeration is analogous to the PLevel.Type enumeration. */
 enum {
 	E_Valuators_x,
 	E_Valuators_y,

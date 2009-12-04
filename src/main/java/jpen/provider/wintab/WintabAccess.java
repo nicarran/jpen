@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import jpen.PLevel;
-import jpen.provider.Utils;
 
 final class WintabAccess {
 	private static final Object LOCK=new Object();
@@ -49,6 +48,8 @@ final class WintabAccess {
 
 	private static native int create();
 	private static native String getError();
+	
+	public static native int getNativeBuild();
 
 	int getValue(PLevel.Type levelType) {
 		synchronized(LOCK){

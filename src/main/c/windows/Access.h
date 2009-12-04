@@ -25,7 +25,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 //#ifdef USE_X_LIB
 //#include "INCLUDE/WINTABX.h"
 //#endif
-#define PACKETDATA	(PK_STATUS | PK_TIME | PK_X | PK_Y | PK_NORMAL_PRESSURE | PK_CURSOR | PK_BUTTONS | PK_ORIENTATION /*| PK_TANGENT_PRESSURE | PK_ROTATION*/)
+#define PACKETDATA	(PK_STATUS | PK_TIME | PK_X | PK_Y | PK_NORMAL_PRESSURE | PK_CURSOR | PK_BUTTONS | PK_ORIENTATION | PK_TANGENT_PRESSURE /*| PK_ROTATION causes packet corruption :-(... symptom on JPen Demo: wild creation of inexistent PenDevices.  */)
 #define PACKETMODE	0
 // #define PACKETTILT PKEXT_ABSOLUTE // TILT extension is not widely implemented (wacom), so I disable it and use pkOrientation to get tilt data 
 #include "INCLUDE/PKTDEF.H"
@@ -48,7 +48,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 #define MIN_WINTAB_QUEUE_SIZE 16
 #define QUEUE_SIZE 16
 
-/* This must be like PLevel.Type enumeration: */
+/* This enum matches the PLevel.Type enumeration: */
 enum{
 	E_Valuators_x,
 	E_Valuators_y,
@@ -56,7 +56,7 @@ enum{
 	E_Valuators_orAzimuth,
 	E_Valuators_orAltitude,
 	E_Valuators_tanPress,
-	E_Valuators_rotRoll,
+	E_Valuators_twist,
 	E_Valuators_size,
 };
 

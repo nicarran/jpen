@@ -59,24 +59,25 @@ public class PLevel
 		*/
 		TILT_Y,
 		/**
-		Barrel button or wheel "pressure". Range: 0 to 1.<p>
-		@deprecated The development team does not have an airbrush to test on all platforms. Please help us giving feedback:
+		Barrel button or wheel. Range: 0 to 1 towards the pen tip.<p>
+		@deprecated The development team does not have an airbrush to test on all platforms. Please help us giving feedback (<a href="http://sourceforge.net/projects/jpen/forums/forum/753961">start a topic on the help forum</a>):
 			<ul>
 				<li>Which operating system are you using?</li>
-				<li>Does the value grow when the wheel is moved towards the tip of the pen?</li>
+				<li>Does the value grow (0 to 1) when the wheel is moved towards the pen tip?</li>
+				<li>Are you using an airbrush or a pen marker?</li>
 			</ul>
 		 */
-		//TAN_PRESSURE,
+		WHEEL,
 		/**
-		Pen rotation angle. Range: ?? (clockwise?) radians. To do: verify for all platforms.<p>
-		@deprecated The development team does not have an airbrush to test on all platforms. Please help us giving feedback:
-		<ul>
-			<li>Which operating system are you using?</li>
-			<li>Which are the maximum and minimum values?</li>
-			<li>Does the value grow when the rotation is clockwise?</li>
-		</ul>
+		Pen rotation. Range: 0 to 1 clockwise.
+		@deprecated The development team does not have a pen marker or 4D mouse to test on all platforms. Please help us giving feedback (<a href="http://sourceforge.net/projects/jpen/forums/forum/753961">start a topic on the help forum</a>):
+			<ul>
+				<li>Which operating system are you using?</li>
+				<li>Does the value grow from 0 to 1 when the device is moved clockwise?</li>
+				<li>Are you using a pen marker or 4D mouse?</li>
+			</ul>
 		 */
-		//ROTATION,
+		ROTATION,
 		CUSTOM;
 
 		public static final List<Type> ALL_VALUES=Collections.unmodifiableList(Arrays.asList(values()));
@@ -134,6 +135,10 @@ public class PLevel
 		public String toString() {
 			return "[PLevel.Range: "+min+", "+max+"]";
 		}
+	}
+	
+	public PLevel(Type type, float value){
+		this(type.ordinal(), value);
 	}
 
 	public PLevel(int typeNumber, float value) {

@@ -28,7 +28,7 @@ final class EmulationProvider
 		extends AbstractConstructor{
 		//@Override
 		public String getName(){
-			return "Emulation";
+			return "JPen";
 		}
 
 		//@Override

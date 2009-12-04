@@ -230,7 +230,12 @@ public class Pen extends PenState {
 	}
 
 	/**
-	Changes the frequency.  This method returns immediately, the change of frequency will happen after all the pending events are processed.
+	Changes the event firing frequency. The pen collects device (tablet) data points and stores them in a buffer. The data  points are taken from this buffer and fired as {@link PenEvent}s at this frequency.<p> 
+	
+	This method returns immediately, the change of frequency will happen after all the pending events are processed.
+	
+	@see #addListener(PenListener) 
+	@see #removeListener(PenListener)
 	*/
 	public void setFrequencyLater(int frequency){
 		setFrequency(frequency, false);
@@ -248,6 +253,9 @@ public class Pen extends PenState {
 		return thread.exception;
 	}
 
+	/**
+	Adds a {@link PenListener} for {@link PenEvent}s fired by this pen.
+	*/
 	public void addListener(PenListener l) {
 		synchronized(listeners) {
 			listeners.add(l);
@@ -255,6 +263,9 @@ public class Pen extends PenState {
 		}
 	}
 
+	/**
+	Removes a {@link PenListener} previously added using {@link #addListener(PenListener)}.
+	*/
 	public void removeListener(PenListener l) {
 		synchronized(listeners) {
 			listeners.remove(l);

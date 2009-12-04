@@ -39,7 +39,6 @@ import jpen.PKind;
 import jpen.PLevel;
 import jpen.PLevelEvent;
 import jpen.provider.AbstractPenDevice;
-import jpen.provider.Utils;
 import jpen.provider.VirtualScreenBounds;
 import jpen.PScroll;
 import jpen.PScrollEvent;
@@ -73,8 +72,8 @@ final class XinputDevice extends AbstractPenDevice {
 								 if(XinputDevice.this.xiDevice.waitNextEvent())
 									 processLastEvent();
 								 else {// then a call to xiDevice.stopWaitingNextEvent was made
-								 	 //System.out.println("stopWaitingNextEvent was called");
-									 synchronized(XinputDevice.this){ // try to aquire this lock to wait until the XinputDevice.this sync methods return 
+									 //System.out.println("stopWaitingNextEvent was called");
+									 synchronized(XinputDevice.this){ // try to aquire this lock to wait until the XinputDevice.this sync methods return
 									 }
 								 }
 							 }
@@ -128,9 +127,9 @@ final class XinputDevice extends AbstractPenDevice {
 	}
 
 	synchronized void reset(){
-		xiDevice.stopWaitingNextEvent(); 
-		while(xiDevice.nextEvent()) // flush pending events 
-				;
+		xiDevice.stopWaitingNextEvent();
+		while(xiDevice.nextEvent()) // flush pending events
+			;
 		resetLevelRanges();
 	}
 
@@ -186,7 +185,7 @@ final class XinputDevice extends AbstractPenDevice {
 		for(int i=PLevel.Type.VALUES.size(); --i>=0;) {
 			PLevel.Type levelType=PLevel.Type.VALUES.get(i);
 			float value=getMultRangedValue(levelType);
-			changedLevels.add(new PLevel(levelType.ordinal(), value));
+			changedLevels.add(new PLevel(levelType, value));
 		}
 		getPenManager().scheduleLevelEvent(this, xiDevice.getLastEventTime(), changedLevels, true);
 		changedLevels.clear();
@@ -203,7 +202,10 @@ final class XinputDevice extends AbstractPenDevice {
 	private static final float RADS_PER_DEG=(float)(Math.PI/180);
 
 	private final float getMultRangedValue(PLevel.Type levelType) {
+		if(levelType.equals(PLevel.Type.ROTATION)) // rotation and wheel are given using the same xinput valuator
+			levelType=PLevel.Type.WHEEL;
 		float devValue=xiDevice.getValue(levelType);
+		// TODO: change to rotation if the name includes "airbrush" ? wait for feedback.
 
 		if(PLevel.Type.TILT_TYPES.contains(levelType))
 			return devValue*RADS_PER_DEG;

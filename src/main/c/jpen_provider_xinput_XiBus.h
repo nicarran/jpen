@@ -9,6 +9,14 @@ extern "C" {
 #endif
 /*
  * Class:     jpen_provider_xinput_XiBus
+ * Method:    getNativeBuild
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_getNativeBuild
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     jpen_provider_xinput_XiBus
  * Method:    create
  * Signature: ()I
  */

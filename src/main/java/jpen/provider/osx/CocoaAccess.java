@@ -254,21 +254,21 @@ public class CocoaAccess {
 			public void run() {
 				
 				levels.clear();
-				levels.add(new PLevel(PLevel.Type.X.ordinal(), screenX));
-				levels.add(new PLevel(PLevel.Type.Y.ordinal(), screenY));
+				levels.add(new PLevel(PLevel.Type.X, screenX));
+				levels.add(new PLevel(PLevel.Type.Y, screenY));
 				
 
 				// JPen expects tilt to be -pi/2 to pi/2 from vertical;
 				// Cocoa delivers tilt as -1 to 1 from vertical
-				levels.add(new PLevel(PLevel.Type.TILT_X.ordinal(), tiltX * HALF_PI));
-				levels.add(new PLevel(PLevel.Type.TILT_Y.ordinal(), tiltY * HALF_PI));
+				levels.add(new PLevel(PLevel.Type.TILT_X, tiltX * HALF_PI));
+				levels.add(new PLevel(PLevel.Type.TILT_Y, tiltY * HALF_PI));
 				
-				levels.add(new PLevel(PLevel.Type.PRESSURE.ordinal(), pressure));
-				//levels.add(new PLevel(PLevel.Type.TANGENTIAL_PRESSURE.ordinal(), tangentialPressure));
+				levels.add(new PLevel(PLevel.Type.PRESSURE, pressure));
+				levels.add(new PLevel(PLevel.Type.WHEEL, tangentialPressure));
 				// Cocoa tablet rotation is in degrees
-				//levels.add(new PLevel(PLevel.Type.ROTATION.ordinal(), RADIANS_PER_DEGREE * rotation));
+				levels.add(new PLevel(PLevel.Type.ROTATION, rotation/360f));
 
-				cocoaProvider.getPenManager().scheduleLevelEvent(device, levels, System.currentTimeMillis(), true);
+				cocoaProvider.getPenManager().scheduleLevelEvent(device, System.currentTimeMillis(), levels, true);
 
 				levels.clear();
 			}

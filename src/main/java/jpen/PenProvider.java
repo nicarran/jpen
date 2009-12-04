@@ -59,6 +59,18 @@ public interface PenProvider {
 		@return The {@code PenProvider} constructed when {@link #construct(PenManager)}  was called. {@code null} if it couldn't be constructed or if it has not yet being called. 
 		*/
 		PenProvider getConstructed();
+		/**
+		@return the native library version number. {@code -1} if the provider does not use a native library. The version is used to construct the native library name. 
+		*/
+		int getNativeVersion();
+		/**
+		@return the loaded native library build number. {@code -1} if the provider does not use a native library.
+		*/
+		int getNativeBuild();
+		/**
+		@return the expected native library build number. {@code -1} if the provider does not use a native library.
+		*/
+		int getExpectedNativeBuild();
 	}
 
 	/**

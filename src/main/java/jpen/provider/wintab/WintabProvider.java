@@ -46,14 +46,14 @@ import jpen.PenProvider;
 import jpen.PLevel;
 import jpen.provider.AbstractPenProvider;
 import jpen.provider.NativeLibraryLoader;
-import jpen.provider.Utils;
 import jpen.provider.VirtualScreenBounds;
 
 public class WintabProvider
 	extends AbstractPenProvider {
 	private static final Logger L=Logger.getLogger(WintabProvider.class.getName());
 	public static final int PERIOD=10;
-	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""}, new String[]{"64"});
+	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""}, new String[]{"64"}, Integer.valueOf(jpen.Utils.getModuleProperties().
+						 getString("jpen.provider.wintab.nativeVersion")));
 	//static{L.setLevel(Level.ALL);}
 
 	static void loadLibrary(){
@@ -83,6 +83,20 @@ public class WintabProvider
 			loadLibrary();
 			WintabAccess wintabAccess=new WintabAccess();
 			return new WintabProvider(this, wintabAccess);
+		}
+		@Override
+		public int getNativeVersion(){
+			return LIB_LOADER.nativeVersion;
+		}
+		//@Override
+		public int getNativeBuild(){
+			loadLibrary();
+			return WintabAccess.getNativeBuild();
+		}
+		//@Override
+		public int getExpectedNativeBuild(){
+			return Integer.valueOf(jpen.Utils.getModuleProperties().
+						 getString("jpen.provider.wintab.nativeBuild"));
 		}
 	}
 

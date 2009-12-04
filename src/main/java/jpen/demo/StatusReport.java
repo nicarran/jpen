@@ -55,7 +55,7 @@ public class StatusReport{
 
 	private void appendHeader(PenManager penManager){
 		appendLine("===== JPen - Status Report =====");
-		appendLine("JPen Version: "+jpen.provider.Utils.getDistVersion());
+		appendLine("JPen Version: "+jpen.Utils.getFullVersion());
 		appendLine("Date: "+new java.util.Date());
 	}
 
@@ -71,25 +71,25 @@ public class StatusReport{
 	}
 
 	private static final Set<String> PRIVATE_SYSTEM_PROPERTIES=new HashSet<String>(Arrays.asList(
-	      new String[]{
-	        "user.dir",
-	        "java.io.tmpdir",
-	        "line.separator",
-	        "user.home",
-	        "user.name",
-	      }
-	    ));
+				new String[]{
+					"user.dir",
+					"java.io.tmpdir",
+					"line.separator",
+					"user.home",
+					"user.name",
+				}
+			));
 
 	private void appendSystemInfo(PenManager penManager){
 		appendLine("System Properties:");
 		try{
-		TreeSet<Object> properties=new TreeSet<Object>(System.getProperties().keySet());
-		for(Object property: properties){
-			String propertyName=property.toString();
-			if(PRIVATE_SYSTEM_PROPERTIES.contains(propertyName))
-				continue;
-			appendLine(propertyName+": "+System.getProperty(propertyName), 1);
-		}
+			TreeSet<Object> properties=new TreeSet<Object>(System.getProperties().keySet());
+			for(Object property: properties){
+				String propertyName=property.toString();
+				if(PRIVATE_SYSTEM_PROPERTIES.contains(propertyName))
+					continue;
+				appendLine(propertyName+": "+System.getProperty(propertyName), 1);
+			}
 		}catch(SecurityException ex){
 			appendLine("System Properties are not readable. You can install JPen as a Java Extension to avoid security restrictions.", 1);
 		}
@@ -107,6 +107,12 @@ public class StatusReport{
 			appendLine("Construction Exception: "+constructionExceptionStackTrace, 2);
 			PenProvider penProvider=constructor.getConstructed();
 			if(penProvider!=null){
+				int nativeVersion=constructor.getNativeVersion();
+				if(nativeVersion!=-1){
+					appendLine("Native Version-Build(Expected): "+
+										 constructor.getNativeVersion()+"-"+constructor.getNativeBuild()+
+										 "("+constructor.getExpectedNativeBuild()+")", 2);
+				}
 				Collection<PenDevice> penDevices=penProvider.getDevices();
 				for(PenDevice penDevice:penDevices){
 					appendLine("Device: "+penDevice.getName()+" ("+penDevice.getPhysicalId()+")", 2);

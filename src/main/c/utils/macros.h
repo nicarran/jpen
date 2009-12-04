@@ -160,13 +160,13 @@ int type##_destroy(int cellIndex){\
 }\
 \
 void type##_setError(char *error){\
-	printf("--- jni setError: "#type": %s \n", error);\
+	/*printf("--- jni setError: "#type": %s \n", error);*/\
 	type##_clearError();\
 	m_concat(type##_row.error, error);\
 }\
 \
 void type##_appendError(char *toAppend){\
-	printf("--- jni appendError: "#type": %s \n", toAppend);\
+	/*printf("--- jni appendError: "#type": %s \n", toAppend);*/\
 	m_concat(type##_row.error, toAppend);\
 }\
 void type##_clearError(void){\

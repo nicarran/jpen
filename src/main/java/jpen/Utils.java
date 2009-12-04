@@ -24,8 +24,34 @@ import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.ResourceBundle;
 
 public final class Utils{
+	private static ResourceBundle moduleProperties;
+	
+	public static ResourceBundle getModuleProperties() {
+		if(moduleProperties==null) {
+			moduleProperties=ResourceBundle.getBundle("jpen.module");
+		}
+		return moduleProperties;
+	}
+
+	public static String getModuleId(){
+		return getModuleProperties().getString("module.id");
+	}
+
+	public static String getFullVersion(){
+		return getVersion()+"-"+getBuild();
+	}
+
+	public static String getVersion(){
+		return getModuleProperties().getString("module.version");
+	}
+
+	public static String getBuild(){
+		return getModuleProperties().getString("module.distVersion");
+	}
+	
 	public static String evalStackTrace(Throwable t){
 		StringWriter sw=new StringWriter();
 		PrintWriter pw=new PrintWriter(sw);
