@@ -35,88 +35,89 @@ public final class XinputProvider
 	extends AbstractPenProvider {
 	private static final Logger L=Logger.getLogger(XinputProvider.class.getName());
 
-	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""}, new String[]{"x86_64", "ia64"},Integer.valueOf(jpen.Utils.getModuleProperties().
-			getString("jpen.provider.xinput.nativeVersion")));
+	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""},
+			new String[]{"x86_64", "ia64"},
+			Integer.valueOf(jpen.Utils.getModuleProperties().getString("jpen.provider.xinput.nativeVersion")));
 
-			static void loadLibrary(){
-				LIB_LOADER.load();
-			}
+	static void loadLibrary(){
+		LIB_LOADER.load();
+	}
 
-			private final XinputDevice[] xinputDevices;
-			final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
+	private final XinputDevice[] xinputDevices;
+	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 
-			public static class Constructor
-			extends AbstractPenProvider.AbstractConstructor{
-				//@Override
-				public String getName() {
-					return "XInput";
-				}
-				//@Override
-				public boolean constructable(PenManager penManager) {
-					return System.getProperty("os.name").toLowerCase().contains("linux");
-				}
-
-				@Override
-				public PenProvider constructProvider() throws Throwable {
-					loadLibrary();
-					return new XinputProvider(this);
-				}
-				@Override
-				public int getNativeVersion(){
-					return LIB_LOADER.nativeVersion;
-				}
-				//@Override
-				public int getNativeBuild(){
-					loadLibrary();
-					return XiBus.getNativeBuild();
-				}
-				//@Override
-				public int getExpectedNativeBuild(){
-					return Integer.valueOf(jpen.Utils.getModuleProperties().
-								 getString("jpen.provider.xinput.nativeBuild"));
-				}
-			}
-
-			private XinputProvider(Constructor constructor) throws Exception {
-				super(constructor);
-				L.fine("start");
-
-				XiBus xiBus=new XiBus();
-
-				for(int xiDeviceIndex=xiBus.getXiDevicesSize(); --xiDeviceIndex>=0; ) {
-				XiBus xiBus2=new XiBus(); // each XiBus opens a connection to the X server.
-					try {
-						xiBus2.setXiDevice(xiDeviceIndex);
-					} catch(Exception ex) {
-						continue;
-					}
-					devices.add(new XinputDevice(this, xiBus2.getXiDevice()));
-				}
-
-				xinputDevices=devices.toArray(new XinputDevice[devices.size()]);
-				if(devices.size()==1){
-				xinputDevices[0].setKindTypeNumber(PKind.Type.STYLUS.ordinal());
-				}
-
-				L.fine("end");
-			}
-
-			private void resetXinputDevices(){
-				for(int i=xinputDevices.length; --i>=0;)
-					xinputDevices[i].reset();
-			}
-
-			private void pauseXinputDevices(boolean paused){
-				for(int i=xinputDevices.length; --i>=0;)
-					xinputDevices[i].setIsListening(!paused);
-			}
-
-			//@Override
-			public void penManagerPaused(boolean paused) {
-				pauseXinputDevices(paused);
-				if(!paused){
-					screenBounds.reset();
-					resetXinputDevices();
-				}
-			}
+	public static class Constructor
+		extends AbstractPenProvider.AbstractConstructor{
+		//@Override
+		public String getName() {
+			return "XInput";
 		}
+		//@Override
+		public boolean constructable(PenManager penManager) {
+			return System.getProperty("os.name").toLowerCase().contains("linux");
+		}
+
+		@Override
+		public PenProvider constructProvider() throws Throwable {
+			loadLibrary();
+			return new XinputProvider(this);
+		}
+		@Override
+		public int getNativeVersion(){
+			return LIB_LOADER.nativeVersion;
+		}
+		@Override
+		public int getNativeBuild(){
+			loadLibrary();
+			return XiBus.getNativeBuild();
+		}
+		@Override
+		public int getExpectedNativeBuild(){
+			return Integer.valueOf(jpen.Utils.getModuleProperties().
+						 getString("jpen.provider.xinput.nativeBuild"));
+		}
+	}
+
+	private XinputProvider(Constructor constructor) throws Exception {
+		super(constructor);
+		L.fine("start");
+
+		XiBus xiBus=new XiBus();
+
+		for(int xiDeviceIndex=xiBus.getXiDevicesSize(); --xiDeviceIndex>=0; ) {
+			XiBus xiBus2=new XiBus(); // each XiBus opens a connection to the X server.
+			try {
+				xiBus2.setXiDevice(xiDeviceIndex);
+			} catch(Exception ex) {
+				continue;
+			}
+			devices.add(new XinputDevice(this, xiBus2.getXiDevice()));
+		}
+
+		xinputDevices=devices.toArray(new XinputDevice[devices.size()]);
+		if(devices.size()==1){
+			xinputDevices[0].setKindTypeNumber(PKind.Type.STYLUS.ordinal());
+		}
+
+		L.fine("end");
+	}
+
+	private void resetXinputDevices(){
+		for(int i=xinputDevices.length; --i>=0;)
+			xinputDevices[i].reset();
+	}
+
+	private void pauseXinputDevices(boolean paused){
+		for(int i=xinputDevices.length; --i>=0;)
+			xinputDevices[i].setIsListening(!paused);
+	}
+
+	//@Override
+	public void penManagerPaused(boolean paused) {
+		pauseXinputDevices(paused);
+		if(!paused){
+			screenBounds.reset();
+			resetXinputDevices();
+		}
+	}
+}

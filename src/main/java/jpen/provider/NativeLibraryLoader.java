@@ -36,11 +36,19 @@ public class NativeLibraryLoader{
 	private final Map<String, Collection<String>> dataModelToArchitectures=new HashMap<String, Collection<String>>();
 	private boolean loaded;
 	public final int nativeVersion;
+	
+	public NativeLibraryLoader(int nativeVersion){
+		this(new String[]{""}, nativeVersion);
+	}
+	
+	public NativeLibraryLoader(String[] architectures, int nativeVersion){
+		this(architectures, architectures, nativeVersion);
+	}
 
 	public NativeLibraryLoader(){
 		this(new String[]{""});
 	}
-
+	
 	public NativeLibraryLoader(String[] architectures){
 		this(architectures, architectures);
 	}
@@ -48,7 +56,7 @@ public class NativeLibraryLoader{
 	public NativeLibraryLoader(String[] architectures32, String[] architectures64){
 		this(architectures32, architectures64, 0);
 	}
-
+	
 	public NativeLibraryLoader(String[] architectures32, String[] architectures64, int nativeVersion){
 		dataModelToArchitectures.put("32", Arrays.asList(architectures32));
 		dataModelToArchitectures.put("64", Arrays.asList(architectures64));

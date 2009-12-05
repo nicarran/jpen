@@ -28,10 +28,11 @@ import jpen.provider.NativeLibraryLoader;
 
 public class CocoaProvider extends AbstractPenProvider {
 
-	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader();
+	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(
+				Integer.valueOf(jpen.Utils.getModuleProperties().getString("jpen.provider.osx.nativeVersion")));
 
 	public static class Constructor
-	extends AbstractPenProvider.AbstractConstructor{
+		extends AbstractPenProvider.AbstractConstructor{
 
 		public String getName() {
 			return "Cocoa";
@@ -42,9 +43,23 @@ public class CocoaProvider extends AbstractPenProvider {
 		}
 
 		public PenProvider constructProvider() throws Throwable {
-				LIB_LOADER.load();
-				CocoaAccess cocoaAccess=new CocoaAccess();
-				return new CocoaProvider(this, cocoaAccess);
+			LIB_LOADER.load();
+			CocoaAccess cocoaAccess=new CocoaAccess();
+			return new CocoaProvider(this, cocoaAccess);
+		}
+		@Override
+		public int getNativeVersion(){
+			return LIB_LOADER.nativeVersion;
+		}
+		@Override
+		public int getNativeBuild(){
+			LIB_LOADER.load();
+			return CocoaAccess.getNativeBuild();
+		}
+		@Override
+		public int getExpectedNativeBuild(){
+			return Integer.valueOf(jpen.Utils.getModuleProperties().
+						 getString("jpen.provider.osx.nativeBuild"));
 		}
 	}
 

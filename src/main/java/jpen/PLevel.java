@@ -60,7 +60,7 @@ public class PLevel
 		TILT_Y,
 		/**
 		Barrel button or wheel. Range: 0 to 1 towards the pen tip.<p>
-		@deprecated The development team does not have an airbrush to test on all platforms. Please help us giving feedback (<a href="http://sourceforge.net/projects/jpen/forums/forum/753961">start a topic on the help forum</a>):
+		@deprecated Testing needed. The development team does not have an airbrush to test on all platforms. Please help us giving feedback (<a href="http://sourceforge.net/projects/jpen/forums/forum/753961">start a topic on the help forum</a>):
 			<ul>
 				<li>Which operating system are you using?</li>
 				<li>Does the value grow (0 to 1) when the wheel is moved towards the pen tip?</li>
@@ -70,7 +70,7 @@ public class PLevel
 		WHEEL,
 		/**
 		Pen rotation. Range: 0 to 1 clockwise.
-		@deprecated The development team does not have a pen marker or 4D mouse to test on all platforms. Please help us giving feedback (<a href="http://sourceforge.net/projects/jpen/forums/forum/753961">start a topic on the help forum</a>):
+		@deprecated Testing needed. The development team does not have a pen marker or 4D mouse to test on all platforms. Please help us giving feedback (<a href="http://sourceforge.net/projects/jpen/forums/forum/753961">start a topic on the help forum</a>):
 			<ul>
 				<li>Which operating system are you using?</li>
 				<li>Does the value grow from 0 to 1 when the device is moved clockwise?</li>

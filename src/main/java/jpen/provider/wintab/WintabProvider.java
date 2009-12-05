@@ -52,8 +52,9 @@ public class WintabProvider
 	extends AbstractPenProvider {
 	private static final Logger L=Logger.getLogger(WintabProvider.class.getName());
 	public static final int PERIOD=10;
-	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""}, new String[]{"64"}, Integer.valueOf(jpen.Utils.getModuleProperties().
-						 getString("jpen.provider.wintab.nativeVersion")));
+	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""},
+			new String[]{"64"},
+			Integer.valueOf(jpen.Utils.getModuleProperties().getString("jpen.provider.wintab.nativeVersion")));
 	//static{L.setLevel(Level.ALL);}
 
 	static void loadLibrary(){
@@ -88,12 +89,12 @@ public class WintabProvider
 		public int getNativeVersion(){
 			return LIB_LOADER.nativeVersion;
 		}
-		//@Override
+		@Override
 		public int getNativeBuild(){
 			loadLibrary();
 			return WintabAccess.getNativeBuild();
 		}
-		//@Override
+		@Override
 		public int getExpectedNativeBuild(){
 			return Integer.valueOf(jpen.Utils.getModuleProperties().
 						 getString("jpen.provider.wintab.nativeBuild"));
@@ -114,9 +115,9 @@ public class WintabProvider
 
 		thread=new Thread("jpen-WintabProvider") {
 						 private long getPeriod(){
-						 	 return PERIOD;
+							 return PERIOD;
 							 //return Math.max(10,
-									//						 getConstructor().getPenManager().pen.getPeriodMillis()/2);
+							 //						 getConstructor().getPenManager().pen.getPeriodMillis()/2);
 						 }
 						 public void run() {
 							 while(true) {

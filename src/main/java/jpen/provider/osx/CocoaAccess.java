@@ -39,6 +39,8 @@ public class CocoaAccess {
 	private CocoaProvider cocoaProvider = null;
 
 	public CocoaAccess() {}
+	
+	static native int getNativeBuild();
 
 
 	public void start() {
