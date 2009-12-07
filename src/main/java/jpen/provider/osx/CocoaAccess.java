@@ -188,7 +188,6 @@ public class CocoaAccess {
 	protected void postProximityEvent(
 	  double eventTimeSeconds,
 	  int cocoaModifierFlags,
-	  float screenX, float screenY,
 	  int capabilityMask, // UInt32
 	  int deviceID, // UInt16
 	  boolean enteringProximity,
@@ -255,6 +254,10 @@ public class CocoaAccess {
 		invokeOnEventThread(new Runnable() {
 			public void run() {
 				
+				if (device == null) {
+					device = cocoaProvider.getDevice(PKind.Type.CURSOR);
+				}
+				
 				levels.clear();
 				levels.add(new PLevel(PLevel.Type.X, screenX));
 				levels.add(new PLevel(PLevel.Type.Y, screenY));
@@ -270,7 +273,7 @@ public class CocoaAccess {
 				// Cocoa tablet rotation is in degrees
 				levels.add(new PLevel(PLevel.Type.ROTATION, rotation/360f));
 
-				cocoaProvider.getPenManager().scheduleLevelEvent(device, System.currentTimeMillis(), levels, true);
+				cocoaProvider.getPenManager().scheduleLevelEvent(device, (long)(eventTimeSeconds*1000), levels, true);
 
 				levels.clear();
 			}

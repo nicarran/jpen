@@ -43,7 +43,8 @@ Based on code by Jerry Huxtable. See http://www.jhlabs.com/java/tablet/ .
 #include <Cocoa/Cocoa.h>
 #import <objc/runtime.h>
 #include "JRSwizzle.h"
-#include "NSDate_Additions.h"
+#include "BuildNumber.h"
+//#include "NSDate_Additions.h"
 
 /* these are not defined in 10.5 */
 #if MAC_OS_X_VERSION_MAX_ALLOWED == MAC_OS_X_VERSION_10_5
@@ -158,11 +159,12 @@ static NSPoint getLocation(NSEvent *event) {
 
 static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 	
-	NSPoint location = getLocation(event);
+	// This location is bogus. It merely represents the last point the cursor was at, 
+	// not the new point for the device entering proximity	
+	//NSPoint location = getLocation(event);
 	(*env)->CallVoidMethod(env, g_object, g_methodID_prox,
 						   [event timestamp]+systemStartTime,
 						   [event modifierFlags],
-						   location.x, location.y,
 						   [event capabilityMask],
 						   [event deviceID],
 						   [event isEnteringProximity],
@@ -280,8 +282,10 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 				{
 					bool tablet = NSTabletPoint == [event type] || NSTabletPointEventSubtype == [event subtype];
 					
-					if (watchProximityEvents && NSTabletPoint != [event type] && [event subtype] == NSTabletProximityEventSubtype) {
-						postProximityEvent(env, event);
+					// Apparently this is a duplicate of the proximity event, so we don't want to do anything with it...
+					if (NSTabletPoint != [event type] && [event subtype] == NSTabletProximityEventSubtype) {
+						break;
+						//postProximityEvent(env, event);
 					}
 					if (watchTabletEvents) {
 						NSPoint location = getLocation(event);				
@@ -329,6 +333,12 @@ static void updateWatchingEvents() {
 	watchingEvents = watchTabletEvents || watchProximityEvents || watchScrollEvents || watchGestureEvents;
 }
 
+
+JNIEXPORT jint JNICALL Java_jpen_provider_osx_CocoaAccess_getNativeBuild(JNIEnv *env, jobject this) {
+	return BUILD_NUMBER;
+}
+
+
 JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_setTabletEventsEnabled(JNIEnv *env, jobject this, jboolean enabled) {
     watchTabletEvents = enabled;
 	updateWatchingEvents();
@@ -346,8 +356,6 @@ JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_setGestureEventsEnable
 	updateWatchingEvents();
 }
 
-
-
 /*
  ** Start up: use jrswizzle to subclass the NSApplication object on the fly.
  */
@@ -358,21 +366,22 @@ JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_startup(JNIEnv *env, j
 	[NSApplication jr_swizzleMethod:@selector(sendEvent:)
 						 withMethod:@selector(JPen_sendEvent:)
 							  error:&error];
+	[NSEvent setMouseCoalescingEnabled:NO];
 	
 	if (error != nil) {
 		NSLog(@"error overriding [NSApplication sendEvent]: %@", [error description]);
 		throwException(env,"Error initializing event monitor");
 	} else {
-		NSDate *startDate = [[NSDate alloc] initWithDateOfSystemStartup];
-		systemStartTime = [startDate timeIntervalSince1970];
-		[startDate release];
+//		NSDate *startDate = [[NSDate alloc] initWithDateOfSystemStartup];
+//		systemStartTime = [startDate timeIntervalSince1970];
+//		[startDate release];
 		
 		g_object = (*env)->NewGlobalRef( env, this );
 		g_class = (*env)->GetObjectClass( env, this );
 		g_class = (*env)->NewGlobalRef( env, g_class );
 		if ( g_class != (jclass)0 ) {
 			g_methodID =	     (*env)->GetMethodID( env, g_class, "postEvent",		  "(IDIFFIIIIFFFFF)V" );
-			g_methodID_prox =    (*env)->GetMethodID( env, g_class, "postProximityEvent", "(DIFFIIZIIIIIJII)V" );
+			g_methodID_prox =    (*env)->GetMethodID( env, g_class, "postProximityEvent", "(DIIIZIIIIIJII)V" );
 			g_methodID_scroll =  (*env)->GetMethodID( env, g_class, "postScrollEvent",    "(DIFFFF)V" );
 			g_methodID_magnify = (*env)->GetMethodID( env, g_class, "postMagnifyEvent",   "(DIFFF)V" );
 			g_methodID_swipe =   (*env)->GetMethodID( env, g_class, "postSwipeEvent",     "(DIFFFF)V" );
