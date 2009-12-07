@@ -269,7 +269,7 @@ public class CocoaAccess {
 				levels.add(new PLevel(PLevel.Type.TILT_Y, tiltY * HALF_PI));
 				
 				levels.add(new PLevel(PLevel.Type.PRESSURE, pressure));
-				levels.add(new PLevel(PLevel.Type.WHEEL, tangentialPressure));
+				levels.add(new PLevel(PLevel.Type.SIDE_PRESSURE, tangentialPressure));
 				// Cocoa tablet rotation is in degrees
 				levels.add(new PLevel(PLevel.Type.ROTATION, rotation/360f));
 

@@ -203,7 +203,7 @@ final class XinputDevice extends AbstractPenDevice {
 
 	private final float getMultRangedValue(PLevel.Type levelType) {
 		if(levelType.equals(PLevel.Type.ROTATION)) // rotation and wheel are given using the same xinput valuator
-			levelType=PLevel.Type.WHEEL;
+			levelType=PLevel.Type.SIDE_PRESSURE;
 		float devValue=xiDevice.getValue(levelType);
 		// TODO: change to rotation if the name includes "airbrush" ? wait for feedback.
 

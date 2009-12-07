@@ -67,7 +67,7 @@ public class PLevel
 				<li>Are you using an airbrush or a pen marker?</li>
 			</ul>
 		 */
-		WHEEL,
+		SIDE_PRESSURE,
 		/**
 		Pen rotation. Range: 0 to 1 clockwise.
 		@deprecated Testing needed. The development team does not have a pen marker or 4D mouse to test on all platforms. Please help us giving feedback (<a href="http://sourceforge.net/projects/jpen/forums/forum/753961">start a topic on the help forum</a>):
