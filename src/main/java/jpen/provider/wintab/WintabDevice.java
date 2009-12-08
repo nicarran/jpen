@@ -138,6 +138,7 @@ class WintabDevice
 		changedLevels.clear();
 	}
 
+	private static final float PI_2=(float)(Math.PI*2);
 	private static final double PI_over_2=Math.PI/2;
 	private static final double PI_over_2_over_900=PI_over_2/900; // (/10) and (/90)
 
@@ -173,6 +174,9 @@ class WintabDevice
 			rangedValue=wintabProvider.screenBounds.getLevelRangeOffset(type)+
 									rangedValue*wintabProvider.screenBounds.getLevelRangeMult(type);
 		}
+		
+		if(PLevel.Type.ROTATION.equals(type))
+			rangedValue*=PI_2;
 
 		return rangedValue;
 	}

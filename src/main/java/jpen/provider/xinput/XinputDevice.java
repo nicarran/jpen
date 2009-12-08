@@ -200,18 +200,23 @@ final class XinputDevice extends AbstractPenDevice {
 	}
 
 	private static final float RADS_PER_DEG=(float)(Math.PI/180);
+	private static final float PI_2=(float)(2f*Math.PI);
 
 	private final float getMultRangedValue(PLevel.Type levelType) {
-		if(levelType.equals(PLevel.Type.ROTATION)) // rotation and wheel are given using the same xinput valuator
+		boolean isRotation=PLevel.Type.ROTATION.equals(levelType);
+		if(isRotation) // rotation and wheel are given using the same xinput valuator
 			levelType=PLevel.Type.SIDE_PRESSURE;
 		float devValue=xiDevice.getValue(levelType);
-		// TODO: change to rotation if the name includes "airbrush" ? wait for feedback.
+		// TODO: ignore rotation or SIDE_PRESSURE depending on the name of the device? wait feedback
 
 		if(PLevel.Type.TILT_TYPES.contains(levelType))
 			return devValue*RADS_PER_DEG;
-
+			
 		devValue=levelRanges[levelType.ordinal()].getRangedValue(devValue);
-
+		
+		if(isRotation)
+			return devValue*PI_2;
+		
 		if(PLevel.Type.MOVEMENT_TYPES.contains(levelType))
 			devValue=xinputProvider.screenBounds.getLevelRangeOffset(levelType)+
 							 devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);

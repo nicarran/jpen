@@ -38,10 +38,12 @@ public class CocoaProvider extends AbstractPenProvider {
 			return "Cocoa";
 		}
 
+		//@Override
 		public boolean constructable(PenManager penManager) {
 			return System.getProperty("os.name").toLowerCase().contains("mac");
 		}
 
+		@Override
 		public PenProvider constructProvider() throws Throwable {
 			LIB_LOADER.load();
 			CocoaAccess cocoaAccess=new CocoaAccess();

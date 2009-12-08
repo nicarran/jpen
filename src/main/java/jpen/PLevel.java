@@ -69,11 +69,11 @@ public class PLevel
 		 */
 		SIDE_PRESSURE,
 		/**
-		Pen rotation. Range: 0 to 1 clockwise.
+		Pen rotation. Range: 0 to 2*pi clockwise.
 		@deprecated Testing needed. The development team does not have a pen marker or 4D mouse to test on all platforms. Please help us giving feedback (<a href="http://sourceforge.net/projects/jpen/forums/forum/753961">start a topic on the help forum</a>):
 			<ul>
 				<li>Which operating system are you using?</li>
-				<li>Does the value grow from 0 to 1 when the device is moved clockwise?</li>
+				<li>Does the value grow from 0 to 2*pi when the device is moved clockwise?</li>
 				<li>Are you using a pen marker or 4D mouse?</li>
 			</ul>
 		 */
@@ -104,25 +104,32 @@ public class PLevel
 				azimuthXAndAltitude[0]=PI;
 			else if(tiltX==0 && tiltY==0){
 				azimuthXAndAltitude[0]=0;
-				azimuthXAndAltitude[1]=PI_2;
+				azimuthXAndAltitude[1]=PI_over_2;
 				return;
 			} else
 				azimuthXAndAltitude[0]=0;
 			double tanTiltY=tan(tiltY);
 			azimuthXAndAltitude[0]+=atan(tanTiltY/tan(tiltX));
 			azimuthXAndAltitude[1]=azimuthXAndAltitude[0]==0?
-					PI_2-tiltX:
+					PI_over_2-tiltX:
 					Math.abs(atan(sin(azimuthXAndAltitude[0])/tanTiltY));
 		}
 
-		private static final double PI_2=PI/2;
+		private static final double PI_over_2=PI/2;
 	}
 
 	public static class Range {
 		public final float min;
 		public final float max;
 		private final float range;
+		
 		public Range(float min, float max) {
+			if(min<0 && max>0 && Math.abs(max+min)==1){ // trick to avoid loosing the tool center
+				if(max>-min)
+					min=-max;
+				else
+					max=-min;
+			}
 			this.min=min;
 			this.max=max;
 			this.range=max-min;

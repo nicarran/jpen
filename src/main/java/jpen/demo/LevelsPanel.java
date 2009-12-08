@@ -35,7 +35,8 @@ class LevelsPanel{
 	{
 		for(PLevel.Type levelType: PLevel.Type.VALUES){
 			levelTypeToDisplay.put(levelType,
-			    PLevel.Type.TILT_TYPES.contains(levelType)?
+			    PLevel.Type.TILT_TYPES.contains(levelType) ||
+			    PLevel.Type.ROTATION.equals(levelType)?
 			    new AngleDisplay(levelType):
 			    new Display(levelType));
 		}
