@@ -83,7 +83,7 @@ public abstract class PenEvent
 	public PenDevice getDevice(){
 		if(pen==null)
 			throw new IllegalStateException();
-		return pen.penManager.getDevice(getDeviceId());
+		return pen.penManager.getDevice(deviceId);
 	}
 
 	/**

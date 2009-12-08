@@ -91,7 +91,6 @@ final class PenScheduler{
 	private final Point2D.Float scheduledLocation=new Point2D.Float();
 
 	synchronized boolean scheduleLevelEvent(PenDevice device, long deviceTime, Collection<PLevel> levels, boolean levelsOnScreen) {
-		// if device == null then this is an emulated event request
 		if(device!=getEmulationDevice() && phantomLevelFilter.filter(device))
 			return false;
 		float scheduledPressure=-1, lastScheduledPressure=-1;

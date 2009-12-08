@@ -32,11 +32,11 @@ public class PLevelEvent
 
 	public final PLevel[] levels;
 
-	PLevelEvent(PenDevice device, long deviceTime, PLevel[] levels) {
+	public PLevelEvent(PenDevice device, long deviceTime, PLevel[] levels) {
 		super(device, deviceTime);
 		this.levels=levels;
 	}
-
+	
 	@Override
 	void copyTo(PenState penState){
 		penState.levels.setValues(this);

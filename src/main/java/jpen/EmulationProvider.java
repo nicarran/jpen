@@ -63,6 +63,10 @@ final class EmulationProvider
 		public void setKindTypeNumber(int kindType){
 			throw new UnsupportedOperationException("the pen kind can not be changed on the Emulation device");
 		}
+		@Override
+		public boolean isDigitizer(){
+			return false;
+		}
 	}
 
 	//@Override

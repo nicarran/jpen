@@ -200,18 +200,18 @@ public class Pen extends PenState {
 	}
 
 	/**
-	Changes the frequency and waits for the event queue to dispatch all pending events. Warning: this method can not be called from the event dispatcher thread.
-
-	@throws Error if called from the event dispatcher thread. 
-	@deprecated Use {@link #setFrequencyLater(int)}.
+	Changes the event firing frequency. The pen collects device (tablet) data points and stores them in a buffer. The data  points are taken from this buffer and fired as {@link PenEvent}s at this frequency.<p> 
+	
+	This method returns immediately, the change of frequency will happen after all the pending events are processed.
+	
+	@see #addListener(PenListener) 
+	@see #removeListener(PenListener)
 	*/
-	@Deprecated
-	// TODO: for jpen3... setFrequency to be setFrequencyLater and create setFrequencyAndWait?
-	public void setFrequency(int frequency){
-		setFrequency(frequency, true);
+	public void setFrequencyLater(int frequency){
+		setFrequency(frequency, false);
 	}
-
-	private synchronized void setFrequency(int frequency, boolean wait) {
+	
+		private synchronized void setFrequency(int frequency, boolean wait) {
 		if(frequency<=0)
 			throw new IllegalArgumentException();
 		if(frequency==this.frequency)
@@ -227,18 +227,6 @@ public class Pen extends PenState {
 		thread=new MyThread(oldThread);
 		thread.start();
 		L.finest("^");
-	}
-
-	/**
-	Changes the event firing frequency. The pen collects device (tablet) data points and stores them in a buffer. The data  points are taken from this buffer and fired as {@link PenEvent}s at this frequency.<p> 
-	
-	This method returns immediately, the change of frequency will happen after all the pending events are processed.
-	
-	@see #addListener(PenListener) 
-	@see #removeListener(PenListener)
-	*/
-	public void setFrequencyLater(int frequency){
-		setFrequency(frequency, false);
 	}
 
 	public int getFrequency() {

@@ -21,7 +21,10 @@ package jpen;
 import java.util.EnumSet;
 import java.util.Set;
 
-@Deprecated // I don't need it anymore... let's see if anybody does
+/**
+@deprecated There is no replacement.
+*/
+@Deprecated 
 public interface PLevelFilter{
 	
 	boolean filterPenLevel(PLevel level);

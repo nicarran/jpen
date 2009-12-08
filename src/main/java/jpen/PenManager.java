@@ -36,24 +36,17 @@ import jpen.provider.system.SystemProvider;
 public final class PenManager {
 	private static final Logger L=Logger.getLogger(PenManager.class.getName());
 
-	final PenDevice emulationDevice;
 	public final Pen  pen=new Pen(this);
-	/**
-	@deprecated Use {@link #penOwner}.
-	*/
-	@Deprecated
-	public final Component component;
 	public final PenOwner penOwner;
 	private final Set<PenProvider.Constructor> providerConstructors=new HashSet<PenProvider.Constructor>();
 	private final Set<PenProvider.Constructor> providerConstructorsA=Collections.unmodifiableSet(providerConstructors);
-	private final Map<Byte, PenDevice> deviceIdToDevice=new HashMap<Byte, PenDevice>();
+	private final Map<Byte, PenDevice> deviceIdToDevice=new HashMap<Byte, PenDevice>(Byte.MAX_VALUE, 1f);
 	private final Collection<PenDevice> devicesA=Collections.unmodifiableCollection(deviceIdToDevice.values());
 	private byte nextDeviceId;
 	private volatile boolean paused=true;
 	private final List<PenManagerListener> listeners=new ArrayList<PenManagerListener>();
 	private PenManagerListener[] listenersArray;
-	@Deprecated
-	private PenDevice systemMouseDevice;
+	final PenDevice emulationDevice;
 
 	public PenManager(Component component) {
 		this(new AwtPenOwner(component));
@@ -61,8 +54,6 @@ public final class PenManager {
 
 	public PenManager(PenOwner penOwner){
 		this.penOwner=penOwner;
-		this.component=penOwner instanceof AwtPenOwner?
-									 ((AwtPenOwner)penOwner).component: null;
 		synchronized(pen.scheduler){
 			PenProvider.Constructor emulationProviderConstructor=new EmulationProvider.Constructor();
 			addProvider(emulationProviderConstructor);
@@ -134,8 +125,6 @@ public final class PenManager {
 		device.setId(nextDeviceId);
 		if(deviceIdToDevice.put(nextDeviceId, device)!=null)
 			throw new AssertionError();
-		if(constructor.getName().equals(SystemProvider.Constructor.NAME))
-			systemMouseDevice=device;
 		for(PenManagerListener l: getListenersArray()){
 			l.penDeviceAdded(constructor, device);
 		}
@@ -145,6 +134,8 @@ public final class PenManager {
 		Set<Byte> deviceIds=deviceIdToDevice.keySet();
 		while(deviceIds.contains(Byte.valueOf(nextDeviceId)))
 			nextDeviceId++;
+		if(nextDeviceId<0)
+			throw new IllegalStateException();
 		return nextDeviceId;
 	}
 
@@ -161,14 +152,6 @@ public final class PenManager {
 
 	public Collection<PenDevice> getDevices(){
 		return devicesA;
-	}
-
-	/**
-	@deprecated There is no replacement.
-	*/
-	@Deprecated
-	public PenDevice getSystemMouseDevice(){
-		return systemMouseDevice;
 	}
 
 	public Set<PenProvider.Constructor> getConstructors() {
@@ -200,6 +183,9 @@ public final class PenManager {
 			return;
 		pen.scheduler.scheduleButtonEvent(device, deviceTime, button);
 	}
+	/**
+	@deprecated Use {@link #scheduleButtonEvent(PenDevice, long, PButton)}
+	*/
 	@Deprecated
 	public void scheduleButtonEvent(PButton button) {
 		scheduleButtonEvent(emulationDevice, System.currentTimeMillis(), button);
@@ -213,7 +199,10 @@ public final class PenManager {
 			return;
 		pen.scheduler.scheduleScrollEvent(device, deviceTime, scroll);
 	}
-
+	
+	/**
+	@deprecated Use {@link #scheduleScrollEvent(PenDevice, long, PScroll)}.
+	*/
 	@Deprecated
 	public void scheduleScrollEvent(PenDevice device, PScroll scroll) {
 		scheduleScrollEvent(device, System.currentTimeMillis(), scroll);
@@ -231,17 +220,26 @@ public final class PenManager {
 			return false;
 		return pen.scheduler.scheduleLevelEvent(device, deviceTime, levels, levelsOnScreen);
 	}
-
+	
+	/**
+	@deprecated Use {@link #scheduleLevelEvent(PenDevice, long, Collection, boolean)}.
+	*/
 	@Deprecated
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long deviceTime, boolean levelsOnScreen) {
 		return scheduleLevelEvent(device, deviceTime, levels, levelsOnScreen);
 	}
 
+	/**
+	@deprecated Use {@link #scheduleLevelEvent(PenDevice, long, Collection, boolean)}.
+	*/
 	@Deprecated
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long deviceTime) {
 		return scheduleLevelEvent(device, levels, deviceTime, false);
 	}
 
+	/**
+	@deprecated Use {@link #scheduleLevelEvent(PenDevice, long, Collection, boolean)}.
+	*/
 	@Deprecated
 	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels) {
 		return scheduleLevelEvent(device, levels, System.currentTimeMillis());
