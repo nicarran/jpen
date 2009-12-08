@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
 
+import jpen.PButton;
 import jpen.PKind;
 import jpen.PLevel;
 
@@ -257,8 +258,34 @@ public class CocoaAccess {
 				if (device == null) {
 					device = cocoaProvider.getDevice(PKind.Type.CURSOR);
 				}
+
+
+				long deviceTime = (long)(eventTimeSeconds*1000);
 				
+				switch (type) {
+					case NS_EVENT_TYPE_LeftMouseDown:
+						scheduleButtonEvent(deviceTime, PButton.Type.LEFT, true);
+						break;
+					case NS_EVENT_TYPE_LeftMouseUp:
+						scheduleButtonEvent(deviceTime, PButton.Type.LEFT, false);
+						break;
+					case NS_EVENT_TYPE_RightMouseDown:
+						scheduleButtonEvent(deviceTime, PButton.Type.RIGHT, true);
+						break;
+					case NS_EVENT_TYPE_RightMouseUp:
+						scheduleButtonEvent(deviceTime, PButton.Type.RIGHT, false);
+						break;
+					case NS_EVENT_TYPE_OtherMouseDown:
+						scheduleButtonEvent(deviceTime, PButton.Type.CENTER, true);
+						break;
+					case NS_EVENT_TYPE_OtherMouseUp:
+						scheduleButtonEvent(deviceTime, PButton.Type.CENTER, false);
+						break;
+
+				}
+
 				levels.clear();
+								
 				levels.add(new PLevel(PLevel.Type.X, screenX));
 				levels.add(new PLevel(PLevel.Type.Y, screenY));
 				
@@ -272,10 +299,9 @@ public class CocoaAccess {
 				levels.add(new PLevel(PLevel.Type.SIDE_PRESSURE, tangentialPressure));
 				// Cocoa tablet rotation is in degrees
 				levels.add(new PLevel(PLevel.Type.ROTATION, rotation/360f));
+				cocoaProvider.getPenManager().scheduleLevelEvent(device, deviceTime, levels, true);
 
-				cocoaProvider.getPenManager().scheduleLevelEvent(device, (long)(eventTimeSeconds*1000), levels, true);
-
-				levels.clear();
+				
 			}
 		});
 	}
@@ -318,5 +344,9 @@ public class CocoaAccess {
 		} else {
 			SwingUtilities.invokeLater(r);
 		}
+	}
+
+	private void scheduleButtonEvent(long deviceTime, PButton.Type type, boolean pressed) {
+		cocoaProvider.getPenManager().scheduleButtonEvent(device, deviceTime, new PButton(type.ordinal(),pressed));
 	}
 }
