@@ -46,12 +46,30 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
     <defaultGoal>integration-test</defaultGoal>
     <plugins>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>1.0-alpha-2</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <configuration>
+              <files>
+                <file>module.properties</file>
+              </files>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
             <manifest>
-              <mainClass>jpen.demo.JPenDemoControl</mainClass>
+              <mainClass>${module.mainClass}</mainClass>
               <addClasspath>true</addClasspath>
               <addExtensions/>
               <classpathPrefix/>
@@ -66,8 +84,8 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.0.2</version>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>${module.javacTarget}</source>
+          <target>${module.javacTarget}</target>
           <debug>false</debug>
           <optimize>true</optimize>
         </configuration>
@@ -86,7 +104,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
               <exclude>**/WintabAccess.class</exclude>
             </excludes>
           </javah>
-          <output>jpen-2</output>
+          <output>jpen-${module.version}</output>
           <libraries>
             <library>
               <type>jni</type>
@@ -141,7 +159,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
             <version>2.0-alpha-10</version>
             <extensions>true</extensions>
             <configuration>
-              <output>jpen-2-x86_64</output>
+              <output>jpen-${module.version}-${jpen.provider.xinput.nativeVersion}-x86_64</output>
               <linker>
                 <name>g++</name>
                 <sysLibs>
@@ -181,7 +199,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
                       <arg value="-fpic"/>
                       <arg value="-shared"/>
                       <arg value="-o"/>
-                      <arg value="libjpen-2.so"/>
+                      <arg value="libjpen-${module.version}-${jpen.provider.xinput.nativeVersion}.so"/>
                       <arg value="-LXi"/>
                       <arg value="../../../../../src/main/c/linux/Bus.c"/>
                       <arg value="../../../../../src/main/c/linux/Device.c"/>
@@ -263,7 +281,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
                     <exec executable="gcc" dir="target/nar/lib/x86-Windows-g++/jni/">
                       <arg value="-shared"/>
                       <arg value="-o"/>
-                      <arg value="jpen-2.dll"/>
+                      <arg value="jpen-${module.version}-${jpen.provider.wintab.nativeVersion}.dll"/>
                       <arg value="../../../obj/x86-Windows-g++/jpen_provider_wintab_WintabAccess.o"/>
                       <arg value="../../../obj/x86-Windows-g++/Access.o"/>
                       <arg value="../../../obj/x86-Windows-g++/macros.o"/>
