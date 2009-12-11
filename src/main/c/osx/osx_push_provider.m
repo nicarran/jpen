@@ -43,7 +43,7 @@ Based on code by Jerry Huxtable. See http://www.jhlabs.com/java/tablet/ .
 #include <Cocoa/Cocoa.h>
 #import <objc/runtime.h>
 #include "JRSwizzle.h"
-#include "BuildNumber.h"
+#include "../nativeBuild/osx-BuildNumber.h"
 //#include "NSDate_Additions.h"
 
 /* these are not defined in 10.5 */

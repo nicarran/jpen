@@ -498,7 +498,7 @@ along with ${module.commercialId}.  If not, see &lt;http://www.gnu.org/licenses/
 			<zipfileset dir="src/main/resources" prefix="${module.id-fullVer}/src/main/resources" includes="**/*.properties, **/*.java"/>
 			<zipfileset dir="src/main/c" prefix="${module.id-fullVer}/src/main/c" includes="**/*.h, **/*.c, **/*.m"/>
 			<zipfileset dir="src/test/java" prefix="${module.id-fullVer}/src/test/java" includes="**/SmokeTest.java"/>
-			<zipfileset dir="." prefix="${module.id-fullVer}/" includes="pom.xml"/>
+			<zipfileset dir="." prefix="${module.id-fullVer}/"  includes="pom.xml,module.properties,nativeBuild.properties"/>
 			<zipfileset dir="src/copyright" prefix="${module.id-fullVer}"/>
 			<zipfileset dir="JPen-JNI-MacOSX.xcodeproj" prefix="${module.id-fullVer}/JPen-JNI-MacOSX.xcodeproj" includes="**/*"/>
 		</zip>

@@ -18,7 +18,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 #include "../jpen_provider_xinput_XiBus.h"
 #include "Bus.h"
-#include "BuildNumber.h"
+#include "../nativeBuild/linux-BuildNumber.h"
 
 /*
  * Class:     jpen_provider_xinput_XiBus
