@@ -24,6 +24,24 @@ static int Access_refreshLc(SAccess *pAccess);
 static int Access_queueIsEmpty(SAccess *pAccess);
 static void Access_fillPacketQueue(SAccess *pAccess);
 
+
+//int ScanExts(UINT wTag)
+//{
+//	int i;
+//	UINT wScanTag;
+//
+//	/* scan for wTag's info category. */
+//	for (i = 0; WTInfo(WTI_EXTENSIONS + i, EXT_TAG, &wScanTag); i++) {
+//		 if (wTag == wScanTag) {
+//			/* return category offset from WTI_EXTENSIONS. */
+//			return i;
+//		}
+//	}
+//	/* return error code. */
+//	return -1;
+//}
+
+
 int Access_preCreate(SAccess *pAccess) {
 	HWND hWnd=GetDesktopWindow();
 	if(!hWnd) {
@@ -38,6 +56,29 @@ int Access_preCreate(SAccess *pAccess) {
 	pAccess->lc.lcOptions |= CXO_SYSTEM;
 	pAccess->lc.lcPktData = PACKETDATA;
 	pAccess->lc.lcPktMode = PACKETMODE;
+
+
+//	int i=0;
+//	UINT wScanTag = 0;
+//	for (i = 0; WTInfo(WTI_EXTENSIONS + i, EXT_TAG, &wScanTag); i++) {
+//		TCHAR name[128];
+//		WTInfo(WTI_EXTENSIONS + i, EXT_NAME, name);
+//		printf("extension %2i: %s (tag=%i)\n", i,name,wScanTag);
+//	}
+//	int tiltExtension = ScanExts(WTX_TILT);
+//
+//	if (tiltExtension >= 0) {
+//		UINT tiltMask = 0;
+//		if (WTInfo(WTI_EXTENSIONS + tiltMask, EXT_MASK, &tiltMask)) {
+//			pAccess->lc.lcPktData |= tiltMask;
+//			printf("tilt mask = %d\n", tiltMask);
+//		} else {
+//			printf("no tilt mask :(\n");
+//		}
+//	} else {
+//		printf("no tilt :(\n");
+//	}
+
 	pAccess->lc.lcMoveMask = PACKETDATA;// use lcPktData?
 	pAccess->lc.lcBtnUpMask = pAccess->lc.lcBtnDnMask;
 	pAccess->lc.lcSysMode=FALSE;
@@ -67,7 +108,7 @@ void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange) {
 	if(Access_refreshLc(pAccess)){
 		Access_appendError(" Couldn't get status.");
 	}
-	pRange[0]=pRange[1]=0;
+	pRange[0]=pRange[1]=pRange[2]=pRange[3]=0;
 	switch(valuator){
 	case E_Valuators_x:
 		pRange[0]=pRange[1]=pAccess->lc.lcOutOrgX;
@@ -83,6 +124,8 @@ void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange) {
 			if(WTInfo(WTI_DEVICES+pAccess->device, DVC_NPRESSURE, &axis)){
 				pRange[0]=axis.axMin;
 				pRange[1]=axis.axMax;
+				pRange[2]=axis.axUnits;
+				pRange[3]=axis.axResolution;
 			}
 		}
 		break;
@@ -92,15 +135,33 @@ void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange) {
 			if(WTInfo(WTI_DEVICES+pAccess->device, DVC_TPRESSURE, &axis)){
 				pRange[0]=axis.axMin;
 				pRange[1]=axis.axMax;
+				pRange[2]=axis.axUnits;
+				pRange[3]=axis.axResolution;
 			}
 		}
 		break;
+	case E_Valuators_orAzimuth:
+	case E_Valuators_orAltitude:
 	case E_Valuators_twist:
 		{
 			AXIS axises[3];
 			if(WTInfo(WTI_DEVICES+pAccess->device, DVC_ORIENTATION, &axises)){
-				pRange[0]=axises[2].axMin;
-				pRange[1]=axises[2].axMax;
+				int axis = 0;
+				switch (valuator) {
+					case E_Valuators_orAzimuth:
+						axis=0;
+						break;
+					case E_Valuators_orAltitude:
+						axis=1;
+						break;
+					case E_Valuators_twist:
+						axis=2;
+						break;
+				}
+				pRange[0]=axises[axis].axMin;
+				pRange[1]=axises[axis].axMax;
+				pRange[2]=axises[axis].axUnits;
+				pRange[3]=axises[axis].axResolution;
 			}
 		}
 		break;

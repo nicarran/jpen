@@ -25,6 +25,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 //#ifdef USE_X_LIB
 //#include "INCLUDE/WINTABX.h"
 //#endif
+//#define PACKETTILT	PKEXT_ABSOLUTE
 #define PACKETDATA	(PK_STATUS | PK_TIME | PK_X | PK_Y | PK_NORMAL_PRESSURE | PK_CURSOR | PK_BUTTONS | PK_ORIENTATION | PK_TANGENT_PRESSURE /*| PK_ROTATION causes packet corruption :-(... symptom on JPen Demo: wild creation of inexistent PenDevices.  */)
 #define PACKETMODE	0
 // #define PACKETTILT PKEXT_ABSOLUTE // TILT extension is not widely implemented (wacom), so I disable it and use pkOrientation to get tilt data 
@@ -32,9 +33,9 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 
 //vvv Taken from csrmaskex wacom example.
 // cellosoft.jtablet is also a good example. Thanks marcello (cellosoft)!!
-#define CSR_TYPE_GENERAL_MASK			( ( UINT ) 0xC000 )
+#define CSR_TYPE_GENERAL_MASK		( ( UINT ) 0xC000 )
 #define CSR_TYPE_GENERAL_PENTIP		( ( UINT ) 0x4000 )
-#define CSR_TYPE_GENERAL_PUCK			( ( UINT ) 0x8000 )
+#define CSR_TYPE_GENERAL_PUCK		( ( UINT ) 0x8000 )
 #define CSR_TYPE_GENERAL_PENERASER	( ( UINT ) 0xC000 )
 
 // The CSR_TYPE WTInfo data item is new to Wintab 1.2 and is not defined
@@ -44,9 +45,9 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 //^^^
 
-#define MAX_WINTAB_QUEUE_SIZE 64
+#define MAX_WINTAB_QUEUE_SIZE 1024
 #define MIN_WINTAB_QUEUE_SIZE 16
-#define QUEUE_SIZE 16
+#define QUEUE_SIZE 128
 
 /* This enum matches the PLevel.Type enumeration: */
 enum{

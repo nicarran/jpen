@@ -7,8 +7,70 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* Inaccessible static: LOCK */
-/* Inaccessible static: bootTimeUtc */
+#undef jpen_provider_wintab_WintabAccess_LEVEL_TYPE_X
+#define jpen_provider_wintab_WintabAccess_LEVEL_TYPE_X 0L
+#undef jpen_provider_wintab_WintabAccess_LEVEL_TYPE_Y
+#define jpen_provider_wintab_WintabAccess_LEVEL_TYPE_Y 1L
+#undef jpen_provider_wintab_WintabAccess_LEVEL_TYPE_PRESSURE
+#define jpen_provider_wintab_WintabAccess_LEVEL_TYPE_PRESSURE 2L
+#undef jpen_provider_wintab_WintabAccess_LEVEL_TYPE_TILT_ALTITUDE
+#define jpen_provider_wintab_WintabAccess_LEVEL_TYPE_TILT_ALTITUDE 3L
+#undef jpen_provider_wintab_WintabAccess_LEVEL_TYPE_TILT_AZIMUTH
+#define jpen_provider_wintab_WintabAccess_LEVEL_TYPE_TILT_AZIMUTH 4L
+#undef jpen_provider_wintab_WintabAccess_LEVEL_TYPE_SIDE_PRESSURE
+#define jpen_provider_wintab_WintabAccess_LEVEL_TYPE_SIDE_PRESSURE 5L
+#undef jpen_provider_wintab_WintabAccess_LEVEL_TYPE_ROTATION
+#define jpen_provider_wintab_WintabAccess_LEVEL_TYPE_ROTATION 6L
+#undef jpen_provider_wintab_WintabAccess_BUTTON1_MASK
+#define jpen_provider_wintab_WintabAccess_BUTTON1_MASK 1L
+#undef jpen_provider_wintab_WintabAccess_BUTTON2_MASK
+#define jpen_provider_wintab_WintabAccess_BUTTON2_MASK 2L
+#undef jpen_provider_wintab_WintabAccess_BUTTON3_MASK
+#define jpen_provider_wintab_WintabAccess_BUTTON3_MASK 4L
+#undef jpen_provider_wintab_WintabAccess_PK_CONTEXT
+#define jpen_provider_wintab_WintabAccess_PK_CONTEXT 1L
+#undef jpen_provider_wintab_WintabAccess_PK_STATUS
+#define jpen_provider_wintab_WintabAccess_PK_STATUS 2L
+#undef jpen_provider_wintab_WintabAccess_PK_TIME
+#define jpen_provider_wintab_WintabAccess_PK_TIME 4L
+#undef jpen_provider_wintab_WintabAccess_PK_CHANGED
+#define jpen_provider_wintab_WintabAccess_PK_CHANGED 8L
+#undef jpen_provider_wintab_WintabAccess_PK_SERIAL_NUMBER
+#define jpen_provider_wintab_WintabAccess_PK_SERIAL_NUMBER 16L
+#undef jpen_provider_wintab_WintabAccess_PK_CURSOR
+#define jpen_provider_wintab_WintabAccess_PK_CURSOR 32L
+#undef jpen_provider_wintab_WintabAccess_PK_BUTTONS
+#define jpen_provider_wintab_WintabAccess_PK_BUTTONS 64L
+#undef jpen_provider_wintab_WintabAccess_PK_X
+#define jpen_provider_wintab_WintabAccess_PK_X 128L
+#undef jpen_provider_wintab_WintabAccess_PK_Y
+#define jpen_provider_wintab_WintabAccess_PK_Y 256L
+#undef jpen_provider_wintab_WintabAccess_PK_Z
+#define jpen_provider_wintab_WintabAccess_PK_Z 512L
+#undef jpen_provider_wintab_WintabAccess_PK_NORMAL_PRESSURE
+#define jpen_provider_wintab_WintabAccess_PK_NORMAL_PRESSURE 1024L
+#undef jpen_provider_wintab_WintabAccess_PK_TANGENT_PRESSURE
+#define jpen_provider_wintab_WintabAccess_PK_TANGENT_PRESSURE 2048L
+#undef jpen_provider_wintab_WintabAccess_PK_ORIENTATION
+#define jpen_provider_wintab_WintabAccess_PK_ORIENTATION 4096L
+#undef jpen_provider_wintab_WintabAccess_PK_ROTATION
+#define jpen_provider_wintab_WintabAccess_PK_ROTATION 8192L
+#undef jpen_provider_wintab_WintabAccess_TU_NONE
+#define jpen_provider_wintab_WintabAccess_TU_NONE 0L
+#undef jpen_provider_wintab_WintabAccess_TU_INCHES
+#define jpen_provider_wintab_WintabAccess_TU_INCHES 1L
+#undef jpen_provider_wintab_WintabAccess_TU_CENTIMETERS
+#define jpen_provider_wintab_WintabAccess_TU_CENTIMETERS 2L
+#undef jpen_provider_wintab_WintabAccess_TU_CIRCLE
+#define jpen_provider_wintab_WintabAccess_TU_CIRCLE 3L
+#undef jpen_provider_wintab_WintabAccess_HWC_INTEGRATED
+#define jpen_provider_wintab_WintabAccess_HWC_INTEGRATED 1L
+#undef jpen_provider_wintab_WintabAccess_HWC_TOUCH
+#define jpen_provider_wintab_WintabAccess_HWC_TOUCH 2L
+#undef jpen_provider_wintab_WintabAccess_HWC_HARDPROX
+#define jpen_provider_wintab_WintabAccess_HWC_HARDPROX 4L
+#undef jpen_provider_wintab_WintabAccess_HWC_PHYSID_CURSORS
+#define jpen_provider_wintab_WintabAccess_HWC_PHYSID_CURSORS 8L
 /*
  * Class:     jpen_provider_wintab_WintabAccess
  * Method:    create
@@ -115,6 +177,14 @@ JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorTypeOrdin
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getRawCursorType
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getRawCursorType
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
  * Method:    getCursorName
  * Signature: (I)Ljava/lang/String;
  */
@@ -123,10 +193,58 @@ JNIEXPORT jstring JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorName
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getPhysicalId
- * Signature: (I)J
+ * Method:    getPacketRate
+ * Signature: (I)I
  */
-JNIEXPORT jlong JNICALL Java_jpen_provider_wintab_WintabAccess_getPhysicalId
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getPacketRate
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getDeviceName
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_jpen_provider_wintab_WintabAccess_getDeviceName
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getDeviceHardwareCapabilities
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getDeviceHardwareCapabilities
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getPhysicalId
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getPhysicalId
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getButtonCount
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getButtonCount
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getButtonNames
+ * Signature: (I)[Ljava/lang/String;
+ */
+JNIEXPORT jobjectArray JNICALL Java_jpen_provider_wintab_WintabAccess_getButtonNames
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getCapabilityMask
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getCapabilityMask
   (JNIEnv *, jclass, jint);
 
 /*

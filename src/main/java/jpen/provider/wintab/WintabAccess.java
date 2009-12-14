@@ -21,12 +21,13 @@ package jpen.provider.wintab;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import jpen.PLevel;
 
-final class WintabAccess {
+public final class WintabAccess {
 	private static final Object LOCK=new Object();
 
-	private static long bootTimeUtc=-1;
+//	private static long bootTimeUtc=-1;
 
 	/**
 	This must correspond to Access.h: E_csrTypes enumeration.
@@ -36,8 +37,8 @@ final class WintabAccess {
 	                      }
 
 	private final int cellIndex;
-
-	WintabAccess() throws Exception {
+	
+	public WintabAccess() throws Exception {
 		synchronized(LOCK){
 			WintabProvider.loadLibrary();
 			this.cellIndex=create();
@@ -51,12 +52,58 @@ final class WintabAccess {
 	
 	public static native int getNativeBuild();
 
-	int getValue(PLevel.Type levelType) {
+	public static final int LEVEL_TYPE_X = 0;
+	public static final int LEVEL_TYPE_Y = 1;
+	public static final int LEVEL_TYPE_PRESSURE = 2;
+	public static final int LEVEL_TYPE_TILT_AZIMUTH = 3;
+	public static final int LEVEL_TYPE_TILT_ALTITUDE = 4;
+	public static final int LEVEL_TYPE_SIDE_PRESSURE = 5;
+	public static final int LEVEL_TYPE_ROTATION = 6;
+	
+	
+	public static final int BUTTON1_MASK = 1<<0;
+	public static final int BUTTON2_MASK = 1<<1;
+	public static final int BUTTON3_MASK = 1<<2;
+	
+	// from WINTAB.h
+	public static final int PK_CONTEXT				= 0x0001;	/* reporting context */
+	public static final int PK_STATUS				= 0x0002;	/* status bits */
+	public static final int PK_TIME					= 0x0004;	/* time stamp */
+	public static final int PK_CHANGED				= 0x0008;	/* change bit vector */
+	public static final int PK_SERIAL_NUMBER		= 0x0010;	/* packet serial number */
+	public static final int PK_CURSOR				= 0x0020;	/* reporting cursor */
+	public static final int PK_BUTTONS				= 0x0040;	/* button information */
+	public static final int PK_X					= 0x0080;	/* x axis */
+	public static final int PK_Y					= 0x0100;	/* y axis */
+	public static final int PK_Z					= 0x0200;	/* z axis */
+	public static final int PK_NORMAL_PRESSURE		= 0x0400;	/* normal or tip pressure */
+	public static final int PK_TANGENT_PRESSURE		= 0x0800;	/* tangential or barrel pressure */
+	public static final int PK_ORIENTATION			= 0x1000;	/* orientation info: tilts */
+	public static final int PK_ROTATION				= 0x2000;	/* rotation info; 1.1 */
+
+	/* unit specifiers (from wintab.h) */
+	public static final int TU_NONE			= 0;
+	public static final int TU_INCHES		= 1;
+	public static final int TU_CENTIMETERS	= 2;
+	public static final int TU_CIRCLE		= 3;
+	
+
+	/* hardware capabilities flags */
+	public static final int HWC_INTEGRATED		= 0x0001;
+	public static final int HWC_TOUCH			= 0x0002;
+	public static final int HWC_HARDPROX		= 0x0004;
+	public static final int HWC_PHYSID_CURSORS	= 0x0008; /* 1.1 */
+
+	public int getValue(PLevel.Type levelType) {
+		return getValue(getLevelTypeValueIndex(levelType));
+	}
+	public int getValue(int type) {
 		synchronized(LOCK){
 			// tilt data is really azimuth and altitude and must be transformed!
-			return getValue(cellIndex, getLevelTypeValueIndex(levelType));
+			return getValue(cellIndex, type);
 		}
 	}
+
 
 	private static native int getValue(int cellIndex, int valueIndex);
 
@@ -88,16 +135,24 @@ final class WintabAccess {
 	private static native void setEnabled(int cellIndex, boolean enabled);
 
 	public PLevel.Range getLevelRange(PLevel.Type levelType) {
+		int[] minMax = getLevelRange(getLevelTypeValueIndex(levelType));
+
+		return new PLevel.Range(minMax[0], minMax[1]);
+	}
+	public int[] getLevelRange(int type) {
 		synchronized(LOCK){
-			int[] minMax=getLevelRange(cellIndex,getLevelTypeValueIndex(levelType));
-			return new PLevel.Range(minMax[0], minMax[1]);
+			return getLevelRange(cellIndex,type);
 		}
 	}
-	
 	static int getLevelTypeValueIndex(PLevel.Type levelType){
 		return levelType.ordinal();
 	}
 
+	/**
+	 * @param cellIndex
+	 * @param valueIndex
+	 * @return an array of 4 ints, the min, max, unit type (TU_NONE, TU_INCHES, etc.), and unit resolution
+	 */
 	private static native int[] getLevelRange(int cellIndex, int valueIndex);
 
 	public int getCursor() {
@@ -130,18 +185,43 @@ final class WintabAccess {
 		}
 	}
 
-	static native int getCursorTypeOrdinal(int cursor);
+	public static native int getCursorTypeOrdinal(int cursor);
+
+	public static native int getRawCursorType(int cursor);
 
 	public static native String getCursorName(int cursor);
 
-	public static native long getPhysicalId(int cursor);
+	public int getPacketRate() {
+		synchronized(LOCK){
+			return getPacketRate(cellIndex);
+		}
+	}
+	private static native int getPacketRate(int cellIndex);
+	public String getDeviceName() {
+		synchronized(LOCK){
+			return getDeviceName(cellIndex);
+		}
+	}
+	private static native String getDeviceName(int cellIndex);
 
+	public int getDeviceHardwareCapabilities() {
+		synchronized(LOCK){
+			return getDeviceHardwareCapabilities(cellIndex);
+		}
+	}
+	private static native int getDeviceHardwareCapabilities(int cellIndex);
+	public static native int getPhysicalId(int cursor);
+	public static native int getButtonCount(int cursor);
+	public static native String[] getButtonNames(int cursor);
+	public static native int getCapabilityMask(int cursor);
+	
 	@Override
-	protected void finalize() {
+	protected void finalize() throws Throwable {
 		synchronized(LOCK){
 			if(cellIndex!=-1)
 				destroy(cellIndex);
 		}
+		super.finalize();
 	}
 
 	private static native int destroy(int cellIndex);

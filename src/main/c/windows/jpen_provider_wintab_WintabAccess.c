@@ -108,12 +108,12 @@ JNIEXPORT void JNICALL Java_jpen_provider_wintab_WintabAccess_setEnabled
  */
 JNIEXPORT jintArray JNICALL Java_jpen_provider_wintab_WintabAccess_getLevelRange
 (JNIEnv *pEnv, jclass class, jint cellIndex, jint levelTypeOrdinal) {
-	jint range[2];
+	jint range[4];
 	Access_getValuatorRange(Access_getP(cellIndex), levelTypeOrdinal, range);
-	jintArray r=(*pEnv)->NewIntArray(pEnv, 2);
+	jintArray r=(*pEnv)->NewIntArray(pEnv, 4);
 	if(!r)
 		return NULL;
-	(*pEnv)->SetIntArrayRegion(pEnv, r, 0, 2, range);
+	(*pEnv)->SetIntArrayRegion(pEnv, r, 0, 4, range);
 	return r;
 }
 
@@ -158,6 +158,19 @@ JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorTypeOrdin
 	return Access_getCsrType(cursor);
 }
 
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getRawCursorType
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getRawCursorType
+(JNIEnv *pEnv, jclass class, jint cursor) {
+	UINT cursorType = 0;
+	WTInfo( WTI_CURSORS + cursor, CSR_TYPE, &cursorType );
+	return cursorType;
+}
+
 /*
  * Class:     jpen_provider_wintab_WintabAccess
  * Method:    getCursorName
@@ -167,20 +180,113 @@ JNIEXPORT jstring JNICALL Java_jpen_provider_wintab_WintabAccess_getCursorName
 (JNIEnv *pEnv, jclass class, jint cursor) {
 	TCHAR r[256];
 	WTInfo( WTI_CURSORS + cursor, CSR_NAME, &r);
+	r[255] = 0;
+	return (*pEnv)->NewStringUTF(pEnv, r);
+}
+
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getDeviceName
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_jpen_provider_wintab_WintabAccess_getDeviceName
+(JNIEnv *pEnv, jclass class, jint cellIndex) {
+	TCHAR r[256];
+	WTInfo( WTI_DEVICES + Access_getP(cellIndex)->device, DVC_NAME, &r);
+	r[255] = 0;
 	return (*pEnv)->NewStringUTF(pEnv, r);
 }
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
- * Method:    getPhysicalId
- * Signature: (I)J
+ * Method:    getDeviceHardwareCapabilities
+ * Signature: (I)I;
  */
-JNIEXPORT jlong JNICALL Java_jpen_provider_wintab_WintabAccess_getPhysicalId
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getDeviceHardwareCapabilities
+(JNIEnv *pEnv, jclass class, jint cellIndex) {
+	UINT hardware = 0;
+	WTInfo( WTI_DEVICES + Access_getP(cellIndex)->device, DVC_HARDWARE, &hardware);
+	return hardware;
+}
+
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getPacketRate
+ * Signature: ()I;
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getPacketRate
+(JNIEnv *pEnv, jclass class, jint cellIndex) {
+	UINT rate = 0;
+	WTInfo(WTI_DEVICES + Access_getP(cellIndex)->device, DVC_PKTRATE, &rate);
+	return rate;
+}
+
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getButtonCount
+(JNIEnv *pEnv, jclass class, jint cursor) {
+	BYTE buttons;
+	WTInfo(WTI_CURSORS + cursor, CSR_BUTTONS, &buttons);
+	return buttons;
+}
+
+JNIEXPORT jobjectArray JNICALL Java_jpen_provider_wintab_WintabAccess_getButtonNames
+(JNIEnv *pEnv, jclass class, jint cursor) {
+
+	int buttonCount = 0;
+	WTInfo( WTI_CURSORS + cursor, CSR_BUTTONS, &buttonCount);
+
+	jobjectArray r=(*pEnv)->NewObjectArray(pEnv, buttonCount, (*pEnv)->FindClass(pEnv, "java/lang/String"), NULL);
+	if (!r)
+		return NULL;
+	if (buttonCount) {
+		TCHAR buttons[2048];
+
+		// This method returns a null-delimited and terminated array
+		// e.g: Button 1\0Button2\0\0
+		WTInfo( WTI_CURSORS + cursor, CSR_BTNNAMES, &buttons);
+
+		// Make sure we don't have any buffer overruns (hate null-terminated strings)...
+		buttons[2046] = buttons[2047] = 0;
+
+		int i=0;
+		TCHAR *buttonPtr = buttons;
+		while (*buttonPtr && i < buttonCount) {
+	        (*pEnv)->SetObjectArrayElement(pEnv, r, i, (*pEnv)->NewStringUTF(pEnv, buttonPtr));
+			buttonPtr += strlen(buttonPtr);
+			buttonPtr++;
+			i++;
+		}
+	}
+	return r;
+}
+
+
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getCapabilityMask
+(JNIEnv *pEnv, jclass class, jint cursor) {
+	WTPKT wtpkt;
+	WTInfo(WTI_CURSORS + cursor, CSR_PKTDATA, &wtpkt);
+	return wtpkt;
+}
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getPhysicalId
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getPhysicalId
 (JNIEnv *pEnv, jclass class, jint cursor) {
 	DWORD r;
+	// Physical ID is a 32bit unique id for a cursor type. It needs to be combined with CSR_TYPE to truly be unique:
+
+	// According to Wacom (http://www.wacomeng.com/devsupport/ibmpc/gddevpc.html):
+	//  The ID code from the device is in two sections. It is the combination of the two
+	//  that is guaranteed unique. One section, the CSR_TYPE, is actually a code unique
+	//  to each device type. The other section, the CSR_PHYSID, is a unique 32 bit number
+	//  within a device type. CSR_PHYSID  may be repeated between device types, but not
+	//  within a type.
+
 	WTInfo( WTI_CURSORS + cursor, CSR_PHYSID, &r );
-	jlong r2=r;
-	return r2;
+	return r;
 }
 
 /*

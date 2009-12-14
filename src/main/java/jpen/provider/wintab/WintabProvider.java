@@ -18,32 +18,14 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.provider.wintab;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseMotionListener;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.Toolkit;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.Map;
-import java.util.Set;
-import jpen.Pen;
-import jpen.PenDevice;
+
+import jpen.PLevel;
 import jpen.PenManager;
 import jpen.PenProvider;
-import jpen.PLevel;
 import jpen.provider.AbstractPenProvider;
 import jpen.provider.NativeLibraryLoader;
 import jpen.provider.VirtualScreenBounds;
