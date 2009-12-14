@@ -35,6 +35,11 @@ public class CocoaAccess {
 
 	protected static final float RADIANS_PER_DEGREE = (float)(Math.PI / 180);
 	protected static final float HALF_PI = (float) (Math.PI / 2);
+	// Tilt on Mac OS X is given in the range -1 to 1, 
+	// where 0.9375 (the maximum on intuos2) == 60 degrees (angle from wacom diagnostics)...
+	//  which happens to equal 60 / 64, so 1 == 64 degrees... 
+	//  but we want radians, so...
+	protected static final float TILT_TO_RADIANS = 64 * RADIANS_PER_DEGREE;
 
 	private boolean active = false;
 	private CocoaProvider cocoaProvider = null;
@@ -97,6 +102,9 @@ public class CocoaAccess {
 	public static final int WACOM_CAPABILITY_BUTTONSMASK            = 0x0040;
 	public static final int WACOM_CAPABILITY_TILTXMASK              = 0x0080;
 	public static final int WACOM_CAPABILITY_TILTYMASK              = 0x0100;
+
+	public static final int WACOM_CAPABILITY_TILTMASK               = WACOM_CAPABILITY_TILTXMASK|WACOM_CAPABILITY_TILTYMASK;
+	
 	public static final int WACOM_CAPABILITY_ABSZMASK               = 0x0200;
 	public static final int WACOM_CAPABILITY_PRESSUREMASK           = 0x0400;
 	public static final int WACOM_CAPABILITY_TANGENTIALPRESSUREMASK = 0x0800;
@@ -252,7 +260,9 @@ public class CocoaAccess {
 	  final float tiltX, final float tiltY,
 	  final float tangentialPressure
 	) {
+		// If we try to run this directly, we get a threadlock on AWT-AppKit... 
 		invokeOnEventThread(new Runnable() {
+			@SuppressWarnings("deprecation")
 			public void run() {
 				
 				if (device == null) {
@@ -291,17 +301,16 @@ public class CocoaAccess {
 				
 
 				// JPen expects tilt to be -pi/2 to pi/2 from vertical;
-				// Cocoa delivers tilt as -1 to 1 from vertical
-				levels.add(new PLevel(PLevel.Type.TILT_X, tiltX * HALF_PI));
-				levels.add(new PLevel(PLevel.Type.TILT_Y, tiltY * HALF_PI));
+				// Cocoa delivers tilt as -1 to 1 from vertical, see rant on TILT_TO_RADIANS up above...
+				levels.add(new PLevel(PLevel.Type.TILT_X, tiltX * TILT_TO_RADIANS));
+				// flip Y: Mac OS X reports positive Y when tilting toward the top of the tablet
+				levels.add(new PLevel(PLevel.Type.TILT_Y, -tiltY * TILT_TO_RADIANS));
 				
 				levels.add(new PLevel(PLevel.Type.PRESSURE, pressure));
 				levels.add(new PLevel(PLevel.Type.SIDE_PRESSURE, tangentialPressure));
 				// Cocoa tablet rotation is in degrees
 				levels.add(new PLevel(PLevel.Type.ROTATION, rotation*RADIANS_PER_DEGREE));
 				cocoaProvider.getPenManager().scheduleLevelEvent(device, deviceTime, levels, true);
-
-				
 			}
 		});
 	}

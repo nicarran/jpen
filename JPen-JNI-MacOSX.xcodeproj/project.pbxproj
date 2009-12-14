@@ -11,7 +11,7 @@
 		AD945F9D10B65ED100DBDA5B /* NSDate_Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = AD945F9B10B65ED100DBDA5B /* NSDate_Additions.h */; };
 		AD945F9E10B65ED100DBDA5B /* NSDate_Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = AD945F9C10B65ED100DBDA5B /* NSDate_Additions.m */; };
 		ADA2EDD110CC7DCB009051D5 /* BuildNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = ADA2EDD010CC7DCB009051D5 /* BuildNumber.h */; };
-		ADA2EEEE10CC862C009051D5 /* libjpen-2-2.jnilib in CopyFiles */ = {isa = PBXBuildFile; fileRef = ADD73C880FFAF320000FFF71 /* libjpen-2-2.jnilib */; };
+		ADA2EEEE10CC862C009051D5 /* libjpen-2-2.jnilib in Copy Files to SVN Directory */ = {isa = PBXBuildFile; fileRef = ADD73C880FFAF320000FFF71 /* libjpen-2-2.jnilib */; };
 		ADD73C480FFAEEB1000FFF71 /* JRSwizzle.h in Headers */ = {isa = PBXBuildFile; fileRef = ADD73C450FFAEEB1000FFF71 /* JRSwizzle.h */; };
 		ADD73C490FFAEEB1000FFF71 /* JRSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = ADD73C460FFAEEB1000FFF71 /* JRSwizzle.m */; };
 		ADD73C4A0FFAEEB1000FFF71 /* osx_push_provider.m in Sources */ = {isa = PBXBuildFile; fileRef = ADD73C470FFAEEB1000FFF71 /* osx_push_provider.m */; };
@@ -32,14 +32,15 @@
 			name = "Copy Files to Java Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		ADA2EEE910CC85BA009051D5 /* CopyFiles */ = {
+		ADA2EEE910CC85BA009051D5 /* Copy Files to SVN Directory */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 12;
 			dstPath = "/Users/marcello/Documents/workspace-marcello/jpen/users/marcello3d/osx-build";
 			dstSubfolderSpec = 0;
 			files = (
-				ADA2EEEE10CC862C009051D5 /* libjpen-2-2.jnilib in CopyFiles */,
+				ADA2EEEE10CC862C009051D5 /* libjpen-2-2.jnilib in Copy Files to SVN Directory */,
 			);
+			name = "Copy Files to SVN Directory";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -151,7 +152,7 @@
 				FDC254480EC5286700984EE2 /* Sources */,
 				FDC254490EC5286700984EE2 /* Frameworks */,
 				AD614C9D0FA610F400266935 /* Copy Files to Java Extensions */,
-				ADA2EEE910CC85BA009051D5 /* CopyFiles */,
+				ADA2EEE910CC85BA009051D5 /* Copy Files to SVN Directory */,
 			);
 			buildRules = (
 			);
