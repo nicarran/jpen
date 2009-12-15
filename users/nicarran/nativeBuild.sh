@@ -25,4 +25,6 @@ echo jpen.provider.xinput.nativeBuild=$combinedRevision >> $propertyFile
 getCombinedRevision "src/main/c/windows" "src/main/c/utils"
 echo jpen.provider.wintab.nativeBuild=$combinedRevision >> $propertyFile
 getCombinedRevision "src/main/c/osx"
-echo jpen.provider.osx.nativeBuild=$combinedRevision >> $propertyFile
+# nicarran: temporally disabled:  
+# echo jpen.provider.osx.nativeBuild=$combinedRevision >> $propertyFile
+echo jpen.provider.osx.nativeBuild=1 >> $propertyFile

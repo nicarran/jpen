@@ -62,7 +62,7 @@ class WintabDevice
 
 	@Override
 	protected String evalPhysicalId(){
-		return  wintabProvider.wintabAccess.getCursorTypeOrdinal(cursor)+"-"
+		return  wintabProvider.wintabAccess.getRawCursorType(cursor)+"."
 						+wintabProvider.wintabAccess.getPhysicalId(cursor)+"@"
 						+wintabProvider.getConstructor().getName();
 	}

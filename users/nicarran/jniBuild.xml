@@ -9,7 +9,7 @@
 		</exec>
 	</target>
 	
-	<target name="nativeBuildProperties" depends="updateRepoTrunk">
+	<target name="nativeBuild" depends="updateRepoTrunk">
 		<exec executable="bash">
 			<arg value="nativeBuild.sh"/>
 		</exec>
@@ -48,7 +48,7 @@
 		<property name="module.windowsGccExtraLib" value="-Llib -lWintab32 "/>
 		<property name="module.windowsGccExtraLib-64" value="-Llib-64 -lWintab64"/>
 		<property name="module.jniLibNamePrefix" value="${module.id}-${module.version}"/>
-		<property name="jniHeadersPath" value="/opt/sun-jdk-1.5.0.21/include"/>
+		<property name="jniHeadersPath" value="/opt/sun-jdk-1.5.0.22/include"/>
 		
 		<property name="module.linuxJniLibName" value="${module.jniLibNamePrefix}-${jpen.provider.xinput.nativeVersion}"/>
 		<property name="module.winJniLibName" value="${module.jniLibNamePrefix}-${jpen.provider.wintab.nativeVersion}"/>
@@ -280,6 +280,6 @@
 	
 	<target name="lib" depends="libLinux, libWin, libOsx"/>
 	
-	<target name="all" depends="lib, javaBuild.all"/>
+	<target name="all" depends="nativeBuild, lib, javaBuild.all"/>
 
 </project>
