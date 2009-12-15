@@ -1,5 +1,6 @@
 /* [{
 Copyright 2008 Brien Colwell
+Copyright 2009 Marcello Bastea-Forte <marcello at cellosoft.com>
 
 This file is part of jpen.
 

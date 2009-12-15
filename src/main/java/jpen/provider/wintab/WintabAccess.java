@@ -1,5 +1,6 @@
 /* [{
-Copyright 2007, 2008 Nicolas Carranza <nicarran at gmail.com>
+Copyright 2007, 2008, 2009 Nicolas Carranza <nicarran at gmail.com>
+Copyright 2009 Marcello Bastea-Forte <marcello at cellosoft.com>
 
 This file is part of jpen.
 
@@ -26,8 +27,6 @@ import jpen.PLevel;
 
 public final class WintabAccess {
 	private static final Object LOCK=new Object();
-
-//	private static long bootTimeUtc=-1;
 
 	/**
 	This must correspond to Access.h: E_csrTypes enumeration.
