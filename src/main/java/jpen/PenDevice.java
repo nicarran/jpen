@@ -50,7 +50,7 @@ public interface PenDevice {
 	void setId(byte id);
 	
 	/**
-	@return A unique and constant id. This id is always the same for the given device, even if the program restarts.
+	@return A unique and constant id. This {@code physicalId} is always the same for the given device, even if the program restarts. Each PenDevice has a different {@code physicalId}.  
 	*/
 	String getPhysicalId();
 }
