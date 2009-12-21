@@ -25,6 +25,9 @@ import java.util.List;
 
 import jpen.PLevel;
 
+/**
+<b>Warning</b>: Don't use this class directly. This class is currently public only to be used by JTablet.
+*/
 public final class WintabAccess {
 	private static final Object LOCK=new Object();
 

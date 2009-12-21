@@ -26,6 +26,9 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ResourceBundle;
 
+/**
+Various utility methods. Don't use this class directly, it is only intended to be used internally by jpen and its providers.
+*/
 public final class Utils{
 	private static ResourceBundle moduleProperties;
 	

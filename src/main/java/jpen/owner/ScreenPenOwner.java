@@ -27,7 +27,9 @@ import jpen.PenProvider;
 import jpen.provider.osx.CocoaProvider;
 import jpen.provider.wintab.WintabProvider;
 import jpen.provider.xinput.XinputProvider;
-
+/**
+Defines a {@link PenClip} for all the screen. Its {@link PenManager} is always unpaused.
+*/
 public class ScreenPenOwner implements PenOwner {
 
 //	@Override
