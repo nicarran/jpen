@@ -211,21 +211,24 @@ public class CocoaAccess {
 	  int vendorPointingDeviceType // UInt16
 	) {
 
-
-		switch (pointingDeviceType) {
-			case NSPenPointingDevice:
-				device = cocoaProvider.getDevice(PKind.Type.STYLUS);
-				break;
-			case NSCursorPointingDevice:
-				device = cocoaProvider.getDevice(PKind.Type.CURSOR);
-				break;
-			case NSEraserPointingDevice:
-				device = cocoaProvider.getDevice(PKind.Type.ERASER);
-				break;
-			case NSUnknownPointingDevice:
-			default:
-				device = cocoaProvider.getDevice(PKind.Type.CURSOR);
-				break;
+		if (enteringProximity) {
+			switch (pointingDeviceType) {
+				case NSPenPointingDevice:
+					device = cocoaProvider.getDevice(PKind.Type.STYLUS);
+					break;
+				case NSCursorPointingDevice:
+					device = cocoaProvider.getDevice(PKind.Type.CURSOR);
+					break;
+				case NSEraserPointingDevice:
+					device = cocoaProvider.getDevice(PKind.Type.ERASER);
+					break;
+				case NSUnknownPointingDevice:
+				default:
+					device = cocoaProvider.getDevice(PKind.Type.CURSOR);
+					break;
+			}
+		} else {
+			device = cocoaProvider.getDevice(PKind.Type.CURSOR);
 		}
 		
 		// This works on my Intuos2:
