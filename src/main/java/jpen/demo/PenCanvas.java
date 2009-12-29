@@ -22,6 +22,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
@@ -125,12 +127,19 @@ class PenCanvas
 				    isDirty=false;
 			    }
 		    });
-
+		
+		setFocusable(true); // to receive key events
+		addKeyListener(new KeyAdapter(){
+				@Override
+				public void keyPressed(KeyEvent ev){
+					if(ev.isControlDown() && ev.getKeyCode()==KeyEvent.VK_D)
+						JOptionPane.showMessageDialog(null, "<html>Testing dialog window:<p> the pen buttons must be disabled when this dialog appears.</html>");
+				}
+		});
 		addMouseListener(new MouseAdapter(){
 			    @Override
 			    public void mousePressed(MouseEvent ev){
-				    if(ev.isShiftDown() && ev.isControlDown())
-					    JOptionPane.showMessageDialog(null, "<html>Testing dialog window:<p> the pen buttons must be disabled when this dialog appears.</html>");
+			    	requestFocus();
 			    }
 		    });
 	}

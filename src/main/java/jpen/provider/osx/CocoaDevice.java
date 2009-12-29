@@ -28,6 +28,7 @@ public class CocoaDevice extends AbstractPenDevice {
 		super(_cocoaProvider);
 		type = _type;
 		setKindTypeNumber(type.ordinal());
+		super.setEnabled(true);
 	}
 	
 	public String getName() {

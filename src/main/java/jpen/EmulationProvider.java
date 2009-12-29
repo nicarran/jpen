@@ -41,8 +41,8 @@ final class EmulationProvider
 			return new EmulationProvider(this);
 		}
 	}
-	
-	final PenDevice device; 
+
+	final PenDevice device;
 
 	private EmulationProvider(Constructor constructor){
 		super(constructor);
@@ -54,7 +54,14 @@ final class EmulationProvider
 		private Device(){
 			super(EmulationProvider.this);
 			super.setKindTypeNumber(PKind.Type.IGNORE.ordinal());
+			super.setEnabled(true); // but the enabled state is currently ignored on this device... it is considered as always enabled.
 		}
+
+		@Override
+		public void setEnabled(boolean enabled){
+			throw new UnsupportedOperationException("the enabled state can not be changed on the Emulation device");
+		}
+
 		//@Override
 		public String getName(){
 			return "Emulation";

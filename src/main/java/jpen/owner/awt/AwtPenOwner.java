@@ -19,6 +19,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 package jpen.owner.awt;
 
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -29,6 +30,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.Collection;
+import javax.swing.SwingUtilities;
 import jpen.owner.AbstractPenOwner;
 import jpen.owner.PenClip;
 import jpen.PenProvider;
@@ -43,24 +45,24 @@ public final class AwtPenOwner
 	public final Component component;
 	final PenClipOnComponent penClipOnComponent;
 	private final MouseListener mouseListener=new MouseAdapter(){
-		    @Override
-		    public void mouseExited(MouseEvent ev) {
-			    synchronized(penManagerHandle.getPenSchedulerLock()){
-				    if(!startDraggingOut()){
-					    pause();
-					    unpauser.disable();
-				    }
-			    }
-		    }
+				@Override
+				public void mouseExited(MouseEvent ev) {
+					synchronized(penManagerHandle.getPenSchedulerLock()){
+						if(!startDraggingOut()){
+							pause();
+							unpauser.disable();
+						}
+					}
+				}
 
-		    @Override
-		    public void mouseEntered(MouseEvent ev) {
-			    synchronized(penManagerHandle.getPenSchedulerLock()){
-				    if(!stopDraggingOut())
-					    unpauser.enable(); // unpauses when mouse motion is detected.
-			    }
-		    }
-	    };
+				@Override
+				public void mouseEntered(MouseEvent ev) {
+					synchronized(penManagerHandle.getPenSchedulerLock()){
+						if(!stopDraggingOut())
+							unpauser.enable(); // unpauses when mouse motion is detected.
+					}
+				}
+			};
 	Unpauser unpauser=new Unpauser();
 	final class Unpauser
 		implements MouseMotionListener{
@@ -91,7 +93,7 @@ public final class AwtPenOwner
 				if(!penManagerHandle.getPenManager().getPaused())
 					return;
 				if(enabled){
-					focusedWindowListener.install();
+					activeWindowListener.setEnabled(true);
 					penManagerHandle.setPenManagerPaused(false);
 					disable();
 				}
@@ -103,39 +105,49 @@ public final class AwtPenOwner
 		}
 	}
 
-	/*
-	The component does not get a mouseExited event when a new JOptionPane dialog appears... (jdk bug on Linux?)
-	As workaround a focusedWindowListener is installed and it pauses the penManager. 
-	*/
-	private class FocusedWindowListener
-		implements PropertyChangeListener{
-		private KeyboardFocusManager keyboardFocusManager;
-		private Window focusedWindow;
+	private final ActiveWindowListener activeWindowListener=new ActiveWindowListener();
+
+	private class ActiveWindowListener
+		implements ActiveWindow.Listener{
+
+		private boolean enabled;
+		private ActiveWindow activeWindow;
+
+		void setEnabled(boolean enabled){
+			if(activeWindow==null)
+				activeWindow=new ActiveWindow(this);
+			this.enabled=enabled;
+		}
+
 		//@Override
-		public void propertyChange(PropertyChangeEvent ev){
+		public void activeWindowChanged(Window activeWindow){
+			if(!enabled)
+				return;
 			synchronized(penManagerHandle.getPenSchedulerLock()){
-				if(focusedWindow==null){
-					focusedWindow=(Window)ev.getNewValue();
+				if(activeWindow==null){
+					// if there is no active window on this application, on MS Windows the mouse stops sending events.
+					pauseAMoment();
 					return;
 				}
-				pause(); // release buttons
-				unpauser.enable();
+				Window componentWindow=SwingUtilities.getWindowAncestor(component);
+				if(componentWindow==null)
+					return;
+				if(activeWindow!=componentWindow &&
+					 activeWindow instanceof Dialog){
+					//	A modal dialog stops sending events from other windows when shown... then here we honor this behavior
+					Dialog activeDialog=(Dialog)activeWindow;
+					if(activeDialog.isModal())
+						pauseAMoment();
+				}
 			}
 		}
 
-		private void install(){
-			keyboardFocusManager=KeyboardFocusManager.getCurrentKeyboardFocusManager();
-			keyboardFocusManager.addPropertyChangeListener(FOCUSED_WINDOW_PROP, this);
-			focusedWindow=keyboardFocusManager.getFocusedWindow();
-		}
-
-		private void uninstall(){
-			keyboardFocusManager.removePropertyChangeListener(FOCUSED_WINDOW_PROP, this);
-			focusedWindow=null;
+		private void pauseAMoment(){
+			pause();
+			unpauser.enable();
 		}
 	}
-	private static final String FOCUSED_WINDOW_PROP="focusedWindow";
-	private final FocusedWindowListener focusedWindowListener=new FocusedWindowListener();
+
 
 	public AwtPenOwner(Component component){
 		this.component=component;
@@ -145,19 +157,19 @@ public final class AwtPenOwner
 	//@Override
 	public Collection<PenProvider.Constructor> getPenProviderConstructors(){
 		return Arrays.asList(
-		         new PenProvider.Constructor[]{
-		           new SystemProvider.Constructor(),
-		           new XinputProvider.Constructor(),
-		           new WintabProvider.Constructor(),
-		           new CocoaProvider.Constructor(),
-		         }
-		       );
+						 new PenProvider.Constructor[]{
+							 new SystemProvider.Constructor(),
+							 new XinputProvider.Constructor(),
+							 new WintabProvider.Constructor(),
+							 new CocoaProvider.Constructor(),
+						 }
+					 );
 	}
 
 	private void pause(){
 		if(penManagerHandle.getPenManager().getPaused())
 			return;
-		focusedWindowListener.uninstall();
+		activeWindowListener.setEnabled(false);
 		penManagerHandle.setPenManagerPaused(true);
 	}
 

@@ -18,7 +18,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.provider.osx;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import jpen.PenManager;
 import jpen.PenProvider;
@@ -74,7 +74,7 @@ public class CocoaProvider extends AbstractPenProvider {
 		cocoaAccess = _cocoaAccess;
 		cocoaAccess.setProvider(this);
 
-		deviceMap = new HashMap<PKind.Type, CocoaDevice>(3);
+		deviceMap = new EnumMap<PKind.Type, CocoaDevice>(PKind.Type.class);
 		for (PKind.Type type : PKind.Type.VALUES) {
 			final CocoaDevice device = new CocoaDevice(this, type);
 			deviceMap.put(type, device);

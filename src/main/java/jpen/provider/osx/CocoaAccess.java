@@ -272,7 +272,9 @@ public class CocoaAccess {
 				if (device == null) {
 					device = cocoaProvider.getDevice(PKind.Type.CURSOR);
 				}
-
+				
+				if(!device.getEnabled())
+					return;
 
 				long deviceTime = (long)(eventTimeSeconds*1000);
 				
