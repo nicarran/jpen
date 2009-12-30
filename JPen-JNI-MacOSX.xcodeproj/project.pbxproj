@@ -7,10 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AD48204510C4CF6A00865987 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD48204410C4CF6A00865987 /* Carbon.framework */; };
+		AD2E411110EB1E440036410B /* WacomAccess.h in Headers */ = {isa = PBXBuildFile; fileRef = AD2E410F10EB1E440036410B /* WacomAccess.h */; };
+		AD2E411210EB1E440036410B /* WacomAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = AD2E411010EB1E440036410B /* WacomAccess.m */; };
+		AD2E421A10EB206E0036410B /* osx-BuildNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = AD2E421910EB206E0036410B /* osx-BuildNumber.h */; };
+		AD2E423110EB21260036410B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD2E423010EB21260036410B /* Carbon.framework */; };
 		AD945F9D10B65ED100DBDA5B /* NSDate_Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = AD945F9B10B65ED100DBDA5B /* NSDate_Additions.h */; };
 		AD945F9E10B65ED100DBDA5B /* NSDate_Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = AD945F9C10B65ED100DBDA5B /* NSDate_Additions.m */; };
-		ADA2EDD110CC7DCB009051D5 /* BuildNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = ADA2EDD010CC7DCB009051D5 /* BuildNumber.h */; };
 		ADA2EEEE10CC862C009051D5 /* libjpen-2-2.jnilib in Copy Files to SVN Directory */ = {isa = PBXBuildFile; fileRef = ADD73C880FFAF320000FFF71 /* libjpen-2-2.jnilib */; };
 		ADD73C480FFAEEB1000FFF71 /* JRSwizzle.h in Headers */ = {isa = PBXBuildFile; fileRef = ADD73C450FFAEEB1000FFF71 /* JRSwizzle.h */; };
 		ADD73C490FFAEEB1000FFF71 /* JRSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = ADD73C460FFAEEB1000FFF71 /* JRSwizzle.m */; };
@@ -46,10 +48,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		AD48204410C4CF6A00865987 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
+		AD2E410F10EB1E440036410B /* WacomAccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WacomAccess.h; path = src/main/c/osx/WacomAccess.h; sourceTree = "<group>"; };
+		AD2E411010EB1E440036410B /* WacomAccess.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = WacomAccess.m; path = src/main/c/osx/WacomAccess.m; sourceTree = "<group>"; };
+		AD2E421910EB206E0036410B /* osx-BuildNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "osx-BuildNumber.h"; path = "src/main/c/nativeBuild/osx-BuildNumber.h"; sourceTree = "<group>"; };
+		AD2E423010EB21260036410B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		AD945F9B10B65ED100DBDA5B /* NSDate_Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSDate_Additions.h; path = src/main/c/osx/NSDate_Additions.h; sourceTree = "<group>"; };
 		AD945F9C10B65ED100DBDA5B /* NSDate_Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSDate_Additions.m; path = src/main/c/osx/NSDate_Additions.m; sourceTree = "<group>"; };
-		ADA2EDD010CC7DCB009051D5 /* BuildNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BuildNumber.h; path = src/main/c/osx/BuildNumber.h; sourceTree = "<group>"; };
 		ADD73C450FFAEEB1000FFF71 /* JRSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JRSwizzle.h; path = src/main/c/osx/JRSwizzle.h; sourceTree = "<group>"; };
 		ADD73C460FFAEEB1000FFF71 /* JRSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JRSwizzle.m; path = src/main/c/osx/JRSwizzle.m; sourceTree = "<group>"; };
 		ADD73C470FFAEEB1000FFF71 /* osx_push_provider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = osx_push_provider.m; path = src/main/c/osx/osx_push_provider.m; sourceTree = "<group>"; };
@@ -65,7 +69,7 @@
 			files = (
 				FDC2546C0EC52A7A00984EE2 /* Cocoa.framework in Frameworks */,
 				FDC2546D0EC52A7A00984EE2 /* JavaVM.framework in Frameworks */,
-				AD48204510C4CF6A00865987 /* Carbon.framework in Frameworks */,
+				AD2E423110EB21260036410B /* Carbon.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,12 +90,14 @@
 		FDC252B00EC51E9600984EE2 /* Cocoa Sources */ = {
 			isa = PBXGroup;
 			children = (
-				ADA2EDD010CC7DCB009051D5 /* BuildNumber.h */,
+				AD2E421910EB206E0036410B /* osx-BuildNumber.h */,
 				ADD73C450FFAEEB1000FFF71 /* JRSwizzle.h */,
 				ADD73C460FFAEEB1000FFF71 /* JRSwizzle.m */,
 				ADD73C470FFAEEB1000FFF71 /* osx_push_provider.m */,
 				AD945F9B10B65ED100DBDA5B /* NSDate_Additions.h */,
 				AD945F9C10B65ED100DBDA5B /* NSDate_Additions.m */,
+				AD2E410F10EB1E440036410B /* WacomAccess.h */,
+				AD2E411010EB1E440036410B /* WacomAccess.m */,
 			);
 			name = "Cocoa Sources";
 			sourceTree = "<group>";
@@ -123,7 +129,7 @@
 			children = (
 				FDC2546A0EC52A7A00984EE2 /* Cocoa.framework */,
 				FDC2546B0EC52A7A00984EE2 /* JavaVM.framework */,
-				AD48204410C4CF6A00865987 /* Carbon.framework */,
+				AD2E423010EB21260036410B /* Carbon.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -137,7 +143,8 @@
 			files = (
 				ADD73C480FFAEEB1000FFF71 /* JRSwizzle.h in Headers */,
 				AD945F9D10B65ED100DBDA5B /* NSDate_Additions.h in Headers */,
-				ADA2EDD110CC7DCB009051D5 /* BuildNumber.h in Headers */,
+				AD2E411110EB1E440036410B /* WacomAccess.h in Headers */,
+				AD2E421A10EB206E0036410B /* osx-BuildNumber.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -189,6 +196,7 @@
 				ADD73C490FFAEEB1000FFF71 /* JRSwizzle.m in Sources */,
 				ADD73C4A0FFAEEB1000FFF71 /* osx_push_provider.m in Sources */,
 				AD945F9E10B65ED100DBDA5B /* NSDate_Additions.m in Sources */,
+				AD2E411210EB1E440036410B /* WacomAccess.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

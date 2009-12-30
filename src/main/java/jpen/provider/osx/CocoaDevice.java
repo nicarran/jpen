@@ -40,4 +40,11 @@ public class CocoaDevice extends AbstractPenDevice {
 			return "UNKNOWN";
 		}
 	}
+
+	/**
+	 * @return the type
+	 */
+	public PKind.Type getType() {
+		return type;
+	}
 }

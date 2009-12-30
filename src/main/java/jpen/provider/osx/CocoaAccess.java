@@ -258,6 +258,7 @@ public class CocoaAccess {
 	  final double eventTimeSeconds,
 	  final int cocoaModifierFlags,
 	  final float screenX, final float screenY,
+	  final boolean tabletEvent,
 	  final int absoluteX, final int absoluteY,  final int absoluteZ,
 	  final int buttonMask,
 	  final float pressure, final float rotation,
@@ -271,6 +272,11 @@ public class CocoaAccess {
 				
 				if (device == null) {
 					device = cocoaProvider.getDevice(PKind.Type.CURSOR);
+				}
+				
+				// If we have a tablet event, don't use the cursor 
+				if (tabletEvent && device.getType() == PKind.Type.CURSOR) {
+					device = cocoaProvider.getDevice(PKind.Type.STYLUS);
 				}
 				
 				if(!device.getEnabled())

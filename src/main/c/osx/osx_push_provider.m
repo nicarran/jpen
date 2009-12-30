@@ -39,11 +39,12 @@ permission notice:
 Based on code by Jerry Huxtable. See http://www.jhlabs.com/java/tablet/ .
 */
 
-#include <jni.h>
-#include <Cocoa/Cocoa.h>
+#import <jni.h>
+#import <Cocoa/Cocoa.h>
 #import <objc/runtime.h>
-#include "JRSwizzle.h"
-#include "../nativeBuild/osx-BuildNumber.h"
+#import "JRSwizzle.h"
+#import "../nativeBuild/osx-BuildNumber.h"
+#import "WacomAccess.h"
 //#include "NSDate_Additions.h"
 
 /* these are not defined in 10.5 */
@@ -58,6 +59,8 @@ enum {
 };
 @interface NSEvent (JPen)
 - (CGFloat)magnification;       
+- (CGFloat)deviceDeltaX;
+- (CGFloat)deviceDeltaY;
 @end
 
 #endif
@@ -74,10 +77,10 @@ static jmethodID g_methodID_magnify;
 static jmethodID g_methodID_rotate;
 static bool enabled = 0;
 static jboolean watchTabletEvents = false;
-static jboolean watchProximityEvents = false;
+static jboolean watchProximityEvents = true;
 static jboolean watchScrollEvents = false;
 static jboolean watchGestureEvents = false;
-static jboolean watchingEvents = false;
+static jboolean watchingEvents = true;
 static double systemStartTime = 0;
 
 /*
@@ -183,7 +186,7 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 
 @implementation NSApplication (JPen)
 - (void) JPen_sendEvent:(NSEvent *)event
-{
+{			
 	if (watchingEvents) {
 		JNIEnv *env;
 		bool shouldDetach = false;
@@ -197,8 +200,8 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 					break;
 				case NSScrollWheel:
 					if (watchScrollEvents) {
-						float dx = [event deltaX];
-						float dy = [event deltaY];
+						float dx = [event deviceDeltaX];
+						float dy = [event deviceDeltaY];
 						if (dx != 0 || dy != 0) {
 							NSPoint location = getLocation(event);
 							(*env)->CallVoidMethod(env, g_object, g_methodID_scroll,
@@ -280,14 +283,15 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 				case NSOtherMouseDragged:
 				case NSTabletPoint:
 				{
-					bool tablet = NSTabletPoint == [event type] || NSTabletPointEventSubtype == [event subtype];
-					
-					// Apparently this is a duplicate of the proximity event, so we don't want to do anything with it...
-					if (NSTabletPoint != [event type] && [event subtype] == NSTabletProximityEventSubtype) {
-						break;
-						//postProximityEvent(env, event);
-					}
 					if (watchTabletEvents) {
+						bool tablet = NSTabletPoint == [event type] || NSTabletPointEventSubtype == [event subtype];
+						
+						// Apparently this is a duplicate of the proximity event, so we don't want to do anything with it...
+						if (NSTabletPoint != [event type] && [event subtype] == NSTabletProximityEventSubtype) {
+							break;
+							//postProximityEvent(env, event);
+						}
+						
 						NSPoint location = getLocation(event);				
 						NSPoint tilt;
 						if (tablet) {
@@ -300,6 +304,7 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 											   [event modifierFlags],
 											   location.x,
 											   location.y,
+											   tablet,
 											   tablet ? [event absoluteX] : 0 ,
 											   tablet ? [event absoluteY] : 0 ,
 											   tablet ? [event absoluteZ] : 0 ,
@@ -360,13 +365,17 @@ JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_setGestureEventsEnable
  ** Start up: use jrswizzle to subclass the NSApplication object on the fly.
  */
 JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_startup(JNIEnv *env, jobject this) {
+	// Don't startup multiple times
+	if (g_object) {
+		return;
+	}
 	
 	// Swap the original sendEvent method with our custom one so we can monitor events
 	NSError *error = nil;
 	[NSApplication jr_swizzleMethod:@selector(sendEvent:)
 						 withMethod:@selector(JPen_sendEvent:)
 							  error:&error];
-	[NSEvent setMouseCoalescingEnabled:NO];
+	//[NSEvent setMouseCoalescingEnabled:NO];
 	
 	if (error != nil) {
 		NSLog(@"error overriding [NSApplication sendEvent]: %@", [error description]);
@@ -380,13 +389,14 @@ JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_startup(JNIEnv *env, j
 		g_class = (*env)->GetObjectClass( env, this );
 		g_class = (*env)->NewGlobalRef( env, g_class );
 		if ( g_class != (jclass)0 ) {
-			g_methodID =	     (*env)->GetMethodID( env, g_class, "postEvent",		  "(IDIFFIIIIFFFFF)V" );
+			g_methodID =	     (*env)->GetMethodID( env, g_class, "postEvent",		  "(IDIFFZIIIIFFFFF)V" );
 			g_methodID_prox =    (*env)->GetMethodID( env, g_class, "postProximityEvent", "(DIIIZIIIIIJII)V" );
 			g_methodID_scroll =  (*env)->GetMethodID( env, g_class, "postScrollEvent",    "(DIFFFF)V" );
 			g_methodID_magnify = (*env)->GetMethodID( env, g_class, "postMagnifyEvent",   "(DIFFF)V" );
 			g_methodID_swipe =   (*env)->GetMethodID( env, g_class, "postSwipeEvent",     "(DIFFFF)V" );
 			g_methodID_rotate =  (*env)->GetMethodID( env, g_class, "postRotateEvent",    "(DIFFF)V" );
 		}
+		ResendLastTabletEventofType(eEventProximity);
 	}
 }
 
