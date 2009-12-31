@@ -67,6 +67,7 @@ public class PLevel
 				<li>Are you using an airbrush or a pen marker?</li>
 			</ul>
 		 */
+		@Deprecated
 		SIDE_PRESSURE,
 		/**
 		Pen rotation. Range: 0 to 2*pi clockwise.
@@ -77,6 +78,7 @@ public class PLevel
 				<li>Are you using a pen marker or 4D mouse?</li>
 			</ul>
 		 */
+		@Deprecated
 		ROTATION,
 		CUSTOM;
 
@@ -122,7 +124,7 @@ public class PLevel
 		public final float min;
 		public final float max;
 		private final float range;
-		
+
 		public Range(float min, float max) {
 			if(min<0 && max>0 && Math.abs(max+min)==1){ // trick to avoid loosing the tool center
 				if(max>-min)
@@ -143,7 +145,7 @@ public class PLevel
 			return "[PLevel.Range: "+min+", "+max+"]";
 		}
 	}
-	
+
 	public PLevel(Type type, float value){
 		this(type.ordinal(), value);
 	}
