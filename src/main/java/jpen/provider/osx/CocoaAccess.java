@@ -330,6 +330,7 @@ public class CocoaAccess {
 			  double eventTimeSeconds,
 			  int cocoaModifierFlags,
 			  float screenX, float screenY,
+			  boolean isDeviceDelta,
 			  float deltaX, float deltaY
 			) {
 	}

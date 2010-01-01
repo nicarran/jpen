@@ -37,10 +37,14 @@ permission notice:
 
 /*
 Based on code by Jerry Huxtable. See http://www.jhlabs.com/java/tablet/ .
+ Also based on code from 
+ http://mxr.mozilla.org/mozilla/source/widget/src/cocoa/nsChildView.h
+ http://firefox-3.1.sourcearchive.com/lines/3.1~b2plus-pbuild1plus-pnobinonly/nsChildView_8mm-source.html
 */
 
 #import <jni.h>
 #import <Cocoa/Cocoa.h>
+#import <Carbon/Carbon.h>
 #import <objc/runtime.h>
 #import "JRSwizzle.h"
 #import "../nativeBuild/osx-BuildNumber.h"
@@ -61,6 +65,7 @@ enum {
 - (CGFloat)magnification;       
 - (CGFloat)deviceDeltaX;
 - (CGFloat)deviceDeltaY;
+- (EventRef)_eventRef;
 @end
 
 #endif
@@ -200,8 +205,30 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 					break;
 				case NSScrollWheel:
 					if (watchScrollEvents) {
-						float dx = [event deviceDeltaX];
-						float dy = [event deviceDeltaY];
+						float dx = 0, dy = 0;
+						bool useDeviceDelta = false;
+						
+						// Turns out that deviceDeltaX/Y trigger an assertion if you try to access them on a scroll 
+						// event that doesn't actually have them (e.g. from an actual scroll mouse, not multi-touch)
+						// Unfortunately, [event respondsToSelector:@selector(deviceDeltaX)] always returns true, 
+						// even when it ends up throwing an assertion.
+						
+						// Using code found at http://firefox-3.1.sourcearchive.com/lines/3.1~b2plus-pbuild1plus-pnobinonly/nsChildView_8mm-source.html
+						// I discovered that you can get the underlying Carbon event that the Cocoa event maps to,
+						// and it can be checked for being of type "kEventMouseScroll" to determine whether deviceDeltaX
+						// is actually available.
+						if ([event respondsToSelector:@selector(_eventRef)] && 
+							[event respondsToSelector:@selector(deviceDeltaX)]) {
+							EventRef theCarbonEvent = [event _eventRef];
+							useDeviceDelta = theCarbonEvent && GetEventKind(theCarbonEvent) == kEventMouseScroll;
+						}
+						if (useDeviceDelta) {
+							dx = [event deviceDeltaX];
+							dy = [event deviceDeltaY];
+						} else {
+							dx = [event deltaX];
+							dy = [event deltaY];
+						}
 						if (dx != 0 || dy != 0) {
 							NSPoint location = getLocation(event);
 							(*env)->CallVoidMethod(env, g_object, g_methodID_scroll,
@@ -209,6 +236,7 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 												[event modifierFlags],
 												location.x,
 												location.y,
+												useDeviceDelta,
 												dx,
 												dy
 												   );
@@ -334,8 +362,12 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 }
 @end
 
-static void updateWatchingEvents() {	
-	watchingEvents = watchTabletEvents || watchProximityEvents || watchScrollEvents || watchGestureEvents;
+static void updateWatchingEvents() {
+	// Proximity events aren't coalesced
+	BOOL trackMovement = watchTabletEvents || watchScrollEvents || watchGestureEvents;
+	[NSEvent setMouseCoalescingEnabled: trackMovement];
+	
+	watchingEvents = watchProximityEvents || trackMovement;
 }
 
 
@@ -375,8 +407,6 @@ JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_startup(JNIEnv *env, j
 	[NSApplication jr_swizzleMethod:@selector(sendEvent:)
 						 withMethod:@selector(JPen_sendEvent:)
 							  error:&error];
-	//[NSEvent setMouseCoalescingEnabled:NO];
-	
 	if (error != nil) {
 		NSLog(@"error overriding [NSApplication sendEvent]: %@", [error description]);
 		throwException(env,"Error initializing event monitor");
@@ -391,7 +421,7 @@ JNIEXPORT void JNICALL Java_jpen_provider_osx_CocoaAccess_startup(JNIEnv *env, j
 		if ( g_class != (jclass)0 ) {
 			g_methodID =	     (*env)->GetMethodID( env, g_class, "postEvent",		  "(IDIFFZIIIIFFFFF)V" );
 			g_methodID_prox =    (*env)->GetMethodID( env, g_class, "postProximityEvent", "(DIIIZIIIIIJII)V" );
-			g_methodID_scroll =  (*env)->GetMethodID( env, g_class, "postScrollEvent",    "(DIFFFF)V" );
+			g_methodID_scroll =  (*env)->GetMethodID( env, g_class, "postScrollEvent",    "(DIFFZFF)V" );
 			g_methodID_magnify = (*env)->GetMethodID( env, g_class, "postMagnifyEvent",   "(DIFFF)V" );
 			g_methodID_swipe =   (*env)->GetMethodID( env, g_class, "postSwipeEvent",     "(DIFFFF)V" );
 			g_methodID_rotate =  (*env)->GetMethodID( env, g_class, "postRotateEvent",    "(DIFFF)V" );
