@@ -32,15 +32,23 @@ Various utility methods. Don't use this class directly, it is only intended to b
 public final class Utils{
 	private static ResourceBundle moduleProperties;
 	
-	public static ResourceBundle getModuleProperties() {
+	/**
+	@deprecated Use {@link #getBuildProperties()}.
+	*/
+	@Deprecated
+	public static ResourceBundle getModuleProperties(){
+		return getBuildProperties();
+	}
+	
+	public static ResourceBundle getBuildProperties() {
 		if(moduleProperties==null) {
-			moduleProperties=ResourceBundle.getBundle("jpen.module");
+			moduleProperties=ResourceBundle.getBundle("jpen.build");
 		}
 		return moduleProperties;
 	}
 
 	public static String getModuleId(){
-		return getModuleProperties().getString("module.id");
+		return getBuildProperties().getString("module.id");
 	}
 
 	public static String getFullVersion(){
@@ -48,11 +56,11 @@ public final class Utils{
 	}
 
 	public static String getVersion(){
-		return getModuleProperties().getString("module.version");
+		return getBuildProperties().getString("module.version");
 	}
 
 	public static String getBuild(){
-		return getModuleProperties().getString("module.distVersion");
+		return getBuildProperties().getString("module.distVersion");
 	}
 	
 	public static String evalStackTrace(Throwable t){

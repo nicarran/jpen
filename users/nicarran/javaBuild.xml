@@ -1,10 +1,35 @@
 <?xml version="1.0"?>
 <project name="javaBuild" default="prepare">
-	<target name="init">
+	<import  file="commonBuild.xml"/>
+
+	<target name="init" depends="readBuildProperties">
 		<property environment="env"/>
-		<property file="module.properties"/>
-		<property file="module-user.properties"/>
 		
+		<property name="module.distDir" value="product/distributions/${module.distVersion}"/>
+		
+		<property name="module.repositoryDir" value="/home/nicarran/archive/boxes/ant/project/repository"/>
+	
+		<property name="doc.appName" value="${module.artifactId}"/>
+		<script language="javascript"><![CDATA[
+			project.setProperty("doc.lowerAppName", project.getProperty("doc.appName").toLowerCase());
+		]]></script>
+		<property name="doc.lowerAppName-ver" value="${doc.lowerAppName}-${module.version}"/>
+		<mkdir dir="doc"/>
+		<fileset dir="doc" id="filesetId.commands">
+			<include name="*/commands.properties" />
+		</fileset>
+		<pathconvert property="commands.properties.file" refid="filesetId.commands" setonempty="false"/>
+		<property file="${commands.properties.file}"/>
+	
+		<property name="copyright.licenseName" value="GNU General Public License"/>
+		<property name="copyright.licenseAbrevName" value="GNU GPL" />
+		<property name="copyright.licenseVersion" value="3" />
+		<property name="copyright.licensesDir" value="/home/nicarran/archive/boxes/ant/project/licenses/GPL"/>
+		<tstamp>
+			<format property="copyright.years" pattern="yyyy"/>
+		</tstamp>
+		<available property="copyright.contributorsAvail" file="src/copyright/${module.commercialId}-copyright.txt"></available>
+	
 		<mkdir dir="doc"/>
 		<fileset dir="doc" id="filesetId.commands">
 			<include name="*/commands.properties" />
@@ -16,34 +41,7 @@
 			project.setProperty("doc.lowerAppName", project.getProperty("doc.appName").toLowerCase());
 		]]></script>
 		<property name="doc.lowerAppName-ver" value="${doc.lowerAppName}-${module.version}"/>
-		
-		<property name="module.author" value="Nicolas Carranza"/>
-		<property name="module.authorMail" value="nicarran(at)gmail.com"/>
-		<property name="module.url" value="UNDEFINED"/>
-		<property name="module.javacTarget" value="1.6"/>
-		<property name="module.javacFork" value="false"/>
-		<property name="module.javacExecutable" value="javac"/>
-		<property name="module.javaExecutable" value="java"/>
-		<property name="module.javacDebug" value="true"/>
-		<property name="module.mainClass" value="UNDEFINED"/>
-		<property name="module.commercialId" value="${module.id}"/>
-		<property name="copyright.licensesDir" value="/home/nicarran/archive/boxes/ant/project/licenses/GPL"/>
-		<property name="copyright.licenseName" value="GNU General Public License"/>
-		<property name="copyright.licenseAbrevName" value="GNU GPL" />
-		<property name="copyright.licenseVersion" value="3" />
-		<tstamp>
-			<format property="copyright.years" pattern="yyyy"/>
-		</tstamp>
-		<available property="copyright.contributorsAvail" file="src/copyright/${module.commercialId}-copyright.txt"></available>
-		<tstamp>
-			<format property="module.distVersion" pattern="yyMMdd"/>
-		</tstamp>
-		<property name="module.distDir" value="product/distributions/${module.distVersion}"/>
-		<property name="module.id-ver" value="${module.id}-${module.version}"/>
-		<property name="module.id-fullVer" value="${module.id-ver}-${module.distVersion}"/>
-		<property name="module.package-ver" value="${module.package}-${module.version}"/>
-
-		
+	
 		<mkdir dir="dependencies/main-jars"/>
 		<mkdir dir="dependencies/test-jars"/>
 		<mkdir dir="dependencies/modules"/>
@@ -54,10 +52,10 @@
 		<mkdir dir="src/aux/java/${module.packageAsDir}"/>
 		<mkdir dir="src/jars"/>
 		<mkdir dir="src/copyright"></mkdir>
-		
+	
 		<touch mkdirs="true" file="src/main/java/META-INF/MANIFEST.MF"/>
 		<touch mkdirs="true" file="src/test/java/META-INF/MANIFEST.MF"/>
-		
+	
 		<path id="module.depclasspath">
 			<fileset dir="dependencies/main-jars" includes="*.jar"/>
 			<fileset dir="dependencies/test-jars" includes="*.jar"/>
@@ -66,15 +64,15 @@
 				<include name="*/src/aux/java"/>
 			</dirset>
 		</path>
-		
+	
 		<property name="module.srcclasspath" value="src/main/java:src/aux/java:src/test/java"/>
-		
+	
 		<pathconvert property="_hasSources" setonempty="false">
 			<path>
 				<fileset dir="src/main/java" includes="**/*.java"/>
 			</path>
 		</pathconvert>
-		
+	
 		<condition property="disable.javadoc">
 			<or>
 				<isset property="module.is3rdParty"/>
@@ -83,16 +81,13 @@
 				</not>
 			</or>
 		</condition>
-		
+	
 		<copy file="/home/nicarran/archive/boxes/ant/project/logging.properties" todir="."/>
-	
 	</target>
-	
-	<target name="resourcesModuleProperties" depends="init">
-		<echoproperties destfile="src/main/resources/${module.packageAsDir}/module.properties" regex="(module.*)|(doc.*)|(${module.id}.*)"/>
-	</target>
-	
+
 	<target name="updateManifest" depends="init" unless="module.is3rdParty">
+		<property name="module.mainClass" value="UNDEFINED"/>
+	
 		<path id="_lib">
 			<fileset dir="dependencies">
 				<include name="main-jars/*.jar"/>
@@ -136,40 +131,35 @@
 			</classpath>
 		</java>
 	</target> -->
-	
+
 	<target name="linkSrc" depends="init" description="Makes links to the sources.">
 		<exec executable="ln" os="Linux">
-			<arg value="-s"/>
-			<arg value="-f"/>
+			<arg value="-sfT"/>
 			<arg value="src/main/java/${module.packageAsDir}"/>
 			<arg value="src-java"/>
 		</exec>
 		<exec executable="ln" os="Linux">
-			<arg value="-s"/>
-			<arg value="-f"/>
+			<arg value="-sfT"/>
 			<arg value="src/main/java/META-INF"/>
 			<arg value="src-java:metaInf"/>
 		</exec>
 		<exec executable="ln" os="Linux">
-			<arg value="-s"/>
-			<arg value="-f"/>
+			<arg value="-sfT"/>
 			<arg value="src/main/resources/${module.packageAsDir}"/>
 			<arg value="src-resources"/>
 		</exec>
 		<exec executable="ln" os="Linux">
-			<arg value="-s"/>
-			<arg value="-f"/>
+			<arg value="-sfT"/>
 			<arg value="src/test/java/${module.packageAsDir}"/>
 			<arg value="src-java-test"/>
 		</exec>
 		<exec executable="ln" os="Linux">
-			<arg value="-s"/>
-			<arg value="-f"/>
+			<arg value="-sfT"/>
 			<arg value="src/aux/java/${module.packageAsDir}"/>
 			<arg value="src-java-aux"/>
 		</exec>
 	</target>
-	
+
 	<target name="linkTestJars" description="Links the jars required for tests." depends="init">
 		<exec executable="ln" os="Linux">
 			<arg value="-s"/>
@@ -179,19 +169,19 @@
 			<arg value="dependencies/test-jars"/>
 		</exec>
 	</target>
-	
+
 	<target name="linkEjbClientJars" description="Links the jar required in a common EJB client." depends="init">
 		<antcall target="_linkEjbClientJars">
 			<param name="_linkEjbClientJars_dest" value="dependencies/main-jars"/>
 		</antcall>
 	</target>
-	
+
 	<target name="linkEjbTestJars" description="Links the jar required to test EJBs." depends="init">
 		<antcall target="_linkEjbClientJars">
 			<param name="_linkEjbClientJars_dest" value="dependencies/test-jars"/>
 		</antcall>
 	</target>
-	
+
 	<target name="_linkEjbClientJars">
 		<exec executable="ln" os="Linux">
 			<arg value="-s"/>
@@ -203,7 +193,7 @@
 			<arg value="${_linkEjbClientJars_dest}"/>
 		</exec>
 	</target>
-	
+
 	<target name="linkProcessorJars" depends="init">
 		<exec executable="ln" os="Linux">
 			<arg value="-s"/>
@@ -212,13 +202,13 @@
 			<arg value="dependencies/main-jars"/>
 		</exec>
 	</target>
-	
+
 	<target name="clean" description="Removes the compiled classes" depends="init, cleanJar">
 		<delete includeemptydirs="true">
 			<fileset dir="src" includes="**/*.class"/>
 		</delete>
 	</target>
-	
+
 	<target name="process" depends="init" description="Process annotations" if="module.annotationProcessors">
 		<echo>module.annotationProcessors: ${module.annotationProcessors}</echo>
 		<pathconvert property="module.depclasspath" refid="module.depclasspath"/>
@@ -227,31 +217,35 @@
 			<compilerarg line="${module.annotationProcessors} -proc:only -processorpath &quot;${module.depclasspath}&quot; -s src/aux/java"/>
 		</javac>
 	</target>
-	
+
 	<target name="cleanProcess" depends="init">
 		<delete includeemptydirs="true">
 			<fileset dir="src/aux/java/${module.packageAsDir}" includes="**/*"/>
 		</delete>
 	</target>
-	
+
 	<target name="compile" description="Compiles the sources found in src" depends="init">
-		<javac debug="${module.javacDebug}" target="${module.javacTarget}" compiler="javac${module.javacTarget}" fork="${module.javacFork}" executable="${module.javacExecutable}" includeantruntime="no" srcdir="${module.srcclasspath}">
+		<property name="java.compiler" value="javac"/>	
+		<property name="module.javacFork" value="false"/>
+		<property name="module.javacDebug" value="true"/>
+		
+		<javac debug="${module.javacDebug}" target="${module.javacTarget}" compiler="javac${module.javacTarget}" fork="${module.javacFork}" executable="${java.compiler}" includeantruntime="no" srcdir="${module.srcclasspath}">
 			<exclude name="**/*.nu.java"/>
 			<classpath refid="module.depclasspath"/>
 			<compilerarg value="-Xlint:unchecked"/>
 			<compilerarg value="-Xlint:deprecation"/>
 		</javac>
 	</target>
-	
+
 	<target name="deptree">
 		<exec executable="antProject-deptree" os="Linux">
 			<arg value="--cksum"/>
 		</exec>
 	</target>
-	
+
 	<target name="test" description="Does JUnit tests" depends="compile, deptree">
 		<junit haltonfailure="yes" fork="yes" showoutput="yes" forkmode="once">
-			<!--jvm="${module.javaExecutable}" test on the current vm!-->
+			<!--jvm="${java.command}" test on the current vm!-->
 			<jvmarg value="-Xmx512M"/>
 						<!--<jvmarg value="-Xms256M"/>-->
 			<jvmarg value="-Djava.util.logging.config.file=logging.properties"/>
@@ -267,11 +261,11 @@
 				<fileset dir="deptree/test-deptree/jars" includes="*.jar"/>
 			</classpath>
 			<batchtest>
-				<fileset dir="src/test/java" includes="**/*Test.class" excludes="**/*Tests.class"/>
+				<fileset dir="src/test/java" includes="**/ActiveWindow*Test.class" excludes="**/*Tests.class"/>
 			</batchtest>
 		</junit>
 	</target>
-	
+
 	<target name="profile" description="profiles using jrat" depends="init, compile">
 		<fail message="You must define module.profileClass in the module.properties file.">
 			<condition>
@@ -301,7 +295,7 @@ file=${_profilerOutputFile}
 			<arg value="${_profilerOutputFile}"/>
 		</java>
 	</target>
-	
+
 	<target name="prepWinTest" depends="deptree">
 		<property name="_winTestDir" value="product/win-test"/>
 		<fail message="You must link the windows test dir to ${_winTestDir}.">
@@ -345,10 +339,10 @@ java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 		</pathconvert>
 		<echo file="${_winTestDir}/availableTests.txt">${_winAvailableTests}
 				</echo>
-		
+	
 		<zip destfile="${_winTestDir}/tests.zip" basedir="${_winTestDir}" excludes="**/tests.zip"/>
 	</target>
-	
+
 	<target name="cleanJar" depends="init" description="sets the product jar to empty content" unless="module.is3rdParty">
 		<delete>
 			<fileset dir="product">
@@ -359,8 +353,8 @@ java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 		<jar destfile="product/${module.package-ver}.jar"/>
 		<jar destfile="product/${module.package-ver}.test.jar"/>
 	</target>
-	
-	<target name="jar" description="Constructs the main jar." depends="cleanJar, updateManifest, resourcesModuleProperties, compile" unless="module.is3rdParty">
+
+	<target name="jar" description="Constructs the main jar." depends="init, cleanJar, updateManifest, compile" unless="module.is3rdParty">
 		<delete file="${module.repositoryDir}/jarsCksum"/>
 		<jar destfile="product/${module.package-ver}.jar" manifest="src/main/java/META-INF/MANIFEST.MF">
 			<fileset dir="src/main/java" includes="META-INF/**/*.xml"/>
@@ -379,7 +373,7 @@ java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 			<fileset dir="src/test/java" includes="**/*" excludes="**/*.java"/>
 		</jar>
 	</target>
-	
+
 	<target name="javadoc" description="Prepares and generates Javadoc" depends="init" unless="disable.javadoc">
 		<delete dir="product/javadoc"/>
 		<mkdir dir="product/javadoc"/>
@@ -391,7 +385,7 @@ java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 			<packageset dir="src/aux/java"/>
 		</javadoc>
 	</target>
-	
+
 	<target name="javadocUml" description="Prepares and generates Javadoc" depends="init" unless="disable.javadoc">
 		<delete dir="product/javadoc"/>
 		<mkdir dir="product/javadoc"/>
@@ -408,7 +402,7 @@ java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 				<param name="-ranksep" value="0.25"/>
 				<param name="-horizontal"/>
 				<!--<param name="-collapsible"/>-->
-
+				
 				<!-- javadoc params: -->
 				<param name="-linksource"/>
 			</doclet>
@@ -423,14 +417,15 @@ java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 			<mapper type="glob" from="*.dot" to="*.png"/>
 		</apply>-->
 	</target>
-	
+
 	<target name="licenses" depends="init">
 		<copy todir="src/copyright">
 			<fileset dir="${copyright.licensesDir}" includes="*"></fileset>
 		</copy>
 	</target>
-	
+
 	<target name="copyrightSrcs" depends="init">
+		<property name="module.authorMail" value=""/>
 		<echo file="copyright.tmp">/* [{
 Copyright ${copyright.years} ${module.author} &lt;${module.authorMail}&gt;
 
@@ -469,9 +464,9 @@ along with ${module.commercialId}.  If not, see &lt;http://www.gnu.org/licenses/
 		</move>
 		<delete file="copyright.tmp"/>
 	</target>
-	
+
 	<target name="copyright" depends="licenses, copyrightSrcs"/>
-	
+
 	<target name="copyrightErase" depends="init">
 		<apply executable="nicarran.system.utils">
 			<arg value="sys_copyrightEraser"/>
@@ -479,40 +474,40 @@ along with ${module.commercialId}.  If not, see &lt;http://www.gnu.org/licenses/
 			<fileset dir="." includes="src/**/*.java src/**/*.c src/**/*.h"/>
 		</apply>
 	</target>
-	
+
 	<target name="distPrep" depends="init">
 		<delete dir="${module.distDir}" quiet="true"/>
 		<mkdir dir="${module.distDir}"/>
 	</target>
-	
+
 	<target name="distJavadoc" depends="init">
 		<zip destfile="${module.distDir}/${module.id-fullVer}-javadoc.zip">
 			<zipfileset dir="product/javadoc" prefix="${module.id-fullVer}"/>
 			<zipfileset dir="src/copyright" prefix="${module.id-fullVer}"/>
 		</zip>
 	</target>
-	
+
 	<target name="distSrc" depends="init">
 		<zip destfile="${module.distDir}/${module.id-fullVer}-src.zip">
 			<zipfileset dir="src/main/java" prefix="${module.id-fullVer}/src/main/java" includes="**/*.java"/>
 			<zipfileset dir="src/main/resources" prefix="${module.id-fullVer}/src/main/resources" includes="**/*.properties, **/*.java"/>
 			<zipfileset dir="src/main/c" prefix="${module.id-fullVer}/src/main/c" includes="**/*.h, **/*.c, **/*.m"/>
 			<zipfileset dir="src/test/java" prefix="${module.id-fullVer}/src/test/java" includes="**/SmokeTest.java"/>
-			<zipfileset dir="." prefix="${module.id-fullVer}/"  includes="pom.xml,module.properties,nativeBuild.properties"/>
+			<zipfileset dir="." prefix="${module.id-fullVer}/" includes="pom.xml,module.properties,nativeBuild.properties"/>
 			<zipfileset dir="src/copyright" prefix="${module.id-fullVer}"/>
 			<zipfileset dir="JPen-JNI-MacOSX.xcodeproj" prefix="${module.id-fullVer}/JPen-JNI-MacOSX.xcodeproj" includes="**/*"/>
 		</zip>
 	</target>
-	
+
 	<target name="distLib" depends="init">
 		<zip destfile="${module.distDir}/${module.id-fullVer}-lib.zip">
 			<zipfileset dir="product" prefix="${module.id-fullVer}" includes="*.jar *.dll *.so *.jnilib" excludes="*test*"/>
 			<zipfileset dir="src/copyright" prefix="${module.id-fullVer}"/>
 		</zip>
 	</target>
-	
+
 	<target name="dist" depends="distPrep, distJavadoc, distSrc, distLib"/>
-	
+
 	<target name="distUpload" depends="init">
 		<scp sftp="true" todir="${sourceforge.userId}:${sourceforge.userPass}@frs.sf.net:/home/users/n/ni/nicarran/uploads">
 			<fileset dir="${module.distDir}"/>
@@ -522,8 +517,8 @@ along with ${module.commercialId}.  If not, see &lt;http://www.gnu.org/licenses/
 			<fileset dir="${module.distDir}"/>
 		</ftp>-->
 	</target>
-	
+
 	<target name="all" depends="jar, javadoc"/>
-	
+
 	<target name="prepare" depends="linkSrc, jar"/>
 </project>
