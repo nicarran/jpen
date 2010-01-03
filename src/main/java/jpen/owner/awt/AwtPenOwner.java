@@ -58,8 +58,9 @@ public final class AwtPenOwner
 				@Override
 				public void mouseEntered(MouseEvent ev) {
 					synchronized(penManagerHandle.getPenSchedulerLock()){
-						if(!stopDraggingOut())
+						if(!stopDraggingOut()){
 							unpauser.enable(); // unpauses when mouse motion is detected.
+						}
 					}
 				}
 			};
@@ -69,14 +70,14 @@ public final class AwtPenOwner
 
 		private volatile boolean enabled;
 
-		void enable(){
+		synchronized void enable(){
 			if(enabled)
 				return;
 			component.addMouseMotionListener(unpauser); // unpauses only when mouse motion is detected.
 			enabled=true;
 		}
 
-		void disable(){
+		synchronized void disable(){
 			if(!enabled)
 				return;
 			component.removeMouseMotionListener(unpauser);

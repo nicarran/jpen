@@ -35,6 +35,7 @@ void Device_setIsListening(SDevice *pDevice, int isListening) {
 	if(pDevice->isListening==isListening)
 		return;
 	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
+	int failed=0;
 	if(isListening) {
 		XEventClass eventClasses[E_EventType_size];
 		int eventClassesSize=0;
@@ -52,14 +53,15 @@ void Device_setIsListening(SDevice *pDevice, int isListening) {
 			}
 		}
 
-		/* Better grab the device to avoid loosing events
+		/*
 		XSelectInput(pBus->pDisplay,DefaultRootWindow(pBus->pDisplay),0x00FFFFFF ^ PointerMotionHintMask);
 		XSelectExtensionEvent(pBus->pDisplay,
 		    DefaultRootWindow(pBus->pDisplay),
 		    eventClasses,
 		    eventClassesSize);*/
-
-		XGrabDevice(pBus->pDisplay, pDevice->pXdevice, DefaultRootWindow(pBus->pDisplay),
+		
+		// Better grab the device to avoid loosing events: (?)
+		failed=XGrabDevice(pBus->pDisplay, pDevice->pXdevice, DefaultRootWindow(pBus->pDisplay),
 								0,
 								eventClassesSize,
 								eventClasses,
@@ -67,13 +69,12 @@ void Device_setIsListening(SDevice *pDevice, int isListening) {
 								GrabModeAsync,
 								CurrentTime
 							 );
-		XSelectInput(pBus->pDisplay,DefaultRootWindow(pBus->pDisplay),PropertyChangeMask); //hack to signal Device_waitNextEventOrTimeOut through Device_stopWaitingNextEvent
 	}else{
 		XUngrabDevice(pBus->pDisplay, pDevice->pXdevice, CurrentTime);
 	}
 	XSync(pBus->pDisplay, 1);
-	// TODO: error handling?
-	pDevice->isListening=isListening;
+	if(!failed)
+		pDevice->isListening=isListening;
 }
 
 int Device_preDestroy(SDevice *pDevice) {
@@ -151,6 +152,8 @@ int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex) {
 		return errorState;
 	}
 	Device_refreshValuatorRanges(pDevice);
+	//hack to signal Device_waitNextEventOrTimeOut through Device_stopWaitingNextEvent
+	XSelectInput(pBus->pDisplay,DefaultRootWindow(pBus->pDisplay),PropertyChangeMask); 
 	//Device_setIsListening(pDevice, true);
 	return 0;
 }

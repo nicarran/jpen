@@ -21,11 +21,16 @@ package jpen.provider.xinput;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 import jpen.PenDevice;
 import jpen.PenManager;
 import jpen.PLevel;
+import jpen.Utils;
 
 final class XiDevice{
+	static final Logger L=Logger.getLogger(XiDevice.class.getName());
+	//static { L.setLevel(Level.ALL); }
+	
 	enum EventType{
 		BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY;
 		public static final List<EventType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
@@ -45,9 +50,9 @@ final class XiDevice{
 	public String getName() {
 		return xiBus.getXiDeviceName(xiDeviceIndex);
 	}
-	
+
 	public boolean getIsListening(){
-		synchronized(xiBus){ // x server is not thread safe... requests must be made one at a time (per connectionx) 
+		synchronized(xiBus){ // x server is not thread safe... requests must be made one at a time (per connectionx)
 			return getIsListening(cellIndex);
 		}
 	}
@@ -56,7 +61,20 @@ final class XiDevice{
 
 	public void setIsListening(boolean isListening){
 		synchronized(xiBus){
-			setIsListening(cellIndex, isListening);
+			int attempts=0;
+			while(true){
+				// TODO: change setIsListening to return true on success to avoid doing a getIsListening... this requires a nativeVersion change.
+				setIsListening(cellIndex, isListening);
+				if(isListening && !getIsListening()){ // the device couldn't be grabbed
+					if(attempts++>20){
+						L.severe("the tablet device couldn't be grabbed");
+						break;
+					}
+					Utils.sleepUninterrupted(40);
+				}
+				else
+					break;
+			}
 		}
 	}
 
@@ -105,19 +123,19 @@ final class XiDevice{
 	private static native boolean nextEvent(int cellIndex);
 
 	private synchronized static native void stopWaitingNextEvent(int cellIndex);
-	
+
 	public boolean waitNextEvent(){
 		synchronized(xiBus){
 			return waitNextEvent(cellIndex);
 		}
 	}
-	
+
 	private static native boolean waitNextEvent(int cellIndex);
-	
+
 	public void stopWaitingNextEvent(){
-			stopWaitingNextEvent(cellIndex);
+		stopWaitingNextEvent(cellIndex);
 	}
-	
+
 	public long getLastEventTime(){
 		synchronized(xiBus){
 			return getLastEventTime(cellIndex);

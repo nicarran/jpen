@@ -97,8 +97,9 @@ final class PenScheduler{
 		boolean scheduledMovement=false;
 		scheduledLocation.x=lastScheduledState.levels.getValue(PLevel.Type.X);
 		scheduledLocation.y=lastScheduledState.levels.getValue(PLevel.Type.Y);
-		if(pen.penManager!=null && levelsOnScreen)
-			pen.penManager.penOwner.getPenClip().evalLocationOnScreen(clipLocationOnScreen);
+		PenOwner penOwner=pen.penManager==null? null:pen.penManager.penOwner; // pen.penManager can be null when testing
+		if(penOwner!=null && levelsOnScreen)
+			penOwner.getPenClip().evalLocationOnScreen(clipLocationOnScreen);
 		for(PLevel level:levels) {
 			if(level.value==lastScheduledState.getLevelValue(level.typeNumber))
 				continue;
@@ -133,8 +134,8 @@ final class PenScheduler{
 			return false;
 
 		if(scheduledMovement){
-			if(pen.penManager!=null && !pen.penManager.penOwner.getPenClip().contains(scheduledLocation)
-				 && !pen.penManager.penOwner.isDraggingOut())
+			if(penOwner!=null && !penOwner.getPenClip().contains(scheduledLocation)
+				 && !penOwner.isDraggingOut())
 				return false;
 
 			if(device.getKindTypeNumber()!=PKind.Type.IGNORE.ordinal() &&
