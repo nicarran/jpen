@@ -42,6 +42,7 @@ import jpen.provider.AbstractPenDevice;
 import jpen.provider.VirtualScreenBounds;
 import jpen.PScroll;
 import jpen.PScrollEvent;
+import jpen.utils.ObjectUtils;
 import static jpen.provider.xinput.XiDevice.*;
 
 final class XinputDevice extends AbstractPenDevice {
@@ -68,7 +69,7 @@ final class XinputDevice extends AbstractPenDevice {
 						 public void run(){
 							 while(true){
 								 while(!isWorking())
-									 jpen.Utils.synchronizedWait(this, 0);
+									 ObjectUtils.synchronizedWait(this, 0);
 								 if(XinputDevice.this.xiDevice.waitNextEvent())
 									 processLastEvent();
 								 else {// then a call to xiDevice.stopWaitingNextEvent was made

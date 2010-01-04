@@ -25,11 +25,12 @@ import jpen.PenProvider;
 import jpen.PKind;
 import jpen.provider.AbstractPenProvider;
 import jpen.provider.NativeLibraryLoader;
+import jpen.utils.BuildInfo;
 
 public class CocoaProvider extends AbstractPenProvider {
 
 	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(
-				Integer.valueOf(jpen.Utils.getModuleProperties().getString("jpen.provider.osx.nativeVersion")));
+				Integer.valueOf(BuildInfo.getProperties().getString("jpen.provider.osx.nativeVersion")));
 
 	public static class Constructor
 		extends AbstractPenProvider.AbstractConstructor{
@@ -60,7 +61,7 @@ public class CocoaProvider extends AbstractPenProvider {
 		}
 		@Override
 		public int getExpectedNativeBuild(){
-			return Integer.valueOf(jpen.Utils.getModuleProperties().
+			return Integer.valueOf(BuildInfo.getProperties().
 						 getString("jpen.provider.osx.nativeBuild"));
 		}
 	}

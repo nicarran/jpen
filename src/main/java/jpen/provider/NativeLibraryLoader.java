@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.prefs.Preferences;
-import jpen.Utils;
+import jpen.utils.BuildInfo;
 
 public class NativeLibraryLoader{
 	private static final Logger L=Logger.getLogger(NativeLibraryLoader.class.getName());
@@ -182,9 +182,9 @@ public class NativeLibraryLoader{
 	
 	private static final String getJniLibName(String architecture, int nativeVersion) {
 		StringBuilder jniLibName=new StringBuilder(64);
-		jniLibName.append(Utils.getModuleId());
+		jniLibName.append(BuildInfo.getModuleId());
 		jniLibName.append("-");
-		jniLibName.append(Utils.getVersion());
+		jniLibName.append(BuildInfo.getVersion());
 		if(nativeVersion!=0){ // backwards compatibility
 			jniLibName.append("-");
 			jniLibName.append(nativeVersion);

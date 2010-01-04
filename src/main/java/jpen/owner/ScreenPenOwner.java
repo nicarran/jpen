@@ -18,57 +18,79 @@ You should have received a copy of the GNU Lesser General Public License
 along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.owner;
-import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.awt.Point;
+import java.awt.Window;
 import java.util.Arrays;
 import java.util.Collection;
-
 import jpen.PenProvider;
 import jpen.provider.osx.CocoaProvider;
 import jpen.provider.wintab.WintabProvider;
 import jpen.provider.xinput.XinputProvider;
+import jpen.utils.ActiveWindowProperty;
 /**
-Defines a {@link PenClip} for all the screen. Its {@link jpen.PenManager} is always unpaused.
+Defines a {@link PenClip} for all the screen. Its {@link jpen.PenManager} is unpaused when the current application has an active window.
 */
 public class ScreenPenOwner implements PenOwner {
 
-//	@Override
+	private static ScreenPenOwner instance;
+
+	public synchronized static ScreenPenOwner getInstance(){
+		return instance==null? instance=new ScreenPenOwner():
+					 instance;
+	}
+
+	/**
+	@deprecated Use {@code getInstance()}.
+	*/
+	@Deprecated
+	public ScreenPenOwner(){}
+
+	//	@Override
 	public Collection<PenProvider.Constructor> getPenProviderConstructors(){
 		return Arrays.asList(
-		         new PenProvider.Constructor[]{
-		           // new SystemProvider.Constructor(), //Does not work because it needs a java.awt.Component to register the MouseListener
-		           new XinputProvider.Constructor(),
-		           new WintabProvider.Constructor(),
-		           new CocoaProvider.Constructor()
-		         }
-		       );
+						 new PenProvider.Constructor[]{
+							 // new SystemProvider.Constructor(), //Does not work because it needs a java.awt.Component to register the MouseListener
+							 new XinputProvider.Constructor(),
+							 new WintabProvider.Constructor(),
+							 new CocoaProvider.Constructor()
+						 }
+					 );
 	}
 
-//	@Override
-	public void setPenManagerHandle(PenManagerHandle penManagerHandle){
-		// Only unpause it once and never pause it.
-		penManagerHandle.setPenManagerPaused(false);
+	//	@Override
+	public void setPenManagerHandle(final PenManagerHandle penManagerHandle){
+		ActiveWindowProperty.Listener activeWindowPL=new ActiveWindowProperty.Listener(){
+					//@Override
+					public void activeWindowChanged(Window activeWindow){
+						synchronized(penManagerHandle.getPenSchedulerLock()){
+							penManagerHandle.setPenManagerPaused(activeWindow==null);
+						}
+					}
+				};
+		ActiveWindowProperty activeWindowP=new ActiveWindowProperty(activeWindowPL); // -> registers itself with the current KeyboardFocusManager
+		activeWindowPL.activeWindowChanged(activeWindowP.get());
 	}
 
-	private final PenClip penClip = new PenClip() {	
-//	    @Override
-	    public void evalLocationOnScreen(Point locationOnScreen){
-		    // The location of this PenClip is always on (0, 0) screen coordinates.
-		    locationOnScreen.x=locationOnScreen.y=0;
-	    }
-//	    @Override
-	    public boolean contains(Point2D.Float point){
-		    // This PenClip covers all the screen.
-		    return true;
-	    }
-    };
+	private final PenClip penClip = new PenClip() {
+				//	    @Override
+				public void evalLocationOnScreen(Point locationOnScreen){
+					// The location of this PenClip is always on (0, 0) screen coordinates.
+					locationOnScreen.x=locationOnScreen.y=0;
+				}
+				//	    @Override
+				public boolean contains(Point2D.Float point){
+					// This PenClip covers all the screen.
+					return true;
+				}
+			};
 
-//	@Override
+	//	@Override
 	public PenClip getPenClip() {
 		return penClip;
 	}
 
-//	@Override
+	//	@Override
 	public boolean isDraggingOut() {
 		return false;
 	}

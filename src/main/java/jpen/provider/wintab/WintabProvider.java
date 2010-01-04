@@ -19,16 +19,17 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 package jpen.provider.wintab;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import jpen.PLevel;
+import java.util.Map;
 import jpen.PenManager;
 import jpen.PenProvider;
+import jpen.PLevel;
 import jpen.provider.AbstractPenProvider;
 import jpen.provider.NativeLibraryLoader;
 import jpen.provider.VirtualScreenBounds;
+import jpen.utils.BuildInfo;
+import jpen.utils.ObjectUtils;
 
 public class WintabProvider
 	extends AbstractPenProvider {
@@ -36,7 +37,7 @@ public class WintabProvider
 	public static final int PERIOD=10;
 	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""},
 			new String[]{"64"},
-			Integer.valueOf(jpen.Utils.getModuleProperties().getString("jpen.provider.wintab.nativeVersion")));
+			Integer.valueOf(BuildInfo.getProperties().getString("jpen.provider.wintab.nativeVersion")));
 	//static{L.setLevel(Level.ALL);}
 
 	static void loadLibrary(){
@@ -78,8 +79,7 @@ public class WintabProvider
 		}
 		@Override
 		public int getExpectedNativeBuild(){
-			return Integer.valueOf(jpen.Utils.getModuleProperties().
-						 getString("jpen.provider.wintab.nativeBuild"));
+			return Integer.valueOf(BuildInfo.getProperties().getString("jpen.provider.wintab.nativeBuild"));
 		}
 	}
 
@@ -104,10 +104,10 @@ public class WintabProvider
 						 public void run() {
 							 while(true) {
 								 processQuedEvents();
-								 jpen.Utils.synchronizedWait(this, getPeriod());
+								 ObjectUtils.synchronizedWait(this, getPeriod());
 								 while(getPaused()){
 									 L.fine("going to wait...");
-									 jpen.Utils.synchronizedWait(this, 0);
+									 ObjectUtils.synchronizedWait(this, 0);
 									 L.fine("notified");
 								 }
 							 }

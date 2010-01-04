@@ -27,6 +27,7 @@ import jpen.PenDevice;
 import jpen.PenManager;
 import jpen.PenProvider;
 import jpen.PKind;
+import jpen.utils.ThrowableUtils;
 
 public class StatusReport{
 
@@ -55,14 +56,14 @@ public class StatusReport{
 
 	private void appendHeader(PenManager penManager){
 		appendLine("===== JPen - Status Report =====");
-		appendLine("JPen Version: "+jpen.Utils.getFullVersion());
+		appendLine("JPen Version: "+PenManager.getJPenFullVersion());
 		appendLine("Date: "+new java.util.Date());
 	}
 
 	private void appendPenThreadCrashInfo(PenManager penManager){
 		Exception penThreadCrashException=penManager.pen.getThreadException();
 		if(penThreadCrashException!=null){
-			appendLine("Pen Thread Crashed: "+jpen.Utils.evalStackTrace(penThreadCrashException));
+			appendLine("Pen Thread Crashed: "+ThrowableUtils.evalStackTraceString(penThreadCrashException));
 		}
 	}
 
@@ -102,7 +103,7 @@ public class StatusReport{
 			PenProvider.ConstructionException constructionException=constructor.getConstructionException();
 			String constructionExceptionStackTrace="none";
 			if(constructionException!=null){
-				constructionExceptionStackTrace=jpen.Utils.evalStackTrace(constructionException);
+				constructionExceptionStackTrace=ThrowableUtils.evalStackTraceString(constructionException);
 			}
 			appendLine("Construction Exception: "+constructionExceptionStackTrace, 2);
 			PenProvider penProvider=constructor.getConstructed();

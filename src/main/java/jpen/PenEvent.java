@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Arrays;
 import jpen.event.PenListener;
+import jpen.utils.AccessibleField;
 
 public abstract class PenEvent
 	implements java.io.Serializable {
@@ -119,6 +120,6 @@ public abstract class PenEvent
 		}
 	}
 
-	static final Utils.AccessibleField deviceIdField=new Utils.AccessibleField(PenEvent.class, "deviceId");
-	static final Utils.AccessibleField deviceTimeField=new Utils.AccessibleField(PenEvent.class, "deviceTime");
+	static final AccessibleField deviceIdField=new AccessibleField(PenEvent.class, "deviceId");
+	static final AccessibleField deviceTimeField=new AccessibleField(PenEvent.class, "deviceTime");
 }

@@ -28,6 +28,8 @@ import java.util.logging.Logger;
 import java.util.Queue;
 import javax.swing.SwingUtilities;
 import jpen.event.PenListener;
+import jpen.utils.ThreadUtils;
+import jpen.utils.ThrowableUtils;
 
 public class Pen extends PenState {
 	private static final Logger L=Logger.getLogger(Pen.class.getName());
@@ -113,13 +115,13 @@ public class Pen extends PenState {
 					waitTime=periodMillis-evalCurrentProcTime();
 					if(waitTime>0) {
 						//System.out.println("going to wait: "+waitTime);
-						Utils.sleepUninterrupted(waitTime);
+						ThreadUtils.sleepUninterrupted(waitTime);
 						//waiter.doWait(waitTime); // in some cases, this (instead of sleepUninterrupted ^ ) gives better overall performance (wintab-pulling, jpen demo). We can put this as an alternate behavior if  needed.
 						waitTime=0;
 					}
 				}
 			} catch(Exception ex) {
-				L.severe("jpen-Pen thread threw an exception: "+Utils.evalStackTrace(ex));
+				L.severe("jpen-Pen thread threw an exception: "+ThrowableUtils.evalStackTraceString(ex));
 				exception=ex;
 			}
 			L.finest("^");

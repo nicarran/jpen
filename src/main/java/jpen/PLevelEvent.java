@@ -24,6 +24,7 @@ import java.io.ObjectStreamClass;
 import java.util.Arrays;
 import java.util.Set;
 import jpen.event.PenListener;
+import jpen.utils.AccessibleField;
 
 public class PLevelEvent
 			extends PenEvent
@@ -83,6 +84,6 @@ public class PLevelEvent
 		}
 	}
 
-	private static final Utils.AccessibleField levelsField=new Utils.AccessibleField(PLevelEvent.class, "levels");
+	private static final AccessibleField levelsField=new AccessibleField(PLevelEvent.class, "levels");
 
 }

@@ -16,7 +16,7 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
-package jpen.owner.awt;
+package jpen.utils;
 
 import java.awt.KeyboardFocusManager;
 import java.awt.Window;
@@ -29,36 +29,49 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import javax.swing.SwingUtilities;
 
-class ActiveWindow
+/**
+Allows to keep an eye on the application active window avoiding the unnecessary null activeWindow change reported by the default KeyboardFocusManager when switching windows. 
+*/
+public final class ActiveWindowProperty
 	implements PropertyChangeListener, Runnable{
-	interface Listener{
+
+	public interface Listener{
 		void activeWindowChanged(Window newWindow);
 	}
 
 	private final Listener listener;
-	private final KeyboardFocusManager keyboardFocusManager;
 	private Window activeWindow;
 
-	ActiveWindow(Listener listener){
+	public ActiveWindowProperty(Listener listener){
 		this.listener=listener;
-		this.keyboardFocusManager=KeyboardFocusManager.getCurrentKeyboardFocusManager();
+		KeyboardFocusManager keyboardFocusManager=KeyboardFocusManager.getCurrentKeyboardFocusManager();
 		keyboardFocusManager.addPropertyChangeListener("activeWindow",this);
+		activeWindow=keyboardFocusManager.getActiveWindow();
+	}
+
+	public synchronized Window get(){
+		return activeWindow;
+	}
+
+	private synchronized void set(Window activeWindow){
+		this.activeWindow=activeWindow;
+		listener.activeWindowChanged(activeWindow);
 	}
 
 	//@Override
 	public void propertyChange(PropertyChangeEvent ev){
 		Window activeWindow=(Window)ev.getNewValue();
+		if(activeWindow==this.activeWindow)
+			return;
 		if(activeWindow==null){
-			if(nullWindowTask==null || nullWindowTask.isDone()){
+			// if the new activeWindow is null then we do the change only after a delay to avoid unnecessary changes to null activeWindow (java does change the activeWindow to null when switching).
+			if(nullWindowTask==null || nullWindowTask.isDone())
 				nullWindowTask=nullWindowScheduler.schedule(this, 50, TimeUnit.MILLISECONDS);
-			}
 			return;
 		}
-		if(this.activeWindow==activeWindow)
-			return;
 		if(nullWindowTask!=null)
 			nullWindowTask.cancel(false);
-		setActiveWindow(activeWindow);
+		set(activeWindow);
 	}
 
 	private final ScheduledExecutorService nullWindowScheduler=Executors.newSingleThreadScheduledExecutor(new ThreadFactory(){
@@ -83,12 +96,7 @@ class ActiveWindow
 	private final Runnable nullWindowRunnable=new Runnable(){
 				//@Override
 				public void run(){
-					setActiveWindow(null);
+					set(null);
 				}
 			};
-
-	private synchronized void setActiveWindow(Window activeWindow){
-		this.activeWindow=activeWindow;
-		listener.activeWindowChanged(activeWindow);
-	}
 }

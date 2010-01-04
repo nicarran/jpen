@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 import jpen.PenDevice;
 import jpen.PenManager;
 import jpen.PLevel;
-import jpen.Utils;
+import jpen.utils.ThreadUtils;
 
 final class XiDevice{
 	static final Logger L=Logger.getLogger(XiDevice.class.getName());
@@ -70,7 +70,7 @@ final class XiDevice{
 						L.severe("the tablet device couldn't be grabbed");
 						break;
 					}
-					Utils.sleepUninterrupted(40);
+					ThreadUtils.sleepUninterrupted(40);
 				}
 				else
 					break;

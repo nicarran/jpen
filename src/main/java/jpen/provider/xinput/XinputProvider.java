@@ -30,6 +30,7 @@ import jpen.PKind;
 import jpen.provider.AbstractPenProvider;
 import jpen.provider.NativeLibraryLoader;
 import jpen.provider.VirtualScreenBounds;
+import jpen.utils.BuildInfo;
 
 public final class XinputProvider
 	extends AbstractPenProvider {
@@ -37,7 +38,7 @@ public final class XinputProvider
 
 	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""},
 			new String[]{"x86_64", "ia64"},
-			Integer.valueOf(jpen.Utils.getModuleProperties().getString("jpen.provider.xinput.nativeVersion")));
+			Integer.valueOf(BuildInfo.getProperties().getString("jpen.provider.xinput.nativeVersion")));
 
 	static void loadLibrary(){
 		LIB_LOADER.load();
@@ -73,8 +74,7 @@ public final class XinputProvider
 		}
 		@Override
 		public int getExpectedNativeBuild(){
-			return Integer.valueOf(jpen.Utils.getModuleProperties().
-						 getString("jpen.provider.xinput.nativeBuild"));
+			return Integer.valueOf(BuildInfo.getProperties().getString("jpen.provider.xinput.nativeBuild"));
 		}
 	}
 

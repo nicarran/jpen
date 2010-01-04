@@ -38,6 +38,7 @@ import jpen.provider.osx.CocoaProvider;
 import jpen.provider.system.SystemProvider;
 import jpen.provider.wintab.WintabProvider;
 import jpen.provider.xinput.XinputProvider;
+import jpen.utils.ActiveWindowProperty;
 
 public final class AwtPenOwner
 	extends AbstractPenOwner{
@@ -94,7 +95,7 @@ public final class AwtPenOwner
 				if(!penManagerHandle.getPenManager().getPaused())
 					return;
 				if(enabled){
-					activeWindowListener.setEnabled(true);
+					activeWindowPL.setEnabled(true);
 					penManagerHandle.setPenManagerPaused(false);
 					disable();
 				}
@@ -106,17 +107,17 @@ public final class AwtPenOwner
 		}
 	}
 
-	private final ActiveWindowListener activeWindowListener=new ActiveWindowListener();
+	private final ActiveWindowPL activeWindowPL=new ActiveWindowPL();
 
-	private class ActiveWindowListener
-		implements ActiveWindow.Listener{
+	private class ActiveWindowPL
+		implements ActiveWindowProperty.Listener{
 
 		private boolean enabled;
-		private ActiveWindow activeWindow;
+		private ActiveWindowProperty activeWindowP;
 
 		void setEnabled(boolean enabled){
-			if(activeWindow==null)
-				activeWindow=new ActiveWindow(this);
+			if(activeWindowP==null)
+				activeWindowP=new ActiveWindowProperty(this);
 			this.enabled=enabled;
 		}
 
@@ -170,7 +171,7 @@ public final class AwtPenOwner
 	private void pause(){
 		if(penManagerHandle.getPenManager().getPaused())
 			return;
-		activeWindowListener.setEnabled(false);
+		activeWindowPL.setEnabled(false);
 		penManagerHandle.setPenManagerPaused(true);
 	}
 

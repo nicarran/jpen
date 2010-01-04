@@ -32,9 +32,14 @@ import jpen.event.PenManagerListener;
 import jpen.owner.awt.AwtPenOwner;
 import jpen.owner.PenOwner;
 import jpen.provider.system.SystemProvider;
+import jpen.utils.BuildInfo;
 
 public final class PenManager {
 	private static final Logger L=Logger.getLogger(PenManager.class.getName());
+	
+	public static String getJPenFullVersion(){
+		return BuildInfo.getFullVersion();
+	}
 
 	public final Pen  pen=new Pen(this);
 	public final PenOwner penOwner;
