@@ -42,15 +42,17 @@ import jpen.provider.AbstractPenDevice;
 import jpen.provider.VirtualScreenBounds;
 import jpen.PScroll;
 import jpen.PScrollEvent;
-import jpen.utils.ObjectUtils;
+import jpen.internal.ObjectUtils;
+import jpen.internal.Range;
 import static jpen.provider.xinput.XiDevice.*;
 
+@SuppressWarnings("deprecation")
 final class XinputDevice extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(XinputDevice.class.getName());
 	//static{L.setLevel(Level.ALL);}
 
 	private final XiDevice xiDevice;
-	private final PLevel.Range[] levelRanges;
+	private final Range[] levelRanges;
 	private final XinputProvider xinputProvider;
 	private final Point2D.Float componentLocation=new Point2D.Float();
 	private final Dimension componentSize=new Dimension();
@@ -61,7 +63,7 @@ final class XinputDevice extends AbstractPenDevice {
 		super(xinputProvider);
 		this.xiDevice=xiDevice;
 		this.xinputProvider=xinputProvider;
-		levelRanges=new PLevel.Range[PLevel.Type.VALUES.size()];
+		levelRanges=new Range[PLevel.Type.VALUES.size()];
 		resetLevelRanges();
 		setKindTypeNumber(getDefaultKindTypeNumber());
 		thread=new Thread("jpen-XinputDevice-"+getName()){
@@ -127,6 +129,11 @@ final class XinputDevice extends AbstractPenDevice {
 		return xiDevice.getName();
 	}
 
+	public synchronized boolean getIsAbsoluteMode(){
+		xiDevice.stopWaitingNextEvent();
+		return xiDevice.getIsAbsoluteMode();
+	}
+
 	synchronized void reset(){
 		xiDevice.stopWaitingNextEvent();
 		while(xiDevice.nextEvent()) // flush pending events
@@ -143,19 +150,21 @@ final class XinputDevice extends AbstractPenDevice {
 	}
 
 	private int getDefaultKindTypeNumber() {
-		String lowerCaseName=getName().toLowerCase();
-		if(lowerCaseName.indexOf("eraser")!=-1)
-			return PKind.Type.ERASER.ordinal();
-		else if(lowerCaseName.indexOf("cursor")!=-1)
-			return PKind.Type.CURSOR.ordinal();
-		else if(lowerCaseName.indexOf("pad")!=-1)
+		if(isPad())
 			return PKind.Type.IGNORE.ordinal();
-		else
-			return PKind.Type.STYLUS.ordinal();
+		String lowerCaseName=getName().toLowerCase();
+		if(lowerCaseName.contains("eraser"))
+			return PKind.Type.ERASER.ordinal();
+		if(lowerCaseName.contains("cursor"))
+			return PKind.Type.CURSOR.ordinal();
+		return PKind.Type.STYLUS.ordinal();
+	}
+
+	boolean isPad(){
+		return getName().toLowerCase().contains("pad");
 	}
 
 	private void processLastEvent(){
-		//L.fine("processing last event "+System.currentTimeMillis());
 		EventType eventType=xiDevice.getLastEventType();
 		switch(eventType) {
 		case BUTTON_PRESS:
@@ -212,12 +221,12 @@ final class XinputDevice extends AbstractPenDevice {
 
 		if(PLevel.Type.TILT_TYPES.contains(levelType))
 			return devValue*RADS_PER_DEG;
-			
+
 		devValue=levelRanges[levelType.ordinal()].getRangedValue(devValue);
-		
+
 		if(isRotation)
 			return devValue*PI_2;
-		
+
 		if(PLevel.Type.MOVEMENT_TYPES.contains(levelType))
 			devValue=xinputProvider.screenBounds.getLevelRangeOffset(levelType)+
 							 devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);

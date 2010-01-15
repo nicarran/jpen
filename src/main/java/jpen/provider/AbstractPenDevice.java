@@ -32,6 +32,7 @@ import jpen.PKind;
 import jpen.PLevel;
 import jpen.PLevelEvent;
 
+@SuppressWarnings("deprecation")
 public abstract class AbstractPenDevice
 	implements PenDevice {
 
@@ -51,10 +52,10 @@ public abstract class AbstractPenDevice
 	}
 
 	//@Override
-	public void setId(byte id){
+	public void penManagerSetId(byte id){
 		this.id=id;
 	}
-
+	
 	//@Override
 	public PenProvider getProvider() {
 		return provider;
@@ -110,7 +111,17 @@ public abstract class AbstractPenDevice
 	public final Pen getPen() {
 		return getPenManager().pen;
 	}
-
+	
+	//@Override
+	public boolean getUseFractionalMovements(){
+		return true;
+	}
+	
+	//@Override
+	public void penManagerSetUseFractionalMovements(boolean useFractionalMovement){
+		throw new UnsupportedOperationException();
+	}
+	
 	@Override
 	public String toString() {
 		return "[PenDevice: provider="+getProvider()+", name="+getName()+", kind="+getOrNull(PKind.Type.VALUES, getKindTypeNumber())+"("+getKindTypeNumber()+")]";

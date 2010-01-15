@@ -158,3 +158,13 @@ JNIEXPORT void JNICALL Java_jpen_provider_xinput_XiDevice_refreshLevelRanges
 (JNIEnv *pEnv, jclass class, jint cellIndex){
 	Device_refreshValuatorRanges(Device_getP(cellIndex));
 }
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    getIsAbsoluteMode
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_getIsAbsoluteMode
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Device_getP(cellIndex)->absoluteMode? JNI_TRUE:JNI_FALSE;
+}

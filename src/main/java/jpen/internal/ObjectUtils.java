@@ -16,7 +16,7 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
-package jpen.utils;
+package jpen.internal;
 
 public final class ObjectUtils{
 	private ObjectUtils(){}

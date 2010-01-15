@@ -60,25 +60,23 @@ public class PLevel
 		TILT_Y,
 		/**
 		Barrel button or wheel. Range: 0 to 1 towards the pen tip.<p>
-		@deprecated Testing needed. The development team does not have an airbrush to test on all platforms. Please help us giving feedback (<a href="http://sourceforge.net/projects/jpen/forums/forum/753961">start a topic on the help forum</a>):
+		<b>Warning:</b> Testing needed. The development team does not have an airbrush to test on all platforms. Please help us giving feedback (<a href="http://sourceforge.net/projects/jpen/forums/forum/753961">start a topic on the help forum</a>):
 			<ul>
 				<li>Which operating system are you using?</li>
 				<li>Does the value grow (0 to 1) when the wheel is moved towards the pen tip?</li>
 				<li>Are you using an airbrush or a pen marker?</li>
 			</ul>
 		 */
-		@Deprecated
 		SIDE_PRESSURE,
 		/**
 		Pen rotation. Range: 0 to 2*pi clockwise.
-		@deprecated Testing needed. The development team does not have a pen marker or 4D mouse to test on all platforms. Please help us giving feedback (<a href="http://sourceforge.net/projects/jpen/forums/forum/753961">start a topic on the help forum</a>):
+		<b>Warning:</b> Testing needed. The development team does not have a pen marker or 4D mouse to test on all platforms. Please help us giving feedback (<a href="http://sourceforge.net/projects/jpen/forums/forum/753961">start a topic on the help forum</a>):
 			<ul>
 				<li>Which operating system are you using?</li>
 				<li>Does the value grow from 0 to 2*pi when the device is moved clockwise?</li>
 				<li>Are you using a pen marker or 4D mouse?</li>
 			</ul>
 		 */
-		@Deprecated
 		ROTATION,
 		CUSTOM;
 
@@ -120,6 +118,10 @@ public class PLevel
 		private static final double PI_over_2=PI/2;
 	}
 
+	/**
+	@deprecated there is no public replacement
+	*/
+	@Deprecated
 	public static class Range {
 		public final float min;
 		public final float max;
@@ -144,6 +146,10 @@ public class PLevel
 		public String toString() {
 			return "[PLevel.Range: "+min+", "+max+"]";
 		}
+	}
+	
+	public PLevel(PLevel level){
+		this(level.typeNumber, level.value);
 	}
 
 	public PLevel(Type type, float value){

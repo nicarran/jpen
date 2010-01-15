@@ -46,6 +46,7 @@ struct Device {
 	XDevice *pXdevice;
 	int isListening;
 	
+	int absoluteMode; // 1 if true, 0 otherwise 
 	int valuatorRangeMins[E_Valuators_size];
 	int valuatorRangeMaxs[E_Valuators_size];
 

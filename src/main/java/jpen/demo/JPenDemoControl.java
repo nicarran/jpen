@@ -43,7 +43,7 @@ import jpen.PLevelEmulator;
 public class JPenDemoControl{
 	private static final Logger L=Logger.getLogger(JPenDemoControl.class.getName());
 	//static{L.setLevel(Level.ALL);}
-
+	
 	//private static final Dimension SIZE=new Dimension(400, 400);
 
 	final PenCanvas penCanvas;

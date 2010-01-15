@@ -24,7 +24,7 @@ import java.io.ObjectStreamClass;
 import java.util.Arrays;
 import java.util.Set;
 import jpen.event.PenListener;
-import jpen.utils.AccessibleField;
+import jpen.internal.AccessibleField;
 
 public class PLevelEvent
 			extends PenEvent

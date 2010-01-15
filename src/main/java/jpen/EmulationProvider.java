@@ -21,6 +21,7 @@ package jpen;
 import jpen.provider.AbstractPenDevice;
 import jpen.provider.AbstractPenProvider;
 
+@SuppressWarnings("deprecation")
 final class EmulationProvider
 	extends AbstractPenProvider{
 
@@ -69,10 +70,6 @@ final class EmulationProvider
 		@Override
 		public void setKindTypeNumber(int kindType){
 			throw new UnsupportedOperationException("the pen kind can not be changed on the Emulation device");
-		}
-		@Override
-		public boolean isDigitizer(){
-			return false;
 		}
 	}
 

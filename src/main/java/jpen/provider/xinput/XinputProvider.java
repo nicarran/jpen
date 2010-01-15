@@ -30,7 +30,7 @@ import jpen.PKind;
 import jpen.provider.AbstractPenProvider;
 import jpen.provider.NativeLibraryLoader;
 import jpen.provider.VirtualScreenBounds;
-import jpen.utils.BuildInfo;
+import jpen.internal.BuildInfo;
 
 public final class XinputProvider
 	extends AbstractPenProvider {
@@ -91,14 +91,20 @@ public final class XinputProvider
 			} catch(Exception ex) {
 				continue;
 			}
-			devices.add(new XinputDevice(this, xiBus2.getXiDevice()));
+			XinputDevice xinputDevice=new XinputDevice(this, xiBus2.getXiDevice());
+			if(!xinputDevice.getIsAbsoluteMode() && !xinputDevice.isPad()){
+				L.warning("devices using relative positioning mode are not supported, device disabled: "+xinputDevice.getName()+
+					"\n See bug description https://sourceforge.net/tracker/?func=detail&aid=2929548&group_id=209997&atid=1011964");
+				xinputDevice.setEnabled(false);
+			}
+			devices.add(xinputDevice);
 		}
 
 		xinputDevices=devices.toArray(new XinputDevice[devices.size()]);
 		if(devices.size()==1){
 			xinputDevices[0].setKindTypeNumber(PKind.Type.STYLUS.ordinal());
 		}
-
+		
 		L.fine("end");
 	}
 

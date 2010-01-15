@@ -27,7 +27,7 @@ import jpen.PenDevice;
 import jpen.PenManager;
 import jpen.PenProvider;
 import jpen.PKind;
-import jpen.utils.ThrowableUtils;
+import jpen.internal.ThrowableUtils;
 
 public class StatusReport{
 
@@ -116,8 +116,10 @@ public class StatusReport{
 				}
 				Collection<PenDevice> penDevices=penProvider.getDevices();
 				for(PenDevice penDevice:penDevices){
-					appendLine("Device: "+penDevice.getName()+" ("+penDevice.getPhysicalId()+")", 2);
-					appendLine("Is Digitizer: "+penDevice.isDigitizer(), 3);
+					appendLine(
+						(penManager.isSystemMouseDevice(penDevice)? "Device (System Mouse): ":"Device: ")+
+						penDevice.getName()+" ("+penDevice.getPhysicalId()+")", 2);
+					appendLine("Is System Mouse: "+penManager.isSystemMouseDevice(penDevice), 3);
 					appendLine("Enabled: "+penDevice.getEnabled(), 3);
 					appendLine("Kind: "+PKind.valueOf(penDevice.getKindTypeNumber()), 3);
 				}

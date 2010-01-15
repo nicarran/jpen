@@ -31,7 +31,7 @@ public class PKind
 	public enum Type{
 		CURSOR, STYLUS, ERASER, 
 		/**
-		Used for devices that does not identify the pen, rater extends it, like the pad.
+		Used for devices that does not identify the pen, rater extend it, like the pad.
 		*/
 		IGNORE, 
 		CUSTOM;

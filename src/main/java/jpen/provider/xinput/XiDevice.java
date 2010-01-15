@@ -25,7 +25,8 @@ import java.util.logging.Logger;
 import jpen.PenDevice;
 import jpen.PenManager;
 import jpen.PLevel;
-import jpen.utils.ThreadUtils;
+import jpen.internal.Range;
+import jpen.internal.ThreadUtils;
 
 final class XiDevice{
 	static final Logger L=Logger.getLogger(XiDevice.class.getName());
@@ -80,10 +81,10 @@ final class XiDevice{
 
 	private static native void setIsListening(int cellIndex, boolean isListening);
 
-	public PLevel.Range getLevelRange(PLevel.Type levelType) {
+	public Range getLevelRange(PLevel.Type levelType) {
 		synchronized(xiBus){
 			int typeIndex=getLevelTypeValueIndex(levelType);
-			return new PLevel.Range(getLevelRangeMin(cellIndex, typeIndex), getLevelRangeMax(cellIndex, typeIndex));
+			return new Range(getLevelRangeMin(cellIndex, typeIndex), getLevelRangeMax(cellIndex, typeIndex));
 		}
 	}
 
@@ -101,17 +102,7 @@ final class XiDevice{
 	}
 
 	private static native int getValue(int cellIndex, int valueIndex);
-
-	@Override
-	protected void finalize() {
-		synchronized(xiBus){
-			if(cellIndex!=-1)
-				destroy(cellIndex);
-		}
-	}
-	private static native int destroy(int cellIndex);
-	private static native String getError();
-
+	
 	public boolean nextEvent() {
 		synchronized(xiBus){
 			//if(xiBus.getXiDevice()!=this)
@@ -168,8 +159,16 @@ final class XiDevice{
 			refreshLevelRanges(cellIndex);
 		}
 	}
-
+	
 	private static native void refreshLevelRanges(int cellIndex);
+	
+	public boolean getIsAbsoluteMode(){
+		synchronized(xiBus){
+		return getIsAbsoluteMode(cellIndex);
+		}
+	}
+	
+	private static native boolean getIsAbsoluteMode(int cellIndex);
 
 	@Override
 	public String toString() {
@@ -199,4 +198,14 @@ final class XiDevice{
 			return sb.toString();
 		}
 	}
+	
+	@Override
+	protected void finalize() {
+		synchronized(xiBus){
+			if(cellIndex!=-1)
+				destroy(cellIndex);
+		}
+	}
+	private static native int destroy(int cellIndex);
+	private static native String getError();
 }

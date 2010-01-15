@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Arrays;
 import jpen.event.PenListener;
-import jpen.utils.AccessibleField;
+import jpen.internal.AccessibleField;
 
 public abstract class PenEvent
 	implements java.io.Serializable {

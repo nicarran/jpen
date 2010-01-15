@@ -24,6 +24,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.Point;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,7 +43,8 @@ import jpen.provider.AbstractPenDevice;
 import jpen.PScroll;
 import jpen.PScrollEvent;
 
-class MouseDevice
+@SuppressWarnings("deprecation")
+final class MouseDevice
 	extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(MouseDevice.class.getName());
 	//static {L.setLevel(Level.ALL);	}
@@ -101,7 +103,12 @@ class MouseDevice
 	public String getName() {
 		return "Mouse";
 	}
-
+	
+	@Override
+	public boolean getUseFractionalMovements(){
+		return false;
+	}
+	
 	@Override
 	public void setEnabled(boolean enabled) {
 		if(getEnabled()==enabled)
@@ -116,9 +123,10 @@ class MouseDevice
 	private final PLevel[] changedLevelsA=new PLevel[2];
 	private final List<PLevel> changedLevels=Arrays.asList(changedLevelsA);
 	private void scheduleMove(long time, int x, int y) {
-		changedLevelsA[0]=new PLevel(PLevel.Type.X.ordinal(), x);
-		changedLevelsA[1]=new PLevel(PLevel.Type.Y.ordinal(), y);
-		getPenManager().scheduleLevelEvent(this, time, changedLevels);
+		/*Point componentLocation=systemProvider.component.getLocationOnScreen(); // on jdk 1.5 there is no MouseEvent.getXOnScreen*/
+		changedLevelsA[0]=new PLevel(PLevel.Type.X.ordinal(), /*componentLocation.x+*/x);
+		changedLevelsA[1]=new PLevel(PLevel.Type.Y.ordinal(), /*componentLocation.y+*/y);
+		getPenManager().scheduleLevelEvent(this, time, changedLevels, false);
 	}
 
 	private void mouseButtonChanged(MouseEvent ev, boolean state) {

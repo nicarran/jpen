@@ -53,9 +53,8 @@ void Device_setIsListening(SDevice *pDevice, int isListening) {
 			}
 		}
 
-		/*
-		XSelectInput(pBus->pDisplay,DefaultRootWindow(pBus->pDisplay),0x00FFFFFF ^ PointerMotionHintMask);
-		XSelectExtensionEvent(pBus->pDisplay,
+		//XSelectInput(pBus->pDisplay,DefaultRootWindow(pBus->pDisplay),0x00FFFFFF ^ PointerMotionHintMask);
+		/*XSelectExtensionEvent(pBus->pDisplay,
 		    DefaultRootWindow(pBus->pDisplay),
 		    eventClasses,
 		    eventClassesSize);*/
@@ -94,6 +93,8 @@ void Device_refreshValuatorRanges(struct Device *pDevice){
 	while(--j>=0) {
 		if(pAnyClassInfo->class==ValuatorClass) {
 			XValuatorInfo *pValuatorInfo=(XValuatorInfo *) pAnyClassInfo;
+			pDevice->absoluteMode=pValuatorInfo->mode==Absolute? 1:0;
+			//printf("got mode %i\n", pDevice->absoluteMode);
 			int i=0;
 			for(;i<pValuatorInfo->num_axes; i++) {
 				if(i==E_Valuators_size)
@@ -152,7 +153,7 @@ int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex) {
 		return errorState;
 	}
 	Device_refreshValuatorRanges(pDevice);
-	//hack to signal Device_waitNextEventOrTimeOut through Device_stopWaitingNextEvent
+	//hack to signal Device_waitNextEventOrTimeOut through Device_stopWaitingNextEvent:
 	XSelectInput(pBus->pDisplay,DefaultRootWindow(pBus->pDisplay),PropertyChangeMask); 
 	//Device_setIsListening(pDevice, true);
 	return 0;
@@ -173,7 +174,10 @@ static void Device_refreshValuatorValues(struct Device *pDevice, char first_axis
 */
 int Device_nextEvent(struct Device *pDevice) {
 	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
-
+	
+	//if(!pDevice->isListening)
+		//return 0;
+	
 	if(XPending(pBus->pDisplay))
 		return Device_waitNextEvent(pDevice);
 	return false;

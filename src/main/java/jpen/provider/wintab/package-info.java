@@ -16,19 +16,7 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
-package jpen.internal;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-public final class ThrowableUtils{
-	private ThrowableUtils(){}
-
-	public static String evalStackTraceString(Throwable t){
-		StringWriter sw=new StringWriter();
-		PrintWriter pw=new PrintWriter(sw);
-		t.printStackTrace(pw);
-		pw.close();
-		return sw.toString();
-	}
-}
+/**
+Windows Wintab tablet {@link jpen.PenProvider}. 
+*/
+package jpen.provider.wintab;

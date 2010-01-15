@@ -32,7 +32,7 @@ import jpen.event.PenManagerListener;
 import jpen.owner.awt.AwtPenOwner;
 import jpen.owner.PenOwner;
 import jpen.provider.system.SystemProvider;
-import jpen.utils.BuildInfo;
+import jpen.internal.BuildInfo;
 
 public final class PenManager {
 	private static final Logger L=Logger.getLogger(PenManager.class.getName());
@@ -52,6 +52,7 @@ public final class PenManager {
 	private final List<PenManagerListener> listeners=new ArrayList<PenManagerListener>();
 	private PenManagerListener[] listenersArray;
 	final PenDevice emulationDevice;
+	private PenProvider systemMouseProvider; // may be null
 
 	public PenManager(Component component) {
 		this(new AwtPenOwner(component));
@@ -84,6 +85,18 @@ public final class PenManager {
 					});
 		}
 	}
+	
+	/**
+	@return the mouse PenProvider or {@code null} if no mouse provider has been added.
+	@see #addProvider(PenProvider.Constructor)
+	*/
+	public PenProvider getSystemMouseProvider(){
+		return systemMouseProvider;
+	}
+	
+	public boolean isSystemMouseDevice(PenDevice device){
+		return device.getProvider()==systemMouseProvider;
+	}
 
 	/**
 	Constructs and adds provider if {@link PenProvider.Constructor#constructable(PenManager)} is true.
@@ -95,6 +108,13 @@ public final class PenManager {
 				throw new IllegalArgumentException("constructor already added");
 			if(providerConstructor.construct(this)){
 				PenProvider provider=providerConstructor.getConstructed();
+				if(provider instanceof SystemProvider){
+					if(this.systemMouseProvider!=null){
+						providerConstructors.remove(providerConstructor);
+						throw new IllegalStateException("system provider already added");
+					}
+					this.systemMouseProvider=provider;
+				}
 				for(PenDevice device:provider.getDevices())
 					firePenDeviceAdded(providerConstructor, device);
 				return provider;
@@ -127,7 +147,7 @@ public final class PenManager {
 
 	public void firePenDeviceAdded(PenProvider.Constructor constructor, PenDevice device) {
 		byte nextDeviceId=getNextDeviceId();
-		device.setId(nextDeviceId);
+		device.penManagerSetId(nextDeviceId);
 		if(deviceIdToDevice.put(nextDeviceId, device)!=null)
 			throw new AssertionError();
 		for(PenManagerListener l: getListenersArray()){
@@ -166,8 +186,7 @@ public final class PenManager {
 	void setPaused(boolean paused) {
 		if(this.paused==paused)
 			return;
-		if(paused)
-			pen.scheduler.scheduleButtonReleasedEvents();
+		pen.scheduler.setPaused(paused);
 		this.paused=paused;
 		for(PenProvider.Constructor providerConstructor: providerConstructors){
 			PenProvider penProvider=providerConstructor.getConstructed();
@@ -188,13 +207,6 @@ public final class PenManager {
 			return;
 		pen.scheduler.scheduleButtonEvent(device, deviceTime, button);
 	}
-	/**
-	@deprecated Use {@link #scheduleButtonEvent(PenDevice, long, PButton)}
-	*/
-	@Deprecated
-	public void scheduleButtonEvent(PButton button) {
-		scheduleButtonEvent(emulationDevice, System.currentTimeMillis(), button);
-	}
 
 	/**
 	Schedules scroll events. You must construct a new {@code PScroll} each time you call this method (do not reuse).
@@ -205,16 +217,8 @@ public final class PenManager {
 		pen.scheduler.scheduleScrollEvent(device, deviceTime, scroll);
 	}
 	
-	/**
-	@deprecated Use {@link #scheduleScrollEvent(PenDevice, long, PScroll)}.
-	*/
-	@Deprecated
-	public void scheduleScrollEvent(PenDevice device, PScroll scroll) {
-		scheduleScrollEvent(device, System.currentTimeMillis(), scroll);
-	}
-
 	public boolean scheduleLevelEvent(PenDevice device, long deviceTime, Collection<PLevel> levels) {
-		return scheduleLevelEvent(device, levels, deviceTime, false);
+		return scheduleLevelEvent(device, deviceTime, levels, false);
 	}
 
 	/**
@@ -225,29 +229,4 @@ public final class PenManager {
 			return false;
 		return pen.scheduler.scheduleLevelEvent(device, deviceTime, levels, levelsOnScreen);
 	}
-	
-	/**
-	@deprecated Use {@link #scheduleLevelEvent(PenDevice, long, Collection, boolean)}.
-	*/
-	@Deprecated
-	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long deviceTime, boolean levelsOnScreen) {
-		return scheduleLevelEvent(device, deviceTime, levels, levelsOnScreen);
-	}
-
-	/**
-	@deprecated Use {@link #scheduleLevelEvent(PenDevice, long, Collection, boolean)}.
-	*/
-	@Deprecated
-	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels, long deviceTime) {
-		return scheduleLevelEvent(device, levels, deviceTime, false);
-	}
-
-	/**
-	@deprecated Use {@link #scheduleLevelEvent(PenDevice, long, Collection, boolean)}.
-	*/
-	@Deprecated
-	public boolean scheduleLevelEvent(PenDevice device, Collection<PLevel> levels) {
-		return scheduleLevelEvent(device, levels, System.currentTimeMillis());
-	}
-
 }

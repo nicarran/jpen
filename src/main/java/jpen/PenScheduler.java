@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
 import jpen.owner.PenOwner;
+import jpen.internal.filter.RelativeLocationFilter;
 
 final class PenScheduler{
 	static final Logger L=Logger.getLogger(PenScheduler.class.getName());
@@ -36,24 +37,35 @@ final class PenScheduler{
 	private final Pen pen;
 	private PenEvent lastScheduledEvent;
 	public final PenState lastScheduledState=new PenState();
-	private final PhantomEventFilter phantomLevelFilter=new PhantomEventFilter();
+	private final SystemMouseFilter systemMouseFilter;
 	private final List<PLevel> scheduledLevels=new ArrayList<PLevel>();
 
 	PenScheduler(Pen pen){
 		this.pen=pen;
 		lastScheduledEvent=pen.getLastDispatchedEvent();
+		this.systemMouseFilter=new SystemMouseFilter(pen.penManager);
 	}
 
-	private static class PhantomEventFilter {
+	/**
+	The SystemMouseFilter is used to fitler system mouse movement to avoid conflict with movements coming from other devices.
+	*/
+	private static class SystemMouseFilter {
 		public static int THRESHOLD_PERIOD=200;
+		private final PenManager penManager;
 		private PenDevice lastDevice; // last device NOT filtered
 		private PenEvent lastEvent; // last event scheduled
 		boolean filteredFirstInSecuence;
 		private long time;
 		private long firstInSecuenceTime;
-
-		boolean filter(PenDevice device) {
-			if(!device.isDigitizer()) {
+		
+		SystemMouseFilter(PenManager penManager){
+			this.penManager=penManager;
+		}
+		/**
+		@return {@code true} if the device is the system mouse and other device has already scheduled level events
+		*/
+		boolean filterOut(PenDevice device) {
+			if(penManager.isSystemMouseDevice(device)) {
 				time=System.currentTimeMillis();
 				if(lastDevice!=null &&
 					 lastDevice!=device &&
@@ -87,12 +99,52 @@ final class PenScheduler{
 		}
 	}
 
+	private boolean firstScheduleAfterPause;
+
+	void setPaused(boolean paused){
+		if(paused)
+			scheduleButtonReleasedEvents();
+		else{
+			firstScheduleAfterPause=true;
+			relativeLocationFilter.reset();
+		}
+	}
+
 	private final Point clipLocationOnScreen=new Point();
 	private final Point2D.Float scheduledLocation=new Point2D.Float();
+	private final RelativeLocationFilter relativeLocationFilter=new RelativeLocationFilter();
 
 	synchronized boolean scheduleLevelEvent(PenDevice device, long deviceTime, Collection<PLevel> levels, boolean levelsOnScreen) {
-		if(device!=getEmulationDevice() && phantomLevelFilter.filter(device))
+
+		if(device.getProvider().getUseRelativeLocationFilter()){
+			if(relativeLocationFilter.filter(lastScheduledState, device, levels, levelsOnScreen))
+				switch(relativeLocationFilter.getState()){
+				case RELATIVE:
+					device.penManagerSetUseFractionalMovements(false);
+					break;
+				case ABSOLUTE:
+					device.penManagerSetUseFractionalMovements(true);
+					break;
+				default:
+				}
+		}
+
+		if(systemMouseFilter.filterOut(device))
 			return false;
+
+		if(device.getKindTypeNumber()!=PKind.Type.IGNORE.ordinal() &&
+			 device.getKindTypeNumber() !=lastScheduledState.getKind().typeNumber){
+			PKind newKind=PKind.valueOf(device.getKindTypeNumber());
+			if(L.isLoggable(Level.FINE)){
+				L.fine("changing kind to:"+newKind);
+				L.fine("scheduledLevels: "+scheduledLevels);
+				L.fine("device: "+device);
+			}
+			lastScheduledState.setKind(newKind);
+			schedule(new PKindEvent(device, deviceTime, newKind));
+		}
+
+		scheduledLevels.clear();
 		float scheduledPressure=-1, lastScheduledPressure=-1;
 		boolean scheduledMovement=false;
 		scheduledLocation.x=lastScheduledState.levels.getValue(PLevel.Type.X);
@@ -101,61 +153,55 @@ final class PenScheduler{
 		if(penOwner!=null && levelsOnScreen)
 			penOwner.getPenClip().evalLocationOnScreen(clipLocationOnScreen);
 		for(PLevel level:levels) {
-			if(level.value==lastScheduledState.getLevelValue(level.typeNumber))
-				continue;
 			if(device!=getEmulationDevice() && pen.levelEmulator!=null &&
 				 pen.levelEmulator.onActivePolicy(lastScheduledState.getKind().getType().ordinal(),
 						 level.typeNumber))
 				continue;
-			if(pen.getLevelFilter().filterPenLevel(level))
-				continue;
-			switch(level.getType()){
-			case X:
+			if(level.isMovement()){
+				if(levelsOnScreen){
+					switch(level.getType() ){
+					case X:
+						level.value=level.value-clipLocationOnScreen.x;
+						scheduledLocation.x=level.value;
+						break;
+					case Y:
+						level.value=level.value-clipLocationOnScreen.y;
+						scheduledLocation.y=level.value;
+						break;
+					default:
+						throw new AssertionError();
+					}
+				}
+				if(!firstScheduleAfterPause && level.value==lastScheduledState.getLevelValue(level.typeNumber))
+					continue;
 				scheduledMovement=true;
-				if(levelsOnScreen)
-					level.value=level.value-clipLocationOnScreen.x;
-				scheduledLocation.x=level.value;
-				break;
-			case Y:
-				scheduledMovement=true;
-				if(levelsOnScreen)
-					level.value=level.value-clipLocationOnScreen.y;
-				scheduledLocation.y=level.value;
-				break;
-			case PRESSURE:
-				scheduledPressure=level.value;
-				lastScheduledPressure=lastScheduledState.levels.getValue(PLevel.Type.PRESSURE);
-				break;
-			default:
+			}else{
+				if(!firstScheduleAfterPause && level.value==lastScheduledState.getLevelValue(level.typeNumber))
+					continue;
+				switch(level.getType()){
+				case PRESSURE:
+					scheduledPressure=level.value;
+					lastScheduledPressure=lastScheduledState.levels.getValue(PLevel.Type.PRESSURE);
+					break;
+				default:
+				}
 			}
 			scheduledLevels.add(level);
 		}
 		if(scheduledLevels.isEmpty())
 			return false;
+		firstScheduleAfterPause=false;
 
 		if(scheduledMovement){
 			if(penOwner!=null && !penOwner.getPenClip().contains(scheduledLocation)
 				 && !penOwner.isDraggingOut())
 				return false;
-
-			if(device.getKindTypeNumber()!=PKind.Type.IGNORE.ordinal() &&
-				 device.getKindTypeNumber() !=lastScheduledState.getKind().typeNumber){
-				PKind newKind=PKind.valueOf(device.getKindTypeNumber());
-				if(L.isLoggable(Level.FINE)){
-					L.fine("changing kind to:"+newKind);
-					L.fine("scheduledLevels: "+scheduledLevels);
-					L.fine("device: "+device);
-				}
-				lastScheduledState.setKind(newKind);
-				schedule(new PKindEvent(device, deviceTime, newKind));
-			}
 		}
 
 		lastScheduledState.levels.setValues(scheduledLevels);
 		PLevelEvent levelEvent=new PLevelEvent(device, deviceTime,
 				scheduledLevels.toArray(new PLevel[scheduledLevels.size()]));
-		phantomLevelFilter.setLastEvent(levelEvent);
-		scheduledLevels.clear();
+		systemMouseFilter.setLastEvent(levelEvent);
 		scheduleOnPressureButtonEvent(lastScheduledPressure, scheduledPressure);
 		schedule(levelEvent);
 		return true;

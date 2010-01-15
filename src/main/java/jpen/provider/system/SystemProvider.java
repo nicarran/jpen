@@ -29,7 +29,7 @@ import jpen.PenProvider;
 import jpen.provider.AbstractPenProvider;
 import jpen.owner.awt.AwtPenOwner;
 
-public class SystemProvider
+public final class SystemProvider
 	extends AbstractPenProvider {
 
 	public static class Constructor

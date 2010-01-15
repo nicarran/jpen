@@ -21,6 +21,7 @@ package jpen.provider.osx;
 import jpen.PKind;
 import jpen.provider.AbstractPenDevice;
 
+@SuppressWarnings("deprecation")
 public class CocoaDevice extends AbstractPenDevice {
 	private final PKind.Type type;
 

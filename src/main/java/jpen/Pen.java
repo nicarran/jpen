@@ -28,8 +28,8 @@ import java.util.logging.Logger;
 import java.util.Queue;
 import javax.swing.SwingUtilities;
 import jpen.event.PenListener;
-import jpen.utils.ThreadUtils;
-import jpen.utils.ThrowableUtils;
+import jpen.internal.ThreadUtils;
+import jpen.internal.ThrowableUtils;
 
 public class Pen extends PenState {
 	private static final Logger L=Logger.getLogger(Pen.class.getName());
@@ -43,13 +43,12 @@ public class Pen extends PenState {
 
 	/** Tail of event queue. */
 	private PenEvent lastDispatchedEvent=new PenEvent.Dummy();
-	final PenScheduler scheduler=new PenScheduler(this);
-	public final PenState lastScheduledState=scheduler.lastScheduledState;
+	final PenScheduler scheduler;
+	public final PenState lastScheduledState;
 	private final List<PenListener> listeners=new ArrayList<PenListener>();
 	private PenListener[] listenersArray;
 	private boolean firePenTockOnSwing;
 	public final PLevelEmulator levelEmulator;
-	private PLevelFilter levelFilter=PLevelFilter.AllowAll.INSTANCE;
 
 	private final class MyThread
 		extends Thread {
@@ -164,12 +163,10 @@ public class Pen extends PenState {
 		}
 	}
 
-	Pen(){
-		this(null);
-	}
-
 	Pen(PenManager penManager) {
 		this.penManager=penManager;
+		this.scheduler=new PenScheduler(this);
+		this.lastScheduledState=scheduler.lastScheduledState;
 		this.levelEmulator=new PLevelEmulator(this);
 		setFrequencyLater(DEFAULT_FREQUENCY);
 	}
@@ -180,14 +177,6 @@ public class Pen extends PenState {
 
 	PenEvent getLastDispatchedEvent(){
 		return lastDispatchedEvent;
-	}
-
-	public PLevelFilter getLevelFilter(){
-		return levelFilter;
-	}
-
-	public void setLevelFilter(PLevelFilter levelFilter){
-		this.levelFilter=levelFilter;
 	}
 
 	public boolean getFirePenTockOnSwing() {

@@ -27,7 +27,7 @@ import jpen.PenProvider;
 import jpen.provider.osx.CocoaProvider;
 import jpen.provider.wintab.WintabProvider;
 import jpen.provider.xinput.XinputProvider;
-import jpen.utils.ActiveWindowProperty;
+import jpen.internal.ActiveWindowProperty;
 /**
 Defines a {@link PenClip} for all the screen. Its {@link jpen.PenManager} is unpaused when the current application has an active window.
 */

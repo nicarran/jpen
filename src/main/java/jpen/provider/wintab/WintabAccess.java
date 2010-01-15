@@ -22,8 +22,8 @@ package jpen.provider.wintab;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import jpen.PLevel;
+import jpen.internal.Range;
 
 /**
 <b>Warning</b>: Don't use this class directly. This class is currently public only to be used by JTablet.
@@ -136,10 +136,10 @@ public final class WintabAccess {
 
 	private static native void setEnabled(int cellIndex, boolean enabled);
 
-	public PLevel.Range getLevelRange(PLevel.Type levelType) {
+	public Range getLevelRange(PLevel.Type levelType) {
 		int[] minMax = getLevelRange(getLevelTypeValueIndex(levelType));
 
-		return new PLevel.Range(minMax[0], minMax[1]);
+		return new Range(minMax[0], minMax[1]);
 	}
 	public int[] getLevelRange(int type) {
 		synchronized(LOCK){

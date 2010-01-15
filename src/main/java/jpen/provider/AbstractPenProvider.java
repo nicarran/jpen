@@ -49,12 +49,17 @@ public abstract class AbstractPenProvider
 	public final Constructor getConstructor() {
 		return constructor;
 	}
+	
+	//@Override
+	public boolean getUseRelativeLocationFilter(){
+		return false;
+	}
 
 	//@Override
 	public String toString() {
 		return "[PenProvider: constructor.name="+getConstructor().getName()+"]";
 	}
-
+	
 	public static abstract class AbstractConstructor
 		implements PenProvider.Constructor{
 		private PenManager penManager;

@@ -39,6 +39,7 @@ import jpen.PLevelEvent;
 import jpen.provider.AbstractPenDevice;
 import static java.lang.Math.*;
 
+@SuppressWarnings("deprecation")
 class WintabDevice
 	extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(WintabDevice.class.getName());
@@ -49,6 +50,7 @@ class WintabDevice
 	private int lastButtonsValues;
 	private final Point2D.Float componentLocation=new Point2D.Float();
 	private final Dimension componentSize=new Dimension();
+	private boolean useFractionalMovement=true;
 
 	WintabDevice(WintabProvider wintabProvider, int cursor) {
 		super(wintabProvider);
@@ -59,6 +61,17 @@ class WintabDevice
 		setEnabled(true);
 		L.fine("end");
 	}
+	
+	@Override
+	public final boolean getUseFractionalMovements(){
+		return useFractionalMovement;
+	}
+	
+	@Override
+	public void penManagerSetUseFractionalMovements(boolean useFractionalMovement){
+		this.useFractionalMovement=useFractionalMovement;
+	}
+
 
 	@Override
 	protected String evalPhysicalId(){

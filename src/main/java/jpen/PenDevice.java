@@ -28,6 +28,10 @@ public interface PenDevice {
 
 	void setKindTypeNumber(int kindTypeNumber);
 
+	/**
+	@deprecated Replacement: negated {@link PenManager#isSystemMouseDevice(PenDevice)}.
+	*/
+	@Deprecated
 	boolean isDigitizer();
 
 	void setEnabled(boolean enabled);
@@ -43,14 +47,27 @@ public interface PenDevice {
 	byte getId();
 	
 	/**
-	Don't call this method. It is only for use by {@link PenManager}.
+	Don't call this method. It is only for use by the {@link PenManager}. This method is called when the device is being constructed to set a meaningful {@code id}.
 	
 	@see PLevelEvent#getDeviceId()
 	*/
-	void setId(byte id);
+	void penManagerSetId(byte id);
 	
 	/**
 	@return A unique and constant id. This {@code physicalId} is always the same for the given device, even if the program restarts. Each PenDevice has a different {@code physicalId}.  
 	*/
 	String getPhysicalId();
+	
+	/**
+	@return {@code true} if this device uses fractional (floating point precision) movement levels.
+	*/
+	boolean getUseFractionalMovements();
+	
+	/**
+	Don't call this method. It is only for use by the {@link PenManager}. This method is called when the provider {@link PenProvider#getUseRelativeLocationFilter()} is {@code true} and this {@code PenDevice} must change its {@code useFractionalMovement} mode.
+	
+	@see #getUseFractionalMovements()
+	*/
+	void penManagerSetUseFractionalMovements(boolean useFractionalMovements);
+	
 }

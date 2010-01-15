@@ -38,7 +38,7 @@ import jpen.provider.osx.CocoaProvider;
 import jpen.provider.system.SystemProvider;
 import jpen.provider.wintab.WintabProvider;
 import jpen.provider.xinput.XinputProvider;
-import jpen.utils.ActiveWindowProperty;
+import jpen.internal.ActiveWindowProperty;
 
 public final class AwtPenOwner
 	extends AbstractPenOwner{

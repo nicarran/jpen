@@ -18,17 +18,29 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.internal;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+public class Range {
+	public final float min;
+	public final float max;
+	private final float range;
 
-public final class ThrowableUtils{
-	private ThrowableUtils(){}
+	public Range(float min, float max) {
+		if(min<0 && max>0 && Math.abs(max+min)==1){ // trick to avoid loosing the tool center
+			if(max>-min)
+				min=-max;
+			else
+				max=-min;
+		}
+		this.min=min;
+		this.max=max;
+		this.range=max-min;
+	}
+	
+	public final float getRangedValue(float value) {
+		return (value-min)/range;
+	}
 
-	public static String evalStackTraceString(Throwable t){
-		StringWriter sw=new StringWriter();
-		PrintWriter pw=new PrintWriter(sw);
-		t.printStackTrace(pw);
-		pw.close();
-		return sw.toString();
+	@Override
+	public String toString() {
+		return "[PLevel.Range: "+min+", "+max+"]";
 	}
 }

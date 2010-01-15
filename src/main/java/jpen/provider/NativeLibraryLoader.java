@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.prefs.Preferences;
-import jpen.utils.BuildInfo;
+import jpen.internal.BuildInfo;
 
 public class NativeLibraryLoader{
 	private static final Logger L=Logger.getLogger(NativeLibraryLoader.class.getName());

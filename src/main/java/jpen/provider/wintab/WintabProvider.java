@@ -28,8 +28,9 @@ import jpen.PLevel;
 import jpen.provider.AbstractPenProvider;
 import jpen.provider.NativeLibraryLoader;
 import jpen.provider.VirtualScreenBounds;
-import jpen.utils.BuildInfo;
-import jpen.utils.ObjectUtils;
+import jpen.internal.BuildInfo;
+import jpen.internal.ObjectUtils;
+import jpen.internal.Range;
 
 public class WintabProvider
 	extends AbstractPenProvider {
@@ -46,7 +47,7 @@ public class WintabProvider
 
 	final WintabAccess wintabAccess;
 	private final Map<Integer, WintabDevice> cursorToDevice=new HashMap<Integer, WintabDevice>();
-	private final PLevel.Range[] levelRanges=new PLevel.Range[PLevel.Type.VALUES.size()];
+	private final Range[] levelRanges=new Range[PLevel.Type.VALUES.size()];
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 	private final Thread thread;
 	private boolean paused=true;
@@ -121,7 +122,7 @@ public class WintabProvider
 		L.fine("end");
 	}
 
-	PLevel.Range getLevelRange(PLevel.Type type) {
+	Range getLevelRange(PLevel.Type type) {
 		return levelRanges[type.ordinal()];
 	}
 
@@ -174,5 +175,10 @@ public class WintabProvider
 		}
 		wintabAccess.setEnabled(!paused); // this clears the queue
 		L.fine("end");
+	}
+	
+	@Override
+	public boolean getUseRelativeLocationFilter(){
+		return true;
 	}
 }

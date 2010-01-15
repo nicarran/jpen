@@ -267,7 +267,6 @@ public class CocoaAccess {
 	) {
 		// If we try to run this directly, we get a threadlock on AWT-AppKit... 
 		invokeOnEventThread(new Runnable() {
-			@SuppressWarnings("deprecation")
 			public void run() {
 				
 				if (device == null) {

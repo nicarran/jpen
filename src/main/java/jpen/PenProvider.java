@@ -22,7 +22,7 @@ import java.util.Collection;
 import jpen.owner.PenOwner;
 
 /**
-A {@code PenProvider } contains and maintains a collection of {@link PenDevice}s which access a pointer (pen tablet/mouse or similar) data source using an specific method (e.g. Wintab). Its main role is to feed pointer data using the following methods: {@link PenManager#scheduleLevelEvent(PenDevice, Collection, long, boolean)}, {@link PenManager#scheduleScrollEvent(PenDevice, PScroll)}, and {@link PenManager#scheduleButtonEvent(PButton)}. <p>
+A {@code PenProvider } contains and maintains a collection of {@link PenDevice}s which access a pointer (pen tablet/mouse or similar) data source using an specific method (e.g. Wintab). Its main role is to feed pointer data using the following methods: {@link PenManager#scheduleLevelEvent(PenDevice device, long deviceTime, Collection levels, boolean levelsOnScreen)}, {@link PenManager#scheduleScrollEvent(PenDevice device, long deviceTime, PScroll scroll)}, and {@link PenManager#scheduleButtonEvent(PenDevice device, long deviceTime, PButton button)}. <p>
 
 Each {@code PenDevice} has a {@link PKind.Type}. A tablet provider constructs typically three {@code PenDevice}s, each one initialized with {@link PKind.Type#ERASER} for the eraser, {@link PKind.Type#STYLUS} for the stylus, and {@link PKind.Type#CURSOR} for the mouse. <p>
 
@@ -99,4 +99,9 @@ public interface PenProvider {
 	@param paused If {@code true} then the devices must stop sending events. If {@code false} then the devices must start sending events. 
 	*/
 	void penManagerPaused(boolean paused);
+	
+	/**
+	@return {@code true} if this provider needs a location filter to automatically detect if one of its devices is using mouse (relative) location mode and replace its movement levels values with mouse pointer location values.
+	*/
+	boolean getUseRelativeLocationFilter();
 }
