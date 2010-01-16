@@ -129,7 +129,9 @@ final class PenScheduler{
 				}
 		}
 
-		if(systemMouseFilter.filterOut(device))
+		if(getEmulationDevice()!=device // the emulation device must not cause filtering of system mouse events
+			&& systemMouseFilter.filterOut(device)
+		) 
 			return false;
 
 		if(device.getKindTypeNumber()!=PKind.Type.IGNORE.ordinal() &&
