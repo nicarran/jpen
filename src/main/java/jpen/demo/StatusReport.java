@@ -119,7 +119,6 @@ public class StatusReport{
 					appendLine(
 						(penManager.isSystemMouseDevice(penDevice)? "Device (System Mouse): ":"Device: ")+
 						penDevice.getName()+" ("+penDevice.getPhysicalId()+")", 2);
-					appendLine("Is System Mouse: "+penManager.isSystemMouseDevice(penDevice), 3);
 					appendLine("Enabled: "+penDevice.getEnabled(), 3);
 					appendLine("Kind: "+PKind.valueOf(penDevice.getKindTypeNumber()), 3);
 				}
