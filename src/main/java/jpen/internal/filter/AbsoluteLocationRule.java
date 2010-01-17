@@ -39,7 +39,7 @@ class AbsoluteLocationRule
 		if(!filter.samplePoint.isComplete)
 			return null;
 		float maxDeviation=Math.max(filter.absDeviation.x, filter.absDeviation.y);
-		if(maxDeviation<2f){
+		if(maxDeviation<1.5f){
 			//System.out.println("absolute device detected, missedPoints="+missedPoints);
 			return RelativeLocationFilter.State.ABSOLUTE;
 		}
