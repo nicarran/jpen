@@ -35,7 +35,7 @@ class AbsoluteOnARowRule
 	//@Override
 	public RelativeLocationFilter.State evalFilterNextState(RelativeLocationFilter filter){
 		missedPoints++;
-		if(filter.samplePoint.isComplete)
+		if(!filter.samplePoint.isComplete)
 			return null;
 		rowCount++;
 		if(filter.absDeviation.x>THRESHOLD ||

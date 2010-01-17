@@ -186,7 +186,7 @@ public final class RelativeLocationFilter{
 	private boolean setupReference(){
 		PointerInfo pointerInfo=MouseInfo.getPointerInfo();
 		if(pointerInfo==null){
-			L.warning("no mouse found. Can not correct devices on relative (mouse) mode.");
+			L.warning("No mouse found. Can not correct devices on relative (mouse) mode.");
 			state=State.OFF;
 			return false;
 		}
