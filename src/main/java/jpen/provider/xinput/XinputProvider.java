@@ -126,4 +126,13 @@ public final class XinputProvider
 			resetXinputDevices();
 		}
 	}
+	
+	/*
+	//v EXPERIMENTAL:
+	@Override
+	public boolean getUseRelativeLocationFilter(){
+		return true;
+	}
+	//^
+	*/
 }

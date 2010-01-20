@@ -233,4 +233,20 @@ final class XinputDevice extends AbstractPenDevice {
 
 		return devValue;
 	}
+	
+	/*
+	//v EXPERIMENTAL:
+	private boolean useFractionalMovement=true;
+	
+	@Override
+	public final boolean getUseFractionalMovements(){
+		return useFractionalMovement;
+	}
+	
+	@Override
+	public void penManagerSetUseFractionalMovements(boolean useFractionalMovement){
+		this.useFractionalMovement=useFractionalMovement;
+	}
+	//^
+	*/
 }
