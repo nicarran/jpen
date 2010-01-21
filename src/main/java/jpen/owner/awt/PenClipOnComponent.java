@@ -41,8 +41,8 @@ final class PenClipOnComponent
 	//@Override
 	public boolean contains(Point2D.Float point){
 		if(point.x<0 || point.y<0 ||
-						point.x>component.getWidth() ||
-						point.y>component.getHeight())
+			 point.x>component.getWidth() ||
+			 point.y>component.getHeight())	
 			return false;
 		return true;
 	}

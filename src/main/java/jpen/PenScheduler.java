@@ -102,12 +102,18 @@ final class PenScheduler{
 	private boolean firstScheduleAfterPause;
 
 	void setPaused(boolean paused){
-		if(paused)
+		if(paused){
+			scheduleEmulatedZeroPressureEvent();
 			scheduleButtonReleasedEvents();
-		else{
+		}else{
 			firstScheduleAfterPause=true;
 			relativeLocationFilter.reset();
 		}
+	}
+
+	private synchronized void scheduleEmulatedZeroPressureEvent(){
+		if(lastScheduledState.levels.getValue(PLevel.Type.PRESSURE)>0)
+			schedule(new PLevelEvent(getEmulationDevice(), System.currentTimeMillis(),new PLevel[]{new PLevel(PLevel.Type.PRESSURE, 0)}));
 	}
 
 	private final Point clipLocationOnScreen=new Point();
@@ -143,6 +149,7 @@ final class PenScheduler{
 				L.fine("device: "+device);
 			}
 			lastScheduledState.setKind(newKind);
+			scheduleEmulatedZeroPressureEvent();
 			schedule(new PKindEvent(device, deviceTime, newKind));
 		}
 
@@ -160,20 +167,22 @@ final class PenScheduler{
 						 level.typeNumber))
 				continue;
 			if(level.isMovement()){
-				if(levelsOnScreen){
-					switch(level.getType() ){
-					case X:
-						level.value=level.value-clipLocationOnScreen.x;
-						scheduledLocation.x=level.value;
-						break;
-					case Y:
-						level.value=level.value-clipLocationOnScreen.y;
-						scheduledLocation.y=level.value;
-						break;
-					default:
-						throw new AssertionError();
-					}
+				float levelValue=level.value;
+				switch(level.getType() ){
+				case X:
+					if(levelsOnScreen)
+						levelValue-=clipLocationOnScreen.x;
+					scheduledLocation.x=levelValue;
+					break;
+				case Y:
+					if(levelsOnScreen)
+						levelValue-=clipLocationOnScreen.y;
+					scheduledLocation.y=levelValue;
+					break;
+				default:
+					throw new AssertionError();
 				}
+				level.value=levelValue;
 				if(!firstScheduleAfterPause && level.value==lastScheduledState.getLevelValue(level.typeNumber))
 					continue;
 				scheduledMovement=true;
@@ -205,19 +214,21 @@ final class PenScheduler{
 		lastScheduledState.levels.setValues(scheduledLevels);
 		schedule(levelEvent);
 		systemMouseFilter.setLastLevelEvent(levelEvent);
-		
+
 		firstScheduleAfterPause=false;
-		
+
 		return true;
 	}
 
 	private void scheduleOnPressureButtonEvent(float scheduledPressure){
 		if(scheduledPressure==-1)
 			return;
+		boolean isOnPressure=lastScheduledState.getButtonValue(PButton.Type.ON_PRESSURE);
 		if(scheduledPressure>0){
-			if(!lastScheduledState.getButtonValue(PButton.Type.ON_PRESSURE))
-				scheduleEmulatedButtonEvent(new PButton(PButton.Type.ON_PRESSURE.ordinal(), true));
-		}else if(lastScheduledState.levels.getValue(PLevel.Type.PRESSURE)>0) // here scheduledPressure==0
+			if(isOnPressure)
+				return;
+			scheduleEmulatedButtonEvent(new PButton(PButton.Type.ON_PRESSURE.ordinal(), true));
+		}else if(isOnPressure) // here scheduledPressure==0
 			scheduleEmulatedButtonEvent(new PButton(PButton.Type.ON_PRESSURE.ordinal(), false));
 	}
 
