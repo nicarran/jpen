@@ -52,22 +52,24 @@ final class MouseDevice
 	private final MouseListener mouseL=new MouseAdapter() {
 				@Override
 				public void mousePressed(MouseEvent ev) {
+					scheduleMove(ev);
 					mouseButtonChanged(ev, true);
 				}
 
 				@Override
 				public void mouseReleased(MouseEvent ev) {
+					scheduleMove(ev);
 					mouseButtonChanged(ev, false);
 				}
 			};
 	private final MouseMotionListener mouseMotionL=new MouseMotionListener(){
 				//@Override
 				public void mouseMoved(MouseEvent ev) {
-					scheduleMove(ev.getWhen(), ev.getX(), ev.getY());
+					scheduleMove(ev);
 				}
 				//@Override
 				public void mouseDragged(MouseEvent ev) {
-					scheduleMove(ev.getWhen(), ev.getX(), ev.getY());
+					scheduleMove(ev);
 				}
 			};
 	private final MouseWheelListener mouseWheelL=new MouseWheelListener(){
@@ -119,9 +121,14 @@ final class MouseDevice
 		if(getEnabled())
 			systemProvider.component.addMouseMotionListener(mouseMotionL);
 	}
+	
+	private void scheduleMove(MouseEvent ev){
+		scheduleMove(ev.getWhen(), ev.getX(), ev.getY());
+	}
 
 	private final PLevel[] changedLevelsA=new PLevel[2];
 	private final List<PLevel> changedLevels=Arrays.asList(changedLevelsA);
+	
 	private void scheduleMove(long time, int x, int y) {
 		/*Point componentLocation=systemProvider.component.getLocationOnScreen(); // on jdk 1.5 there is no MouseEvent.getXOnScreen*/
 		changedLevelsA[0]=new PLevel(PLevel.Type.X.ordinal(), /*componentLocation.x+*/x);

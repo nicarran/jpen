@@ -47,10 +47,10 @@ final class PenScheduler{
 	}
 
 	/**
-	The SystemMouseFilter is used to fitler system mouse movement to avoid conflict with movements coming from other devices.
+	The SystemMouseFilter is used to filter system mouse movement to avoid conflict with movements coming from other devices.
 	*/
 	private static class SystemMouseFilter {
-		public static int THRESHOLD_PERIOD=200;
+		public static int THRESHOLD_PERIOD=100;
 		private final PenManager penManager;
 		private PenDevice lastDevice; // last device NOT filtered
 		private PLevelEvent lastLevelEvent; // last event scheduled
@@ -80,7 +80,7 @@ final class PenScheduler{
 					return true;
 				}
 				if(time-firstInSecuenceTime<=THRESHOLD_PERIOD){
-					L.fine("filtering after the first for a period to allow digitized input to come and win in race");
+					L.fine("filtering after the first for a period to allow digitized input to come and win the race");
 					return true;
 				}
 				L.fine("non digitized input going as event");
@@ -99,9 +99,9 @@ final class PenScheduler{
 		}
 	}
 
-	private boolean firstScheduleAfterPause;
+	private volatile boolean firstScheduleAfterPause;
 
-	void setPaused(boolean paused){
+	synchronized void setPaused(boolean paused){
 		if(paused){
 			scheduleEmulatedZeroPressureEvent();
 			scheduleButtonReleasedEvents();
@@ -113,7 +113,13 @@ final class PenScheduler{
 
 	private synchronized void scheduleEmulatedZeroPressureEvent(){
 		if(lastScheduledState.levels.getValue(PLevel.Type.PRESSURE)>0)
-			schedule(new PLevelEvent(getEmulationDevice(), System.currentTimeMillis(),new PLevel[]{new PLevel(PLevel.Type.PRESSURE, 0)}));
+			scheduleLevelEvent(new PLevelEvent(getEmulationDevice(), System.currentTimeMillis(),new PLevel[]{new PLevel(PLevel.Type.PRESSURE, 0)}));
+	}
+
+	private void scheduleLevelEvent(PLevelEvent levelEvent){
+		lastScheduledState.levels.setValues(levelEvent);
+		schedule(levelEvent);
+		systemMouseFilter.setLastLevelEvent(levelEvent);
 	}
 
 	private final Point clipLocationOnScreen=new Point();
@@ -209,11 +215,8 @@ final class PenScheduler{
 
 		scheduleOnPressureButtonEvent(scheduledPressure);
 
-		PLevelEvent levelEvent=new PLevelEvent(device, deviceTime,
-				scheduledLevels.toArray(new PLevel[scheduledLevels.size()]));
-		lastScheduledState.levels.setValues(scheduledLevels);
-		schedule(levelEvent);
-		systemMouseFilter.setLastLevelEvent(levelEvent);
+		scheduleLevelEvent(new PLevelEvent(device, deviceTime,
+				scheduledLevels.toArray(new PLevel[scheduledLevels.size()])));
 
 		firstScheduleAfterPause=false;
 
