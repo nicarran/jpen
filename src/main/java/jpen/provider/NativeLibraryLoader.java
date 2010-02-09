@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import java.util.Map;
 import java.util.prefs.Preferences;
 import jpen.internal.BuildInfo;
+import jpen.PenManager;
 
 public class NativeLibraryLoader{
 	private static final Logger L=Logger.getLogger(NativeLibraryLoader.class.getName());
@@ -162,7 +163,7 @@ public class NativeLibraryLoader{
 			    //@Override
 			    public Object run() {
 				    try{
-					    L.info("loading JNI library: "+jniLibName+" ...");
+					    L.info("loading JPen "+PenManager.getJPenFullVersion()+" JNI library: "+jniLibName+" ...");
 					    System.loadLibrary(jniLibName);
 					    L.info(jniLibName+" loaded");
 					    return null;
