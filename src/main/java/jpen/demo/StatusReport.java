@@ -121,6 +121,7 @@ public class StatusReport{
 						penDevice.getName()+" ("+penDevice.getPhysicalId()+")", 2);
 					appendLine("Enabled: "+penDevice.getEnabled(), 3);
 					appendLine("Kind: "+PKind.valueOf(penDevice.getKindTypeNumber()), 3);
+					appendLine("Fractional Movements: "+penDevice.getUseFractionalMovements(), 3);
 				}
 			}
 		}

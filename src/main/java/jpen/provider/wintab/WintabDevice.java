@@ -61,12 +61,12 @@ class WintabDevice
 		setEnabled(true);
 		L.fine("end");
 	}
-	
+
 	@Override
 	public final boolean getUseFractionalMovements(){
 		return useFractionalMovement;
 	}
-	
+
 	@Override
 	public void penManagerSetUseFractionalMovements(boolean useFractionalMovement){
 		this.useFractionalMovement=useFractionalMovement;
@@ -85,12 +85,21 @@ class WintabDevice
 		switch(cursorType) {
 		case PENTIP:
 			return PKind.Type.STYLUS.ordinal();
-		case PUCK:
-			return PKind.Type.CURSOR.ordinal();
 		case PENERASER:
 			return PKind.Type.ERASER.ordinal();
+		case PUCK:
+		case UNDEF:
+			String deviceName=getName().toLowerCase();
+			if(deviceName.contains("stylus"))
+				return PKind.Type.STYLUS.ordinal();
+			if(deviceName.contains("eraser"))
+				return PKind.Type.ERASER.ordinal();
+			return cursorType.equals(WintabAccess.CursorType.PUCK)?
+						 PKind.Type.CURSOR.ordinal():
+						 PKind.Type.STYLUS.ordinal();
+		default:
+			throw new AssertionError();
 		}
-		return PKind.Type.CURSOR.ordinal();
 	}
 
 	public String getName() {
@@ -177,7 +186,7 @@ class WintabDevice
 				throw new AssertionError();
 			}
 		}
-		
+
 		float rangedValue=wintabProvider.getLevelRange(type).getRangedValue(
 					wintabProvider.wintabAccess.getValue(type));
 
@@ -187,7 +196,7 @@ class WintabDevice
 			rangedValue=wintabProvider.screenBounds.getLevelRangeOffset(type)+
 									rangedValue*wintabProvider.screenBounds.getLevelRangeMult(type);
 		}
-		
+
 		if(PLevel.Type.ROTATION.equals(type))
 			rangedValue*=PI_2;
 
