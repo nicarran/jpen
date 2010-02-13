@@ -77,7 +77,7 @@ public class Pen extends PenState {
 		MyThread(Thread oldThread){
 			periodMillis=1000/Pen.this.frequency;
 			this.oldThread=oldThread;
-			setName("jpen-Pen-"+periodMillis+"ms");
+			setName("jpen-Pen-["+periodMillis+"ms]");
 			setDaemon(true);
 		}
 		private final Runnable penTockFirer=new Runnable(){
@@ -85,7 +85,7 @@ public class Pen extends PenState {
 					public void run(){
 						//System.out.println("firing tocks "+System.currentTimeMillis());
 						for(PenListener l:getListenersArray())
-							l.penTock( availablePeriod - evalCurrentProcTime());
+							l.penTock(availablePeriodLeft());
 					}
 				};
 
@@ -108,10 +108,10 @@ public class Pen extends PenState {
 						lastDispatchedEvent.next=null;
 						lastDispatchedEvent=event;
 					}
-					availablePeriod=periodMillis+waitTime;
+					availablePeriod=periodMillis+waitTime; // waitTime here is always <=0, if it is <0 then the whole processing of the previous round took longer than the time available. 
 					//System.out.println("going to fire tock "+System.currentTimeMillis());
 					firePenTock();
-					waitTime=periodMillis-evalCurrentProcTime();
+					waitTime=availablePeriodLeft();// the same:  (periodMillis-evalCurrentProcTime())+waitTime;
 					if(waitTime>0) {
 						//System.out.println("going to wait: "+waitTime);
 						ThreadUtils.sleepUninterrupted(waitTime);
@@ -128,6 +128,10 @@ public class Pen extends PenState {
 
 		private long evalCurrentProcTime(){
 			return System.currentTimeMillis()-beforeTime;
+		}
+		
+		private long availablePeriodLeft(){
+			return availablePeriod-evalCurrentProcTime();
 		}
 
 		private boolean waitNewEvents() throws InterruptedException {
