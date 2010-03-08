@@ -65,6 +65,14 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_refreshDeviceInfo
 
 /*
  * Class:     jpen_provider_xinput_XiBus
+ * Method:    printXNextRequestSerial
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_jpen_provider_xinput_XiBus_printXNextRequestSerial
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_xinput_XiBus
  * Method:    destroy
  * Signature: (I)I
  */

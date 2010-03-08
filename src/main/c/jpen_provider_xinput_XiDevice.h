@@ -7,6 +7,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/* Inaccessible static: L */
 /*
  * Class:     jpen_provider_xinput_XiDevice
  * Method:    getIsListening
@@ -46,22 +47,6 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiDevice_getLevelRangeMax
  */
 JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiDevice_getValue
   (JNIEnv *, jclass, jint, jint);
-
-/*
- * Class:     jpen_provider_xinput_XiDevice
- * Method:    destroy
- * Signature: (I)I
- */
-JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiDevice_destroy
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     jpen_provider_xinput_XiDevice
- * Method:    getError
- * Signature: ()Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_jpen_provider_xinput_XiDevice_getError
-  (JNIEnv *, jclass);
 
 /*
  * Class:     jpen_provider_xinput_XiDevice
@@ -118,6 +103,30 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiDevice_getLastEventButton
  */
 JNIEXPORT void JNICALL Java_jpen_provider_xinput_XiDevice_refreshLevelRanges
   (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    getIsAbsoluteMode
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_getIsAbsoluteMode
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    destroy
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiDevice_destroy
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    getError
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_jpen_provider_xinput_XiDevice_getError
+  (JNIEnv *, jclass);
 
 #ifdef __cplusplus
 }
