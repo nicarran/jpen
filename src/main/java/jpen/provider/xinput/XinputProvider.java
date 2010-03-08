@@ -94,7 +94,7 @@ public final class XinputProvider
 			XinputDevice xinputDevice=new XinputDevice(this, xiBus2.getXiDevice());
 			if(!xinputDevice.getIsAbsoluteMode() && !xinputDevice.isPad()){
 				L.warning("devices using relative positioning mode are not supported, device disabled: "+xinputDevice.getName()+
-					"\n See bug description https://sourceforge.net/tracker/?func=detail&aid=2929548&group_id=209997&atid=1011964");
+									"\n See bug description https://sourceforge.net/tracker/?func=detail&aid=2929548&group_id=209997&atid=1011964");
 				xinputDevice.setEnabled(false);
 			}
 			devices.add(xinputDevice);
@@ -104,7 +104,6 @@ public final class XinputProvider
 		if(devices.size()==1){
 			xinputDevices[0].setKindTypeNumber(PKind.Type.STYLUS.ordinal());
 		}
-		
 		L.fine("end");
 	}
 
@@ -126,13 +125,13 @@ public final class XinputProvider
 			resetXinputDevices();
 		}
 	}
-	
+
 	/*
 	//v EXPERIMENTAL:
 	@Override
 	public boolean getUseRelativeLocationFilter(){
 		return true;
-	}
+}
 	//^
 	*/
 }

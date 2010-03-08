@@ -26,21 +26,21 @@ int xerrorHandler(Display *pDisplay, XErrorEvent *pEvent) {
 	XGetErrorText(pDisplay, pEvent->error_code, chBuf, sizeof(chBuf));
 	m_newstr(xerror, "X error: ");
 	m_concat(xerror, chBuf);
-	printf("--- %s\n", xerror);
+	printf("--- %s (%li)\n", xerror, pEvent->serial);
 	return cleanState;
 }
 
 m_implementRow(Bus);
 
 int Bus_preCreate(SBus *pBus) {
-	XSetErrorHandler(&xerrorHandler);
+	XSetErrorHandler(&xerrorHandler); 
 	pBus->pDisplay = XOpenDisplay(NULL);
 	if (!pBus->pDisplay) {
 		Bus_setError("Failed to connect to X server; ");
 		Bus_appendError(xerror);
 		return errorState;
 	}
-	//XSynchronize(pBus->pDisplay,1);
+	// XSynchronize(pBus->pDisplay,1); // useful to debug. Hinders performance
 	int iMajor, iFEV, iFER;
 	if (!XQueryExtension(pBus->pDisplay,INAME,&iMajor,&iFEV,&iFER)) {
 		Bus_setError("Server does not support XInput extension.");
@@ -86,7 +86,6 @@ int Bus_setDevice(SBus *pBus, int deviceIndex) {
 	}
 	SDevice *pDevice=Device_getP(deviceCellIndex);
 	if(Device_init(pDevice, pBus, deviceIndex)==errorState) {
-		Bus_setError("Device init failed:");
 		Bus_appendError(Device_row.error);
 		Bus_appendError(".");
 		if(Device_destroy(deviceCellIndex))
@@ -94,4 +93,8 @@ int Bus_setDevice(SBus *pBus, int deviceIndex) {
 		return errorState;
 	}
 	return pBus->deviceCellIndex=deviceCellIndex;
+}
+
+void Bus_printXNextRequestSerial(SBus *pBus){
+	printf("X next request serial number: %li \n", XNextRequest(pBus->pDisplay));
 }

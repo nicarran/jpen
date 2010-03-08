@@ -99,3 +99,14 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiBus_refreshDeviceInfo
 (JNIEnv *pEnv, jclass class, jint cellIndex){
 	return Bus_refreshDeviceInfo(Bus_getP(cellIndex));
 }
+
+/*
+ * Class:     jpen_provider_xinput_XiBus
+ * Method:    printXNextRequestSerial
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_jpen_provider_xinput_XiBus_printXNextRequestSerial
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Bus_printXNextRequestSerial(Bus_getP(cellIndex));
+}
+

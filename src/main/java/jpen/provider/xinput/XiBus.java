@@ -33,7 +33,7 @@ final class XiBus {
 		if(cellIndex==-1)
 			throw new Exception(getError());
 	}
-	
+
 	public static native int getNativeBuild();
 
 	private static native int create();
@@ -69,16 +69,25 @@ final class XiBus {
 	private static native int setDevice(int cellIndex, int deviceIndex);
 
 	public synchronized void refreshXiDeviceInfo(){
-			if(refreshDeviceInfo(cellIndex)!=0)
-				throw new IllegalStateException(getError());
+		if(refreshDeviceInfo(cellIndex)!=0)
+			throw new IllegalStateException(getError());
 	}
 
 	private static native int refreshDeviceInfo(int cellIndex);
 
+	/**
+	Prints the next X request serial number on std. out for debugging purposes.
+	*/
+	synchronized void printXNextRequestSerial(){
+		printXNextRequestSerial(cellIndex);
+	}
+
+	private static native void printXNextRequestSerial(int cellIndex);
+
 	@Override
 	protected synchronized void finalize() {
-			if(cellIndex!=-1)
-				destroy(cellIndex);
+		if(cellIndex!=-1)
+			destroy(cellIndex);
 	}
 	static native int destroy(int cellIndex);
 
