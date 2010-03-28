@@ -42,7 +42,6 @@ public final class WintabAccess {
 	
 	public WintabAccess() throws Exception {
 		synchronized(LOCK){
-			WintabProvider.loadLibrary();
 			this.cellIndex=create();
 			if(cellIndex==-1)
 				throw new Exception(getError());

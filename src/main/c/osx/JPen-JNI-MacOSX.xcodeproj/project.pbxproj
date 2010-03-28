@@ -1,0 +1,450 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AD2E423110EB21260036410B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD2E423010EB21260036410B /* Carbon.framework */; };
+		AD466FC5110C3DBC004B89F4 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDC2546A0EC52A7A00984EE2 /* Cocoa.framework */; };
+		AD466FC6110C3DBC004B89F4 /* JavaVM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDC2546B0EC52A7A00984EE2 /* JavaVM.framework */; };
+		AD466FC7110C3DBC004B89F4 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD2E423010EB21260036410B /* Carbon.framework */; };
+		ADDE1A4D11324FA100226E22 /* osx-BuildNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = ADDE1A4C11324FA100226E22 /* osx-BuildNumber.h */; };
+		ADDE1A5511324FAB00226E22 /* JRSwizzle.h in Headers */ = {isa = PBXBuildFile; fileRef = ADDE1A4E11324FAB00226E22 /* JRSwizzle.h */; };
+		ADDE1A5611324FAB00226E22 /* JRSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDE1A4F11324FAB00226E22 /* JRSwizzle.m */; };
+		ADDE1A5711324FAB00226E22 /* NSDate_Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = ADDE1A5011324FAB00226E22 /* NSDate_Additions.h */; };
+		ADDE1A5811324FAB00226E22 /* NSDate_Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDE1A5111324FAB00226E22 /* NSDate_Additions.m */; };
+		ADDE1A5911324FAB00226E22 /* osx_push_provider.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDE1A5211324FAB00226E22 /* osx_push_provider.m */; };
+		ADDE1A5A11324FAB00226E22 /* WacomAccess.h in Headers */ = {isa = PBXBuildFile; fileRef = ADDE1A5311324FAB00226E22 /* WacomAccess.h */; };
+		ADDE1A5B11324FAB00226E22 /* WacomAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDE1A5411324FAB00226E22 /* WacomAccess.m */; };
+		FDC2546C0EC52A7A00984EE2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDC2546A0EC52A7A00984EE2 /* Cocoa.framework */; };
+		FDC2546D0EC52A7A00984EE2 /* JavaVM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDC2546B0EC52A7A00984EE2 /* JavaVM.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		AD466FC8110C3DBC004B89F4 /* Copy Files to Java Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "~/Library/Java/Extensions";
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			name = "Copy Files to Java Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD466FCA110C3DBC004B89F4 /* Copy Files to SVN Directory */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "/Users/marcello/Documents/workspace-marcello/jpen/users/marcello3d/osx-build";
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			name = "Copy Files to SVN Directory";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD614C9D0FA610F400266935 /* Copy Files to Java Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "~/Library/Java/Extensions";
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			name = "Copy Files to Java Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ADA2EEE910CC85BA009051D5 /* Copy Files to SVN Directory */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "/Users/marcello/Documents/workspace-marcello/jpen/users/marcello3d/osx-build";
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			name = "Copy Files to SVN Directory";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		AD2E423010EB21260036410B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
+		ADDE1A4C11324FA100226E22 /* osx-BuildNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "osx-BuildNumber.h"; path = "../nativeBuild/osx-BuildNumber.h"; sourceTree = SOURCE_ROOT; };
+		ADDE1A4E11324FAB00226E22 /* JRSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRSwizzle.h; sourceTree = "<group>"; };
+		ADDE1A4F11324FAB00226E22 /* JRSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRSwizzle.m; sourceTree = "<group>"; };
+		ADDE1A5011324FAB00226E22 /* NSDate_Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDate_Additions.h; sourceTree = "<group>"; };
+		ADDE1A5111324FAB00226E22 /* NSDate_Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDate_Additions.m; sourceTree = "<group>"; };
+		ADDE1A5211324FAB00226E22 /* osx_push_provider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = osx_push_provider.m; sourceTree = "<group>"; };
+		ADDE1A5311324FAB00226E22 /* WacomAccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WacomAccess.h; sourceTree = "<group>"; };
+		ADDE1A5411324FAB00226E22 /* WacomAccess.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WacomAccess.m; sourceTree = "<group>"; };
+		ADDE1A5C11324FB100226E22 /* libjpen-2-3.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = "libjpen-2-3.jnilib"; sourceTree = BUILT_PRODUCTS_DIR; };
+		ADDE1A5D11324FB100226E22 /* libjpen-2-3-tiger.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = "libjpen-2-3-tiger.jnilib"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FDC2546A0EC52A7A00984EE2 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		FDC2546B0EC52A7A00984EE2 /* JavaVM.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaVM.framework; path = /System/Library/Frameworks/JavaVM.framework; sourceTree = "<absolute>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AD466FC4110C3DBC004B89F4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AD466FC5110C3DBC004B89F4 /* Cocoa.framework in Frameworks */,
+				AD466FC6110C3DBC004B89F4 /* JavaVM.framework in Frameworks */,
+				AD466FC7110C3DBC004B89F4 /* Carbon.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDC254490EC5286700984EE2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FDC2546C0EC52A7A00984EE2 /* Cocoa.framework in Frameworks */,
+				FDC2546D0EC52A7A00984EE2 /* JavaVM.framework in Frameworks */,
+				AD2E423110EB21260036410B /* Carbon.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		FDC252A20EC51E7600984EE2 = {
+			isa = PBXGroup;
+			children = (
+				FDC252B00EC51E9600984EE2 /* Cocoa Sources */,
+				FDC252B10EC51EA000984EE2 /* Java Sources */,
+				FDC2546E0EC52A9A00984EE2 /* Frameworks */,
+				FDC253270EC5226500984EE2 /* Resources */,
+				FDC252BF0EC51FEA00984EE2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FDC252B00EC51E9600984EE2 /* Cocoa Sources */ = {
+			isa = PBXGroup;
+			children = (
+				ADDE1A4E11324FAB00226E22 /* JRSwizzle.h */,
+				ADDE1A4F11324FAB00226E22 /* JRSwizzle.m */,
+				ADDE1A5011324FAB00226E22 /* NSDate_Additions.h */,
+				ADDE1A5111324FAB00226E22 /* NSDate_Additions.m */,
+				ADDE1A5211324FAB00226E22 /* osx_push_provider.m */,
+				ADDE1A5311324FAB00226E22 /* WacomAccess.h */,
+				ADDE1A5411324FAB00226E22 /* WacomAccess.m */,
+				ADDE1A4C11324FA100226E22 /* osx-BuildNumber.h */,
+			);
+			name = "Cocoa Sources";
+			sourceTree = "<group>";
+		};
+		FDC252B10EC51EA000984EE2 /* Java Sources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Java Sources";
+			sourceTree = "<group>";
+		};
+		FDC252BF0EC51FEA00984EE2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				ADDE1A5C11324FB100226E22 /* libjpen-2-3.jnilib */,
+				ADDE1A5D11324FB100226E22 /* libjpen-2-3-tiger.jnilib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FDC253270EC5226500984EE2 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		FDC2546E0EC52A9A00984EE2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FDC2546A0EC52A7A00984EE2 /* Cocoa.framework */,
+				FDC2546B0EC52A7A00984EE2 /* JavaVM.framework */,
+				AD2E423010EB21260036410B /* Carbon.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		AD466FBA110C3DBC004B89F4 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDC254470EC5286700984EE2 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ADDE1A4D11324FA100226E22 /* osx-BuildNumber.h in Headers */,
+				ADDE1A5511324FAB00226E22 /* JRSwizzle.h in Headers */,
+				ADDE1A5711324FAB00226E22 /* NSDate_Additions.h in Headers */,
+				ADDE1A5A11324FAB00226E22 /* WacomAccess.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		AD466FB9110C3DBC004B89F4 /* jnilib-tiger */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AD466FCC110C3DBC004B89F4 /* Build configuration list for PBXNativeTarget "jnilib-tiger" */;
+			buildPhases = (
+				AD466FBA110C3DBC004B89F4 /* Headers */,
+				AD466FBF110C3DBC004B89F4 /* Sources */,
+				AD466FC4110C3DBC004B89F4 /* Frameworks */,
+				AD466FC8110C3DBC004B89F4 /* Copy Files to Java Extensions */,
+				AD466FCA110C3DBC004B89F4 /* Copy Files to SVN Directory */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "jnilib-tiger";
+			productName = "jpen-2";
+			productReference = ADDE1A5D11324FB100226E22 /* libjpen-2-3-tiger.jnilib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		FDC2544A0EC5286700984EE2 /* jnilib */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FDC254500EC5287400984EE2 /* Build configuration list for PBXNativeTarget "jnilib" */;
+			buildPhases = (
+				FDC254470EC5286700984EE2 /* Headers */,
+				FDC254480EC5286700984EE2 /* Sources */,
+				FDC254490EC5286700984EE2 /* Frameworks */,
+				AD614C9D0FA610F400266935 /* Copy Files to Java Extensions */,
+				ADA2EEE910CC85BA009051D5 /* Copy Files to SVN Directory */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = jnilib;
+			productName = "jpen-2";
+			productReference = ADDE1A5C11324FB100226E22 /* libjpen-2-3.jnilib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FDC252A40EC51E7600984EE2 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = FDC252A70EC51E7600984EE2 /* Build configuration list for PBXProject "JPen-JNI-MacOSX" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 0;
+			mainGroup = FDC252A20EC51E7600984EE2;
+			productRefGroup = FDC252BF0EC51FEA00984EE2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FDC2544A0EC5286700984EE2 /* jnilib */,
+				AD466FB9110C3DBC004B89F4 /* jnilib-tiger */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AD466FBF110C3DBC004B89F4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDC254480EC5286700984EE2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ADDE1A5611324FAB00226E22 /* JRSwizzle.m in Sources */,
+				ADDE1A5811324FAB00226E22 /* NSDate_Additions.m in Sources */,
+				ADDE1A5911324FAB00226E22 /* osx_push_provider.m in Sources */,
+				ADDE1A5B11324FAB00226E22 /* WacomAccess.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AD466FCD110C3DBC004B89F4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "ppc i386 ppc64 x86_64";
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_EXTENSION = jnilib;
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				HEADER_SEARCH_PATHS = "$(SDKROOT)/System/Library/Frameworks/JavaVM.framework/Headers";
+				INSTALL_PATH = /usr/local/lib;
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "jpen-2";
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		AD466FCE110C3DBC004B89F4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_EXTENSION = jnilib;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_VERSION = 4.0;
+				HEADER_SEARCH_PATHS = "$(SDKROOT)/System/Library/Frameworks/JavaVM.framework/Headers";
+				INSTALL_PATH = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "jpen-2-3-tiger";
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		FDC252A50EC51E7600984EE2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
+				COPY_PHASE_STRIP = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				VALID_ARCHS = "i386 ppc x86_64";
+			};
+			name = Debug;
+		};
+		FDC252A60EC51E7600984EE2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
+				COPY_PHASE_STRIP = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				VALID_ARCHS = "i386 ppc x86_64";
+			};
+			name = Release;
+		};
+		FDC2544C0EC5286700984EE2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "ppc i386 ppc64 x86_64";
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_EXTENSION = jnilib;
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				HEADER_SEARCH_PATHS = "$(SDKROOT)/System/Library/Frameworks/JavaVM.framework/Headers";
+				INSTALL_PATH = /usr/local/lib;
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "jpen-2";
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		FDC2544D0EC5286700984EE2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_EXTENSION = jnilib;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				HEADER_SEARCH_PATHS = "$(SDKROOT)/System/Library/Frameworks/JavaVM.framework/Headers";
+				INSTALL_PATH = /usr/local/lib;
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "jpen-2-3";
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AD466FCC110C3DBC004B89F4 /* Build configuration list for PBXNativeTarget "jnilib-tiger" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AD466FCD110C3DBC004B89F4 /* Debug */,
+				AD466FCE110C3DBC004B89F4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FDC252A70EC51E7600984EE2 /* Build configuration list for PBXProject "JPen-JNI-MacOSX" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FDC252A50EC51E7600984EE2 /* Debug */,
+				FDC252A60EC51E7600984EE2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FDC254500EC5287400984EE2 /* Build configuration list for PBXNativeTarget "jnilib" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FDC2544C0EC5286700984EE2 /* Debug */,
+				FDC2544D0EC5286700984EE2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FDC252A40EC51E7600984EE2 /* Project object */;
+}
