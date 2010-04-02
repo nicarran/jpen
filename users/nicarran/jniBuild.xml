@@ -241,6 +241,6 @@
 	
 	<target name="lib" depends="updateNativeBuildHeaders, libLinux, libWin, libOsx"/>
 	
-	<target name="all" depends="updateBuildProperties, clean, lib, javaBuild.all"/>
+	<target name="all" depends="clean, lib, javaBuild.all"/>
 
 </project>

@@ -261,7 +261,7 @@
 				<fileset dir="deptree/test-deptree/jars" includes="*.jar"/>
 			</classpath>
 			<batchtest>
-				<fileset dir="src/test/java" includes="**/ActiveWindow*Test.class" excludes="**/*Tests.class"/>
+				<fileset dir="src/test/java" includes="**/JPenDemo*Test.class" excludes="**/*Tests.class"/>
 			</batchtest>
 		</junit>
 	</target>
@@ -383,6 +383,13 @@ java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 		-->
 			<packageset dir="src/main/java"/>
 			<packageset dir="src/aux/java"/>
+			<!--
+			<sourcepath path="src/main/java"/>
+			<package name="jpen"/>
+			<package name="jpen.event**.*"/>
+			<package name="jpen.owner**.*"/>
+			<package name="jpen.demo"/>
+			-->
 		</javadoc>
 	</target>
 
@@ -425,9 +432,10 @@ java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 	</target>
 
 	<target name="copyrightSrcs" depends="init">
-		<property name="module.authorMail" value=""/>
+		<property name="module.copyrightSrcAuthor" value=""/>
+		<property name="module.copyrightSrcMail" value=""/>
 		<echo file="copyright.tmp">/* [{
-Copyright ${copyright.years} ${module.author} &lt;${module.authorMail}&gt;
+Copyright ${copyright.years} ${module.copyrightSrcAuthor} &lt;${module.copyrightSrcMail}&gt;
 
 This file is part of ${module.commercialId}.
 
