@@ -118,36 +118,6 @@ public class PLevel
 		private static final double PI_over_2=PI/2;
 	}
 
-	/**
-	@deprecated there is no public replacement
-	*/
-	@Deprecated
-	public static class Range {
-		public final float min;
-		public final float max;
-		private final float range;
-
-		public Range(float min, float max) {
-			if(min<0 && max>0 && Math.abs(max+min)==1){ // trick to avoid loosing the tool center
-				if(max>-min)
-					min=-max;
-				else
-					max=-min;
-			}
-			this.min=min;
-			this.max=max;
-			this.range=max-min;
-		}
-		public final float getRangedValue(float value) {
-			return (value-min)/range;
-		}
-
-		@Override
-		public String toString() {
-			return "[PLevel.Range: "+min+", "+max+"]";
-		}
-	}
-	
 	public PLevel(PLevel level){
 		this(level.typeNumber, level.value);
 	}

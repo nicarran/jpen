@@ -28,12 +28,6 @@ public interface PenDevice {
 
 	void setKindTypeNumber(int kindTypeNumber);
 
-	/**
-	@deprecated Replacement: negated {@link PenManager#isSystemMouseDevice(PenDevice)}.
-	*/
-	@Deprecated
-	boolean isDigitizer();
-
 	void setEnabled(boolean enabled);
 
 	boolean getEnabled();

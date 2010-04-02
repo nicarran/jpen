@@ -40,12 +40,6 @@ public class ScreenPenOwner implements PenOwner {
 					 instance;
 	}
 
-	/**
-	@deprecated Use {@code getInstance()}.
-	*/
-	@Deprecated
-	public ScreenPenOwner(){}
-
 	//	@Override
 	public Collection<PenProvider.Constructor> getPenProviderConstructors(){
 		return Arrays.asList(

@@ -114,7 +114,7 @@ class WintabDevice
 		//if(L.isLoggable(Level.FINE))
 		//L.fine(wintabProvider.wintabAccess.toString());
 		scheduleLevelEvent();
-		// scheduleButtonEvents(); nicarran:  TODO use this to support extra buttons.
+		// scheduleButtonEvents(); nicarran:  TODO use this to support extra buttons?
 	}
 
 	private void scheduleButtonEvents() {
@@ -130,19 +130,6 @@ class WintabDevice
 		lastButtonsValues=newButtonsValues;
 	}
 
-
-	private int getButtonIndex(PButton.Type type) {
-		switch(type) {
-		case LEFT:
-			return 0;
-		case RIGHT:
-			return 1;
-		case CENTER:
-			return 2;
-		default:
-			throw new AssertionError();
-		}
-	}
 
 	private boolean getButtonState(int buttonsState, int buttonIndex) {
 		return (buttonsState&(1<<buttonIndex))>0;

@@ -30,7 +30,7 @@ class StatePanel{
 	StatePanel(PenManager penManager){
 		Pen pen=penManager.pen;
 		
-		ButtonsPanel buttonsPanel=new ButtonsPanel(pen);
+		ButtonsPanel2 buttonsPanel=new ButtonsPanel2(pen);
 		ScrollsPanel scrollsPanel=new ScrollsPanel(pen);
 		KindPanel kindPanel=new KindPanel(pen);
 		LevelsPanel levelsPanel=new LevelsPanel(pen);
@@ -48,16 +48,21 @@ class StatePanel{
 		mainLine.add(Utils.alignTopLeft(column));
 
 		column=Box.createVerticalBox();
-		column.add(Utils.labelComponent(
-		             "Kind:", kindPanel.panel
-		           ));
 		Box line=Box.createHorizontalBox();
-		buttonsPanel.panel.setBorder(BorderFactory.createTitledBorder("Buttons"));
+		buttonsPanel.panel.setBorder(BorderFactory.createTitledBorder("Pressed Buttons"));
 		line.add(Utils.alignTopLeft(buttonsPanel.panel));
+		
+		Box column2=Box.createVerticalBox();
 		scrollsPanel.panel.setBorder(BorderFactory.createTitledBorder("Scrolls"));
+		column2.add(Utils.alignTopLeft(scrollsPanel.panel));
+		column2.add(Utils.createVerticalStrut());
+		kindPanel.panel.setBorder(BorderFactory.createTitledBorder("Kind"));
+		column2.add(Utils.freezeSizeToPreferred(Utils.alignTopLeft(kindPanel.panel)));
 		line.add(Utils.createHorizontalStrut());
-		line.add(Utils.alignTopLeft(scrollsPanel.panel));
+		line.add(Utils.alignTopLeft(column2));
+		
 		column.add(Utils.alignTopLeft(line));
+		
 		column.add(Utils.labelComponent(
 		             "Available Millis:", availableTimePanel.panel
 		           ));

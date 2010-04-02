@@ -92,7 +92,7 @@ public final class XinputProvider
 				continue;
 			}
 			XinputDevice xinputDevice=new XinputDevice(this, xiBus2.getXiDevice());
-			if(!xinputDevice.getIsAbsoluteMode() && !xinputDevice.isPad()){
+			if(!xinputDevice.getIsAbsoluteMode() && !xinputDevice.isPad){
 				L.warning("devices using relative positioning mode are not supported, device disabled: "+xinputDevice.getName()+
 									"\n See bug description https://sourceforge.net/tracker/?func=detail&aid=2929548&group_id=209997&atid=1011964");
 				xinputDevice.setEnabled(false);

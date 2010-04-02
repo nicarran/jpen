@@ -56,6 +56,7 @@ final class XinputDevice extends AbstractPenDevice {
 	private final XinputProvider xinputProvider;
 	private final Point2D.Float componentLocation=new Point2D.Float();
 	private final Dimension componentSize=new Dimension();
+	final boolean isPad;
 	private final Thread thread;
 	private boolean isListening;
 
@@ -65,6 +66,7 @@ final class XinputDevice extends AbstractPenDevice {
 		this.xinputProvider=xinputProvider;
 		levelRanges=new Range[PLevel.Type.VALUES.size()];
 		resetLevelRanges();
+		isPad=getName().toLowerCase().contains("pad");
 		setKindTypeNumber(getDefaultKindTypeNumber());
 		thread=new Thread("jpen-XinputDevice-"+getName()){
 						 @Override
@@ -150,7 +152,7 @@ final class XinputDevice extends AbstractPenDevice {
 	}
 
 	private int getDefaultKindTypeNumber() {
-		if(isPad())
+		if(isPad)
 			return PKind.Type.IGNORE.ordinal();
 		String lowerCaseName=getName().toLowerCase();
 		if(lowerCaseName.contains("eraser"))
@@ -160,28 +162,20 @@ final class XinputDevice extends AbstractPenDevice {
 		return PKind.Type.STYLUS.ordinal();
 	}
 
-	boolean isPad(){
-		return getName().toLowerCase().contains("pad");
-	}
-
 	private void processLastEvent(){
 		EventType eventType=xiDevice.getLastEventType();
 		switch(eventType) {
+		/* nicarran: TODO: support buttons?
 		case BUTTON_PRESS:
-			int lastEventButton=xiDevice.getLastEventButton();
-			if( lastEventButton ==4 || lastEventButton ==5 ){
-				//scheduleScrollEvent(lastEventButton); nicarran: the mouse provider catches this.
-			}
-			else
-				scheduleButtonEvent(lastEventButton-1, true);
+			//scheduleButtonEvent(xiDevice.getLastEventButton(), true); 
 			break;
 		case BUTTON_RELEASE:
-			lastEventButton=xiDevice.getLastEventButton();
-			if( lastEventButton !=4 && lastEventButton !=5)
-				scheduleButtonEvent(lastEventButton, false);
+			//scheduleButtonEvent(xiDevice.getLastEventButton(), false);
 			break;
+		*/
 		case MOTION_NOTIFY:
 			scheduleLevelEvent();
+		default:
 		}
 	}
 
@@ -201,12 +195,17 @@ final class XinputDevice extends AbstractPenDevice {
 		changedLevels.clear();
 	}
 
-	void scheduleButtonEvent(int number, boolean state) {
-		/*
-		it fires different numbers for press and release. : (  TODO: support the pad buttons.
+	private void scheduleButtonEvent(int number, boolean state) {
 		if(L.isLoggable(Level.FINE))
-			L.fine("scheduling button event: number="+number+", state="+state);
-		getPenManager().scheduleButtonEvent(new PButton(number, state));*/
+			L.fine("scheduling button event: number="+number+", state="+state+	", isPad="+isPad);
+		PButton.Type.Group buttonTypeGroup=isPad? PButton.Type.Group.PAD:
+		PButton.Type.Group.PEN;
+		List<PButton.Type> types=buttonTypeGroup.getTypes();
+		if(types.size()<=number){
+			L.warning("Unsupported button number:"+number);
+			return;
+		}
+		getPenManager().scheduleButtonEvent(this, xiDevice.getLastEventTime(), new PButton(types.get(number-1), state));
 	}
 
 	private static final float RADS_PER_DEG=(float)(Math.PI/180);
@@ -217,7 +216,7 @@ final class XinputDevice extends AbstractPenDevice {
 		if(isRotation) // rotation and wheel are given using the same xinput valuator
 			levelType=PLevel.Type.SIDE_PRESSURE;
 		float devValue=xiDevice.getValue(levelType);
-		// TODO: ignore rotation or SIDE_PRESSURE depending on the name of the device? wait feedback
+		// nicarran: TODO: ignore rotation or SIDE_PRESSURE depending on the name of the device? wait feedback
 
 		if(PLevel.Type.TILT_TYPES.contains(levelType))
 			return devValue*RADS_PER_DEG;
@@ -234,8 +233,8 @@ final class XinputDevice extends AbstractPenDevice {
 		return devValue;
 	}
 	
-	/*
-	//v EXPERIMENTAL:
+	/* nicarran: experimental: support relative movements like the wintab provider?
+	
 	private boolean useFractionalMovement=true;
 	
 	@Override
@@ -247,6 +246,5 @@ final class XinputDevice extends AbstractPenDevice {
 	public void penManagerSetUseFractionalMovements(boolean useFractionalMovement){
 		this.useFractionalMovement=useFractionalMovement;
 	}
-	//^
 	*/
 }

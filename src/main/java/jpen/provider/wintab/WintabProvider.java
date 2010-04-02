@@ -50,7 +50,7 @@ public class WintabProvider
 	private final Range[] levelRanges=new Range[PLevel.Type.VALUES.size()];
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 	private final Thread thread;
-	private boolean paused=true;
+	private volatile boolean paused=true;
 
 	public static class Constructor
 		extends AbstractPenProvider.AbstractConstructor{

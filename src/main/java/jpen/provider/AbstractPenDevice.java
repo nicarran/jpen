@@ -74,11 +74,6 @@ public abstract class AbstractPenDevice
 	}
 
 	//@Override
-	public boolean isDigitizer() {
-		return true;
-	}
-
-	//@Override
 	public boolean getEnabled() {
 		return enabled;
 	}

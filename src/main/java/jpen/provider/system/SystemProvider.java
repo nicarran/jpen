@@ -51,13 +51,20 @@ public final class SystemProvider
 	}
 
 	final Component component;
+	//private final KeyboardDevice keyboardDevice=new KeyboardDevice(this); nicarran: experimental
 
 	private SystemProvider(Constructor constructor, Component component) {
 		super(constructor);
 		this.component=component;
 		devices.add(new MouseDevice(this));
+		//devices.add(keyboardDevice); nicarran: experimental
 	}
 
 	//@Override
-	public void penManagerPaused(boolean paused) {}
+	public void penManagerPaused(boolean paused) {
+		/* nicarran: experimental
+		if(!paused){
+			keyboardDevice.setPaused(paused);
+		}*/
+	}
 }

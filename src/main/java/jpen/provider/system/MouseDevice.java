@@ -44,7 +44,7 @@ import jpen.PScroll;
 import jpen.PScrollEvent;
 
 @SuppressWarnings("deprecation")
-final class MouseDevice
+public final class MouseDevice
 	extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(MouseDevice.class.getName());
 	//static {L.setLevel(Level.ALL);	}
@@ -94,11 +94,6 @@ final class MouseDevice
 		systemProvider.component.addMouseListener(mouseL);
 		systemProvider.component.addMouseWheelListener(mouseWheelL);
 		setEnabled(true);
-	}
-
-	@Override
-	public boolean isDigitizer(){
-		return false;
 	}
 
 	//@Override

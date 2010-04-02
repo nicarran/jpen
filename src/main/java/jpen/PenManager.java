@@ -29,14 +29,14 @@ import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Set;
 import jpen.event.PenManagerListener;
+import jpen.internal.BuildInfo;
 import jpen.owner.awt.AwtPenOwner;
 import jpen.owner.PenOwner;
-import jpen.provider.system.SystemProvider;
-import jpen.internal.BuildInfo;
+import jpen.provider.system.MouseDevice;
 
 public final class PenManager {
 	private static final Logger L=Logger.getLogger(PenManager.class.getName());
-	
+
 	public static String getJPenFullVersion(){
 		return BuildInfo.getFullVersion();
 	}
@@ -52,7 +52,7 @@ public final class PenManager {
 	private final List<PenManagerListener> listeners=new ArrayList<PenManagerListener>();
 	private PenManagerListener[] listenersArray;
 	final PenDevice emulationDevice;
-	private PenProvider systemMouseProvider; // may be null
+	private PenDevice systemMouseDevice; // may be null
 
 	public PenManager(Component component) {
 		this(new AwtPenOwner(component));
@@ -85,17 +85,17 @@ public final class PenManager {
 					});
 		}
 	}
-	
+
 	/**
 	@return the mouse PenProvider or {@code null} if no mouse provider has been added.
 	@see #addProvider(PenProvider.Constructor)
 	*/
 	public PenProvider getSystemMouseProvider(){
-		return systemMouseProvider;
+		return systemMouseDevice==null? null: systemMouseDevice.getProvider();
 	}
-	
+
 	public boolean isSystemMouseDevice(PenDevice device){
-		return device.getProvider()==systemMouseProvider;
+		return device!=null && device==systemMouseDevice;
 	}
 
 	/**
@@ -108,13 +108,6 @@ public final class PenManager {
 				throw new IllegalArgumentException("constructor already added");
 			if(providerConstructor.construct(this)){
 				PenProvider provider=providerConstructor.getConstructed();
-				if(provider instanceof SystemProvider){
-					if(this.systemMouseProvider!=null){
-						providerConstructors.remove(providerConstructor);
-						throw new IllegalStateException("system provider already added");
-					}
-					this.systemMouseProvider=provider;
-				}
 				for(PenDevice device:provider.getDevices())
 					firePenDeviceAdded(providerConstructor, device);
 				return provider;
@@ -150,6 +143,8 @@ public final class PenManager {
 		device.penManagerSetId(nextDeviceId);
 		if(deviceIdToDevice.put(nextDeviceId, device)!=null)
 			throw new AssertionError();
+		if(systemMouseDevice==null && device instanceof MouseDevice)
+			this.systemMouseDevice=device;
 		for(PenManagerListener l: getListenersArray()){
 			l.penDeviceAdded(constructor, device);
 		}
@@ -169,6 +164,8 @@ public final class PenManager {
 			throw new IllegalArgumentException("device not found");
 		for(PenManagerListener l: getListenersArray())
 			l.penDeviceRemoved(constructor, device);
+		if(systemMouseDevice==device)
+			this.systemMouseDevice=null;
 	}
 
 	public PenDevice getDevice(byte deviceId){
@@ -216,7 +213,7 @@ public final class PenManager {
 			return;
 		pen.scheduler.scheduleScrollEvent(device, deviceTime, scroll);
 	}
-	
+
 	public boolean scheduleLevelEvent(PenDevice device, long deviceTime, Collection<PLevel> levels) {
 		return scheduleLevelEvent(device, deviceTime, levels, false);
 	}
