@@ -117,6 +117,7 @@ class WintabDevice
 		// scheduleButtonEvents(); nicarran:  TODO use this to support extra buttons?
 	}
 
+	/* nicarran:  TODO use this to support extra buttons?
 	private void scheduleButtonEvents() {
 		int newButtonsValues=wintabProvider.wintabAccess.getButtons();
 		if(newButtonsValues==lastButtonsValues)
@@ -130,10 +131,10 @@ class WintabDevice
 		lastButtonsValues=newButtonsValues;
 	}
 
-
 	private boolean getButtonState(int buttonsState, int buttonIndex) {
 		return (buttonsState&(1<<buttonIndex))>0;
 	}
+	*/
 
 	private final List<PLevel> changedLevels=new ArrayList<PLevel>();
 	private void scheduleLevelEvent() {

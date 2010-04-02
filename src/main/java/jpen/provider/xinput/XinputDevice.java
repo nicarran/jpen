@@ -195,6 +195,7 @@ final class XinputDevice extends AbstractPenDevice {
 		changedLevels.clear();
 	}
 
+	/* nicarran: TODO: support buttons?
 	private void scheduleButtonEvent(int number, boolean state) {
 		if(L.isLoggable(Level.FINE))
 			L.fine("scheduling button event: number="+number+", state="+state+	", isPad="+isPad);
@@ -207,6 +208,7 @@ final class XinputDevice extends AbstractPenDevice {
 		}
 		getPenManager().scheduleButtonEvent(this, xiDevice.getLastEventTime(), new PButton(types.get(number-1), state));
 	}
+	*/
 
 	private static final float RADS_PER_DEG=(float)(Math.PI/180);
 	private static final float PI_2=(float)(2f*Math.PI);
