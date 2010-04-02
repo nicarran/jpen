@@ -45,9 +45,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 //^^^
 
-#define MAX_WINTAB_QUEUE_SIZE 64
-#define MIN_WINTAB_QUEUE_SIZE 16
-#define QUEUE_SIZE 16
+#define QUEUE_SIZE 64
 
 /* This enum matches the PLevel.Type enumeration: */
 enum{

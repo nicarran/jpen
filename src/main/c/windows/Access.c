@@ -94,12 +94,20 @@ int Access_preCreate(SAccess *pAccess) {
 		Access_setError("Assertion failed... pointer to access is not clean.");
 		return errorState;
 	}
-
-	// Set queue size on wintab:
-	int wintabQueueSize=MAX_WINTAB_QUEUE_SIZE;
-	for(; wintabQueueSize>=MIN_WINTAB_QUEUE_SIZE; wintabQueueSize-=16)
-		if(WTQueueSizeSet(pAccess->ctx, wintabQueueSize))
+	
+	// Set up wintab queue size:
+	int wintabQueueSize=QUEUE_SIZE;
+	int wintabQueueSizeSetted=0;
+	for(; wintabQueueSize>=2; wintabQueueSize-=2){
+		wintabQueueSizeSetted=WTQueueSizeSet(pAccess->ctx, wintabQueueSize);
+		if(wintabQueueSizeSetted)
 			break;
+	}
+	if(!wintabQueueSizeSetted){
+		Access_setError("Couldn't set up the wintab queue size.");
+		Access_preDestroy(pAccess);
+		return errorState;
+	}
 	//printf("C: wintab queue size: %i \n",WTQueueSizeGet(pAccess->ctx)); // D
 
 	return cleanState;
