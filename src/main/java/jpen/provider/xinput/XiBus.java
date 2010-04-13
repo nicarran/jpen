@@ -28,7 +28,6 @@ final class XiBus {
 	private XiDevice xiDevice;
 
 	XiBus() throws Exception {
-		XinputProvider.loadLibrary();
 		this.cellIndex=create();
 		if(cellIndex==-1)
 			throw new Exception(getError());
