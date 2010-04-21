@@ -23,11 +23,14 @@ import java.util.Collections;
 import java.util.List;
 import jpen.PenManager;
 
-final class XiBus {
+/**
+<b>Warning</b>: Don't use this class directly. This class is currently public only to be used by JTablet.
+*/
+public final class XiBus {
 	private final int cellIndex;
 	private XiDevice xiDevice;
 
-	XiBus() throws Exception {
+	public XiBus() throws Exception {
 		this.cellIndex=create();
 		if(cellIndex==-1)
 			throw new Exception(getError());

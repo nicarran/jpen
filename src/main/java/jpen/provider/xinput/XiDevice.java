@@ -28,7 +28,10 @@ import jpen.PLevel;
 import jpen.internal.Range;
 import jpen.internal.ThreadUtils;
 
-final class XiDevice{
+/**
+<b>Warning</b>: Don't use this class directly. This class is currently public only to be used by JTablet.
+*/
+public final class XiDevice{
 	static final Logger L=Logger.getLogger(XiDevice.class.getName());
 	//static { L.setLevel(Level.ALL); }
 	
