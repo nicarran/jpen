@@ -29,6 +29,8 @@ static int EventClassAndOffsets[][2]={
 			{ButtonClass,_deviceButtonPress},
 			{ButtonClass,_deviceButtonRelease},
 			{ValuatorClass, _deviceMotionNotify},
+			{ProximityClass, _proximityIn},
+			{ProximityClass, _proximityOut}
 		};
 
 void Device_setIsListening(SDevice *pDevice, int isListening) {
@@ -58,16 +60,16 @@ void Device_setIsListening(SDevice *pDevice, int isListening) {
 		    DefaultRootWindow(pBus->pDisplay),
 		    eventClasses,
 		    eventClassesSize);*/
-		
+
 		// Better grab the device to avoid loosing events: (?)
 		failed=XGrabDevice(pBus->pDisplay, pDevice->pXdevice, DefaultRootWindow(pBus->pDisplay),
-								0,
-								eventClassesSize,
-								eventClasses,
-								GrabModeAsync,
-								GrabModeAsync,
-								CurrentTime
-							 );
+					 0,
+					 eventClassesSize,
+					 eventClasses,
+					 GrabModeAsync,
+					 GrabModeAsync,
+					 CurrentTime
+											);
 	}else{
 		XUngrabDevice(pBus->pDisplay, pDevice->pXdevice, CurrentTime);
 	}
@@ -154,7 +156,7 @@ int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex) {
 	}
 	Device_refreshValuatorRanges(pDevice);
 	//hack to signal Device_waitNextEventOrTimeOut through Device_stopWaitingNextEvent:
-	XSelectInput(pBus->pDisplay,DefaultRootWindow(pBus->pDisplay),PropertyChangeMask); 
+	XSelectInput(pBus->pDisplay,DefaultRootWindow(pBus->pDisplay),PropertyChangeMask);
 	//Device_setIsListening(pDevice, true);
 	return 0;
 }
@@ -174,10 +176,10 @@ static void Device_refreshValuatorValues(struct Device *pDevice, char first_axis
 */
 int Device_nextEvent(struct Device *pDevice) {
 	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
-	
+
 	//if(!pDevice->isListening)
-		//return 0;
-	
+	//return 0;
+
 	if(XPending(pBus->pDisplay))
 		return Device_waitNextEvent(pDevice);
 	return false;
@@ -202,12 +204,23 @@ int Device_waitNextEvent(struct Device *pDevice) {
 					XDeviceButtonEvent *pEvent = (XDeviceButtonEvent *)&pDevice->lastEvent;
 					pDevice->lastEventTime=pEvent->time;
 					pDevice->lastEventButton=pEvent->button;
+					pDevice->lastEventDeviceState=pEvent->device_state;
 				}
 				break;
 			case E_EventType_MotionNotify:
 				{
 					XDeviceMotionEvent *pEvent=(XDeviceMotionEvent *)&pDevice->lastEvent;
 					pDevice->lastEventTime=pEvent->time;
+					Device_refreshValuatorValues(pDevice, pEvent->first_axis, pEvent->axes_count, pEvent->axis_data);
+				}
+				break;
+			case E_EventType_ProximityIn:
+			case E_EventType_ProximityOut:
+				{
+					XProximityNotifyEvent *pEvent = (XProximityNotifyEvent *)&pDevice->lastEvent;
+					pDevice->lastEventTime=pEvent->time;
+					pDevice->lastEventProximity=(i==E_EventType_ProximityIn);
+					pDevice->lastEventDeviceState=pEvent->device_state;
 					Device_refreshValuatorValues(pDevice, pEvent->first_axis, pEvent->axes_count, pEvent->axis_data);
 				}
 				break;

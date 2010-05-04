@@ -26,6 +26,8 @@ enum{
 	E_EventType_ButtonPress,
 	E_EventType_ButtonRelease,
 	E_EventType_MotionNotify,
+	E_EventType_ProximityIn,
+	E_EventType_ProximityOut,
 	E_EventType_size
 };
 /* Warning: this enumeration is analogous to the PLevel.Type enumeration. */
@@ -56,6 +58,8 @@ struct Device {
 	int lastEventType;
 	Time lastEventTime;
 	int lastEventButton;
+	unsigned int lastEventDeviceState;
+	int lastEventProximity;
 };
 m_declareRow(Device);
 extern int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex);

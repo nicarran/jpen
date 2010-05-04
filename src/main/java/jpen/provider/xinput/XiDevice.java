@@ -36,7 +36,7 @@ public final class XiDevice{
 	//static { L.setLevel(Level.ALL); }
 	
 	enum EventType{
-		BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY;
+		BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY, PROXIMITY_IN, PROXIMITY_OUT;
 		public static final List<EventType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
 	}
 
@@ -155,6 +155,22 @@ public final class XiDevice{
 	}
 
 	private static native int getLastEventButton(int cellIndex);
+	
+	public long getLastEventDeviceState(){
+		synchronized(xiBus){
+			return getLastEventDeviceState(cellIndex);
+		}
+	}
+	
+	private static native long getLastEventDeviceState(int cellIndex);
+	
+	public boolean getLastEventProximity() {
+		synchronized(xiBus){
+			return getLastEventProximity(cellIndex);
+		}
+	}
+	
+	private static native boolean getLastEventProximity(int cellIndex);
 
 	public void refreshLevelRanges(){
 		synchronized(xiBus){
@@ -196,6 +212,10 @@ public final class XiDevice{
 			sb.append(getLastEventType());
 			sb.append(", lastEventButton=");
 			sb.append(getLastEventButton());
+			sb.append(", lastEventDeviceState=");
+			sb.append(getLastEventDeviceState());
+			sb.append(", lastEventProximity=");
+			sb.append(getLastEventProximity());
 			sb.append("}");
 			return sb.toString();
 		}

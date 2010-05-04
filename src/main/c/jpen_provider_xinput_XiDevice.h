@@ -7,7 +7,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* Inaccessible static: L */
 /*
  * Class:     jpen_provider_xinput_XiDevice
  * Method:    getIsListening
@@ -94,6 +93,22 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiDevice_getLastEventType
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiDevice_getLastEventButton
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    getLastEventDeviceState
+ * Signature: (I)J
+ */
+JNIEXPORT jlong JNICALL Java_jpen_provider_xinput_XiDevice_getLastEventDeviceState
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
+ * Method:    getLastEventProximity
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_getLastEventProximity
   (JNIEnv *, jclass, jint);
 
 /*

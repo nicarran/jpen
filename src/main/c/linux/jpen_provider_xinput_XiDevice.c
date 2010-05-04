@@ -151,6 +151,26 @@ JNIEXPORT jint JNICALL Java_jpen_provider_xinput_XiDevice_getLastEventButton
 
 /*
  * Class:     jpen_provider_xinput_XiDevice
+ * Method:    getLastEventDeviceState
+ * Signature: (I)J
+ */
+JNIEXPORT jlong JNICALL Java_jpen_provider_xinput_XiDevice_getLastEventDeviceState
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Device_getP(cellIndex)->lastEventDeviceState;
+}
+
+/*
+ * Class:     jpen_provider_xinput_Device
+ * Method:    getLastEventProximity
+ * Signature: (I)I
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_xinput_XiDevice_getLastEventProximity
+(JNIEnv *pEnv, jclass class, jint cellIndex) {
+	return Device_getP(cellIndex)->lastEventProximity? JNI_TRUE:JNI_FALSE;
+}
+
+/*
+ * Class:     jpen_provider_xinput_XiDevice
  * Method:    refreshLevelRanges
  * Signature: (I)V
  */
