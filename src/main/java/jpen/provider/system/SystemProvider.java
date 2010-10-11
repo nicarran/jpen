@@ -33,7 +33,7 @@ public final class SystemProvider
 	extends AbstractPenProvider {
 
 	public static class Constructor
-	extends AbstractPenProvider.AbstractConstructor {
+		extends AbstractPenProvider.AbstractConstructor {
 		public static final String NAME="System";
 		//@Override
 		public String getName() {
@@ -51,20 +51,17 @@ public final class SystemProvider
 	}
 
 	final Component component;
-	//private final KeyboardDevice keyboardDevice=new KeyboardDevice(this); nicarran: experimental
+	private final KeyboardDevice keyboardDevice=new KeyboardDevice(this);
 
 	private SystemProvider(Constructor constructor, Component component) {
 		super(constructor);
 		this.component=component;
 		devices.add(new MouseDevice(this));
-		//devices.add(keyboardDevice); nicarran: experimental
+		devices.add(keyboardDevice);
 	}
 
 	//@Override
 	public void penManagerPaused(boolean paused) {
-		/* nicarran: experimental
-		if(!paused){
-			keyboardDevice.setPaused(paused);
-		}*/
+		keyboardDevice.setPaused(paused);
 	}
 }

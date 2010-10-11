@@ -175,6 +175,7 @@ final class XinputDevice extends AbstractPenDevice {
 		*/
 		case MOTION_NOTIFY:
 			scheduleLevelEvent();
+			break;
 		default:
 		}
 	}

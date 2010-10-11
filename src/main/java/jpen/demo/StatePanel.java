@@ -18,6 +18,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.demo;
 
+import java.awt.Color;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JLabel;
@@ -55,13 +56,15 @@ class StatePanel{
 		Box column2=Box.createVerticalBox();
 		scrollsPanel.panel.setBorder(BorderFactory.createTitledBorder("Scrolls"));
 		column2.add(Utils.alignTopLeft(scrollsPanel.panel));
-		column2.add(Utils.createVerticalStrut());
+		column2.add(Box.createVerticalGlue());
 		kindPanel.panel.setBorder(BorderFactory.createTitledBorder("Kind"));
-		column2.add(Utils.freezeSizeToPreferred(Utils.alignTopLeft(kindPanel.panel)));
+		column2.add(Utils.alignTopLeft(kindPanel.panel));
 		line.add(Utils.createHorizontalStrut());
 		line.add(Utils.alignTopLeft(column2));
 		
 		column.add(Utils.alignTopLeft(line));
+		
+		column.add(Utils.createVerticalStrut());
 		
 		column.add(Utils.labelComponent(
 		             "Available Millis:", availableTimePanel.panel
@@ -72,6 +75,8 @@ class StatePanel{
 		column.add(Utils.labelComponent(
 		             "JPen Version:", new JLabel(PenManager.getJPenFullVersion())
 		           ));
+		
+		column.add(Box.createVerticalGlue());		
 
 		mainLine.add(Utils.createHorizontalStrut());
 		mainLine.add(Utils.alignTopLeft(column));

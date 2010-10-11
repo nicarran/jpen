@@ -200,6 +200,15 @@
 			<mapper type="flatten"/>
 		</pathconvert>
 		<echo>sources: ${_wsources}</echo>
+		<exec dir="src/main/c/windows" executable="echo" failonerror="true">
+			<arg value="c:\\mingww64\\bin\\x86_64-pc-mingw32-gcc"/>
+			<arg value="-Wall"/>
+			<arg value="-c"/>
+			<arg value="-D_JNI_IMPLEMENTATION"/>
+			<arg value="-Ic:/javaSdk/include"/>
+			<arg value="-Ic:/javaSdk/include/win32"/>
+			<arg line="${_wsources}"/>
+		</exec>
 		<exec dir="src/main/c/windows" executable="wine" failonerror="true">
 			<arg value="c:\\mingww64\\bin\\x86_64-pc-mingw32-gcc"/>
 			<arg value="-Wall"/>
@@ -217,6 +226,16 @@
 			<mapper type="flatten"/>
 		</pathconvert>
 		<echo>objects: ${_wobjects}</echo>
+		<exec dir="src/main/c/windows" executable="echo" failonerror="true">
+			<arg value="c:\\mingww64\\bin\\x86_64-pc-mingw32-gcc"/>
+			<arg value="-Wall"/>
+			<arg value="-Wl,--kill-at"/>
+			<arg value="-shared"/>
+			<arg value="-o"/>
+			<arg value="${module.winJniLibName}-64.dll"/>
+			<arg line="${_wobjects}"/>
+			<arg line="${module.windowsGccExtraLib-64}"/>
+		</exec>
 		<exec dir="src/main/c/windows" executable="wine" failonerror="true">
 			<arg value="c:\\mingww64\\bin\\x86_64-pc-mingw32-gcc"/>
 			<arg value="-Wall"/>

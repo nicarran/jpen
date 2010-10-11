@@ -37,10 +37,8 @@ public class PButton
 		*/
 		ON_PRESSURE(TypeGroup.LEVEL),
 
-		/* nicarran: experimental keyboard buttons support:
-		
 		CONTROL(TypeGroup.MODIFIER), SHIFT(TypeGroup.MODIFIER), ALT(TypeGroup.MODIFIER),
-		
+		/* nicarran: experimental keyboard buttons support:
 		VK_1(TypeGroup.VK_NUMBER), VK_2(TypeGroup.VK_NUMBER), VK_3(TypeGroup.VK_NUMBER), VK_4(TypeGroup.VK_NUMBER), VK_5(TypeGroup.VK_NUMBER), VK_6(TypeGroup.VK_NUMBER), VK_7(TypeGroup.VK_NUMBER), VK_8(TypeGroup.VK_NUMBER), VK_9(TypeGroup.VK_NUMBER), VK_0(TypeGroup.VK_NUMBER),
 		*/
 
@@ -70,10 +68,11 @@ public class PButton
 		Level condition buttons.
 		*/
 		LEVEL,
-		/* nicarran: experimental keyboard buttons support:
 		/**
 		Modifier buttons.
+		*/
 		MODIFIER,
+		/* nicarran: experimental keyboard buttons support:
 		/**
 		Virtual key number buttons.
 		VK_NUMBER,

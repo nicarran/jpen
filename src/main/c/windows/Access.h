@@ -45,7 +45,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 //^^^
 
-#define QUEUE_SIZE 64
+#define QUEUE_SIZE 32
 
 /* This enum matches the PLevel.Type enumeration: */
 enum{

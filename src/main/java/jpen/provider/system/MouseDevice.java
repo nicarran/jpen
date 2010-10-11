@@ -125,9 +125,8 @@ public final class MouseDevice
 	private final List<PLevel> changedLevels=Arrays.asList(changedLevelsA);
 	
 	private void scheduleMove(long time, int x, int y) {
-		/*Point componentLocation=systemProvider.component.getLocationOnScreen(); // on jdk 1.5 there is no MouseEvent.getXOnScreen*/
-		changedLevelsA[0]=new PLevel(PLevel.Type.X.ordinal(), /*componentLocation.x+*/x);
-		changedLevelsA[1]=new PLevel(PLevel.Type.Y.ordinal(), /*componentLocation.y+*/y);
+		changedLevelsA[0]=new PLevel(PLevel.Type.X.ordinal(), x);
+		changedLevelsA[1]=new PLevel(PLevel.Type.Y.ordinal(), y);
 		getPenManager().scheduleLevelEvent(this, time, changedLevels, false);
 	}
 

@@ -84,8 +84,10 @@ public class Pen extends PenState {
 					//@Override
 					public void run(){
 						//System.out.println("firing tocks "+System.currentTimeMillis());
-						for(PenListener l:getListenersArray())
+						for(PenListener l:getListenersArray()){
+							//System.out.println("firing pentock, procTime="+evalCurrentProcTime()+", l="+l);
 							l.penTock(availablePeriodLeft());
+						}
 					}
 				};
 
@@ -102,15 +104,18 @@ public class Pen extends PenState {
 						waitTime=0;
 					else
 						yield();
+					//System.out.println("--- on yield, procTime="+evalCurrentProcTime());
 					while((event=lastDispatchedEvent.next)!=null && event.getTime()<=beforeTime) {
 						event.copyTo(Pen.this);
 						event.dispatch();
 						lastDispatchedEvent.next=null;
 						lastDispatchedEvent=event;
 					}
+					//System.out.println("after event dispatching, procTime="+evalCurrentProcTime());
 					availablePeriod=periodMillis+waitTime; // waitTime here is always <=0, if it is <0 then the whole processing of the previous round took longer than the time available. 
 					//System.out.println("going to fire tock "+System.currentTimeMillis());
 					firePenTock();
+					//System.out.println("after penTock, procTime="+evalCurrentProcTime());
 					waitTime=availablePeriodLeft();// the same:  (periodMillis-evalCurrentProcTime())+waitTime;
 					if(waitTime>0) {
 						//System.out.println("going to wait: "+waitTime);

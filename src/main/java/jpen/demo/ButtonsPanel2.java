@@ -20,14 +20,6 @@ import jpen.Pen;
 
 final class ButtonsPanel2{
 	
-	private PButtonEvent lastButtonEvent;
-	final JTextField lastButtonEventTF=new JTextField();
-	{
-		lastButtonEventTF.setEditable(false);
-		Dimension prefSize=lastButtonEventTF.getPreferredSize();
-		lastButtonEventTF.setMaximumSize(new Dimension(Integer.MAX_VALUE, prefSize.height));
-	}
-
 	Display display=new Display();
 
 	class Display
@@ -46,7 +38,7 @@ final class ButtonsPanel2{
 			for(PButton.Type buttonType: PButton.Type.VALUES)
 				listModel.addElement(buttonType);
 			component.setFixedCellWidth(component.getPreferredSize().width+5);
-			component.setVisibleRowCount(4);
+			component.setVisibleRowCount(5);
 			listModel.clear();
 		}
 
@@ -58,8 +50,6 @@ final class ButtonsPanel2{
 					listModel.addElement(buttonType);
 				}
 			}
-			if(lastButtonEvent!=null)
-				lastButtonEventTF.setText(lastButtonEvent.button.getType().toString());
 		}
 	}
 	
@@ -68,10 +58,6 @@ final class ButtonsPanel2{
 		JScrollPane scrollPane=new JScrollPane(display.component);
 		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		panel.add(Utils.alignTopLeft(scrollPane));
-		panel.add(Utils.createVerticalStrut());
-		panel.add(Utils.alignTopLeft(new JLabel("Last:")));
-		panel.add(Utils.createVerticalStrut());
-		panel.add(Utils.alignTopLeft(lastButtonEventTF));
 	}
 
 	ButtonsPanel2(Pen pen){
@@ -81,7 +67,6 @@ final class ButtonsPanel2{
 											public void penButtonEvent(PButtonEvent ev){
 												this.pen=ev.pen;
 												display.setIsDirty(true);
-												lastButtonEvent=ev;
 											}
 											@Override
 											public void penTock(long availableMillis){
