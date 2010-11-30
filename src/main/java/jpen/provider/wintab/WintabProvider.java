@@ -45,7 +45,7 @@ public class WintabProvider
 		LIB_LOADER.load();
 	}
 
-	final WintabAccess wintabAccess;
+	public final WintabAccess wintabAccess;
 	private final Map<Integer, WintabDevice> cursorToDevice=new HashMap<Integer, WintabDevice>();
 	private final Range[] levelRanges=new Range[PLevel.Type.VALUES.size()];
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();

@@ -256,6 +256,22 @@ JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_getCapabilityMask
 JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_destroy
   (JNIEnv *, jclass, jint);
 
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getSystemCursorEnabled
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getSystemCursorEnabled
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    setSystemCursorEnabled
+ * Signature: (IZ)V
+ */
+JNIEXPORT void JNICALL Java_jpen_provider_wintab_WintabAccess_setSystemCursorEnabled
+  (JNIEnv *, jclass, jint, jboolean);
+
 #ifdef __cplusplus
 }
 #endif

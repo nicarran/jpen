@@ -276,3 +276,17 @@ int Access_getCsrType(int cursor) {
 
 	return E_csrTypes_undef;
 }
+
+void Access_setSystemCursorEnabled(SAccess *pAccess, int enabled){
+	Access_refreshLc(pAccess);
+	if(enabled)
+		pAccess->lc.lcOptions |= CXO_SYSTEM;
+	else
+		pAccess->lc.lcOptions &= ~CXO_SYSTEM;
+	WTSet(pAccess->ctx, &(pAccess->lc));
+}
+
+int Access_getSystemCursorEnabled(SAccess *pAccess){
+	Access_refreshLc(pAccess);
+	return (pAccess->lc.lcOptions & CXO_SYSTEM) !=0? true: false;
+}

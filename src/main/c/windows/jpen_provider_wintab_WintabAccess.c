@@ -299,3 +299,23 @@ JNIEXPORT jint JNICALL Java_jpen_provider_wintab_WintabAccess_destroy
 (JNIEnv *pEnv, jclass class, jint cellIndex) {
 	return Access_destroy(cellIndex);
 }
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    getSystemCursorEnabled
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_jpen_provider_wintab_WintabAccess_getSystemCursorEnabled
+(JNIEnv *pEnv, jclass class, jint cellIndex){
+	return Access_getSystemCursorEnabled(Access_getP(cellIndex))? JNI_TRUE: JNI_FALSE;
+}
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    setSystemCursorEnabled
+ * Signature: (IZ)V
+ */
+JNIEXPORT void JNICALL Java_jpen_provider_wintab_WintabAccess_setSystemCursorEnabled
+(JNIEnv *pEnv, jclass class, jint cellIndex, jboolean enabled){
+	Access_setSystemCursorEnabled(Access_getP(cellIndex), enabled==JNI_TRUE);
+}

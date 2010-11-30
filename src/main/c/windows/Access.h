@@ -86,4 +86,6 @@ extern int Access_getEnabled(SAccess *pAccess);
 extern void Access_setEnabled(SAccess *pAccess, int enabled);
 extern void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange);
 extern int Access_getCsrType(int cursor);
+extern void Access_setSystemCursorEnabled(SAccess *pAccess, int enabled);
+extern int Access_getSystemCursorEnabled(SAccess *pAccess);
 #endif

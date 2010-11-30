@@ -232,7 +232,23 @@ public final class WintabAccess {
 			return getStatus(cellIndex);
 		}
 	}
+	
+	public boolean getSystemCursorEnabled() {
+		synchronized(LOCK){
+			return getSystemCursorEnabled(cellIndex);
+		}
+	}
 
+	private static native boolean getSystemCursorEnabled(int cellIndex);
+	
+	public void setSystemCursorEnabled(boolean enabled) {
+		synchronized(LOCK){
+			setSystemCursorEnabled(cellIndex, enabled);
+		}
+	}
+
+	private static native void setSystemCursorEnabled(int cellIndex, boolean enabled);
+	
 	@Override
 	public String toString() {
 		synchronized(LOCK){

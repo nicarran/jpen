@@ -7,6 +7,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/* Inaccessible static: L */
 /*
  * Class:     jpen_provider_xinput_XiDevice
  * Method:    getIsListening

@@ -176,7 +176,15 @@ public final class PenManager {
 		return devicesA;
 	}
 
+	/**
+	@deprecated replacement: #getProviderConstructors().
+	*/
+	@Deprecated
 	public Set<PenProvider.Constructor> getConstructors() {
+		return providerConstructorsA;
+	}
+	
+	public Set<PenProvider.Constructor> getProviderConstructors() {
 		return providerConstructorsA;
 	}
 
