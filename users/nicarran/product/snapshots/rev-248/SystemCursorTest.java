@@ -14,8 +14,9 @@ import jpen.provider.wintab.WintabProvider;
 class SystemCursorTest{
 	
 	public static void main(String... args) {
+		//v
 		PenManager penManager=new PenManager(ScreenPenOwner.getInstance());
-		// ^ ScreenPenOwner fires only level events coming from the tablet and only when the application window is active.
+		//^ ScreenPenOwner fires only level events coming from the tablet and only when the application window is active.
 		penManager.pen.addListener(new PenAdapter(){
 					@Override
 					public void penLevelEvent(PLevelEvent ev){
@@ -49,6 +50,7 @@ class SystemCursorTest{
 
 	static WintabAccess getWintabAccess(PenManager penManager){
 		WintabProvider wintabProvider=null;
+		//v do reflection to get the WintabProvider. If the get/setSystemCursorEnabled feature is useful we can move it to a higher level API (no-reflection) and implement it on linux (and osx if possible). 
 		for(PenProvider.Constructor constructor:penManager.getProviderConstructors()){
 			PenProvider penProvider=constructor.getConstructed();
 			if(penProvider instanceof WintabProvider){
@@ -56,6 +58,7 @@ class SystemCursorTest{
 				break;
 			}
 		}
-		return wintabProvider==null? null: wintabProvider.wintabAccess;  
+		return wintabProvider==null? null: wintabProvider.wintabAccess;
+		//^
 	}
 }
