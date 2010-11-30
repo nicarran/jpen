@@ -31,7 +31,7 @@ public class SmokeTest extends TestCase {
 		PenManager penManager = new PenManager(component);
 		System.out.println("Providers:");
 		int count=0;
-		for(PenProvider.Constructor constructor: penManager.getConstructors()){
+		for(PenProvider.Constructor constructor: penManager.getProviderConstructors()){
 			System.out.println("Constructor: "+constructor.getName());
 			count++;
 			PenProvider.ConstructionException ex=constructor.getConstructionException();

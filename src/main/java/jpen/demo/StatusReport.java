@@ -98,7 +98,7 @@ public class StatusReport{
 
 	private void appendProvidersInfo(PenManager penManager){
 		appendLine("Providers:");
-		for(PenProvider.Constructor constructor: penManager.getConstructors()){
+		for(PenProvider.Constructor constructor: penManager.getProviderConstructors()){
 			appendLine("Constructor: "+constructor.getName(), 1);
 			PenProvider.ConstructionException constructionException=constructor.getConstructionException();
 			String constructionExceptionStackTrace="none";
