@@ -28,14 +28,11 @@ import jpen.PLevel;
 import jpen.internal.Range;
 import jpen.internal.ThreadUtils;
 
-/**
-<b>Warning</b>: Don't use this class directly. This class is currently public only to be used by JTablet.
-*/
-public final class XiDevice{
+final class XiDevice {
 	static final Logger L=Logger.getLogger(XiDevice.class.getName());
 	//static { L.setLevel(Level.ALL); }
 	
-	enum EventType{
+	public enum EventType {
 		BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY, PROXIMITY_IN, PROXIMITY_OUT;
 		public static final List<EventType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
 	}

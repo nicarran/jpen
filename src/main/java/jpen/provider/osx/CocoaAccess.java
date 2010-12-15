@@ -29,7 +29,7 @@ import jpen.PButton;
 import jpen.PKind;
 import jpen.PLevel;
 
-public class CocoaAccess { 
+final class CocoaAccess {
 
 	static final Logger L=Logger.getLogger(CocoaAccess.class.getName());
 	//static { L.setLevel(Level.ALL); }
@@ -67,8 +67,9 @@ public class CocoaAccess {
 		}
 	}
 
-	public void finalize() {
-		stop();
+	public void finalize() throws Throwable {
+        stop();
+        super.finalize();
 	}
 
 	public void enable() {
