@@ -23,10 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import jpen.PenManager;
 
-/**
-<b>Warning</b>: Don't use this class directly. This class is currently public only to be used by JTablet.
-*/
-public final class XiBus {
+final class XiBus {
 	private final int cellIndex;
 	private XiDevice xiDevice;
 

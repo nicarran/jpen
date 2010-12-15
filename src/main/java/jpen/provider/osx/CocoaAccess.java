@@ -29,7 +29,10 @@ import jpen.PButton;
 import jpen.PKind;
 import jpen.PLevel;
 
-final class CocoaAccess {
+/**
+<b>Warning</b>: Don't use this class directly. This class is currently public only to be used by JTablet.
+*/
+public final class CocoaAccess {
 
 	static final Logger L=Logger.getLogger(CocoaAccess.class.getName());
 	//static { L.setLevel(Level.ALL); }
