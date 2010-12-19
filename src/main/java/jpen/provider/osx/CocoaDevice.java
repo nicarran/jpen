@@ -21,11 +21,8 @@ package jpen.provider.osx;
 import jpen.PKind;
 import jpen.provider.AbstractPenDevice;
 
-/**
-<b>Warning</b>: Don't use this class directly. This class is currently public only to be used by JTablet.
-*/
-@SuppressWarnings("deprecation")
-public class CocoaDevice extends AbstractPenDevice {
+
+class CocoaDevice extends AbstractPenDevice {
 	private final PKind.Type type;
 
 	public CocoaDevice(final CocoaProvider _cocoaProvider, final PKind.Type _type) {
