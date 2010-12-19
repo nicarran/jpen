@@ -22,11 +22,13 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 char *xerror;
 
 int xerrorHandler(Display *pDisplay, XErrorEvent *pEvent) {
+	/*
 	char chBuf[128];
 	XGetErrorText(pDisplay, pEvent->error_code, chBuf, sizeof(chBuf));
 	m_newstr(xerror, "X error: ");
 	m_concat(xerror, chBuf);
 	printf("--- %s (%li)\n", xerror, pEvent->serial);
+	*/
 	return cleanState;
 }
 
