@@ -46,44 +46,44 @@ public abstract class AbstractPenDevice
 		this.provider=provider;
 	}
 
-	//@Override
+	@Override
 	public byte getId(){
 		return id;
 	}
 
-	//@Override
+	@Override
 	public void penManagerSetId(byte id){
 		this.id=id;
 	}
 	
-	//@Override
+	@Override
 	public PenProvider getProvider() {
 		return provider;
 	}
 
-	//@Override
+	@Override
 	public int getKindTypeNumber() {
 		return kindTypeNumber;
 	}
 
-	//@Override
+	@Override
 	public void setKindTypeNumber(int kindTypeNumber) {
 		if(kindTypeNumber<0)
 			throw new IllegalArgumentException("PKind.Type must be >= 0");
 		this.kindTypeNumber=kindTypeNumber;
 	}
 
-	//@Override
+	@Override
 	public boolean getEnabled() {
 		return enabled;
 	}
 
-	//@Override
+	@Override
 	public void setEnabled(boolean enabled) {
 		this.enabled=enabled;
 	}
 
-	//@Override
+	@Override
 	public String getPhysicalId(){
 		String physicalId=this.physicalId;
 		if(physicalId==null)
@@ -107,12 +107,12 @@ public abstract class AbstractPenDevice
 		return getPenManager().pen;
 	}
 	
-	//@Override
+	@Override
 	public boolean getUseFractionalMovements(){
 		return true;
 	}
 	
-	//@Override
+	@Override
 	public void penManagerSetUseFractionalMovements(boolean useFractionalMovement){
 		throw new UnsupportedOperationException();
 	}

@@ -104,6 +104,16 @@ JNIEXPORT void JNICALL Java_jpen_provider_wintab_WintabAccess_setEnabled
 
 /*
  * Class:     jpen_provider_wintab_WintabAccess
+ * Method:    enable
+ * Signature: (IZ)V
+ */
+JNIEXPORT void JNICALL Java_jpen_provider_wintab_WintabAccess_enable
+(JNIEnv *pEnv, jclass class, jint cellIndex, jboolean enable){
+	Access_enable(Access_getP(cellIndex), enable==JNI_TRUE);
+}
+
+/*
+ * Class:     jpen_provider_wintab_WintabAccess
  * Method:    getLevelRange
  * Signature: (II)[I
  */

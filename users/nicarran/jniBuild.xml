@@ -7,10 +7,12 @@
 		<!--list of classes with native methods -->
 		<property name="module.jniClasses" value="jpen.cFramework.TestType, jpen.provider.xinput.XiBus, jpen.provider.xinput.XiDevice, jpen.provider.wintab.WintabAccess "/>
 		<property name="module.linuxGccExtraLib" value="-lXi"/>
+		<property name="module.jniLibNamePrefix" value="${module.id}-${module.version}"/>
+		<property name="linux_jniHeadersPath" value="/opt/sun-jdk-1.6.0.23/include"/>
+		<property name="windows_jniHeadersPath" value="/home/nicarran/aux/distributions/jdk-6_23-windows-include"/>
+		
 		<property name="module.windowsGccExtraLib" value="-Llib -lWintab32 "/>
 		<property name="module.windowsGccExtraLib-64" value="-Llib-64 -lWintab64"/>
-		<property name="module.jniLibNamePrefix" value="${module.id}-${module.version}"/>
-		<property name="jniHeadersPath" value="/opt/sun-jdk-1.5.0.22/include"/>
 		
 		<property name="module.linuxJniLibName" value="${module.jniLibNamePrefix}-${jpen.provider.xinput.nativeVersion}"/>
 		<property name="module.winJniLibName" value="${module.jniLibNamePrefix}-${jpen.provider.wintab.nativeVersion}"/>
@@ -82,10 +84,12 @@
 		</pathconvert>
 		<echo>sources: ${_sources}</echo>
 				<!--<exec dir="src/main/c" executable="gcc" failonerror="true">-->
-		<exec dir="src/main/c/linux" executable="gcc" failonerror="true">
+		<exec dir="src/main/c/linux" executable="x86_64-pc-linux-gnu-gcc" failonerror="true">
 			<arg value="-Wall"/>
 			<arg value="-fpic"/>
 			<arg value="-shared"/>
+			<arg value="-I${linux_jniHeadersPath}"/>
+			<arg value="-I${linux_jniHeadersPath}/linux"/>
 			<arg value="-m32"/>
 						<!--<arg value="-nostdinc"/>-->
 			<arg value="-o"/>
@@ -111,8 +115,8 @@
 			<arg value="-Wall"/>
 			<arg value="-fpic"/>
 			<arg value="-shared"/>
-			<arg value="-I${jniHeadersPath}"/>
-			<arg value="-I${jniHeadersPath}/linux"/>
+			<arg value="-I${linux_jniHeadersPath}"/>
+			<arg value="-I${linux_jniHeadersPath}/linux"/>
 			<arg value="-I/usr/include"/>
 			<arg value="-o"/>
 			<arg value="lib${module.linuxJniLibName}-x86_64.so"/>
@@ -122,33 +126,7 @@
 		<move todir="product" file="src/main/c/linux/lib${module.linuxJniLibName}-x86_64.so"/>
 	</target>
 	
-	<target name="libLinux-ia64" depends="init">
-		<pathconvert pathsep=" " dirsep="/" property="_sources">
-			<path>
-				<fileset dir="src/main/c/linux" includes="*.c"/>
-								<!--<fileset dir="src/main/c" includes="linux/*.c, all/*.c"/>-->
-			</path>
-						<!--<mapper type="flatten"/>-->
-			<map from="${basedir}/src/main/c/linux/" to=""/>
-		</pathconvert>
-		<echo>sources: ${_sources}</echo>
-				<!--<exec dir="src/main/c" executable="gcc" failonerror="true">-->
-		<exec dir="src/main/c/linux" executable="ia64-unknown-linux-gnu-gcc" failonerror="true">
-			<arg value="-Wall"/>
-			<arg value="-fpic"/>
-			<arg value="-shared"/>
-			<arg value="-I${jniHeadersPath}"/>
-			<arg value="-I${jniHeadersPath}/linux"/>
-			<arg value="-I/usr/include"/>
-			<arg value="-o"/>
-			<arg value="lib${module.linuxJniLibName}-ia64.so"/>
-						<!--<arg line="${module.linuxGccExtraLib}"/> underlinked :( -->
-			<arg line="${_sources}"/>
-		</exec>
-		<move todir="product" file="src/main/c/linux/lib${module.linuxJniLibName}-ia64.so"/>
-	</target>
-	
-	<target name="libLinux" depends="libLinux-x86, libLinux-x86_64, libLinux-ia64"></target>
+	<target name="libLinux" depends="libLinux-x86, libLinux-x86_64"></target>
 	
 	<target name="libWin-32" depends="init">
 		<pathconvert pathsep=" " dirsep="/" property="_wsources">
@@ -158,14 +136,23 @@
 			<mapper type="flatten"/>
 		</pathconvert>
 		<echo>sources: ${_wsources}</echo>
-		<exec dir="src/main/c/windows" executable="wine" failonerror="true">
-			<arg value="c:\\mingw\\bin\\gcc"/>
+		<exec dir="src/main/c/windows" executable="echo" failonerror="true">
+			<arg value="i684-w64-mingw32-gcc"/>
+			<arg value="-m32"/>
 			<arg value="-Wall"/>
 			<arg value="-c"/>
-			<arg value="-mrtd"/>
 			<arg value="-D_JNI_IMPLEMENTATION"/>
-			<arg value="-Ic:/javaSdk/include"/>
-			<arg value="-Ic:/javaSdk/include/win32"/>
+			<arg value="-I${windows_jniHeadersPath}"/>
+			<arg value="-I${windows_jniHeadersPath}/win32"/>
+			<arg line="${_wsources}"/>
+		</exec>
+		<exec dir="src/main/c/windows" executable="i686-w64-mingw32-gcc" failonerror="true">
+			<arg value="-Wall"/>
+			<arg value="-m32"/>
+			<arg value="-c"/>
+			<arg value="-D_JNI_IMPLEMENTATION"/>
+			<arg value="-I${windows_jniHeadersPath}"/>
+			<arg value="-I${windows_jniHeadersPath}/win32"/>
 			<arg line="${_wsources}"/>
 		</exec>
 		
@@ -176,10 +163,21 @@
 			<mapper type="flatten"/>
 		</pathconvert>
 		<echo>objects: ${_wobjects}</echo>
-		<exec dir="src/main/c/windows" executable="wine" failonerror="true">
-			<arg value="c:\\mingw\\bin\\gcc"/>
+		<exec dir="src/main/c/windows" executable="echo" failonerror="true">
+			<arg value="i686-w64-mingw32-gcc"/>
+			<arg value="-Wall"/>
+			<arg value="-m32"/>
+			<arg value="-Wl,--kill-at"/>
+			<arg value="-shared"/>
+			<arg value="-o"/>
+			<arg value="${module.winJniLibName}.dll"/>
+			<arg line="${_wobjects}"/>
+			<arg line="${module.windowsGccExtraLib}"/>
+		</exec>
+		<exec dir="src/main/c/windows" executable="i686-w64-mingw32-gcc" failonerror="true">
 			<arg value="-Wall"/>
 			<arg value="-Wl,--kill-at"/>
+			<arg value="-m32"/>
 			<arg value="-shared"/>
 			<arg value="-o"/>
 			<arg value="${module.winJniLibName}.dll"/>
@@ -191,7 +189,7 @@
 		</delete>
 		<move todir="product" file="src/main/c/windows/${module.winJniLibName}.dll"/>
 	</target>
-	
+		
 	<target name="libWin-64" depends="init">
 		<pathconvert pathsep=" " dirsep="/" property="_wsources">
 			<path>
@@ -201,21 +199,20 @@
 		</pathconvert>
 		<echo>sources: ${_wsources}</echo>
 		<exec dir="src/main/c/windows" executable="echo" failonerror="true">
-			<arg value="c:\\mingww64\\bin\\x86_64-pc-mingw32-gcc"/>
+			<arg value="x86_64-w64-mingw32-gcc"/>
 			<arg value="-Wall"/>
 			<arg value="-c"/>
 			<arg value="-D_JNI_IMPLEMENTATION"/>
-			<arg value="-Ic:/javaSdk/include"/>
-			<arg value="-Ic:/javaSdk/include/win32"/>
+			<arg value="-I${windows_jniHeadersPath}"/>
+			<arg value="-I${windows_jniHeadersPath}/win32"/>
 			<arg line="${_wsources}"/>
 		</exec>
-		<exec dir="src/main/c/windows" executable="wine" failonerror="true">
-			<arg value="c:\\mingww64\\bin\\x86_64-pc-mingw32-gcc"/>
+		<exec dir="src/main/c/windows" executable="x86_64-w64-mingw32-gcc" failonerror="true">
 			<arg value="-Wall"/>
 			<arg value="-c"/>
 			<arg value="-D_JNI_IMPLEMENTATION"/>
-			<arg value="-Ic:/javaSdk/include"/>
-			<arg value="-Ic:/javaSdk/include/win32"/>
+			<arg value="-I${windows_jniHeadersPath}"/>
+			<arg value="-I${windows_jniHeadersPath}/win32"/>
 			<arg line="${_wsources}"/>
 		</exec>
 		
@@ -227,7 +224,7 @@
 		</pathconvert>
 		<echo>objects: ${_wobjects}</echo>
 		<exec dir="src/main/c/windows" executable="echo" failonerror="true">
-			<arg value="c:\\mingww64\\bin\\x86_64-pc-mingw32-gcc"/>
+			<arg value="x86_64-w64-mingw32-gcc"/>
 			<arg value="-Wall"/>
 			<arg value="-Wl,--kill-at"/>
 			<arg value="-shared"/>
@@ -236,8 +233,7 @@
 			<arg line="${_wobjects}"/>
 			<arg line="${module.windowsGccExtraLib-64}"/>
 		</exec>
-		<exec dir="src/main/c/windows" executable="wine" failonerror="true">
-			<arg value="c:\\mingww64\\bin\\x86_64-pc-mingw32-gcc"/>
+		<exec dir="src/main/c/windows" executable="x86_64-w64-mingw32-gcc" failonerror="true">
 			<arg value="-Wall"/>
 			<arg value="-Wl,--kill-at"/>
 			<arg value="-shared"/>

@@ -109,7 +109,7 @@ final class XinputDevice extends AbstractPenDevice {
 		return isListening;
 	}
 
-	//@Override
+	@Override
 	public synchronized void setEnabled(boolean enabled){
 		if(getEnabled()==enabled)
 			return;
@@ -125,7 +125,7 @@ final class XinputDevice extends AbstractPenDevice {
 	}
 
 
-	//@Override
+	@Override
 	public synchronized String getName() {
 		xiDevice.stopWaitingNextEvent();
 		return xiDevice.getName();

@@ -29,7 +29,7 @@ class MainPanel{
 	
 	MainPanel(PenCanvas penCanvas){
 		penCanvas.scrollPane.setBorder(BorderFactory.createTitledBorder("Pen Enabled Component"));
-		panel.add(Utils.alignTopLeft(penCanvas.scrollPane));
+		panel.add(penCanvas.scrollPane);
 		
 		StatePanel statePanel=new StatePanel(penCanvas.penManager);
 		tabbedPane.addTab("Pen", statePanel.panel);
@@ -38,6 +38,8 @@ class MainPanel{
 		//devicesPanel.panel.setBorder(BorderFactory.createTitledBorder("Devices"));
 		tabbedPane.addTab("Input Devices", devicesPanel.panel);
 		
-		panel.add(Utils.alignTopLeft(tabbedPane));
+		tabbedPane.setMaximumSize(tabbedPane.getPreferredSize());
+		
+		panel.add(tabbedPane);
 	}
 }

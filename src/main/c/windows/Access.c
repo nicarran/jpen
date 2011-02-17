@@ -59,26 +59,26 @@ int Access_preCreate(SAccess *pAccess) {
 	pAccess->lc.lcPktMode = PACKETMODE;
 
 
-//	int i=0;
-//	UINT wScanTag = 0;
-//	for (i = 0; WTInfo(WTI_EXTENSIONS + i, EXT_TAG, &wScanTag); i++) {
-//		TCHAR name[128];
-//		WTInfo(WTI_EXTENSIONS + i, EXT_NAME, name);
-//		printf("extension %2i: %s (tag=%i)\n", i,name,wScanTag);
-//	}
-//	int tiltExtension = ScanExts(WTX_TILT);
-//
-//	if (tiltExtension >= 0) {
-//		UINT tiltMask = 0;
-//		if (WTInfo(WTI_EXTENSIONS + tiltMask, EXT_MASK, &tiltMask)) {
-//			pAccess->lc.lcPktData |= tiltMask;
-//			printf("tilt mask = %d\n", tiltMask);
-//		} else {
-//			printf("no tilt mask :(\n");
-//		}
-//	} else {
-//		printf("no tilt :(\n");
-//	}
+	//	int i=0;
+	//	UINT wScanTag = 0;
+	//	for (i = 0; WTInfo(WTI_EXTENSIONS + i, EXT_TAG, &wScanTag); i++) {
+	//		TCHAR name[128];
+	//		WTInfo(WTI_EXTENSIONS + i, EXT_NAME, name);
+	//		printf("extension %2i: %s (tag=%i)\n", i,name,wScanTag);
+	//	}
+	//	int tiltExtension = ScanExts(WTX_TILT);
+	//
+	//	if (tiltExtension >= 0) {
+	//		UINT tiltMask = 0;
+	//		if (WTInfo(WTI_EXTENSIONS + tiltMask, EXT_MASK, &tiltMask)) {
+	//			pAccess->lc.lcPktData |= tiltMask;
+	//			printf("tilt mask = %d\n", tiltMask);
+	//		} else {
+	//			printf("no tilt mask :(\n");
+	//		}
+	//	} else {
+	//		printf("no tilt :(\n");
+	//	}
 
 	pAccess->lc.lcMoveMask = PACKETDATA;// use lcPktData?
 	pAccess->lc.lcBtnUpMask = pAccess->lc.lcBtnDnMask;
@@ -94,7 +94,7 @@ int Access_preCreate(SAccess *pAccess) {
 		Access_setError("Assertion failed... pointer to access is not clean.");
 		return errorState;
 	}
-	
+
 	// Set up wintab queue size:
 	int wintabQueueSize=QUEUE_SIZE;
 	int wintabQueueSizeSetted=0;
@@ -157,15 +157,15 @@ void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange) {
 			if(WTInfo(WTI_DEVICES+pAccess->device, DVC_ORIENTATION, &axises)){
 				int axis = 0;
 				switch (valuator) {
-					case E_Valuators_orAzimuth:
-						axis=0;
-						break;
-					case E_Valuators_orAltitude:
-						axis=1;
-						break;
-					case E_Valuators_twist:
-						axis=2;
-						break;
+				case E_Valuators_orAzimuth:
+					axis=0;
+					break;
+				case E_Valuators_orAltitude:
+					axis=1;
+					break;
+				case E_Valuators_twist:
+					axis=2;
+					break;
 				}
 				pRange[0]=axises[axis].axMin;
 				pRange[1]=axises[axis].axMax;
@@ -214,12 +214,19 @@ static int Access_refreshLc(SAccess *pAccess){
 void Access_setEnabled(SAccess *pAccess, int enabled) {
 	if(enabled==Access_getEnabled(pAccess))
 		return;
-	WTEnable(pAccess->ctx, enabled);
-	// flush queue:
+	Access_enable(pAccess, enabled);
+}
+
+static void Access_flushQueue(SAccess *pAccess){
 	while(WTPacketsGet(pAccess->ctx, 10, NULL))
 		;
 	pAccess->queueSize=pAccess->queueConsumableIndex=0;
-	WTOverlap(pAccess->ctx, enabled);
+}
+
+void Access_enable(SAccess *pAccess, int enable) {
+	WTEnable(pAccess->ctx, enable);
+	Access_flushQueue(pAccess);
+	WTOverlap(pAccess->ctx, enable);
 }
 
 int Access_preDestroy(SAccess *pAccess) {

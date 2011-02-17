@@ -1,1 +1,1 @@
-wine c:\\mingww64\\bin\\x86_64-pc-mingw32-dlltool -d Wintab64.def -l libWintab64.a
+x86_64-w64-mingw32-dlltool -d Wintab64.def -l libWintab64.a

@@ -26,13 +26,13 @@ class AbsoluteOnARowRule
 	private int missedPoints;
 	int rowCount;
 
-	//@Override
+	@Override
 	public void reset(){
 		missedPoints=-1;
 		rowCount=0;
 	}
 
-	//@Override
+	@Override
 	public RelativeLocationFilter.State evalFilterNextState(RelativeLocationFilter filter){
 		missedPoints++;
 		if(!filter.samplePoint.isComplete)

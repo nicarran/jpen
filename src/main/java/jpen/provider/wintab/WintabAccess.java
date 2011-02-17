@@ -131,7 +131,15 @@ final class WintabAccess {
 	}
 
 	private static native void setEnabled(int cellIndex, boolean enabled);
+	
+	public void enable(boolean enable) {
+		synchronized(LOCK){
+			enable(cellIndex, enable);
+		}
+	}
 
+	private static native void enable(int cellIndex, boolean enable);
+	
 	public Range getLevelRange(PLevel.Type levelType) {
 		int[] minMax = getLevelRange(getLevelTypeValueIndex(levelType));
 

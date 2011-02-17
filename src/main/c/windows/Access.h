@@ -84,6 +84,7 @@ m_declareRow(Access);
 extern int Access_nextPacket(SAccess *pAccess);
 extern int Access_getEnabled(SAccess *pAccess);
 extern void Access_setEnabled(SAccess *pAccess, int enabled);
+extern void Access_enable(SAccess *pAccess, int enable);
 extern void Access_getValuatorRange(SAccess *pAccess, int valuator, jint *pRange);
 extern int Access_getCsrType(int cursor);
 extern void Access_setSystemCursorEnabled(SAccess *pAccess, int enabled);

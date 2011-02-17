@@ -27,12 +27,12 @@ final class EmulationProvider
 
 	final static class Constructor
 		extends AbstractConstructor{
-		//@Override
+		@Override
 		public String getName(){
 			return "JPen";
 		}
 
-		//@Override
+		@Override
 		public boolean constructable(PenManager pm){
 			return true;
 		}
@@ -63,7 +63,7 @@ final class EmulationProvider
 			throw new UnsupportedOperationException("the enabled state can not be changed on the Emulation device");
 		}
 
-		//@Override
+		@Override
 		public String getName(){
 			return "Emulation";
 		}
@@ -73,6 +73,6 @@ final class EmulationProvider
 		}
 	}
 
-	//@Override
+	@Override
 	public void penManagerPaused(boolean paused){}
 }

@@ -81,7 +81,7 @@ public class Pen extends PenState {
 			setDaemon(true);
 		}
 		private final Runnable penTockFirer=new Runnable(){
-					//@Override
+					@Override
 					public void run(){
 						//System.out.println("firing tocks "+System.currentTimeMillis());
 						for(PenListener l:getListenersArray()){

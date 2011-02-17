@@ -179,41 +179,41 @@ class DevicesTableModel
 			kindTypeNumberCombo.setMaxPKindTypeNumber(devicesMax);
 	}
 
-	//@Override
+	@Override
 	public void 	penDeviceAdded(PenProvider.Constructor providerConstructor, PenDevice penDevice){
 		updateDevices();
 	}
 
-	//@Override
+	@Override
 	public void 	penDeviceRemoved(PenProvider.Constructor providerConstructor, PenDevice penDevice){
 		updateDevices();
 	}
 
-	//@Override
+	@Override
 	public int getRowCount(){
 		return devices.size();
 	}
-	//@Override
+	@Override
 	public int getColumnCount(){
 		return columns.length;
 	}
-	//@Override
+	@Override
 	public Object getValueAt(int row, int column){
 		return columns[column].getValueAt(row);
 	}
-	// @Override
+	@Override
 	public String getColumnName(int col){
 		return columns[col].name;
 	}
-	// @Override
+	@Override
 	public Class<?> getColumnClass(int col){
 		return columns[col].clazz;
 	}
-	// @Override
+	@Override
 	public boolean isCellEditable(int row, int col){
 		return columns[col].isCellEditable;
 	}
-	// @Override
+	@Override
 	public void 	setValueAt(Object aValue, int row, int col){
 		columns[col].setValueAt(aValue, row);
 	}

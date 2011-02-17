@@ -54,10 +54,9 @@ class PenCanvas
 	private static final Logger L=Logger.getLogger(PenCanvas.class.getName());
 	//static {L.setLevel(Level.ALL);}
 
-	private static final Dimension SIZE=new Dimension(1000,1000);
-	private static final Color BACKGROUND_COLOR=new Color(247, 217, 186); // yellish
-	private static final float CURSOR_DIAM=2;
-	private static final float STROKE_RAD=25f;
+	private static final Dimension SIZE=new Dimension(1900,1900);
+	private static final Color BACKGROUND_COLOR=new Color(247, 217, 186); // pink yellow
+	private static final float STROKE_RAD=20f;
 	private static final Dimension PREF_SCROLLPANE_SIZE=new Dimension(230,230);
 
 	final PenManager penManager;
@@ -160,7 +159,7 @@ class PenCanvas
 			return;
 		}
 
-		pressure*=pressure; // parabolic sensitivity
+		//pressure*=pressure; // parabolic sensitivity
 		float r=pressure*STROKE_RAD;
 		PKind.Type kindType=penManager.pen.getKind().getType();
 		switch(kindType) {

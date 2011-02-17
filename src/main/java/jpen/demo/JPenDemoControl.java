@@ -18,18 +18,23 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.demo;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.logging.Logger;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import jpen.demo.inspect.Inspector;
@@ -43,7 +48,7 @@ import jpen.PLevelEmulator;
 public class JPenDemoControl{
 	private static final Logger L=Logger.getLogger(JPenDemoControl.class.getName());
 	//static{L.setLevel(Level.ALL);}
-	
+
 	//private static final Dimension SIZE=new Dimension(400, 400);
 
 	final PenCanvas penCanvas;
@@ -57,7 +62,7 @@ public class JPenDemoControl{
 		setSupportCustomPKinds(true);
 
 		statusReportButton.addActionListener(new ActionListener(){
-					//@Override
+					@Override
 					public void actionPerformed(ActionEvent ev){
 						StatusReportPanel statusReportPanel=new StatusReportPanel(
 									new StatusReport(penCanvas.penManager));
@@ -65,13 +70,6 @@ public class JPenDemoControl{
 						JOptionPane.showMessageDialog(mainPanel.panel, statusReportPanel.panel, "JPen Status Report", JOptionPane.INFORMATION_MESSAGE);
 					}
 				});
-
-		/*JFrame f=new JFrame("JPen Demo");
-		f.getContentPane().add(mainPanel.panel);
-		f.setSize(new Dimension(450, 480));
-		f.setResizable(false);
-		f.setVisible(true);
-		f.setDefaultCloseOperation(f.EXIT_ON_CLOSE);*/
 	}
 
 	public void setSupportCustomPKinds(boolean supportCustomPKinds){
@@ -87,20 +85,11 @@ public class JPenDemoControl{
 		return statusReportButton;
 	}
 
-	public void showDialog(JComponent parent, String title){
-		String closeOption="Close";
-		Object[] options=new Object[]{statusReportButton, closeOption};
-		JOptionPane.showOptionDialog(null, getMainPanelComponent(), title,
-				JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
-				null, options, closeOption);
-	}
-
 	public static void main(String... args) throws IOException, NumberFormatException{
 		setupLookAndFeel();
 		JPenDemoControl jpenDemoControl=new JPenDemoControl();
 		startInspector(jpenDemoControl.penCanvas.penManager);
-		jpenDemoControl.showDialog(null, "JPen Demo");
-		System.exit(0);
+		jpenDemoControl.showFrame();
 	}
 
 	static void setupLookAndFeel(){
@@ -121,5 +110,31 @@ public class JPenDemoControl{
 			Inspector inspector=new Inspector(penManager, "jpen", inspectorPeriod);
 			L.info("inspector constructed");
 		}
+	}
+
+	void showFrame(){
+		JFrame f=new JFrame("JPen Demo");
+		JPanel framePanel=new JPanel(new BorderLayout(4, 4));
+		framePanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 5, 5));
+		f.setContentPane(framePanel);
+		framePanel.add(mainPanel.panel);
+		Box buttonBox=Box.createHorizontalBox();
+		buttonBox.add(Box.createHorizontalGlue());
+		buttonBox.add(statusReportButton);
+		framePanel.add(buttonBox, BorderLayout.SOUTH);
+
+		f.pack();
+		f.setLocationByPlatform(true);
+		f.setVisible(true);
+		f.setDefaultCloseOperation(f.EXIT_ON_CLOSE);
+	}
+
+	@Deprecated
+	public void showDialog(JComponent parent, String title){
+		String closeOption="Close";
+		Object[] options=new Object[]{statusReportButton, closeOption};
+		JOptionPane.showOptionDialog(null, getMainPanelComponent(), title,
+				JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
+				null, options, closeOption);
 	}
 }

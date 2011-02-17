@@ -85,7 +85,7 @@ public final class AwtPenOwner
 			enabled=false;
 		}
 
-		//@Override
+		@Override
 		public void mouseMoved(MouseEvent ev){
 			unpause();
 		}
@@ -102,7 +102,7 @@ public final class AwtPenOwner
 			}
 		}
 
-		//@Override
+		@Override
 		public void mouseDragged(MouseEvent ev){
 		}
 	}
@@ -121,7 +121,7 @@ public final class AwtPenOwner
 			this.enabled=enabled;
 		}
 
-		//@Override
+		@Override
 		public void activeWindowChanged(Window activeWindow){
 			if(!enabled)
 				return;
@@ -156,7 +156,7 @@ public final class AwtPenOwner
 		this.penClipOnComponent=new PenClipOnComponent(component);
 	}
 
-	//@Override
+	@Override
 	public Collection<PenProvider.Constructor> getPenProviderConstructors(){
 		return Arrays.asList(
 						 new PenProvider.Constructor[]{
@@ -175,7 +175,7 @@ public final class AwtPenOwner
 		penManagerHandle.setPenManagerPaused(true);
 	}
 
-	//@Override
+	@Override
 	public PenClip getPenClip(){
 		return penClipOnComponent;
 	}

@@ -36,7 +36,7 @@ public abstract class AbstractPenProvider
 		this.constructor=constructor;
 	}
 
-	//@Override
+	@Override
 	public Collection<PenDevice> getDevices() {
 		return devicesA;
 	}
@@ -45,17 +45,17 @@ public abstract class AbstractPenProvider
 		return getConstructor().getPenManager();
 	}
 
-	//@Override
+	@Override
 	public final Constructor getConstructor() {
 		return constructor;
 	}
 	
-	//@Override
+	@Override
 	public boolean getUseRelativeLocationFilter(){
 		return false;
 	}
 
-	//@Override
+	@Override
 	public String toString() {
 		return "[PenProvider: constructor.name="+getConstructor().getName()+"]";
 	}
@@ -66,22 +66,22 @@ public abstract class AbstractPenProvider
 		private PenProvider constructed;
 		private ConstructionException constructionException;
 
-		//@Override
+		@Override
 		public PenManager getPenManager(){
 			return penManager;
 		}
 
-		//@Override
+		@Override
 		public ConstructionException getConstructionException(){
 			return constructionException;
 		}
 
-		//@Override
+		@Override
 		public PenProvider getConstructed(){
 			return constructed;
 		}
 
-		//@Override
+		@Override
 		public final boolean construct(PenManager penManager){
 			if(this.penManager!=null)
 				throw new IllegalStateException("constructor already used by PenManager");
@@ -97,15 +97,15 @@ public abstract class AbstractPenProvider
 		
 		protected abstract PenProvider constructProvider() throws Throwable;
 		
-		//@Override
+		@Override
 		public int getNativeVersion(){
 			return -1;
 		}
-		//@Override
+		@Override
 		public int getNativeBuild(){
 			return -1;
 		}
-		//@Override
+		@Override
 		public int getExpectedNativeBuild(){
 			return -1;
 		}

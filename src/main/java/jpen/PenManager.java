@@ -70,15 +70,15 @@ public final class PenManager {
 			for(PenProvider.Constructor penProviderConstructor: penOwner.getPenProviderConstructors())
 				addProvider(penProviderConstructor);
 			penOwner.setPenManagerHandle(new PenOwner.PenManagerHandle(){
-						//@Override
+						@Override
 						public final PenManager getPenManager(){
 							return PenManager.this;
 						}
-						//@Override
+						@Override
 						public final Object getPenSchedulerLock(){
 							return pen.scheduler;
 						}
-						//@Override
+						@Override
 						public final void setPenManagerPaused(boolean paused){
 							PenManager.this.setPaused(paused);
 						}

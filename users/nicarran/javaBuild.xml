@@ -7,7 +7,7 @@
 		
 		<property name="module.distDir" value="product/distributions/${module.distVersion}"/>
 		
-		<property name="module.repositoryDir" value="/home/nicarran/archive/boxes/ant/project/repository"/>
+		<property name="module.repositoryDir" value="/home/nicarran/boxes/ant/project/repository"/>
 	
 		<property name="doc.appName" value="${module.artifactId}"/>
 		<script language="javascript"><![CDATA[
@@ -24,7 +24,7 @@
 		<property name="copyright.licenseName" value="GNU General Public License"/>
 		<property name="copyright.licenseAbrevName" value="GNU GPL" />
 		<property name="copyright.licenseVersion" value="3" />
-		<property name="copyright.licensesDir" value="/home/nicarran/archive/boxes/ant/project/licenses/GPL"/>
+		<property name="copyright.licensesDir" value="/home/nicarran/boxes/ant/project/licenses/GPL"/>
 		<tstamp>
 			<format property="copyright.years" pattern="yyyy"/>
 		</tstamp>
@@ -82,7 +82,7 @@
 			</or>
 		</condition>
 	
-		<copy file="/home/nicarran/archive/boxes/ant/project/logging.properties" todir="."/>
+		<copy file="/home/nicarran/boxes/ant/project/logging.properties" todir="."/>
 	</target>
 
 	<target name="updateManifest" depends="init" unless="module.is3rdParty">
@@ -261,7 +261,7 @@
 				<fileset dir="deptree/test-deptree/jars" includes="*.jar"/>
 			</classpath>
 			<batchtest>
-				<fileset dir="src/test/java" includes="**/JPenDemo*Test.class" excludes="**/*Tests.class"/>
+				<fileset dir="src/test/java" includes="**/WintabAccessTest.class" excludes="**/*Tests.class"/>
 			</batchtest>
 		</junit>
 	</target>
@@ -282,8 +282,8 @@ file=${_profilerOutputFile}
 		<java classname="${module.profileClass}" fork="yes">
 			<jvmarg value="-verbose:gc"/>
 			<jvmarg value="-Djava.library.path=deptree/main-deptree/jars"/>
-						<!--<jvmarg value="-javaagent:/home/nicarran/archive/boxes/jrat/distribution/shiftone-jrat.jar"/>-->
-			<jvmarg value="-javaagent:/home/nicarran/archive/boxes/jip/distribution/profile/profile.jar"/>
+						<!--<jvmarg value="-javaagent:/home/nicarran/boxes/jrat/distribution/shiftone-jrat.jar"/>-->
+			<jvmarg value="-javaagent:/home/nicarran/boxes/jip/distribution/profile/profile.jar"/>
 						<!--<jvmarg value="-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n"/>-->
 			<jvmarg value="-Dprofile.properties=profile.properties"/>
 			<classpath>
@@ -291,7 +291,7 @@ file=${_profilerOutputFile}
 				<fileset dir="deptree/test-deptree/jars" includes="*.jar"/>
 			</classpath>
 		</java>
-		<java jar="/home/nicarran/archive/boxes/jip/distribution/client/jipViewer.jar" fork="yes">
+		<java jar="/home/nicarran/boxes/jip/distribution/client/jipViewer.jar" fork="yes">
 			<arg value="${_profilerOutputFile}"/>
 		</java>
 	</target>
@@ -377,7 +377,7 @@ java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 	<target name="javadoc" description="Prepares and generates Javadoc" depends="init" unless="disable.javadoc">
 		<delete dir="product/javadoc"/>
 		<mkdir dir="product/javadoc"/>
-		<javadoc WindowTitle="${module.id-fullVer}" DocTitle="${module.commercialId}-${module.version}" destdir="product/javadoc" classpathref="module.depclasspath" linksource="yes" stylesheetfile="/home/nicarran/archive/boxes/latex2html/latex2html.css" bottom="&lt;div class=&quot;bottom&quot;&gt; Copyright &#169; ${copyright.years} &lt;a target=&quot;_blank&quot; href=&quot;${module.url}&quot;&gt;${module.commercialId}&lt;/a&gt;. &lt;/div&gt;">
+		<javadoc WindowTitle="${module.id-fullVer}" DocTitle="${module.commercialId}-${module.version}" destdir="product/javadoc" classpathref="module.depclasspath" linksource="yes" stylesheetfile="/home/nicarran/boxes/latex2html/latex2html.css" bottom="&lt;div class=&quot;bottom&quot;&gt; Copyright &#169; ${copyright.years} &lt;a target=&quot;_blank&quot; href=&quot;${module.url}&quot;&gt;${module.commercialId}&lt;/a&gt;. &lt;/div&gt;">
 		<!--
 		bottom="&lt;div class=&quot;bottom&quot;&gt; Copyright &#169; ${copyright.years} ${module.author} and individual contributors. &lt;a href=&quot;${module.url}&quot;&gt;${module.commercialId}&lt;/a&gt; is licensed under the &lt;a href=&quot;http://www.gnu.org/licenses/lgpl.html&quot;&gt;GNU LGPL&lt;/a&gt;. &lt;/div&gt;"
 		-->
@@ -396,7 +396,7 @@ java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 	<target name="javadocUml" description="Prepares and generates Javadoc" depends="init" unless="disable.javadoc">
 		<delete dir="product/javadoc"/>
 		<mkdir dir="product/javadoc"/>
-		<javadoc WindowTitle="${module.package-ver}" DocTitle="${module.commercialId} (ver.${module.version})" destdir="product/javadoc" classpathref="module.depclasspath" stylesheetfile="/home/nicarran/archive/boxes/latex2html/latex2html.css" bottom="&lt;div class=&quot;bottom&quot;&gt; Copyright &#169; ${copyright.years} &lt;a target=&quot;_blank&quot; href=&quot;${module.url}&quot;&gt;${module.commercialId}&lt;/a&gt;">
+		<javadoc WindowTitle="${module.package-ver}" DocTitle="${module.commercialId} (ver.${module.version})" destdir="product/javadoc" classpathref="module.depclasspath" stylesheetfile="/home/nicarran/boxes/latex2html/latex2html.css" bottom="&lt;div class=&quot;bottom&quot;&gt; Copyright &#169; ${copyright.years} &lt;a target=&quot;_blank&quot; href=&quot;${module.url}&quot;&gt;${module.commercialId}&lt;/a&gt;">
 			<packageset dir="src/main/java"/>
 			<packageset dir="src/aux/java"/>
 			<doclet name="org.umlgraph.doclet.UmlGraphDoc" path="${env.UMLGRAPH_HOME}/UmlGraph.jar">
@@ -499,11 +499,10 @@ along with ${module.commercialId}.  If not, see &lt;http://www.gnu.org/licenses/
 		<zip destfile="${module.distDir}/${module.id-fullVer}-src.zip">
 			<zipfileset dir="src/main/java" prefix="${module.id-fullVer}/src/main/java" includes="**/*.java"/>
 			<zipfileset dir="src/main/resources" prefix="${module.id-fullVer}/src/main/resources" includes="**/*.properties, **/*.java"/>
-			<zipfileset dir="src/main/c" prefix="${module.id-fullVer}/src/main/c" includes="**/*.h, **/*.c, **/*.m"/>
+			<zipfileset dir="src/main/c" prefix="${module.id-fullVer}/src/main/c" includes="**/*.h, **/*.c, **/*.m, **/*.pbxproj"/>
 			<zipfileset dir="src/test/java" prefix="${module.id-fullVer}/src/test/java" includes="**/SmokeTest.java"/>
 			<zipfileset dir="." prefix="${module.id-fullVer}/" includes="pom.xml,module.properties,nativeBuild.properties"/>
 			<zipfileset dir="src/copyright" prefix="${module.id-fullVer}"/>
-			<zipfileset dir="JPen-JNI-MacOSX.xcodeproj" prefix="${module.id-fullVer}/JPen-JNI-MacOSX.xcodeproj" includes="**/*"/>
 		</zip>
 	</target>
 

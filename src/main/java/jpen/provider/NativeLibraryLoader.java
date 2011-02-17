@@ -119,7 +119,7 @@ public class NativeLibraryLoader{
 
 	private static String getJavaVMDataModel(){
 		String dataModel=AccessController.doPrivileged(new PrivilegedAction<String>() {
-			    //@Override
+			    @Override
 			    public String run() {
 				    return System.getProperty("sun.arch.data.model");
 			    }
@@ -129,7 +129,7 @@ public class NativeLibraryLoader{
 
 	private String getPreferredArchitecture(){
 		return AccessController.doPrivileged(new PrivilegedAction<String>(){
-			       //@Override
+			       @Override
 			       public String run(){
 				       String override=System.getProperty("jpen.provider.architecture");
 				       if(override!=null)
@@ -142,7 +142,7 @@ public class NativeLibraryLoader{
 
 	private static void setPreferredArchitecture(final String architecture){
 		AccessController.doPrivileged(new PrivilegedAction<Object>(){
-			    //@Override
+			    @Override
 			    public String run(){
 				    Preferences preferences=Preferences.userNodeForPackage(NativeLibraryLoader.class);
 				    if(architecture==null){
@@ -160,7 +160,7 @@ public class NativeLibraryLoader{
 	public static final void loadLibrary(final String architecture, final int nativeVersion) {
 		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			    final String jniLibName=getJniLibName(architecture, nativeVersion);
-			    //@Override
+			    @Override
 			    public Object run() {
 				    try{
 					    L.info("loading JPen "+PenManager.getJPenFullVersion()+" JNI library: "+jniLibName+" ...");

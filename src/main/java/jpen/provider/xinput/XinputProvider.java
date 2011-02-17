@@ -37,7 +37,7 @@ public final class XinputProvider
 	private static final Logger L=Logger.getLogger(XinputProvider.class.getName());
 
 	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""},
-			new String[]{"x86_64", "ia64"},
+			new String[]{"x86_64"},
 			Integer.valueOf(BuildInfo.getProperties().getString("jpen.provider.xinput.nativeVersion")));
 
 	static void loadLibrary(){
@@ -49,11 +49,11 @@ public final class XinputProvider
 
 	public static class Constructor
 		extends AbstractPenProvider.AbstractConstructor{
-		//@Override
+		@Override
 		public String getName() {
 			return "XInput";
 		}
-		//@Override
+		@Override
 		public boolean constructable(PenManager penManager) {
 			return System.getProperty("os.name").toLowerCase().contains("linux");
 		}
@@ -92,11 +92,6 @@ public final class XinputProvider
 				continue;
 			}
 			XinputDevice xinputDevice=new XinputDevice(this, xiBus2.getXiDevice());
-			if(!xinputDevice.getIsAbsoluteMode() && !xinputDevice.isPad){
-				L.warning("devices using relative positioning mode are not supported, device disabled: "+xinputDevice.getName()+
-									"\n See bug description https://sourceforge.net/tracker/?func=detail&aid=2929548&group_id=209997&atid=1011964");
-				xinputDevice.setEnabled(false);
-			}
 			devices.add(xinputDevice);
 		}
 
@@ -117,7 +112,7 @@ public final class XinputProvider
 			xinputDevices[i].setIsListening(!paused);
 	}
 
-	//@Override
+	@Override
 	public void penManagerPaused(boolean paused) {
 		pauseXinputDevices(paused);
 		if(!paused){

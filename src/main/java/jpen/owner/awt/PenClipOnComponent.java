@@ -32,13 +32,13 @@ final class PenClipOnComponent
 		this.component=component;
 	}
 
-	//@Override
+	@Override
 	public void evalLocationOnScreen(Point pointOnScreen){
 		pointOnScreen.x=pointOnScreen.y=0;
 		SwingUtilities.convertPointToScreen(pointOnScreen, component);
 	}
 
-	//@Override
+	@Override
 	public boolean contains(Point2D.Float point){
 		if(point.x<0 || point.y<0 ||
 			 point.x>component.getWidth() ||

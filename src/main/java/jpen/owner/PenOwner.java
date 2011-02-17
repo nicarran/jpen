@@ -47,7 +47,7 @@ public interface PenOwner{
 		*/
 		Object getPenSchedulerLock();
 		/**
-		Unpause/pause the {@link PenManager}'s {@link PenProvider}s from the scheduling of {@link jpen.PenEvent}s.
+		Unpause/pause the scheduling of {@link jpen.PenEvent}s done by the {@link PenManager}'s {@link PenProvider}s.
 		*/
 		void setPenManagerPaused(boolean paused);
 	}

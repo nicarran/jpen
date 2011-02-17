@@ -29,13 +29,13 @@ class RelativeOnSlopesRule
 	private int positiveSlopes;
 	private final Point2D.Float previousAbsDeviation=new Point2D.Float();
 
-	//@Override
+	@Override
 	public void reset(){
 		missedPoints=-1;
 		positiveSlopes=-1;
 	}
 
-	//@Override
+	@Override
 	public RelativeLocationFilter.State evalFilterNextState(RelativeLocationFilter filter){
 		missedPoints++;
 		if(!filter.samplePoint.isComplete)

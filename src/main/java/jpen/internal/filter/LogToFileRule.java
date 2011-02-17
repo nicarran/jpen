@@ -52,7 +52,7 @@ final class LogToFileRule
 		}
 	}
 
-	//@Override
+	@Override
 	public void reset(){
 		if(records==null){
 			logFileStamp++;
@@ -61,7 +61,7 @@ final class LogToFileRule
 			records.clear();
 	}
 
-	//@Override
+	@Override
 	public RelativeLocationFilter.State evalFilterNextState(RelativeLocationFilter filter){
 		if(records==null)
 			return null;

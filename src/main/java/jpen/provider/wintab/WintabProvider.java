@@ -54,16 +54,16 @@ public class WintabProvider
 
 	public static class Constructor
 		extends AbstractPenProvider.AbstractConstructor{
-		//@Override
+		@Override
 		public String getName() {
 			return "Wintab";
 		}
-		//@Override
+		@Override
 		public boolean constructable(PenManager penManager) {
 			return System.getProperty("os.name").toLowerCase().contains("windows");
 		}
 
-		//@Override
+		@Override
 		public PenProvider constructProvider() throws Throwable {
 			loadLibrary();
 			WintabAccess wintabAccess=new WintabAccess();
@@ -150,7 +150,7 @@ public class WintabProvider
 		return wintabDevice;
 	}
 
-	//@Override
+	@Override
 	public void penManagerPaused(boolean paused) {
 		setPaused(paused);
 	}
@@ -172,8 +172,8 @@ public class WintabProvider
 				thread.notifyAll();
 				L.fine("done notifying ");
 			}
+			wintabAccess.enable(true);
 		}
-		wintabAccess.setEnabled(!paused); // this clears the queue
 		L.fine("end");
 	}
 	
