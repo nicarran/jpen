@@ -261,7 +261,7 @@
 				<fileset dir="deptree/test-deptree/jars" includes="*.jar"/>
 			</classpath>
 			<batchtest>
-				<fileset dir="src/test/java" includes="**/WintabAccessTest.class" excludes="**/*Tests.class"/>
+				<fileset dir="src/test/java" includes="**/MultiComponentTest.class" excludes="**/*Tests.class"/>
 			</batchtest>
 		</junit>
 	</target>

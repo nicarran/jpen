@@ -35,11 +35,11 @@ public final class SystemProvider
 	public static class Constructor
 		extends AbstractPenProvider.AbstractConstructor {
 		public static final String NAME="System";
-		@Override
+		//@Override
 		public String getName() {
 			return NAME;
 		}
-		@Override
+		//@Override
 		public boolean constructable(PenManager penManager) {
 			return penManager.penOwner instanceof AwtPenOwner;
 		}
@@ -60,7 +60,7 @@ public final class SystemProvider
 		devices.add(keyboardDevice);
 	}
 
-	@Override
+	//@Override
 	public void penManagerPaused(boolean paused) {
 		keyboardDevice.setPaused(paused);
 	}

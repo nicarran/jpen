@@ -63,17 +63,17 @@ public final class MouseDevice
 				}
 			};
 	private final MouseMotionListener mouseMotionL=new MouseMotionListener(){
-				@Override
+				//@Override
 				public void mouseMoved(MouseEvent ev) {
 					scheduleMove(ev);
 				}
-				@Override
+				//@Override
 				public void mouseDragged(MouseEvent ev) {
 					scheduleMove(ev);
 				}
 			};
 	private final MouseWheelListener mouseWheelL=new MouseWheelListener(){
-				@Override
+				//@Override
 				public void mouseWheelMoved(MouseWheelEvent ev) {
 					int value=ev.getWheelRotation();
 					PScroll.Type type=PScroll.Type.DOWN;
@@ -96,7 +96,7 @@ public final class MouseDevice
 		setEnabled(true);
 	}
 
-	@Override
+	//@Override
 	public String getName() {
 		return "Mouse";
 	}

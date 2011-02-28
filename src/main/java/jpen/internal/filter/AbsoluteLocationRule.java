@@ -28,12 +28,12 @@ class AbsoluteLocationRule
 
 	private int missedPoints;
 
-	@Override
+	//@Override
 	public void reset(){
 		missedPoints=-1;
 	}
 
-	@Override
+	//@Override
 	public RelativeLocationFilter.State evalFilterNextState(RelativeLocationFilter filter){
 		missedPoints++;
 		if(!filter.samplePoint.isComplete)

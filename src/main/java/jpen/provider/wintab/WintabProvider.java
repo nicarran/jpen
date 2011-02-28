@@ -54,11 +54,11 @@ public class WintabProvider
 
 	public static class Constructor
 		extends AbstractPenProvider.AbstractConstructor{
-		@Override
+		//@Override
 		public String getName() {
 			return "Wintab";
 		}
-		@Override
+		//@Override
 		public boolean constructable(PenManager penManager) {
 			return System.getProperty("os.name").toLowerCase().contains("windows");
 		}
@@ -150,7 +150,7 @@ public class WintabProvider
 		return wintabDevice;
 	}
 
-	@Override
+	//@Override
 	public void penManagerPaused(boolean paused) {
 		setPaused(paused);
 	}

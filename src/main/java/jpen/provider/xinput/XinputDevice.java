@@ -125,7 +125,7 @@ final class XinputDevice extends AbstractPenDevice {
 	}
 
 
-	@Override
+	//@Override
 	public synchronized String getName() {
 		xiDevice.stopWaitingNextEvent();
 		return xiDevice.getName();

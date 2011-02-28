@@ -8,7 +8,7 @@
 		<property name="module.jniClasses" value="jpen.cFramework.TestType, jpen.provider.xinput.XiBus, jpen.provider.xinput.XiDevice, jpen.provider.wintab.WintabAccess "/>
 		<property name="module.linuxGccExtraLib" value="-lXi"/>
 		<property name="module.jniLibNamePrefix" value="${module.id}-${module.version}"/>
-		<property name="linux_jniHeadersPath" value="/opt/sun-jdk-1.6.0.23/include"/>
+		<property name="linux_jniHeadersPath" value="/opt/sun-jdk-1.5.0.22/include"/>
 		<property name="windows_jniHeadersPath" value="/home/nicarran/aux/distributions/jdk-6_23-windows-include"/>
 		
 		<property name="module.windowsGccExtraLib" value="-Llib -lWintab32 "/>
@@ -120,7 +120,7 @@
 			<arg value="-I/usr/include"/>
 			<arg value="-o"/>
 			<arg value="lib${module.linuxJniLibName}-x86_64.so"/>
-						<!--<arg line="${module.linuxGccExtraLib}"/> underlinked :( -->
+			<arg line="${module.linuxGccExtraLib}"/>
 			<arg line="${_sources}"/>
 		</exec>
 		<move todir="product" file="src/main/c/linux/lib${module.linuxJniLibName}-x86_64.so"/>

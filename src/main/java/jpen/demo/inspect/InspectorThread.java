@@ -45,7 +45,7 @@ public class InspectorThread
 	}
 
 
-	@Override
+	//@Override
 	public synchronized void run(){
 		try{
 			long totalTime=times*period/1000;

@@ -40,7 +40,7 @@ public class ScreenPenOwner implements PenOwner {
 					 instance;
 	}
 
-	@Override
+	//@Override
 	public Collection<PenProvider.Constructor> getPenProviderConstructors(){
 		return Arrays.asList(
 						 new PenProvider.Constructor[]{
@@ -52,10 +52,10 @@ public class ScreenPenOwner implements PenOwner {
 					 );
 	}
 
-	@Override
+	//@Override
 	public void setPenManagerHandle(final PenManagerHandle penManagerHandle){
 		ActiveWindowProperty.Listener activeWindowPL=new ActiveWindowProperty.Listener(){
-					@Override
+					//@Override
 					public void activeWindowChanged(Window activeWindow){
 						synchronized(penManagerHandle.getPenSchedulerLock()){
 							penManagerHandle.setPenManagerPaused(activeWindow==null);
@@ -67,24 +67,24 @@ public class ScreenPenOwner implements PenOwner {
 	}
 
 	private final PenClip penClip = new PenClip() {
-				@Override
+				//@Override
 				public void evalLocationOnScreen(Point locationOnScreen){
 					// The location of this PenClip is always on (0, 0) screen coordinates.
 					locationOnScreen.x=locationOnScreen.y=0;
 				}
-				@Override
+				//@Override
 				public boolean contains(Point2D.Float point){
 					// This PenClip covers all the screen.
 					return true;
 				}
 			};
 
-	@Override
+	//@Override
 	public PenClip getPenClip() {
 		return penClip;
 	}
 
-	@Override
+	//@Override
 	public boolean isDraggingOut() {
 		return false;
 	}

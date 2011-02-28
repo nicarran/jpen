@@ -23,7 +23,7 @@ final class KeyboardDevice
 		setEnabled(true);
 	}
 
-	@Override
+	//@Override
 	public String getName(){
 		return "Keyboard";
 	}
@@ -50,7 +50,7 @@ final class KeyboardDevice
 
 		private InputEvent lastInputEvent;
 
-		@Override
+		//@Override
 		public void eventDispatched(AWTEvent ev){
 			if(ev instanceof InputEvent){
 				lastInputEvent=(InputEvent)ev;

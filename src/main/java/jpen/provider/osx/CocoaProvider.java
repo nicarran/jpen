@@ -39,7 +39,7 @@ public class CocoaProvider extends AbstractPenProvider {
 			return "Cocoa";
 		}
 
-		@Override
+		//@Override
 		public boolean constructable(PenManager penManager) {
 			return System.getProperty("os.name").toLowerCase().contains("mac");
 		}

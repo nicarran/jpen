@@ -46,7 +46,7 @@ public abstract class AbstractPenOwner
 				}
 			};
 
-	@Override
+	//@Override
 	public final void setPenManagerHandle(PenManagerHandle penManagerHandle){
 		this.penManagerHandle=penManagerHandle;
 		init();
@@ -57,7 +57,7 @@ public abstract class AbstractPenOwner
 	*/
 	protected abstract void init();
 
-	@Override
+	//@Override
 	public final boolean isDraggingOut(){
 		return isDraggingOut;
 	}

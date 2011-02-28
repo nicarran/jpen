@@ -62,7 +62,7 @@ public class JPenDemoControl{
 		setSupportCustomPKinds(true);
 
 		statusReportButton.addActionListener(new ActionListener(){
-					@Override
+					//@Override
 					public void actionPerformed(ActionEvent ev){
 						StatusReportPanel statusReportPanel=new StatusReportPanel(
 									new StatusReport(penCanvas.penManager));

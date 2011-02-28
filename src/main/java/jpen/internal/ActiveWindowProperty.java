@@ -28,7 +28,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import javax.swing.SwingUtilities;
-
 /**
 Allows to keep an eye on the application active window avoiding the unnecessary null activeWindow change reported by the default KeyboardFocusManager when switching windows. 
 */
@@ -58,7 +57,7 @@ public final class ActiveWindowProperty
 		listener.activeWindowChanged(activeWindow);
 	}
 
-	@Override
+	//@Override
 	public void propertyChange(PropertyChangeEvent ev){
 		Window activeWindow=(Window)ev.getNewValue();
 		if(activeWindow==this.activeWindow)
@@ -75,7 +74,7 @@ public final class ActiveWindowProperty
 	}
 
 	private final ScheduledExecutorService nullWindowScheduler=Executors.newSingleThreadScheduledExecutor(new ThreadFactory(){
-				@Override
+				//@Override
 				public Thread newThread(Runnable runnable){
 					Thread t=new Thread(runnable, "jpen-ActiveWindow-filter");
 					t.setDaemon(true);
@@ -84,7 +83,7 @@ public final class ActiveWindowProperty
 			});
 	private ScheduledFuture nullWindowTask;
 
-	@Override
+	//@Override
 	public void run(){
 		try{
 			SwingUtilities.invokeAndWait(nullWindowRunnable);
@@ -94,7 +93,7 @@ public final class ActiveWindowProperty
 	}
 
 	private final Runnable nullWindowRunnable=new Runnable(){
-				@Override
+				//@Override
 				public void run(){
 					set(null);
 				}

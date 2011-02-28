@@ -49,11 +49,11 @@ public final class XinputProvider
 
 	public static class Constructor
 		extends AbstractPenProvider.AbstractConstructor{
-		@Override
+		//@Override
 		public String getName() {
 			return "XInput";
 		}
-		@Override
+		//@Override
 		public boolean constructable(PenManager penManager) {
 			return System.getProperty("os.name").toLowerCase().contains("linux");
 		}
@@ -112,7 +112,7 @@ public final class XinputProvider
 			xinputDevices[i].setIsListening(!paused);
 	}
 
-	@Override
+	//@Override
 	public void penManagerPaused(boolean paused) {
 		pauseXinputDevices(paused);
 		if(!paused){
