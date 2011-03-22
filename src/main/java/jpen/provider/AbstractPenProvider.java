@@ -87,6 +87,7 @@ public abstract class AbstractPenProvider
 				throw new IllegalStateException("constructor already used by PenManager");
 			this.penManager=penManager;
 			try{
+				checkExpectedNativeBuild();
 				this.constructed=constructProvider();
 			}catch(Throwable t){
 				this.constructionException=new ConstructionException(t);
@@ -96,6 +97,11 @@ public abstract class AbstractPenProvider
 		}
 		
 		protected abstract PenProvider constructProvider() throws Throwable;
+		
+		private void checkExpectedNativeBuild() throws IllegalStateException{
+			if(getExpectedNativeBuild()>getNativeBuild())
+				throw new IllegalStateException("expectedNativeBuild number ("+getExpectedNativeBuild()+") is greater than library's nativeBuild number ("+getNativeBuild()+")");
+		}
 		
 		//@Override
 		public int getNativeVersion(){
