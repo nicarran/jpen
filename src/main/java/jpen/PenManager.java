@@ -183,7 +183,7 @@ public final class PenManager {
 	public Set<PenProvider.Constructor> getConstructors() {
 		return providerConstructorsA;
 	}
-	
+
 	public Set<PenProvider.Constructor> getProviderConstructors() {
 		return providerConstructorsA;
 	}
@@ -233,5 +233,17 @@ public final class PenManager {
 		if(paused)
 			return false;
 		return pen.scheduler.scheduleLevelEvent(device, deviceTime, levels, levelsOnScreen);
+	}
+
+	/**
+	Uses reflection to get the first provider of the given class.
+	*/
+	public <T extends PenProvider> T getProvider(Class<T> providerClass){
+		for(PenProvider.Constructor constructor: getProviderConstructors()){
+			PenProvider penProvider=constructor.getConstructed();
+			if(providerClass.isInstance(penProvider))
+				return providerClass.cast(penProvider);
+		}
+		return null;
 	}
 }

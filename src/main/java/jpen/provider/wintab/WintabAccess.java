@@ -246,6 +246,10 @@ final class WintabAccess {
 
 	private static native boolean getSystemCursorEnabled(int cellIndex);
 	
+	/**
+	@param enabled If <code>true<code> then movement on Wintab devices cause movement on the system pointer. The default value is <code>true<code>. 
+	@see WintabProvider#setPointerMovementEnabled(boolean)
+	*/
 	public void setSystemCursorEnabled(boolean enabled) {
 		synchronized(LOCK){
 			setSystemCursorEnabled(cellIndex, enabled);

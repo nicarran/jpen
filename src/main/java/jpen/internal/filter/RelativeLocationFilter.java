@@ -64,7 +64,7 @@ public final class RelativeLocationFilter{
 		boolean reset(Collection<PLevel> sample){
 			levelX=levelY=null;
 			int valuesCount=0;
-		out:
+			out:
 			for(PLevel level: sample){
 				switch(level.getType()){
 				case X:

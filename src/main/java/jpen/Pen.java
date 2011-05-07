@@ -65,11 +65,19 @@ public class Pen extends PenState {
 
 		final class Waiter
 			extends Object{
-			synchronized void doWait(long timeout) throws InterruptedException{
-				if(!stopRunning)
-					wait(timeout);
+
+			boolean waitForNewEvent() throws InterruptedException{
+				if(lastDispatchedEvent.next!=null)
+					return false;
+				synchronized(this){
+					if(lastDispatchedEvent.next!=null)
+						return false;
+					if(!stopRunning)
+						wait(0);
+					return true;
+				}
 			}
-			synchronized void doNotify(){
+			synchronized void notifyNewEvent(){
 				notify();
 			}
 		}
@@ -98,7 +106,7 @@ public class Pen extends PenState {
 					oldThread.join();
 				oldThread=null;
 				while(!stopRunning) {
-					waitedNewEvents=waitNewEvents();
+					waitedNewEvents=waiter.waitForNewEvent();
 					beforeTime=System.currentTimeMillis();
 					if(waitedNewEvents)
 						waitTime=0;
@@ -112,7 +120,7 @@ public class Pen extends PenState {
 						lastDispatchedEvent=event;
 					}
 					//System.out.println("after event dispatching, procTime="+evalCurrentProcTime());
-					availablePeriod=periodMillis+waitTime; // waitTime here is always <=0, if it is <0 then the whole processing of the previous round took longer than the time available. 
+					availablePeriod=periodMillis+waitTime; // waitTime here is always <=0, if it is <0 then the whole processing of the previous round took longer than the time available.
 					//System.out.println("going to fire tock "+System.currentTimeMillis());
 					firePenTock();
 					//System.out.println("after penTock, procTime="+evalCurrentProcTime());
@@ -134,16 +142,9 @@ public class Pen extends PenState {
 		private long evalCurrentProcTime(){
 			return System.currentTimeMillis()-beforeTime;
 		}
-		
+
 		private long availablePeriodLeft(){
 			return availablePeriod-evalCurrentProcTime();
-		}
-
-		private boolean waitNewEvents() throws InterruptedException {
-			if(lastDispatchedEvent.next!=null)
-				return false;
-			waiter.doWait(0);
-			return true;
 		}
 
 		private void firePenTock() throws InterruptedException, InvocationTargetException{
@@ -153,10 +154,6 @@ public class Pen extends PenState {
 				SwingUtilities.invokeAndWait(penTockFirer);
 			else
 				penTockFirer.run();
-		}
-
-		void processNewEvents() {
-			waiter.doNotify();
 		}
 
 		void stop(boolean join){
@@ -181,7 +178,7 @@ public class Pen extends PenState {
 	}
 
 	void processNewEvents(){
-		thread.processNewEvents();
+		thread.waiter.notifyNewEvent();
 	}
 
 	PenEvent getLastDispatchedEvent(){
@@ -201,17 +198,17 @@ public class Pen extends PenState {
 
 	/**
 	Changes the event firing frequency. The pen collects device (tablet) data points and stores them in a buffer. The data  points are taken from this buffer and fired as {@link PenEvent}s at this frequency.<p> 
-	
+
 	This method returns immediately, the change of frequency will happen after all the pending events are processed.
-	
+
 	@see #addListener(PenListener) 
 	@see #removeListener(PenListener)
 	*/
 	public void setFrequencyLater(int frequency){
 		setFrequency(frequency, false);
 	}
-	
-		private synchronized void setFrequency(int frequency, boolean wait) {
+
+	private synchronized void setFrequency(int frequency, boolean wait) {
 		if(frequency<=0)
 			throw new IllegalArgumentException();
 		if(frequency==this.frequency)

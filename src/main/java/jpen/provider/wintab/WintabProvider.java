@@ -51,6 +51,7 @@ public class WintabProvider
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 	private final Thread thread;
 	private volatile boolean paused=true;
+	private boolean systemCursorEnabled=true; // by default the tablet device moves the system pointer (cursor)
 
 	public static class Constructor
 		extends AbstractPenProvider.AbstractConstructor{
@@ -176,9 +177,23 @@ public class WintabProvider
 		}
 		L.fine("end");
 	}
-	
+
 	@Override
 	public boolean getUseRelativeLocationFilter(){
-		return true;
+		return systemCursorEnabled;
+	}
+
+	/**
+	@param systemCursorEnabled If <code>false<code> then tablet movement on Wintab devices doesn't cause movement on the system mouse pointer. If <code>true<code> then tablet movement on Wintab devices cause movement on the system mouse pointer, this is the default value. 
+	*/
+	public synchronized void setSystemCursorEnabled(boolean systemCursorEnabled){
+		if(this.systemCursorEnabled==systemCursorEnabled)
+			return;
+		this.systemCursorEnabled=systemCursorEnabled;
+		wintabAccess.setSystemCursorEnabled(systemCursorEnabled);
+	}
+
+	public synchronized boolean getSystemCursorEnabled(){
+		return systemCursorEnabled;
 	}
 }
