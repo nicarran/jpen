@@ -267,6 +267,7 @@ final class PenScheduler{
 
 	private void schedule(PenEvent ev) {
 		ev.time=System.currentTimeMillis();
+		ev.setPenOwnerTag(pen.penManager.penOwner.evalPenEventTag(ev));
 		lastScheduledEvent.next=ev;
 		lastScheduledEvent=ev;
 		pen.processNewEvents();

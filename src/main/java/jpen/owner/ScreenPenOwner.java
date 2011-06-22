@@ -23,11 +23,12 @@ import java.awt.Point;
 import java.awt.Window;
 import java.util.Arrays;
 import java.util.Collection;
+import jpen.internal.ActiveWindowProperty;
+import jpen.PenEvent;
 import jpen.PenProvider;
 import jpen.provider.osx.CocoaProvider;
 import jpen.provider.wintab.WintabProvider;
 import jpen.provider.xinput.XinputProvider;
-import jpen.internal.ActiveWindowProperty;
 /**
 Defines a {@link PenClip} for all the screen. Its {@link jpen.PenManager} is unpaused when the current application has an active window.
 */
@@ -86,6 +87,16 @@ public class ScreenPenOwner implements PenOwner {
 
 	//@Override
 	public boolean isDraggingOut() {
+		return false;
+	}
+
+	//@Override
+	public Object evalPenEventTag(PenEvent ev){
+		return null;
+	}
+
+	//@Override
+	public boolean enforceSinglePenManager(){
 		return false;
 	}
 }

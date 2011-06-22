@@ -24,26 +24,33 @@ import java.awt.Point;
 import javax.swing.SwingUtilities;
 import jpen.owner.PenClip;
 
-final class PenClipOnComponent
+final class ComponentPenClip
 	implements PenClip{
-	final Component component;
+	final ComponentPenOwner componentPenOwner;
 
-	public PenClipOnComponent(Component component){
-		this.component=component;
+	public ComponentPenClip(ComponentPenOwner componentPenOwner){
+		this.componentPenOwner=componentPenOwner;
 	}
-
-	//@Override
+	
+		//@Override
 	public void evalLocationOnScreen(Point pointOnScreen){
+		Component activeComponent=componentPenOwner.getActiveComponent();
+		if(activeComponent==null)
+			return;
 		pointOnScreen.x=pointOnScreen.y=0;
-		SwingUtilities.convertPointToScreen(pointOnScreen, component);
+		SwingUtilities.convertPointToScreen(pointOnScreen, activeComponent);
 	}
 
 	//@Override
 	public boolean contains(Point2D.Float point){
-		if(point.x<0 || point.y<0 ||
-			 point.x>component.getWidth() ||
-			 point.y>component.getHeight())	
+		Component activeComponent=componentPenOwner.getActiveComponent();
+		if(activeComponent==null)
 			return false;
+		if(point.x<0 || point.y<0 ||
+			 point.x>activeComponent.getWidth() ||
+			 point.y>activeComponent.getHeight()){
+			return false;
+		}
 		return true;
 	}
 }

@@ -23,11 +23,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import jpen.owner.awt.ComponentPenOwner;
 import jpen.PenDevice;
 import jpen.PenManager;
 import jpen.PenProvider;
 import jpen.provider.AbstractPenProvider;
-import jpen.owner.awt.AwtPenOwner;
 
 public final class SystemProvider
 	extends AbstractPenProvider {
@@ -41,27 +41,29 @@ public final class SystemProvider
 		}
 		//@Override
 		public boolean constructable(PenManager penManager) {
-			return penManager.penOwner instanceof AwtPenOwner;
+			return penManager.penOwner instanceof ComponentPenOwner;
 		}
 		@Override
 		protected PenProvider constructProvider() throws Throwable {
-			Component component=((AwtPenOwner)getPenManager().penOwner).component;
-			return new SystemProvider(this, component);
+			ComponentPenOwner componentPenOwner=(ComponentPenOwner)getPenManager().penOwner;
+			return new SystemProvider(this, componentPenOwner);
 		}
 	}
 
-	final Component component;
+	final ComponentPenOwner componentPenOwner;
+	private final MouseDevice mouseDevice=new MouseDevice(this);
 	private final KeyboardDevice keyboardDevice=new KeyboardDevice(this);
 
-	private SystemProvider(Constructor constructor, Component component) {
+	private SystemProvider(Constructor constructor, ComponentPenOwner componentPenOwner) {
 		super(constructor);
-		this.component=component;
-		devices.add(new MouseDevice(this));
+		this.componentPenOwner=componentPenOwner;
+		devices.add(mouseDevice);
 		devices.add(keyboardDevice);
 	}
 
 	//@Override
 	public void penManagerPaused(boolean paused) {
+		mouseDevice.setPaused(paused);
 		keyboardDevice.setPaused(paused);
 	}
 }

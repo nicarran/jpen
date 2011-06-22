@@ -18,6 +18,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.provider.system;
 
+import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -75,6 +76,8 @@ public final class MouseDevice
 	private final MouseWheelListener mouseWheelL=new MouseWheelListener(){
 				//@Override
 				public void mouseWheelMoved(MouseWheelEvent ev) {
+					if(!getEnabled())
+						return;
 					int value=ev.getWheelRotation();
 					PScroll.Type type=PScroll.Type.DOWN;
 					if(value<0) {
@@ -87,12 +90,11 @@ public final class MouseDevice
 				}
 			};
 	private final SystemProvider systemProvider;
+	private Component activeComponent;
 
 	MouseDevice(SystemProvider systemProvider) {
 		super(systemProvider);
 		this.systemProvider=systemProvider;
-		systemProvider.component.addMouseListener(mouseL);
-		systemProvider.component.addMouseWheelListener(mouseWheelL);
 		setEnabled(true);
 	}
 
@@ -100,30 +102,36 @@ public final class MouseDevice
 	public String getName() {
 		return "Mouse";
 	}
-	
+
 	@Override
 	public boolean getUseFractionalMovements(){
 		return false;
 	}
-	
-	@Override
-	public void setEnabled(boolean enabled) {
-		if(getEnabled()==enabled)
-			return;
-		if(getEnabled())
-			systemProvider.component.removeMouseMotionListener(mouseMotionL);
-		super.setEnabled(enabled);
-		if(getEnabled())
-			systemProvider.component.addMouseMotionListener(mouseMotionL);
+
+	void setPaused(boolean paused) {
+		if(activeComponent!=null){
+			activeComponent.removeMouseListener(mouseL);
+			activeComponent.removeMouseMotionListener(mouseMotionL);
+			activeComponent.removeMouseWheelListener(mouseWheelL);
+			activeComponent=null;
+		}
+		if(!paused){
+			activeComponent=systemProvider.componentPenOwner.getActiveComponent();
+			activeComponent.addMouseListener(mouseL);
+			activeComponent.addMouseMotionListener(mouseMotionL);
+			activeComponent.addMouseWheelListener(mouseWheelL);
+		}
 	}
-	
+
 	private void scheduleMove(MouseEvent ev){
+		if(!getEnabled())
+			return;
 		scheduleMove(ev.getWhen(), ev.getX(), ev.getY());
 	}
 
 	private final PLevel[] changedLevelsA=new PLevel[2];
 	private final List<PLevel> changedLevels=Arrays.asList(changedLevelsA);
-	
+
 	private void scheduleMove(long time, int x, int y) {
 		changedLevelsA[0]=new PLevel(PLevel.Type.X.ordinal(), x);
 		changedLevelsA[1]=new PLevel(PLevel.Type.Y.ordinal(), y);
@@ -131,6 +139,8 @@ public final class MouseDevice
 	}
 
 	private void mouseButtonChanged(MouseEvent ev, boolean state) {
+		if(!getEnabled())
+			return;
 		PButton.Type buttonType=getButtonType(ev.getButton());
 		if(buttonType==null)
 			return;

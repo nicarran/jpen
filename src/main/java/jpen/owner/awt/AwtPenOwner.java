@@ -34,17 +34,12 @@ import javax.swing.SwingUtilities;
 import jpen.owner.AbstractPenOwner;
 import jpen.owner.PenClip;
 import jpen.PenProvider;
-import jpen.provider.osx.CocoaProvider;
-import jpen.provider.system.SystemProvider;
-import jpen.provider.wintab.WintabProvider;
-import jpen.provider.xinput.XinputProvider;
 import jpen.internal.ActiveWindowProperty;
 
 public final class AwtPenOwner
-	extends AbstractPenOwner{
+	extends ComponentPenOwner{
 
 	public final Component component;
-	final PenClipOnComponent penClipOnComponent;
 	private final MouseListener mouseListener=new MouseAdapter(){
 				@Override
 				public void mouseExited(MouseEvent ev) {
@@ -65,119 +60,17 @@ public final class AwtPenOwner
 					}
 				}
 			};
-	Unpauser unpauser=new Unpauser();
-	final class Unpauser
-		implements MouseMotionListener{
 
-		private volatile boolean enabled;
-
-		synchronized void enable(){
-			if(enabled)
-				return;
-			component.addMouseMotionListener(unpauser); // unpauses only when mouse motion is detected.
-			enabled=true;
-		}
-
-		synchronized void disable(){
-			if(!enabled)
-				return;
-			component.removeMouseMotionListener(unpauser);
-			enabled=false;
-		}
-
-		//@Override
-		public void mouseMoved(MouseEvent ev){
-			unpause();
-		}
-
-		void unpause(){
-			synchronized(penManagerHandle.getPenSchedulerLock()){
-				if(!penManagerHandle.getPenManager().getPaused())
-					return;
-				if(enabled){
-					activeWindowPL.setEnabled(true);
-					penManagerHandle.setPenManagerPaused(false);
-					disable();
-				}
-			}
-		}
-
-		//@Override
-		public void mouseDragged(MouseEvent ev){
-		}
-	}
-
-	private final ActiveWindowPL activeWindowPL=new ActiveWindowPL();
-
-	private class ActiveWindowPL
-		implements ActiveWindowProperty.Listener{
-
-		private boolean enabled;
-		private ActiveWindowProperty activeWindowP;
-
-		void setEnabled(boolean enabled){
-			if(activeWindowP==null)
-				activeWindowP=new ActiveWindowProperty(this);
-			this.enabled=enabled;
-		}
-
-		//@Override
-		public void activeWindowChanged(Window activeWindow){
-			if(!enabled)
-				return;
-			synchronized(penManagerHandle.getPenSchedulerLock()){
-				if(activeWindow==null){
-					// if there is no active window on this application, on MS Windows the mouse stops sending events.
-					pauseAMoment();
-					return;
-				}
-				Window componentWindow=SwingUtilities.getWindowAncestor(component);
-				if(componentWindow==null)
-					return;
-				if(activeWindow!=componentWindow &&
-					 activeWindow instanceof Dialog){
-					//	A modal dialog stops sending events from other windows when shown... then here we honor this behavior
-					Dialog activeDialog=(Dialog)activeWindow;
-					if(activeDialog.isModal())
-						pauseAMoment();
-				}
-			}
-		}
-
-		private void pauseAMoment(){
-			pause();
-			unpauser.enable();
-		}
-	}
-
-
+	/**
+	<b>Warning:</b> the Mac OS X provider doesn't work when creating multiple {@code AwtPenOwner}s. If you need to use JPen on multiple AWT components use {@link jpen.owner.multiAwt.AwtPenToolkit} instead.
+	*/
 	public AwtPenOwner(Component component){
 		this.component=component;
-		this.penClipOnComponent=new PenClipOnComponent(component);
 	}
 
-	//@Override
-	public Collection<PenProvider.Constructor> getPenProviderConstructors(){
-		return Arrays.asList(
-						 new PenProvider.Constructor[]{
-							 new SystemProvider.Constructor(),
-							 new XinputProvider.Constructor(),
-							 new WintabProvider.Constructor(),
-							 new CocoaProvider.Constructor(),
-						 }
-					 );
-	}
-
-	private void pause(){
-		if(penManagerHandle.getPenManager().getPaused())
-			return;
-		activeWindowPL.setEnabled(false);
-		penManagerHandle.setPenManagerPaused(true);
-	}
-
-	//@Override
-	public PenClip getPenClip(){
-		return penClipOnComponent;
+	@Override
+	public Component getActiveComponent(){
+		return component;
 	}
 
 	@Override

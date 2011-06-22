@@ -38,6 +38,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import jpen.demo.inspect.Inspector;
+import jpen.owner.multiAwt.AwtPenToolkit;
 import jpen.PButton;
 import jpen.Pen;
 import jpen.PenManager;
@@ -51,13 +52,17 @@ public class JPenDemoControl{
 
 	//private static final Dimension SIZE=new Dimension(400, 400);
 
-	final PenCanvas penCanvas;
 	final MainPanel mainPanel;
 	final JButton statusReportButton=new JButton("Status Report...");
+	final JButton newInstanceButton=new JButton("New Demo Window");
 
 	public JPenDemoControl(){
-		penCanvas=new PenCanvas();
-		mainPanel=new MainPanel(penCanvas);
+		PenManager penManager=AwtPenToolkit.getPenManager();
+		penManager.pen.setFirePenTockOnSwing(true);
+		penManager.pen.setFrequencyLater(40);
+		penManager.pen.levelEmulator.setPressureTriggerForLeftCursorButton(0.5f);
+
+		mainPanel=new MainPanel();
 
 		setSupportCustomPKinds(true);
 
@@ -65,9 +70,16 @@ public class JPenDemoControl{
 					//@Override
 					public void actionPerformed(ActionEvent ev){
 						StatusReportPanel statusReportPanel=new StatusReportPanel(
-									new StatusReport(penCanvas.penManager));
+									new StatusReport(AwtPenToolkit.getPenManager()));
 						//statusReportPanel.panel.setPreferredSize(SIZE);
 						JOptionPane.showMessageDialog(mainPanel.panel, statusReportPanel.panel, "JPen Status Report", JOptionPane.INFORMATION_MESSAGE);
+					}
+				});
+		newInstanceButton.addActionListener(new ActionListener(){
+					//@Override
+					public void actionPerformed(ActionEvent ev){
+						JPenDemoControl jpenDemoControl=new JPenDemoControl();
+						jpenDemoControl.showFrame();
 					}
 				});
 	}
@@ -88,7 +100,7 @@ public class JPenDemoControl{
 	public static void main(String... args) throws IOException, NumberFormatException{
 		setupLookAndFeel();
 		JPenDemoControl jpenDemoControl=new JPenDemoControl();
-		startInspector(jpenDemoControl.penCanvas.penManager);
+		startInspector(AwtPenToolkit.getPenManager());
 		jpenDemoControl.showFrame();
 	}
 
@@ -120,6 +132,8 @@ public class JPenDemoControl{
 		framePanel.add(mainPanel.panel);
 		Box buttonBox=Box.createHorizontalBox();
 		buttonBox.add(Box.createHorizontalGlue());
+		//buttonBox.add(newInstanceButton);
+		//buttonBox.add(Box.createHorizontalStrut(5));
 		buttonBox.add(statusReportButton);
 		framePanel.add(buttonBox, BorderLayout.SOUTH);
 

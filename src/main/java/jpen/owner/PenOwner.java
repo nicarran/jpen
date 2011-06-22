@@ -20,6 +20,7 @@ package jpen.owner;
 
 import java.util.Collection;
 import jpen.owner.PenClip;
+import jpen.PenEvent;
 import jpen.PenManager;
 import jpen.PenProvider;
 
@@ -50,6 +51,11 @@ public interface PenOwner{
 		Unpause/pause the scheduling of {@link jpen.PenEvent}s done by the {@link PenManager}'s {@link PenProvider}s.
 		*/
 		void setPenManagerPaused(boolean paused);
+
+		/**
+		Retrieve the tag stored on the given {@code PenEvent}. See {@link #evalPenEventTag(PenEvent)}.
+		*/
+		Object retrievePenEventTag(PenEvent ev);
 	}
 
 	/**
@@ -63,4 +69,14 @@ public interface PenOwner{
 	@return {@code true} if this PenOwner is currently in a drag-out operation.
 	*/
 	boolean isDraggingOut();
+
+	/**
+	This method is called by the {@code PenManager}'s machinary when creating a {@code PenEvent}. This method returns a tag to be stored on the given {@code PenEvent} or {@code null} if no tagging is needed  (the {@code PenManager} machinary stores this tag on the private {@code PenEvent}'s {@code penOwnerTag} field ). The tag can be later retrieved using {@link PenManagerHandle#retrievePenEventTag(PenEvent)}. 
+	*/
+	Object evalPenEventTag(PenEvent ev);
+
+	/**
+	@return {@code true} if you want to allow only one {@code PenManager} per JVM---attempting to create more than one {@code PenManager} instance will cause an IllegalStateException to be thrown by the PenManager's constructor. 
+	*/
+	boolean enforceSinglePenManager();
 }

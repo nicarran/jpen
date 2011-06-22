@@ -31,6 +31,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import jpen.event.PenManagerListener;
+import jpen.owner.multiAwt.AwtPenToolkit;
 import jpen.PenDevice;
 import jpen.PenManager;
 import jpen.PenProvider;
@@ -39,7 +40,6 @@ import jpen.PKind;
 class DevicesTableModel
 			extends AbstractTableModel
 	implements PenManagerListener{
-	final PenManager penManager;
 
 	private final List<PenDevice> devices=new ArrayList<PenDevice>();
 	final PKindTypeNumberCombo kindTypeNumberCombo=new PKindTypeNumberCombo();
@@ -148,9 +148,8 @@ class DevicesTableModel
 		}
 	}
 
-	DevicesTableModel(PenManager penManager){
-		this.penManager=penManager;
-		penManager.addListener(this);
+	DevicesTableModel(){
+		AwtPenToolkit.getPenManager().addListener(this);
 		updateDevices();
 	}
 
@@ -161,7 +160,7 @@ class DevicesTableModel
 
 	private void updateDevices(){
 		devices.clear();
-		devices.addAll(penManager.getDevices());
+		devices.addAll(AwtPenToolkit.getPenManager().getDevices());
 		updateKindTypeNumberCombo();
 		fireTableDataChanged();
 	}

@@ -33,24 +33,24 @@ class DevicesPanel{
 	private final JScrollPane scrollPane;
 	final JComponent panel;
 
-	DevicesPanel(PenManager penManager){
-		this.devicesTableModel=new DevicesTableModel(penManager);
+	DevicesPanel(){
+		this.devicesTableModel=new DevicesTableModel();
 		JTable table=new JTable(devicesTableModel){
-			             @Override
-			             public TableCellEditor getCellEditor(int row, int col){
-				             TableCellEditor cellEditor=devicesTableModel.getCellEditor(
-				                   /*convertRowIndexToModel(*/row/*)*/,
-				                   convertColumnIndexToModel(col));
-				             return cellEditor==null? super.getCellEditor(row, col): cellEditor;
-			             }
-			             @Override
-			             public TableCellRenderer getCellRenderer(int row, int col){
-				             TableCellRenderer cellRenderer=devicesTableModel.getCellRenderer(
-				                   /*convertRowIndexToModel(*/row/*)*/,
-				                   convertColumnIndexToModel(col));
-				             return cellRenderer==null? super.getCellRenderer(row, col): cellRenderer;
-			             }
-		             };
+									 @Override
+									 public TableCellEditor getCellEditor(int row, int col){
+										 TableCellEditor cellEditor=devicesTableModel.getCellEditor(
+													 /*convertRowIndexToModel(*/row/*)*/,
+													 convertColumnIndexToModel(col));
+										 return cellEditor==null? super.getCellEditor(row, col): cellEditor;
+									 }
+									 @Override
+									 public TableCellRenderer getCellRenderer(int row, int col){
+										 TableCellRenderer cellRenderer=devicesTableModel.getCellRenderer(
+													 /*convertRowIndexToModel(*/row/*)*/,
+													 convertColumnIndexToModel(col));
+										 return cellRenderer==null? super.getCellRenderer(row, col): cellRenderer;
+									 }
+								 };
 		this.scrollPane=new JScrollPane(table);
 		scrollPane.setBorder(BorderFactory.createEmptyBorder(3, 3, 2, 2));
 		scrollPane.setPreferredSize(new Dimension(100, 100));

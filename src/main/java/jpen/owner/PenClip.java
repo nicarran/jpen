@@ -25,7 +25,8 @@ Defines the screen area where {@link jpen.PenEvent}s are fired or a drag-out ope
 */
 public interface PenClip{
 	/**
-	Evaluates the current location of this PenClip on the screen. {@code locationOnScreen} is in screen coordinates and is the origin of this PenClip coordinates.
+	Evaluates the current location of the origin of this PenClip on the screen, using screen coordinates.
+	@param locationOnScreen a Point to put the evaluated result on. 
 	*/
 	public void evalLocationOnScreen(Point locationOnScreen);
 	/**

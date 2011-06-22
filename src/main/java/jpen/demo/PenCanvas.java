@@ -41,6 +41,7 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import jpen.event.PenAdapter;
+import jpen.owner.multiAwt.AwtPenToolkit;
 import jpen.PButton;
 import jpen.PButtonEvent;
 import jpen.PenManager;
@@ -54,12 +55,11 @@ class PenCanvas
 	private static final Logger L=Logger.getLogger(PenCanvas.class.getName());
 	//static {L.setLevel(Level.ALL);}
 
-	private static final Dimension SIZE=new Dimension(1900,1900);
+	private static final Dimension SIZE=new Dimension(1000,1000);
 	private static final Color BACKGROUND_COLOR=new Color(247, 217, 186); // pink yellow
 	private static final float STROKE_RAD=20f;
-	private static final Dimension PREF_SCROLLPANE_SIZE=new Dimension(230,230);
+	private static final Dimension PREF_SCROLLPANE_SIZE=new Dimension(230,120);
 
-	final PenManager penManager;
 	final JScrollPane scrollPane;
 
 	private final BufferedImage image=GraphicsEnvironment.getLocalGraphicsEnvironment().
@@ -73,10 +73,6 @@ class PenCanvas
 	private final Rectangle rectangle=new Rectangle();
 
 	PenCanvas() {
-		this.penManager=new PenManager(this);
-		penManager.pen.setFirePenTockOnSwing(true);
-		penManager.pen.setFrequencyLater(40);
-		penManager.pen.levelEmulator.setPressureTriggerForLeftCursorButton(0.5f);
 		Utils.freezeSize(this, SIZE);
 		setDoubleBuffered(false);
 		setOpaque(true);
@@ -90,7 +86,8 @@ class PenCanvas
 		g.fill(rectangle);
 		setupRenderingHints(g);
 		
-		penManager.pen.addListener(new PenAdapter() {
+		//penManager.pen.addListener(new PenAdapter() {
+		AwtPenToolkit.addPenListener(this, new PenAdapter() {
 			    @Override
 			    public void penLevelEvent(PLevelEvent ev) {
 			    	//System.out.println("current time="+System.currentTimeMillis());
@@ -103,7 +100,7 @@ class PenCanvas
 					    return;
 				    }*/
 				    for(PLevel.Type levelType: PLevel.Type.MOVEMENT_TYPES){
-					    float value=penManager.pen.getLevelValue(levelType);
+					    float value=ev.pen.getLevelValue(levelType);
 					    switch(levelType) {
 					    case X:
 						    cursorCenter.x=value;
@@ -113,7 +110,7 @@ class PenCanvas
 						    break;
 					    }
 				    }
-				    paintStroke();
+				    paintStroke(ev);
 			    }
 			    @Override
 			    public void penTock(long availableTime) {
@@ -152,8 +149,8 @@ class PenCanvas
 		    RenderingHints.VALUE_ANTIALIAS_ON);
 	}
 
-	private synchronized void paintStroke() {
-		float pressure=penManager.pen.getLevelValue(PLevel.Type.PRESSURE);
+	private synchronized void paintStroke(PLevelEvent ev) {
+		float pressure=ev.pen.getLevelValue(PLevel.Type.PRESSURE);
 		if(pressure==0){
 			L.fine("no pressure");
 			return;
@@ -161,7 +158,7 @@ class PenCanvas
 
 		//pressure*=pressure; // parabolic sensitivity
 		float r=pressure*STROKE_RAD;
-		PKind.Type kindType=penManager.pen.getKind().getType();
+		PKind.Type kindType=ev.pen.getKind().getType();
 		switch(kindType) {
 		case CUSTOM:
 			g.setColor(Color.PINK);

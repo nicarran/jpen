@@ -18,28 +18,37 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.demo;
 
+import java.awt.Component;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 
 class MainPanel{
 	private final JTabbedPane tabbedPane=new JTabbedPane(JTabbedPane.TOP);
 	final Box panel=Box.createVerticalBox();
-	final DevicesPanel devicesPanel; 
-	
-	MainPanel(PenCanvas penCanvas){
-		penCanvas.scrollPane.setBorder(BorderFactory.createTitledBorder("Pen Enabled Component"));
-		panel.add(penCanvas.scrollPane);
-		
-		StatePanel statePanel=new StatePanel(penCanvas.penManager);
+	final DevicesPanel devicesPanel;
+
+	MainPanel(){
+		JSplitPane canvasesPane=new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		canvasesPane.setLeftComponent(new PenCanvas().scrollPane);
+		canvasesPane.setRightComponent(new PenCanvas().scrollPane);
+		//canvasesPane.setContinuousLayout(true);
+		canvasesPane.setOneTouchExpandable(true);
+		canvasesPane.setAlignmentX(Component.CENTER_ALIGNMENT);
+		canvasesPane.setBorder(BorderFactory.createTitledBorder("Pen Enabled Components"));
+		panel.add(canvasesPane);
+
+		StatePanel statePanel=new StatePanel();
 		tabbedPane.addTab("Pen", statePanel.panel);
-		
-		devicesPanel=new DevicesPanel(penCanvas.penManager);
+
+		devicesPanel=new DevicesPanel();
 		//devicesPanel.panel.setBorder(BorderFactory.createTitledBorder("Devices"));
 		tabbedPane.addTab("Input Devices", devicesPanel.panel);
-		
+
 		tabbedPane.setMaximumSize(tabbedPane.getPreferredSize());
-		
+
+		tabbedPane.setAlignmentX(Component.CENTER_ALIGNMENT);
 		panel.add(tabbedPane);
 	}
 }

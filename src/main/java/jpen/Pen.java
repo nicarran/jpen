@@ -113,16 +113,19 @@ public class Pen extends PenState {
 					else
 						yield();
 					//System.out.println("--- on yield, procTime="+evalCurrentProcTime());
+					boolean eventDispatched=false;
 					while((event=lastDispatchedEvent.next)!=null && event.getTime()<=beforeTime) {
 						event.copyTo(Pen.this);
 						event.dispatch();
 						lastDispatchedEvent.next=null;
 						lastDispatchedEvent=event;
+						eventDispatched=true;
 					}
 					//System.out.println("after event dispatching, procTime="+evalCurrentProcTime());
 					availablePeriod=periodMillis+waitTime; // waitTime here is always <=0, if it is <0 then the whole processing of the previous round took longer than the time available.
 					//System.out.println("going to fire tock "+System.currentTimeMillis());
-					firePenTock();
+					if(eventDispatched)
+						firePenTock();
 					//System.out.println("after penTock, procTime="+evalCurrentProcTime());
 					waitTime=availablePeriodLeft();// the same:  (periodMillis-evalCurrentProcTime())+waitTime;
 					if(waitTime>0) {

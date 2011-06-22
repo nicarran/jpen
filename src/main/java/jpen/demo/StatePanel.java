@@ -22,14 +22,15 @@ import java.awt.Color;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JLabel;
+import jpen.owner.multiAwt.AwtPenToolkit;
 import jpen.Pen;
 import jpen.PenManager;
 
 class StatePanel{
 	final Box panel=Box.createVerticalBox();
 
-	StatePanel(PenManager penManager){
-		Pen pen=penManager.pen;
+	StatePanel(){
+		Pen pen=AwtPenToolkit.getPenManager().pen;
 		
 		ButtonsPanel2 buttonsPanel=new ButtonsPanel2(pen);
 		ScrollsPanel scrollsPanel=new ScrollsPanel(pen);
@@ -73,7 +74,7 @@ class StatePanel{
 																		"Sample Period:", sampleRatePanel.panel
 																		));
 		column.add(Utils.labelComponent(
-		             "JPen Version:", new JLabel(PenManager.getJPenFullVersion())
+		             "JPen Version:", new JLabel(AwtPenToolkit.getPenManager().getJPenFullVersion())
 		           ));
 		
 		column.add(Box.createVerticalGlue());		

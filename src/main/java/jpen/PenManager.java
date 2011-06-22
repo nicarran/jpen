@@ -33,12 +33,32 @@ import jpen.internal.BuildInfo;
 import jpen.owner.awt.AwtPenOwner;
 import jpen.owner.PenOwner;
 import jpen.provider.system.MouseDevice;
-
+/**
+Create a {@code PenManager} to start using JPen, {@link jpen.owner.multiAwt.AwtPenToolkit} contains one ready to be used. 
+*/
 public final class PenManager {
 	private static final Logger L=Logger.getLogger(PenManager.class.getName());
 
 	public static String getJPenFullVersion(){
 		return BuildInfo.getFullVersion();
+	}
+
+	private static int instanceCount;
+	private static boolean singletonMode;
+
+	private synchronized static void incrementInstanceCount(){
+		if(singletonMode && instanceCount!=0)
+			throw new IllegalStateException("can't create more than one PenManager when in singleton mode");
+		instanceCount++;
+	}
+	
+	/**
+	See {@link PenOwner#enforceSinglePenManager()}.
+	*/
+	private synchronized static void setSingletonMode(boolean singletonMode){
+		if(singletonMode && instanceCount>1)
+			throw new IllegalStateException("can't change singleton mode to true when many PenManagers has already being created");
+		PenManager.singletonMode=singletonMode;
 	}
 
 	public final Pen  pen=new Pen(this);
@@ -54,11 +74,17 @@ public final class PenManager {
 	final PenDevice emulationDevice;
 	private PenDevice systemMouseDevice; // may be null
 
+	/**
+	Creates an {@code AwtPenOwner} and calls the {@link #PenManager(PenOwner)} constructor. <b>Warning:</b> see {@link jpen.owner.awt.AwtPenOwner#AwtPenOwner(Component)}.
+	*/
 	public PenManager(Component component) {
 		this(new AwtPenOwner(component));
 	}
 
 	public PenManager(PenOwner penOwner){
+		if(penOwner.enforceSinglePenManager())
+			setSingletonMode(true);
+		incrementInstanceCount();
 		this.penOwner=penOwner;
 		synchronized(pen.scheduler){
 			PenProvider.Constructor emulationProviderConstructor=new EmulationProvider.Constructor();
@@ -71,16 +97,20 @@ public final class PenManager {
 				addProvider(penProviderConstructor);
 			penOwner.setPenManagerHandle(new PenOwner.PenManagerHandle(){
 						//@Override
-						public final PenManager getPenManager(){
+						public PenManager getPenManager(){
 							return PenManager.this;
 						}
 						//@Override
-						public final Object getPenSchedulerLock(){
+						public Object getPenSchedulerLock(){
 							return pen.scheduler;
 						}
 						//@Override
-						public final void setPenManagerPaused(boolean paused){
+						public void setPenManagerPaused(boolean paused){
 							PenManager.this.setPaused(paused);
+						}
+						//@Override
+						public Object retrievePenEventTag(PenEvent ev){
+							return ev.getPenOwnerTag();
 						}
 					});
 		}

@@ -22,6 +22,7 @@ import jpen.event.PenAdapter;
 import jpen.event.PenListener;
 import jpen.PButtonEvent;
 import jpen.Pen;
+import jpen.PenEvent;
 
 /**
 Provides a mechanism to start/stop the drag-out operation.
@@ -36,18 +37,22 @@ public abstract class AbstractPenOwner
 				public void penButtonEvent(PButtonEvent ev){
 					synchronized(penManagerHandle.getPenSchedulerLock()){
 						if(!ev.button.value &&
-										!getPen().hasPressedButtons() &&
-										isDraggingOut
+							 !getPen().hasPressedButtons() &&
+							 isDraggingOut
 							){
 							stopDraggingOut();
-							penManagerHandle.setPenManagerPaused(true);
+							draggingOutDisengaged();
 						}
 					}
 				}
 			};
 
+	protected abstract void draggingOutDisengaged();
+
 	//@Override
 	public final void setPenManagerHandle(PenManagerHandle penManagerHandle){
+		if(this.penManagerHandle!=null)
+			throw new IllegalStateException("The penManagerHandle has already being set. This PenOwner can't be used on multiple PenManagers.");
 		this.penManagerHandle=penManagerHandle;
 		init();
 	}
@@ -96,6 +101,16 @@ public abstract class AbstractPenOwner
 		isDraggingOut=false;
 		getPen().removeListener(draggingOutPenListener);
 		return true;
+	}
+
+	//@Override
+	public Object evalPenEventTag(PenEvent ev){
+		return null;
+	}
+	
+	//@Override
+	public boolean enforceSinglePenManager(){
+		return false;
 	}
 
 }

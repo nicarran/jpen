@@ -33,6 +33,7 @@ public abstract class PenEvent
 	public final transient Pen pen;
 	private final byte deviceId;
 	private final long deviceTime;
+	private transient Object penOwnerTag;
 
 	PenEvent(PenDevice device, long deviceTime) {
 		this(device.getProvider().getConstructor().getPenManager().pen,
@@ -95,6 +96,17 @@ public abstract class PenEvent
 	*/
 	public long getDeviceTime(){
 		return deviceTime;
+	}
+	
+	/**
+	@see PenOwner#evalPenEventTag(PenEvent)
+	*/
+	void setPenOwnerTag(Object penOwnerTag){
+		this.penOwnerTag=penOwnerTag;
+	}
+	
+	Object getPenOwnerTag(){
+		return penOwnerTag;
 	}
 
 	@Override

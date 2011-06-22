@@ -64,6 +64,8 @@ final class KeyboardDevice
 		}
 
 		private void fireModifiers(){
+			if(!getEnabled())
+				return;
 			InputEvent inputEvent=lastInputEvent; // local copy because this method is concurrent
 			if(inputEvent==null)
 				return;
@@ -79,7 +81,7 @@ final class KeyboardDevice
 		int modifierMask=getModifierMask(modifier);
 		return (modifiers & modifierMask)==modifierMask;
 	}
-	
+
 	private static int getModifierMask(PButton.Type modifier){
 		switch(modifier){
 		case CONTROL:
