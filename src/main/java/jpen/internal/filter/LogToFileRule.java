@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 final class LogToFileRule
 	implements RelativeLocationFilter.Rule{
 	private static final Logger L=Logger.getLogger(LogToFileRule.class.getName());
-	static { L.setLevel(Level.ALL); }
+	//static { L.setLevel(Level.ALL); }
 
 	private int logFileStamp=0;
 	private List<Record> records;

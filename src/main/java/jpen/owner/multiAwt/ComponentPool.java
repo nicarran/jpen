@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import jpen.event.PenListener;
 
-class ComponentPool{
+final class ComponentPool{
 	private final Map<Component, PenListener[]> componentToPenListeners=new HashMap<Component, PenListener[]>();
 
 	private final MouseListener mouseL=new MouseAdapter(){

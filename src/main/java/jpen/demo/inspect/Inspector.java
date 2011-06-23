@@ -30,7 +30,7 @@ import jpen.PenManager;
 
 public class Inspector{
 	static final Logger L=Logger.getLogger(Inspector.class.getName());
-	static { L.setLevel(Level.ALL); }
+	//static { L.setLevel(Level.ALL); }
 
 	final PenManager penManager;
 	final FileHandler fileHandler;

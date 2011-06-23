@@ -79,13 +79,15 @@ final class MultiAwtPenOwner
 					for(int i=0, size=listeners.length; i<size; i++)
 						listeners[i].penScrollEvent(ev);
 				}
+				
+				private static final long NANOS_TO_MILLIS_DIV=1000000l;
 				//@Override
 				public void penTock(long availableMillis){
 					long spentTimeMillis=0;
 					for(int i=0, size=listeners.length; i<size; i++){
 						long startTimeNanos=System.nanoTime();
 						listeners[i].penTock(availableMillis-=spentTimeMillis);
-						spentTimeMillis=(System.nanoTime()-startTimeNanos)/1000;
+						spentTimeMillis=(System.nanoTime()-startTimeNanos)/NANOS_TO_MILLIS_DIV;
 					}
 					listeners=null;
 				}
