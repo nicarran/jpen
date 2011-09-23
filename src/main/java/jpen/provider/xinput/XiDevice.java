@@ -31,7 +31,7 @@ import jpen.internal.ThreadUtils;
 final class XiDevice {
 	static final Logger L=Logger.getLogger(XiDevice.class.getName());
 	//static { L.setLevel(Level.ALL); }
-	
+
 	public enum EventType {
 		BUTTON_PRESS, BUTTON_RELEASE, MOTION_NOTIFY, PROXIMITY_IN, PROXIMITY_OUT;
 		public static final List<EventType> VALUES=Collections.unmodifiableList(Arrays.asList(values()));
@@ -52,8 +52,10 @@ final class XiDevice {
 	}
 
 	public boolean getIsListening(){
-		synchronized(xiBus){ // x server is not thread safe... requests must be made one at a time (per connectionx)
+		synchronized(xiBus){
+			//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
 			return getIsListening(cellIndex);
+			//}
 		}
 	}
 
@@ -61,19 +63,21 @@ final class XiDevice {
 
 	public void setIsListening(boolean isListening){
 		synchronized(xiBus){
-			int attempts=0;
-			while(true){
-				// TODO: change setIsListening to return true on success to avoid doing a getIsListening... this requires a nativeVersion change.
-				setIsListening(cellIndex, isListening);
-				if(isListening && !getIsListening()){ // the device couldn't be grabbed
-					if(attempts++>20){
-						L.severe("the tablet device couldn't be grabbed");
-						break;
+			synchronized(XiBus.macrofLock){
+				int attempts=0;
+				while(true){
+					// TODO: change setIsListening to return true on success to avoid doing a getIsListening... this requires a nativeVersion change.
+					setIsListening(cellIndex, isListening);
+					if(isListening && !getIsListening()){ // the device couldn't be grabbed
+						if(attempts++>20){
+							L.severe("the tablet device couldn't be grabbed");
+							break;
+						}
+						ThreadUtils.sleepUninterrupted(40);
 					}
-					ThreadUtils.sleepUninterrupted(40);
+					else
+						break;
 				}
-				else
-					break;
 			}
 		}
 	}
@@ -82,53 +86,67 @@ final class XiDevice {
 
 	public Range getLevelRange(PLevel.Type levelType) {
 		synchronized(xiBus){
+			//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
 			int typeIndex=getLevelTypeValueIndex(levelType);
 			return new Range(getLevelRangeMin(cellIndex, typeIndex), getLevelRangeMax(cellIndex, typeIndex));
+			//}
 		}
 	}
 
 	private static int getLevelTypeValueIndex(PLevel.Type levelType){
 		return levelType.ordinal();
 	}
-
 	private static native int getLevelRangeMin(int cellIndex, int levelTypeOrdinal);
 	private static native int getLevelRangeMax(int cellIndex, int levelTypeOrdinal);
 
 	public int getValue(PLevel.Type levelType) {
 		synchronized(xiBus){
+			//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
 			return getValue(cellIndex, getLevelTypeValueIndex(levelType));
+			//}
 		}
 	}
 
 	private static native int getValue(int cellIndex, int valueIndex);
-	
+
 	public boolean nextEvent() {
 		synchronized(xiBus){
+			//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
 			//if(xiBus.getXiDevice()!=this)
 			//throw new IllegalStateException("This device is not the xiBus owner.");
 			return nextEvent(cellIndex);
+			//}
 		}
 	}
 
 	private static native boolean nextEvent(int cellIndex);
 
-	private synchronized static native void stopWaitingNextEvent(int cellIndex);
-
 	public boolean waitNextEvent(){
 		synchronized(xiBus){
+			//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
 			return waitNextEvent(cellIndex);
+			//}
 		}
 	}
 
 	private static native boolean waitNextEvent(int cellIndex);
 
-	public void stopWaitingNextEvent(){
+	/**
+	This method opens its own X server connection, it must be synchronized against this XiDevice
+	*/
+	public synchronized void stopWaitingNextEvent(){
+		//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
 		stopWaitingNextEvent(cellIndex);
+		//}
 	}
+
+	private static native void stopWaitingNextEvent(int cellIndex);
 
 	public long getLastEventTime(){
 		synchronized(xiBus){
+			//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
 			return getLastEventTime(cellIndex);
+			//}
 		}
 	}
 
@@ -136,10 +154,12 @@ final class XiDevice {
 
 	public EventType getLastEventType() {
 		synchronized(xiBus){
+			//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
 			int lastEventTypeOrdinal=getLastEventType(cellIndex);
 			if(lastEventTypeOrdinal<0)
 				return null;
 			return EventType.VALUES.get(lastEventTypeOrdinal);
+			//}
 		}
 	}
 
@@ -147,47 +167,58 @@ final class XiDevice {
 
 	public int getLastEventButton() {
 		synchronized(xiBus){
+			//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
 			return getLastEventButton(cellIndex);
+			//}
 		}
 	}
 
 	private static native int getLastEventButton(int cellIndex);
-	
+
 	public long getLastEventDeviceState(){
 		synchronized(xiBus){
+			//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
 			return getLastEventDeviceState(cellIndex);
+			//}
 		}
 	}
-	
+
 	private static native long getLastEventDeviceState(int cellIndex);
-	
+
 	public boolean getLastEventProximity() {
 		synchronized(xiBus){
+			//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
 			return getLastEventProximity(cellIndex);
+			//}
 		}
 	}
-	
+
 	private static native boolean getLastEventProximity(int cellIndex);
 
 	public void refreshLevelRanges(){
 		synchronized(xiBus){
+			//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
 			refreshLevelRanges(cellIndex);
+			//}
 		}
 	}
-	
+
 	private static native void refreshLevelRanges(int cellIndex);
-	
+
 	public boolean getIsAbsoluteMode(){
 		synchronized(xiBus){
-		return getIsAbsoluteMode(cellIndex);
+			//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
+			return getIsAbsoluteMode(cellIndex);
+			//}
 		}
 	}
-	
+
 	private static native boolean getIsAbsoluteMode(int cellIndex);
 
 	@Override
 	public String toString() {
 		synchronized(xiBus){
+			//synchronized(XiBus.macrofLock){ no macrof unsafe alive functions called
 			StringBuffer sb=new StringBuffer();
 			sb.append("{Device: name=");
 			sb.append(getName());
@@ -215,14 +246,17 @@ final class XiDevice {
 			sb.append(getLastEventProximity());
 			sb.append("}");
 			return sb.toString();
+			//}
 		}
 	}
-	
+
 	@Override
 	protected void finalize() {
 		synchronized(xiBus){
-			if(cellIndex!=-1)
-				destroy(cellIndex);
+			synchronized(XiBus.macrofLock){
+				if(cellIndex!=-1)
+					destroy(cellIndex);
+			}
 		}
 	}
 	private static native int destroy(int cellIndex);
