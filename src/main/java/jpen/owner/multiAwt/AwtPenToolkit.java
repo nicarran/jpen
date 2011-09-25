@@ -49,7 +49,7 @@ public final class AwtPenToolkit{
 		Object penOwnerTag= multiAwtPenOwner.getPenManagerHandle().retrievePenEventTag(ev);
 		if(penOwnerTag instanceof MultiAwtPenOwner.ActiveComponentInfo){
 			MultiAwtPenOwner.ActiveComponentInfo activeComponentInfo=(MultiAwtPenOwner.ActiveComponentInfo)penOwnerTag;
-			return activeComponentInfo.component;
+			return activeComponentInfo.getComponent();
 		}
 		throw new IllegalArgumentException("the given PenEvent was not tagged by the MultiAwtPenOwner");
 	}

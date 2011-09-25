@@ -19,8 +19,13 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 package jpen.owner.multiAwt;
 
 import java.awt.Component;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 import jpen.event.PenListener;
+import jpen.internal.WeakChain;
 import jpen.owner.awt.ComponentPenOwner;
 import jpen.PButtonEvent;
 import jpen.PenEvent;
@@ -38,58 +43,68 @@ final class MultiAwtPenOwner
 	final ComponentPool componentPool=new ComponentPool();
 	private ActiveComponentInfo activeComponentInfo;
 	static class ActiveComponentInfo{
-		final Component component;
-		final PenListener[] penListeners;
+		private final WeakReference<Component>	componentRef;
+		private final WeakChain<PenListener> penListenersChain=new WeakChain<PenListener>();
+
 		ActiveComponentInfo(Component component, PenListener[] penListeners){
-			this.component=component;
-			this.penListeners=penListeners;
+			this.componentRef=new WeakReference<Component>(component);
+			for(PenListener penListener: penListeners)
+				penListenersChain.add(penListener);
+		}
+
+		Component getComponent(){
+			return componentRef.get();
+		}
+
+		void getPenListeners(Collection<PenListener> penListeners){
+			penListenersChain.snapshot(penListeners);
 		}
 	}
 
 	private final PenListener penMulticaster=new PenListener(){
-				private PenListener[] listeners;
+				private final Collection<PenListener> listeners=new ArrayList<PenListener>();
 
 				//@Override
 				public void penKindEvent(PKindEvent ev){
 					updateListeners(ev);
-					for(int i=0, size=listeners.length; i<size; i++)
-						listeners[i].penKindEvent(ev);
+					for(PenListener listener: listeners)
+						listener.penKindEvent(ev);
 				}
 
 				private void updateListeners(PenEvent ev){
 					ActiveComponentInfo activeComponentInfo=(ActiveComponentInfo)penManagerHandle.retrievePenEventTag(ev);
-					listeners=activeComponentInfo.penListeners;
+					activeComponentInfo.getPenListeners(listeners);
 				}
 
 				//@Override
 				public void penLevelEvent(PLevelEvent ev){
 					updateListeners(ev);
-					for(int i=0, size=listeners.length; i<size; i++)
-						listeners[i].penLevelEvent(ev);
+					for(PenListener listener: listeners)
+						listener.penLevelEvent(ev);
 				}
 				//@Override
 				public void penButtonEvent(PButtonEvent ev){
 					updateListeners(ev);
-					for(int i=0, size=listeners.length; i<size; i++)
-						listeners[i].penButtonEvent(ev);
+					for(PenListener listener: listeners)
+						listener.penButtonEvent(ev);
 				}
 				//@Override
 				public void penScrollEvent(PScrollEvent ev){
 					updateListeners(ev);
-					for(int i=0, size=listeners.length; i<size; i++)
-						listeners[i].penScrollEvent(ev);
+					for(PenListener listener: listeners)
+						listener.penScrollEvent(ev);
 				}
-				
+
 				private static final long NANOS_TO_MILLIS_DIV=1000000l;
 				//@Override
 				public void penTock(long availableMillis){
 					long spentTimeMillis=0;
-					for(int i=0, size=listeners.length; i<size; i++){
+					for(PenListener listener: listeners){
 						long startTimeNanos=System.nanoTime();
-						listeners[i].penTock(availableMillis-=spentTimeMillis);
+						listener.penTock(availableMillis-=spentTimeMillis);
 						spentTimeMillis=(System.nanoTime()-startTimeNanos)/NANOS_TO_MILLIS_DIV;
 					}
-					listeners=null;
+					listeners.clear();
 				}
 			};
 
@@ -112,16 +127,16 @@ final class MultiAwtPenOwner
 
 	@Override
 	public Component getActiveComponent() {
-		return activeComponentInfo==null? null: activeComponentInfo.component;
+		return activeComponentInfo==null? null: activeComponentInfo.getComponent();
 	}
 
 	//@Override
 	public void pointerComponentChanged(Component component){
-		activate(component);
+		setActiveComponent(component);
 	}
 
-	private void activate(Component component){
-		synchronized(penManagerHandle.getPenSchedulerLock()){
+	private void setActiveComponent(Component component){
+		synchronized(getPenSchedulerLock(component)){
 			if(component==null){
 				if(!startDraggingOut()){
 					pause();
@@ -142,18 +157,41 @@ final class MultiAwtPenOwner
 		}
 	}
 
+	//@Override
+	public void componentRemoved(Component component){
+		System.out.println(Thread.currentThread().holdsLock(component.getTreeLock()));
+		stopDraggingOutAndPause(component);
+	}
+
+	private void stopDraggingOutAndPause(Component component){
+		synchronized(getPenSchedulerLock(component)){
+			if(getActiveComponent()==component && stopDraggingOut())
+				pause();
+		}
+	}
+
+	// Override
+	public void componentUndisplayable(final Component component){
+		// we are holing component's treeLock here... we have to schedule stopDraggingOutAndPause for later:
+		SwingUtilities.invokeLater(new Runnable(){
+					//@Override
+					public void run(){
+						stopDraggingOutAndPause(component);
+					}
+				});
+	}
+
 	@Override
 	protected void draggingOutDisengaged(){
 		super.draggingOutDisengaged();
 		Component pointerComponent=componentPool.getPointerComponent();
 		if(pointerComponent!=null
 			 && pointerComponent!=getActiveComponent())
-			activate(pointerComponent);
+			setActiveComponent(pointerComponent);
 	}
 
 	@Override
 	public ActiveComponentInfo evalPenEventTag(PenEvent ev){
 		return activeComponentInfo;
 	}
-
 }
