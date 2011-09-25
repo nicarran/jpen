@@ -164,7 +164,7 @@ public abstract class ComponentPenOwner
 	}
 
 	/**
-	Checks if the given {@link Component} holds the {@link Component#getTreeLock()} before actually getting and returning the {@link PenManagerHandle#getPenSchedulerLock()}. Prefer using this method instead of {@link PenManagerHandle#getPenScheduleLock()} to be shure you  aren't causing deadlocks because the {@link ComponentPenClip} methods hold the {@link Component#getTreeLock()}.
+	Checks if the given {@link Component} holds the {@link Component#getTreeLock()} before actually getting and returning the {@link jpen.owner.PenOwner.PenManagerHandle#getPenSchedulerLock()}. Prefer using this method instead of {@link jpen.owner.PenOwner.PenManagerHandle#getPenSchedulerLock()} to be shure you  aren't causing deadlocks because the {@link ComponentPenClip} methods hold the {@link Component#getTreeLock()}.
 	*/
 	protected Object getPenSchedulerLock(Component component){
 		if(component!=null && Thread.currentThread().holdsLock(component.getTreeLock()))
