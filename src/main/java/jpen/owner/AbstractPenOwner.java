@@ -47,7 +47,39 @@ public abstract class AbstractPenOwner
 				}
 			};
 
+	/**
+	Force stopping a drag-out operation if it was in progress. This method must be called when entering the {@link PenClip} to stop the drag-out operation if it was still in progress.
+
+	This method must be called while holding the {@link jpen.owner.PenOwner.PenManagerHandle#getPenSchedulerLock()} (See {@link PenOwner#isDraggingOut()}).
+
+	@return {@code true} if a drag-out operation was in progress and was stopped.
+	*/
+	protected final boolean stopDraggingOut(){
+		if(!isDraggingOut)
+			return false;
+		isDraggingOut=false;
+		getPen().removeListener(draggingOutPenListener);
+		return true;
+	}
+
 	protected abstract void draggingOutDisengaged();
+
+	/**
+	Starts a drag-out operation if there are pressed buttons and installs a penListener which automatically stops the drag-out operation when all the buttons are unpressed.
+
+	This method must be called while holding the {@link jpen.owner.PenOwner.PenManagerHandle#getPenSchedulerLock()} (See {@link PenOwner#isDraggingOut()}).
+
+	@return {@code true} if a drag-out operation was started or was already in progress.
+	*/
+	protected final boolean startDraggingOut(){
+		if(isDraggingOut)
+			return true;
+		if(!getPen().hasPressedButtons())
+			return false;
+		isDraggingOut=true;
+		getPen().addListener(draggingOutPenListener);
+		return true;
+	}
 
 	//@Override
 	public final void setPenManagerHandle(PenManagerHandle penManagerHandle){
@@ -67,47 +99,15 @@ public abstract class AbstractPenOwner
 		return isDraggingOut;
 	}
 
-	/**
-	Starts a drag-out operation if there are pressed buttons and installs a penListener which automatically stops the drag-out operation when all the buttons are unpressed.
-
-	This method must be called while holding the {@link jpen.owner.PenOwner.PenManagerHandle#getPenSchedulerLock()} (See {@link PenOwner#isDraggingOut()}).
-
-	@return {@code true} if a drag-out operation was started or was already in progress.
-	*/
-	protected final boolean startDraggingOut(){
-		if(isDraggingOut)
-			return true;
-		if(!getPen().hasPressedButtons())
-			return false;
-		isDraggingOut=true;
-		getPen().addListener(draggingOutPenListener);
-		return true;
-	}
-
 	protected final Pen getPen(){
 		return penManagerHandle.getPenManager().pen;
-	}
-
-	/**
-	Force stopping a drag-out operation if it was in progress. This method must be called when entering the {@link PenClip} to stop the drag-out operation if it was still in progress.
-
-	This method must be called while holding the {@link jpen.owner.PenOwner.PenManagerHandle#getPenSchedulerLock()} (See {@link PenOwner#isDraggingOut()}).
-
-	@return {@code true} if a drag-out operation was in progress and was stopped.
-	*/
-	protected final boolean stopDraggingOut(){
-		if(!isDraggingOut)
-			return false;
-		isDraggingOut=false;
-		getPen().removeListener(draggingOutPenListener);
-		return true;
 	}
 
 	//@Override
 	public Object evalPenEventTag(PenEvent ev){
 		return null;
 	}
-	
+
 	//@Override
 	public boolean enforceSinglePenManager(){
 		return false;
