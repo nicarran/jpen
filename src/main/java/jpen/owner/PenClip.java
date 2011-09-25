@@ -25,11 +25,12 @@ Defines the screen area where {@link jpen.PenEvent}s are fired or a drag-out ope
 */
 public interface PenClip{
 	/**
-	Evaluates the current location of the origin of this PenClip on the screen, using screen coordinates.
+	Evaluates the current location of the origin of this PenClip on the screen, using screen coordinates. This method is called while holding the {@link PenOwner.PenManagerHandle#getPenSchedulerLock()}.
 	@param locationOnScreen a Point to put the evaluated result on. 
 	*/
 	public void evalLocationOnScreen(Point locationOnScreen);
 	/**
+	 This method is called while holding the {@link PenOwner.PenManagerHandle#getPenSchedulerLock()}.
 	@param point The point to test in PenClip coordinates.
 	@return {@code true} if the given point is inside this PenClip.
 	*/
