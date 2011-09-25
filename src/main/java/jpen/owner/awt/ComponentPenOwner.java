@@ -23,6 +23,7 @@ import java.awt.Dialog;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.Window;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collection;
 import javax.swing.SwingUtilities;
@@ -60,17 +61,18 @@ public abstract class ComponentPenOwner
 	}
 
 	protected final Unpauser unpauser=new Unpauser();
-	
+
 	protected final class Unpauser
 		implements MouseMotionListener{
 
 		private volatile boolean enabled;
-		private Component myActiveComponent;
+		private WeakReference<Component> myActiveComponentRef;
 
 		public synchronized void enable(){
 			if(enabled)
 				return;
-			myActiveComponent=getActiveComponent();
+			Component myActiveComponent=getActiveComponent();
+			myActiveComponentRef=new WeakReference<Component>(myActiveComponent);
 			myActiveComponent.addMouseMotionListener(unpauser); // unpauses only when mouse motion is detected.
 			enabled=true;
 		}
@@ -78,7 +80,11 @@ public abstract class ComponentPenOwner
 		synchronized void disable(){
 			if(!enabled)
 				return;
-			myActiveComponent.removeMouseMotionListener(unpauser);
+			Component myActiveComponent=myActiveComponentRef.get();
+			if(myActiveComponent!=null){
+				myActiveComponent.removeMouseMotionListener(unpauser);
+				myActiveComponent=null;
+			}
 			enabled=false;
 		}
 
@@ -121,7 +127,7 @@ public abstract class ComponentPenOwner
 		public void activeWindowChanged(Window activeWindow){
 			if(!enabled)
 				return;
-			synchronized(penManagerHandle.getPenSchedulerLock()){
+			synchronized(getPenSchedulerLock(activeWindow)){
 				if(activeWindow==null){
 					// if there is no active window on this application, on MS Windows the mouse stops sending events.
 					pauseAMoment();
@@ -155,5 +161,14 @@ public abstract class ComponentPenOwner
 	@Override
 	protected void draggingOutDisengaged(){
 		pause();
+	}
+
+	/**
+	Checks if the given {@link Component} holds the {@link Component#getTreeLock()} before actually getting and returning the {@link PenManagerHandle#getPenSchedulerLock()}. Prefer using this method instead of {@link PenManagerHandle#getPenScheduleLock()} to be shure you  aren't causing deadlocks because the {@link ComponentPenClip} methods hold the {@link Component#getTreeLock()}.
+	*/
+	protected Object getPenSchedulerLock(Component component){
+		if(component!=null && Thread.currentThread().holdsLock(component.getTreeLock()))
+			throw new AssertionError("tryed to hold penSchedulerLock while holding Component's treeLock");
+		return penManagerHandle.getPenSchedulerLock();
 	}
 }

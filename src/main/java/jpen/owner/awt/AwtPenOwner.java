@@ -43,17 +43,15 @@ public final class AwtPenOwner
 	private final MouseListener mouseListener=new MouseAdapter(){
 				@Override
 				public void mouseExited(MouseEvent ev) {
-					synchronized(penManagerHandle.getPenSchedulerLock()){
-						if(!startDraggingOut()){
+					synchronized(getPenSchedulerLock(ev.getComponent())){
+						if(!startDraggingOut())
 							pause();
-							unpauser.disable();
-						}
 					}
 				}
 
 				@Override
 				public void mouseEntered(MouseEvent ev) {
-					synchronized(penManagerHandle.getPenSchedulerLock()){
+					synchronized(getPenSchedulerLock(ev.getComponent())){
 						if(!stopDraggingOut()){
 							unpauser.enable(); // unpauses when mouse motion is detected.
 						}
