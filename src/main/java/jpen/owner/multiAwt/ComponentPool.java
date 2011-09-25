@@ -19,6 +19,8 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 package jpen.owner.multiAwt;
 
 import java.awt.Component;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -45,6 +47,16 @@ final class ComponentPool{
 				}
 
 			};
+	private final HierarchyListener hierarchyL=new HierarchyListener(){
+				//@Override
+				public void hierarchyChanged(HierarchyEvent ev){
+					if(ev.getID() == ev.HIERARCHY_CHANGED &&
+						 (ev.getChangeFlags() &  ev.DISPLAYABILITY_CHANGED)>0 &&
+						 !ev.getComponent().isDisplayable())
+						fireComponentUndisplayable(ev.getComponent());
+				}
+			};
+
 	/**
 	Component under the mouse pointer.
 	*/
@@ -52,6 +64,8 @@ final class ComponentPool{
 
 	static interface Listener{
 		void pointerComponentChanged(Component pointerComponent);
+		void componentRemoved(Component component);
+		void componentUndisplayable(Component component);
 	}
 	private Listener listener;
 
@@ -84,6 +98,7 @@ final class ComponentPool{
 		if(penListeners==null){
 			componentToPenListeners.put(component, new PenListener[]{penListener});
 			component.addMouseListener(mouseL);
+			component.addHierarchyListener(hierarchyL);
 		}else{
 			Set<PenListener> newPenListeners=new LinkedHashSet<PenListener>(Arrays.asList(penListeners));
 			if(newPenListeners.add(penListener)){
@@ -101,12 +116,26 @@ final class ComponentPool{
 			if(newPenListeners.isEmpty()){
 				componentToPenListeners.remove(component);
 				component.removeMouseListener(mouseL);
+				component.removeHierarchyListener(hierarchyL);
 				if(pointerComponent==component)
 					setPointerComponent(null);
+				fireComponentRemoved(component);
 			}else{
 				componentToPenListeners.put(component, newPenListeners.toArray(new PenListener[newPenListeners.size()]));
 			}
 		}
+	}
+
+	private void fireComponentRemoved(Component component){
+		Listener listener=this.listener;
+		if(listener!=null)
+			listener.componentRemoved(component);
+	}
+	
+	private void fireComponentUndisplayable(Component component){
+		Listener listener=this.listener;
+		if(listener!=null)
+			listener.componentUndisplayable(component);
 	}
 
 	private static final PenListener[] emptyPenListeners=new PenListener[0];
