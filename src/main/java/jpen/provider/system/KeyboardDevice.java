@@ -64,10 +64,10 @@ final class KeyboardDevice
 	private final AwtListener awtListener=new AwtListener();
 
 	private static class ModifiersInfo{
-			final int modifiers;
+			final int modifiersEx;
 			final long when;
 			ModifiersInfo(InputEvent inputEvent){
-				this.modifiers=inputEvent.getModifiers();
+				this.modifiersEx=inputEvent.getModifiersEx();
 				this.when=inputEvent.getWhen();
 			}
 		}
@@ -85,7 +85,6 @@ final class KeyboardDevice
 				if(inputEvent.getID()==MouseEvent.MOUSE_ENTERED){
 					fireModifiers();
 				}else	if(inputEvent instanceof KeyEvent){
-					//System.out.println("lastInputEvent: "+lastInputEvent);
 					fireModifiers();
 				}
 			}
@@ -98,7 +97,7 @@ final class KeyboardDevice
 			if(modifiersInfo==null)
 				return;
 			for(PButton.Type modifierType: PButton.TypeGroup.MODIFIER.getTypes()){
-				boolean value=getModifierValue(modifiersInfo.modifiers, modifierType);
+				boolean value=getModifierValue(modifiersInfo.modifiersEx, modifierType);
 				getPenManager().scheduleButtonEvent(KeyboardDevice.this, modifiersInfo.when, new PButton(modifierType, value) );
 			}
 		}
