@@ -26,6 +26,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.Point;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -90,7 +91,7 @@ public final class MouseDevice
 				}
 			};
 	private final SystemProvider systemProvider;
-	private Component activeComponent;
+	private WeakReference<Component> activeComponentRef;
 
 	MouseDevice(SystemProvider systemProvider) {
 		super(systemProvider);
@@ -109,17 +110,21 @@ public final class MouseDevice
 	}
 
 	void setPaused(boolean paused) {
+		Component activeComponent=activeComponentRef==null? null:activeComponentRef.get();
+		activeComponentRef=null;
 		if(activeComponent!=null){
 			activeComponent.removeMouseListener(mouseL);
 			activeComponent.removeMouseMotionListener(mouseMotionL);
 			activeComponent.removeMouseWheelListener(mouseWheelL);
-			activeComponent=null;
 		}
 		if(!paused){
 			activeComponent=systemProvider.componentPenOwner.getActiveComponent();
-			activeComponent.addMouseListener(mouseL);
-			activeComponent.addMouseMotionListener(mouseMotionL);
-			activeComponent.addMouseWheelListener(mouseWheelL);
+			if(activeComponent!=null){
+				activeComponent.addMouseListener(mouseL);
+				activeComponent.addMouseMotionListener(mouseMotionL);
+				activeComponent.addMouseWheelListener(mouseWheelL);
+				activeComponentRef=new WeakReference<Component>(activeComponent);
+			}
 		}
 	}
 

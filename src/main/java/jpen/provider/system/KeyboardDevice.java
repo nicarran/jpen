@@ -63,18 +63,28 @@ final class KeyboardDevice
 
 	private final AwtListener awtListener=new AwtListener();
 
+	private static class ModifiersInfo{
+			final int modifiers;
+			final long when;
+			ModifiersInfo(InputEvent inputEvent){
+				this.modifiers=inputEvent.getModifiers();
+				this.when=inputEvent.getWhen();
+			}
+		}
+
 	class AwtListener
 		implements AWTEventListener{
 
-		private InputEvent lastInputEvent;
+		private ModifiersInfo lastModifiersInfo;
 
 		//@Override
 		public void eventDispatched(AWTEvent ev){
 			if(ev instanceof InputEvent){
-				lastInputEvent=(InputEvent)ev;
-				if(lastInputEvent.getID()==MouseEvent.MOUSE_ENTERED){
+				InputEvent inputEvent=(InputEvent)ev;
+				lastModifiersInfo=new ModifiersInfo(inputEvent);
+				if(inputEvent.getID()==MouseEvent.MOUSE_ENTERED){
 					fireModifiers();
-				}else	if(lastInputEvent instanceof KeyEvent){
+				}else	if(inputEvent instanceof KeyEvent){
 					//System.out.println("lastInputEvent: "+lastInputEvent);
 					fireModifiers();
 				}
@@ -84,13 +94,12 @@ final class KeyboardDevice
 		private void fireModifiers(){
 			if(!getEnabled())
 				return;
-			InputEvent inputEvent=lastInputEvent; // local copy because this method is concurrent
-			if(inputEvent==null)
+			ModifiersInfo modifiersInfo=lastModifiersInfo;// local copy because this method is concurrent
+			if(modifiersInfo==null)
 				return;
-			int modifiers=inputEvent.getModifiersEx();
 			for(PButton.Type modifierType: PButton.TypeGroup.MODIFIER.getTypes()){
-				boolean value=getModifierValue(modifiers, modifierType);
-				getPenManager().scheduleButtonEvent(KeyboardDevice.this, inputEvent.getWhen(), new PButton(modifierType, value) );
+				boolean value=getModifierValue(modifiersInfo.modifiers, modifierType);
+				getPenManager().scheduleButtonEvent(KeyboardDevice.this, modifiersInfo.when, new PButton(modifierType, value) );
 			}
 		}
 	}
