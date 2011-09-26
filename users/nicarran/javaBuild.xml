@@ -244,7 +244,7 @@
 	</target>
 
 	<target name="test" description="Does JUnit tests" depends="compile, deptree">
-		<junit haltonfailure="yes" fork="yes" showoutput="yes" forkmode="once">
+		<junit haltonfailure="yes" fork="yes" showoutput="yes" forkmode="perTest">
 			<!--jvm="${java.command}" test on the current vm!-->
 			<jvmarg value="-Xmx512M"/>
 						<!--<jvmarg value="-Xms256M"/>-->
@@ -261,7 +261,7 @@
 				<fileset dir="deptree/test-deptree/jars" includes="*.jar"/>
 			</classpath>
 			<batchtest>
-				<fileset dir="src/test/java" includes="**/MultiComponentTest.class" excludes="**/*Tests.class"/>
+				<fileset dir="src/test/java" includes="**/*Test.class" excludes="**/*Tests.class **/demo/*Test.class **/multiAwt/*Test.class **/ScreenPenOwnerTest.class"/>
 			</batchtest>
 		</junit>
 	</target>
@@ -460,6 +460,9 @@ along with ${module.commercialId}.  If not, see &lt;http://www.gnu.org/licenses/
 			<fileset dir="." includes="src/**/*.java src/**/*.c src/**/*.h">
 				<not>
 					<contains text="Copyright "></contains>
+				</not>
+				<not>
+					<contains text="DO NOT EDIT"></contains>
 				</not>
 			</fileset>
 			<redirector>
