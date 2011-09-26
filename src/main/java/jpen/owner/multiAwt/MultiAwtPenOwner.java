@@ -62,7 +62,24 @@ final class MultiAwtPenOwner
 	}
 
 	private final PenListener penMulticaster=new PenListener(){
-				private final Collection<PenListener> listeners=new ArrayList<PenListener>();
+
+				private final Listeners listeners=new Listeners();
+
+				class Listeners
+					extends ArrayList<PenListener>{
+						
+					private ActiveComponentInfo activeComponentInfo;
+
+					void setActiveComponentInfo(ActiveComponentInfo activeComponentInfo){
+						if(this.activeComponentInfo==activeComponentInfo)
+							return;
+						this.activeComponentInfo=activeComponentInfo;
+						clear();
+						if(activeComponentInfo!=null)
+							activeComponentInfo.getPenListeners(listeners);
+					}
+				}
+
 
 				//@Override
 				public void penKindEvent(PKindEvent ev){
@@ -72,8 +89,9 @@ final class MultiAwtPenOwner
 				}
 
 				private void updateListeners(PenEvent ev){
-					ActiveComponentInfo activeComponentInfo=(ActiveComponentInfo)penManagerHandle.retrievePenEventTag(ev);
-					activeComponentInfo.getPenListeners(listeners);
+					listeners.setActiveComponentInfo(
+						(ActiveComponentInfo)penManagerHandle.retrievePenEventTag(ev)
+					);
 				}
 
 				//@Override
@@ -104,7 +122,7 @@ final class MultiAwtPenOwner
 						listener.penTock(availableMillis-=spentTimeMillis);
 						spentTimeMillis=(System.nanoTime()-startTimeNanos)/NANOS_TO_MILLIS_DIV;
 					}
-					listeners.clear();
+					listeners.setActiveComponentInfo(null);
 				}
 			};
 
