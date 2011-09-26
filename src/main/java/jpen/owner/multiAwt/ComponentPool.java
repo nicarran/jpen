@@ -26,6 +26,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,7 +35,12 @@ import java.util.Set;
 import jpen.event.PenListener;
 
 final class ComponentPool{
-	private final Map<Component, PenListener[]> componentToPenListeners=new HashMap<Component, PenListener[]>();
+	private final MultiAwtPenOwner multiAwtPenOwner;
+	private final Map<Component, PenListener[]> componentToPenListeners=Collections.synchronizedMap(new HashMap<Component, PenListener[]>());
+
+	ComponentPool(MultiAwtPenOwner multiAwtPenOwner){
+		this.multiAwtPenOwner=multiAwtPenOwner;
+	}
 
 	private final MouseListener mouseL=new MouseAdapter(){
 				@Override
@@ -69,16 +75,20 @@ final class ComponentPool{
 	}
 	private Listener listener;
 
-	synchronized Component getPointerComponent(){
-		return pointerComponent;
+	Component getPointerComponent(){
+		synchronized(multiAwtPenOwner.getPenSchedulerLock()){
+			return pointerComponent;
+		}
 	}
 
-	private synchronized void setPointerComponent(Component pointerComponent){
-		if(pointerComponent==this.pointerComponent)
-			return;
-		Component oldPointerComponent=this.pointerComponent;
-		this.pointerComponent=pointerComponent;
-		firePointerComponentChanged();
+	private void setPointerComponent(Component pointerComponent){
+		synchronized(multiAwtPenOwner.getPenSchedulerLock(pointerComponent)){
+			if(pointerComponent==this.pointerComponent)
+				return;
+			Component oldPointerComponent=this.pointerComponent;
+			this.pointerComponent=pointerComponent;
+			firePointerComponentChanged();
+		}
 	}
 
 	private void firePointerComponentChanged(){
@@ -91,37 +101,41 @@ final class ComponentPool{
 		this.listener=listener;
 	}
 
-	synchronized void addPenListener(Component component, PenListener penListener){
-		if(component==null || penListener==null)
-			throw new NullPointerException();
-		PenListener[] penListeners=componentToPenListeners.get(component);
-		if(penListeners==null){
-			componentToPenListeners.put(component, new PenListener[]{penListener});
-			component.addMouseListener(mouseL);
-			component.addHierarchyListener(hierarchyL);
-		}else{
-			Set<PenListener> newPenListeners=new LinkedHashSet<PenListener>(Arrays.asList(penListeners));
-			if(newPenListeners.add(penListener)){
-				componentToPenListeners.put(component, newPenListeners.toArray(new PenListener[newPenListeners.size()]));
+	void addPenListener(Component component, PenListener penListener){
+		synchronized(multiAwtPenOwner.getPenSchedulerLock()){
+			if(component==null || penListener==null)
+				throw new NullPointerException();
+			PenListener[] penListeners=componentToPenListeners.get(component);
+			if(penListeners==null){
+				componentToPenListeners.put(component, new PenListener[]{penListener});
+				component.addMouseListener(mouseL);
+				component.addHierarchyListener(hierarchyL);
+			}else{
+				Set<PenListener> newPenListeners=new LinkedHashSet<PenListener>(Arrays.asList(penListeners));
+				if(newPenListeners.add(penListener)){
+					componentToPenListeners.put(component, newPenListeners.toArray(new PenListener[newPenListeners.size()]));
+				}
 			}
 		}
 	}
 
-	synchronized void removePenListener(Component component, PenListener penListener){
-		PenListener[] penListeners=componentToPenListeners.get(component);
-		if(penListeners==null)
-			return;
-		List<PenListener> newPenListeners=new ArrayList<PenListener>(Arrays.asList(penListeners));
-		if(newPenListeners.remove(penListener)){
-			if(newPenListeners.isEmpty()){
-				componentToPenListeners.remove(component);
-				component.removeMouseListener(mouseL);
-				component.removeHierarchyListener(hierarchyL);
-				if(pointerComponent==component)
-					setPointerComponent(null);
-				fireComponentRemoved(component);
-			}else{
-				componentToPenListeners.put(component, newPenListeners.toArray(new PenListener[newPenListeners.size()]));
+	void removePenListener(Component component, PenListener penListener){
+		synchronized(multiAwtPenOwner.getPenSchedulerLock(component)){
+			PenListener[] penListeners=componentToPenListeners.get(component);
+			if(penListeners==null)
+				return;
+			List<PenListener> newPenListeners=new ArrayList<PenListener>(Arrays.asList(penListeners));
+			if(newPenListeners.remove(penListener)){
+				if(newPenListeners.isEmpty()){
+					componentToPenListeners.remove(component);
+					component.removeMouseListener(mouseL);
+					component.removeHierarchyListener(hierarchyL);
+					if(pointerComponent==component)
+						setPointerComponent(null);
+					fireComponentRemoved(component);
+				}else{
+					componentToPenListeners.put(component, newPenListeners.toArray(new PenListener[newPenListeners.size()]));
+				}
 			}
 		}
 	}
@@ -131,7 +145,7 @@ final class ComponentPool{
 		if(listener!=null)
 			listener.componentRemoved(component);
 	}
-	
+
 	private void fireComponentUndisplayable(Component component){
 		Listener listener=this.listener;
 		if(listener!=null)
@@ -140,7 +154,7 @@ final class ComponentPool{
 
 	private static final PenListener[] emptyPenListeners=new PenListener[0];
 
-	synchronized PenListener[] getPenListeners(Component component){
+	PenListener[] getPenListeners(Component component){
 		if(component==null)
 			return emptyPenListeners;
 		PenListener[] penListeners=componentToPenListeners.get(component);

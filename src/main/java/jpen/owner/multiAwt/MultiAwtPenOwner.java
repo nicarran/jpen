@@ -40,7 +40,7 @@ final class MultiAwtPenOwner
 	private static final Logger L=Logger.getLogger(MultiAwtPenOwner.class.getName());
 	//static { L.setLevel(Level.ALL); }
 
-	final ComponentPool componentPool=new ComponentPool();
+	final ComponentPool componentPool=new ComponentPool(this);
 	private ActiveComponentInfo activeComponentInfo;
 	static class ActiveComponentInfo{
 		private final WeakReference<Component>	componentRef;
@@ -211,5 +211,13 @@ final class MultiAwtPenOwner
 	@Override
 	public ActiveComponentInfo evalPenEventTag(PenEvent ev){
 		return activeComponentInfo;
+	}
+	
+	public Object getPenSchedulerLock(){
+		return this.getPenSchedulerLock(null);
+	}
+	
+	public Object getPenSchedulerLock(Component component){
+		return super.getPenSchedulerLock(component);
 	}
 }
