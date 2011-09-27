@@ -41,14 +41,14 @@ final class MultiAwtPenOwner
 	//static { L.setLevel(Level.ALL); }
 
 	final ComponentPool componentPool=new ComponentPool(this);
-	private ActiveComponentInfo activeComponentInfo;
-	static class ActiveComponentInfo{
+	private ActiveComponentInfo activeComponentInfo=new ActiveComponentInfo(null);
+	class ActiveComponentInfo{
 		private final WeakReference<Component>	componentRef;
 		private final WeakChain<PenListener> penListenersChain=new WeakChain<PenListener>();
 
-		ActiveComponentInfo(Component component, PenListener[] penListeners){
+		ActiveComponentInfo(Component component){
 			this.componentRef=new WeakReference<Component>(component);
-			for(PenListener penListener: penListeners)
+			for(PenListener penListener: componentPool.getPenListeners(component))
 				penListenersChain.add(penListener);
 		}
 
@@ -67,7 +67,7 @@ final class MultiAwtPenOwner
 
 				class Listeners
 					extends ArrayList<PenListener>{
-						
+
 					private ActiveComponentInfo activeComponentInfo;
 
 					void setActiveComponentInfo(ActiveComponentInfo activeComponentInfo){
@@ -158,7 +158,7 @@ final class MultiAwtPenOwner
 			if(component==null){
 				if(!startDraggingOut()){
 					pause();
-					activeComponentInfo=new ActiveComponentInfo(null, componentPool.getPenListeners(null));
+					activeComponentInfo=new ActiveComponentInfo(null);
 				}
 			}
 			else{
@@ -167,8 +167,7 @@ final class MultiAwtPenOwner
 						if(!stopDraggingOut())
 							throw new AssertionError();
 				}else{
-					activeComponentInfo=new ActiveComponentInfo(component,
-							componentPool.getPenListeners(component));
+					activeComponentInfo=new ActiveComponentInfo(component);
 					unpauser.enable();
 				}
 			}
@@ -199,6 +198,14 @@ final class MultiAwtPenOwner
 				});
 	}
 
+	//@Override
+	public void pointerComponentPenListenersChanged(Component pointerComponent){
+		synchronized(getPenSchedulerLock()){
+			if(pointerComponent==getActiveComponent())
+				activeComponentInfo=new ActiveComponentInfo(pointerComponent);
+		}
+	}
+
 	@Override
 	protected void draggingOutDisengaged(){
 		super.draggingOutDisengaged();
@@ -212,11 +219,11 @@ final class MultiAwtPenOwner
 	public ActiveComponentInfo evalPenEventTag(PenEvent ev){
 		return activeComponentInfo;
 	}
-	
+
 	public Object getPenSchedulerLock(){
 		return this.getPenSchedulerLock(null);
 	}
-	
+
 	public Object getPenSchedulerLock(Component component){
 		return super.getPenSchedulerLock(component);
 	}

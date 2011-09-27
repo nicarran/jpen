@@ -70,6 +70,7 @@ final class ComponentPool{
 
 	static interface Listener{
 		void pointerComponentChanged(Component pointerComponent);
+		void pointerComponentPenListenersChanged(Component pointerComponent);
 		void componentRemoved(Component component);
 		void componentUndisplayable(Component component);
 	}
@@ -110,13 +111,25 @@ final class ComponentPool{
 				componentToPenListeners.put(component, new PenListener[]{penListener});
 				component.addMouseListener(mouseL);
 				component.addHierarchyListener(hierarchyL);
+				if(component.getMousePosition()!=null){
+					setPointerComponent(component);
+				}
 			}else{
 				Set<PenListener> newPenListeners=new LinkedHashSet<PenListener>(Arrays.asList(penListeners));
 				if(newPenListeners.add(penListener)){
 					componentToPenListeners.put(component, newPenListeners.toArray(new PenListener[newPenListeners.size()]));
+					firePointerComponentPenListenersChanged(component);
 				}
 			}
 		}
+	}
+
+	private void firePointerComponentPenListenersChanged(Component component){
+		if(pointerComponent!=component)
+			return;
+		Listener listener=this.listener;
+		if(listener!=null)
+			listener.pointerComponentPenListenersChanged(component);
 	}
 
 	void removePenListener(Component component, PenListener penListener){
@@ -135,6 +148,7 @@ final class ComponentPool{
 					fireComponentRemoved(component);
 				}else{
 					componentToPenListeners.put(component, newPenListeners.toArray(new PenListener[newPenListeners.size()]));
+					firePointerComponentPenListenersChanged(component);
 				}
 			}
 		}
