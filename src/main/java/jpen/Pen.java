@@ -19,6 +19,8 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 package jpen;
 
 import java.lang.reflect.InvocationTargetException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -86,7 +88,13 @@ public class Pen extends PenState {
 			periodMillis=1000/Pen.this.frequency;
 			this.oldThread=oldThread;
 			setName("jpen-Pen-["+periodMillis+"ms]");
-			setDaemon(true);
+			AccessController.doPrivileged(new PrivilegedAction<Object>(){
+						//@Override
+						public Object run(){
+							setDaemon(true);
+							return null;
+						}
+					});
 		}
 		private final Runnable penTockFirer=new Runnable(){
 					//@Override
