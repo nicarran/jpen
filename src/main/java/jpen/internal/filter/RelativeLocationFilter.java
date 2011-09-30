@@ -22,6 +22,8 @@ import java.awt.geom.Point2D;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Collection;
 import java.util.logging.Logger;
 import jpen.PenDevice;
@@ -64,7 +66,7 @@ public final class RelativeLocationFilter{
 		boolean reset(Collection<PLevel> sample){
 			levelX=levelY=null;
 			int valuesCount=0;
-			out:
+		out:
 			for(PLevel level: sample){
 				switch(level.getType()){
 				case X:
@@ -84,7 +86,7 @@ public final class RelativeLocationFilter{
 			isComplete=valuesCount==2;
 			return valuesCount>0;
 		}
-		
+
 		private void set(float x, float y){
 			set(x, y, null);
 		}
@@ -158,7 +160,7 @@ public final class RelativeLocationFilter{
 			return false;
 		if(!setupReference())
 			return true;
-		
+
 		boolean stateChanged=false;
 		if(state.equals(State.UNDEFINED)){
 			setupDeviation();
@@ -184,15 +186,22 @@ public final class RelativeLocationFilter{
 	}
 
 	private boolean setupReference(){
-		PointerInfo pointerInfo=MouseInfo.getPointerInfo();
-		if(pointerInfo==null){
-			L.warning("No mouse found. Can not correct devices on relative (mouse) mode.");
-			state=State.OFF;
-			return false;
-		}
-		reference.setLocation(pointerInfo.getLocation());
-		return true;
+		return AccessController.doPrivileged(setupReferenceAction);
 	}
+
+	private final PrivilegedAction<Boolean> setupReferenceAction=new PrivilegedAction<Boolean>(){
+		//@Override
+		public Boolean run(){
+			PointerInfo pointerInfo=MouseInfo.getPointerInfo();
+			if(pointerInfo==null){
+				L.warning("No mouse found. Can not correct devices on relative (mouse) mode.");
+				state=State.OFF;
+				return false;
+			}
+			reference.setLocation(pointerInfo.getLocation());
+			return true;
+		}
+	};
 
 	private void setupDeviation(){
 		if(samplePoint.levelX!=null){
@@ -215,7 +224,7 @@ public final class RelativeLocationFilter{
 		}
 		return false;
 	}
-	
+
 	public State getState(){
 		return state;
 	}

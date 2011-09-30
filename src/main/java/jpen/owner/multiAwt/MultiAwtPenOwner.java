@@ -41,15 +41,18 @@ final class MultiAwtPenOwner
 	//static { L.setLevel(Level.ALL); }
 
 	final ComponentPool componentPool=new ComponentPool(this);
-	private ActiveComponentInfo activeComponentInfo=new ActiveComponentInfo(null);
-	class ActiveComponentInfo{
+	private ActiveComponentInfo activeComponentInfo=ActiveComponentInfo.emptyInstance;
+	static class ActiveComponentInfo{
 		private final WeakReference<Component>	componentRef;
 		private final WeakChain<PenListener> penListenersChain=new WeakChain<PenListener>();
+		
+		static final ActiveComponentInfo emptyInstance=new ActiveComponentInfo(null, null);
 
-		ActiveComponentInfo(Component component){
+		ActiveComponentInfo(Component component, PenListener[] penListeners){
 			this.componentRef=new WeakReference<Component>(component);
-			for(PenListener penListener: componentPool.getPenListeners(component))
-				penListenersChain.add(penListener);
+			if(penListeners!=null)
+				for(PenListener penListener: penListeners)
+					penListenersChain.add(penListener);
 		}
 
 		Component getComponent(){
@@ -158,7 +161,7 @@ final class MultiAwtPenOwner
 			if(component==null){
 				if(!startDraggingOut()){
 					pause();
-					activeComponentInfo=new ActiveComponentInfo(null);
+					activeComponentInfo=ActiveComponentInfo.emptyInstance;
 				}
 			}
 			else{
@@ -167,7 +170,7 @@ final class MultiAwtPenOwner
 						if(!stopDraggingOut())
 							throw new AssertionError();
 				}else{
-					activeComponentInfo=new ActiveComponentInfo(component);
+					activeComponentInfo=new ActiveComponentInfo(component, componentPool.getPenListeners(component));
 					unpauser.enable();
 				}
 			}
@@ -202,7 +205,7 @@ final class MultiAwtPenOwner
 	public void pointerComponentPenListenersChanged(Component pointerComponent){
 		synchronized(getPenSchedulerLock()){
 			if(pointerComponent==getActiveComponent())
-				activeComponentInfo=new ActiveComponentInfo(pointerComponent);
+				activeComponentInfo=new ActiveComponentInfo(pointerComponent, componentPool.getPenListeners(pointerComponent));
 		}
 	}
 
