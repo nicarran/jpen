@@ -186,22 +186,22 @@ public final class RelativeLocationFilter{
 	}
 
 	private boolean setupReference(){
-		return AccessController.doPrivileged(setupReferenceAction);
+		PointerInfo pointerInfo=AccessController.doPrivileged(getPointerInfoAction);
+		if(pointerInfo==null){
+			L.warning("No mouse found. Can not correct devices on relative (mouse) mode.");
+			state=State.OFF;
+			return false;
+		}
+		reference.setLocation(pointerInfo.getLocation());
+		return true;
 	}
 
-	private final PrivilegedAction<Boolean> setupReferenceAction=new PrivilegedAction<Boolean>(){
-		//@Override
-		public Boolean run(){
-			PointerInfo pointerInfo=MouseInfo.getPointerInfo();
-			if(pointerInfo==null){
-				L.warning("No mouse found. Can not correct devices on relative (mouse) mode.");
-				state=State.OFF;
-				return false;
-			}
-			reference.setLocation(pointerInfo.getLocation());
-			return true;
-		}
-	};
+	private final PrivilegedAction<PointerInfo> getPointerInfoAction=new PrivilegedAction<PointerInfo>(){
+				//@Override
+				public PointerInfo run(){
+					return MouseInfo.getPointerInfo();
+				}
+			};
 
 	private void setupDeviation(){
 		if(samplePoint.levelX!=null){
