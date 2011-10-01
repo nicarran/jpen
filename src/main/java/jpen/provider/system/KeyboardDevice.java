@@ -24,6 +24,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.Toolkit;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.logging.Logger;
 import jpen.PButton;
 import jpen.PenProvider;
@@ -50,7 +52,14 @@ final class KeyboardDevice
 	public void setEnabled(boolean enabled){
 		super.setEnabled(enabled);
 		if(enabled){
-			Toolkit.getDefaultToolkit().addAWTEventListener(awtListener, AWTEvent.KEY_EVENT_MASK | AWTEvent.MOUSE_EVENT_MASK);
+			AccessController.doPrivileged(new PrivilegedAction<Object>(){
+						//@Override
+						public Object run(){
+							Toolkit.getDefaultToolkit().addAWTEventListener(awtListener, AWTEvent.KEY_EVENT_MASK | AWTEvent.MOUSE_EVENT_MASK);
+							return null;
+						}
+					});
+
 		}else{
 			Toolkit.getDefaultToolkit().removeAWTEventListener(awtListener);
 		}
@@ -64,13 +73,13 @@ final class KeyboardDevice
 	private final AwtListener awtListener=new AwtListener();
 
 	private static class ModifiersInfo{
-			final int modifiersEx;
-			final long when;
-			ModifiersInfo(InputEvent inputEvent){
-				this.modifiersEx=inputEvent.getModifiersEx();
-				this.when=inputEvent.getWhen();
-			}
+		final int modifiersEx;
+		final long when;
+		ModifiersInfo(InputEvent inputEvent){
+			this.modifiersEx=inputEvent.getModifiersEx();
+			this.when=inputEvent.getWhen();
 		}
+	}
 
 	class AwtListener
 		implements AWTEventListener{
