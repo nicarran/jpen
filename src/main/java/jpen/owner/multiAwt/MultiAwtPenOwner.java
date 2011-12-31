@@ -45,7 +45,7 @@ final class MultiAwtPenOwner
 	static class ActiveComponentInfo{
 		private final WeakReference<Component>	componentRef;
 		private final WeakChain<PenListener> penListenersChain=new WeakChain<PenListener>();
-		
+
 		static final ActiveComponentInfo emptyInstance=new ActiveComponentInfo(null, null);
 
 		ActiveComponentInfo(Component component, PenListener[] penListeners){
@@ -68,7 +68,7 @@ final class MultiAwtPenOwner
 
 				private final Listeners listeners=new Listeners();
 
-				class Listeners
+				final class Listeners
 					extends ArrayList<PenListener>{
 
 					private ActiveComponentInfo activeComponentInfo;
@@ -118,18 +118,34 @@ final class MultiAwtPenOwner
 
 				private static final long NANOS_TO_MILLIS_DIV=1000000l;
 				//@Override
-				public void penTock(long availableMillis){
-					long spentTimeMillis=0;
+				public void penTock(final long availableMillis){
+					/*
+					long startTime=System.nanoTime();
 					for(PenListener listener: listeners){
-						long startTimeNanos=System.nanoTime();
-						listener.penTock(availableMillis-=spentTimeMillis);
-						spentTimeMillis=(System.nanoTime()-startTimeNanos)/NANOS_TO_MILLIS_DIV;
+						listener.penTock(availableMillis- (System.nanoTime()-startTime)/NANOS_TO_MILLIS_DIV );
+				}
+					*/
+					//v System.nanoTime is expensive compared to currentTimeMillis => optimized version of the previous loop:
+					int size=listeners.size();
+					switch(size){ // optimized loop
+					case 0:
+						break;
+					case 1:
+						listeners.get(0).penTock(availableMillis);
+						break;
+					default:
+						long startTime=System.nanoTime();
+						listeners.get(0).penTock(availableMillis);
+						for(int i=1; i<size; i++)
+							listeners.get(i).penTock(availableMillis-
+									(System.nanoTime()-startTime)/NANOS_TO_MILLIS_DIV);
 					}
+					//^
 					listeners.setActiveComponentInfo(null);
 				}
 			};
 
-	MultiAwtPenOwner(){}
+MultiAwtPenOwner(){}
 
 	PenManagerHandle getPenManagerHandle(){
 		return penManagerHandle;
