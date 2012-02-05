@@ -63,13 +63,15 @@ public final class ActiveWindowProperty
 		if(activeWindow==this.activeWindow)
 			return;
 		if(activeWindow==null){
-			// if the new activeWindow is null then we do the change only after a delay to avoid unnecessary changes to null activeWindow (java does change the activeWindow to null when switching).
+			// if the new activeWindow is null then we do the change only after a delay to avoid unnecessary changes to null (java does change the activeWindow to null when switching).
 			if(nullWindowTask==null || nullWindowTask.isDone())
 				nullWindowTask=nullWindowScheduler.schedule(this, 50, TimeUnit.MILLISECONDS);
 			return;
 		}
-		if(nullWindowTask!=null)
+		if(nullWindowTask!=null){
 			nullWindowTask.cancel(false);
+			nullWindowTask=null;
+		}
 		set(activeWindow);
 	}
 
