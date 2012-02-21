@@ -96,19 +96,19 @@ int Access_preCreate(SAccess *pAccess) {
 	}
 
 	// Set up wintab queue size:
+	
+	
+	/*The queue size is 8 by default (http://www.wacomeng.com/windows/docs/WacomWindevFAQ.html#_Toc276983623). Try to enlarge it to the QUEUE_SIZE value:
+	vvv
+	*/
 	int wintabQueueSize=QUEUE_SIZE;
-	int wintabQueueSizeSetted=0;
-	for(; wintabQueueSize>=2; wintabQueueSize-=2){
-		wintabQueueSizeSetted=WTQueueSizeSet(pAccess->ctx, wintabQueueSize);
-		if(wintabQueueSizeSetted)
+	for(; wintabQueueSize>8; wintabQueueSize-=4){
+		if(WTQueueSizeSet(pAccess->ctx, wintabQueueSize))
 			break;
 	}
-	if(!wintabQueueSizeSetted){
-		Access_setError("Couldn't set up the wintab queue size.");
-		Access_preDestroy(pAccess);
-		return errorState;
-	}
+	//sometimes tablets (e.g. wacom-cintiq)  do not allow changing the queue size so we don't bark if the queue size couldn't be set.
 	//printf("C: wintab queue size: %i \n",WTQueueSizeGet(pAccess->ctx)); // D
+	//^^^
 
 	return cleanState;
 }
