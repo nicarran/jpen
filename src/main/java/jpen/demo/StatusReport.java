@@ -92,7 +92,7 @@ public class StatusReport{
 				appendLine(propertyName+": "+System.getProperty(propertyName), 1);
 			}
 		}catch(SecurityException ex){
-			appendLine("System Properties are not readable. You can install JPen as a Java Extension to avoid security restrictions.", 1);
+			appendLine("Security Exception: system properties are not readable.", 1);
 		}
 	}
 
