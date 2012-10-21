@@ -56,7 +56,7 @@ final class XinputDevice extends AbstractPenDevice {
 	private final XinputProvider xinputProvider;
 	private final Point2D.Float componentLocation=new Point2D.Float();
 	private final Dimension componentSize=new Dimension();
-	final boolean isPad;
+	private final boolean isPad;
 	private final Thread thread;
 	private boolean isListening;
 
@@ -66,24 +66,24 @@ final class XinputDevice extends AbstractPenDevice {
 		this.xinputProvider=xinputProvider;
 		levelRanges=new Range[PLevel.Type.VALUES.size()];
 		resetLevelRanges();
-		isPad=getName().toLowerCase().contains("pad");
+		isPad=getName().toLowerCase().contains(" pad");
 		setKindTypeNumber(getDefaultKindTypeNumber());
 		thread=new Thread("jpen-XinputDevice-"+getName()){
-						 @Override
-						 public void run(){
-							 while(true){
-								 while(!isWorking())
-									 ObjectUtils.synchronizedWait(this, 0);
-								 if(XinputDevice.this.xiDevice.waitNextEvent())
-									 processLastEvent();
-								 else {// then a call to xiDevice.stopWaitingNextEvent was made
-									 //System.out.println("stopWaitingNextEvent was called");
-									 synchronized(XinputDevice.this){ // try to aquire this lock to wait until the XinputDevice.this sync methods return
-									 }
+					 @Override
+					 public void run(){
+						 while(true){
+							 while(!isWorking())
+								 ObjectUtils.synchronizedWait(this, 0);
+							 if(XinputDevice.this.xiDevice.waitNextEvent())
+								 processLastEvent();
+							 else {// then a call to xiDevice.stopWaitingNextEvent was made
+								 //System.out.println("stopWaitingNextEvent was called");
+								 synchronized(XinputDevice.this){ // try to aquire this lock to wait until the XinputDevice.this sync methods return
 								 }
 							 }
 						 }
-					 };
+					 }
+				 };
 		thread.setPriority(Thread.MAX_PRIORITY);
 		thread.setDaemon(true);
 		thread.start();
@@ -159,20 +159,23 @@ final class XinputDevice extends AbstractPenDevice {
 			return PKind.Type.ERASER.ordinal();
 		if(lowerCaseName.contains("cursor"))
 			return PKind.Type.CURSOR.ordinal();
-		return PKind.Type.STYLUS.ordinal();
+		Range pressureRange=levelRanges[PLevel.Type.PRESSURE.ordinal()];
+		return pressureRange.max-pressureRange.min>1?
+				 PKind.Type.STYLUS.ordinal():
+				 PKind.Type.CURSOR.ordinal();
 	}
 
 	private void processLastEvent(){
 		EventType eventType=xiDevice.getLastEventType();
 		switch(eventType) {
-		/* nicarran: TODO: support buttons?
-		case BUTTON_PRESS:
-			//scheduleButtonEvent(xiDevice.getLastEventButton(), true); 
-			break;
-		case BUTTON_RELEASE:
-			//scheduleButtonEvent(xiDevice.getLastEventButton(), false);
-			break;
-		*/
+			/* nicarran: TODO: support buttons?
+			case BUTTON_PRESS:
+				//scheduleButtonEvent(xiDevice.getLastEventButton(), true); 
+				break;
+			case BUTTON_RELEASE:
+				//scheduleButtonEvent(xiDevice.getLastEventButton(), false);
+				break;
+			*/
 		case MOTION_NOTIFY:
 			scheduleLevelEvent();
 			break;
@@ -208,7 +211,7 @@ final class XinputDevice extends AbstractPenDevice {
 			return;
 		}
 		getPenManager().scheduleButtonEvent(this, xiDevice.getLastEventTime(), new PButton(types.get(number-1), state));
-	}
+}
 	*/
 
 	private static final float RADS_PER_DEG=(float)(Math.PI/180);
@@ -231,23 +234,23 @@ final class XinputDevice extends AbstractPenDevice {
 
 		if(PLevel.Type.MOVEMENT_TYPES.contains(levelType))
 			devValue=xinputProvider.screenBounds.getLevelRangeOffset(levelType)+
-							 devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);
+						devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);
 
 		return devValue;
 	}
-	
+
 	/* nicarran: experimental: support relative movements like the wintab provider?
-	
+
 	private boolean useFractionalMovement=true;
-	
+
 	@Override
 	public final boolean getUseFractionalMovements(){
 		return useFractionalMovement;
-	}
-	
+}
+
 	@Override
 	public void penManagerSetUseFractionalMovements(boolean useFractionalMovement){
 		this.useFractionalMovement=useFractionalMovement;
-	}
+}
 	*/
 }
