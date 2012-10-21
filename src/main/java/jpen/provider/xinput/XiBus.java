@@ -31,7 +31,7 @@ final class XiBus {
 	<li>The c/utils/macro.c-h framework is not thread safe, its functions must be serialized (per class-row).
 	</ul>
 
-	Sometime is needed to synchronize against the X-Server but not against the macro.c/f framework (1), sometimes is needed to synchronize against the macro.c/f framework alone (2), and sometimes is needed to synchronize against both (3). The locks must be acquired in this order: XiBus instance first (public lock), {@code macrofLock} later. Trying to hold XiBus instance lock after holding macrofLock will cause dead-locks.
+	Sometimes is needed to synchronize against the X-Server but not against the macro.c/f framework (1), sometimes is needed to synchronize against the macro.c/f framework alone (2), and sometimes is needed to synchronize against both (3). The locks must be acquired in this order: XiBus instance first (public lock), {@code macrofLock} later. Trying to hold XiBus instance lock after holding macrofLock will cause dead-locks.
 	*/
 	static final Object macrofLock=new Object();
 
