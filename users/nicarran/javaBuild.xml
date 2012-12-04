@@ -248,11 +248,11 @@
 			<!--jvm="${java.command}" test on the current vm!-->
 			<jvmarg value="-Xmx512M"/>
 						<!--<jvmarg value="-Xms256M"/>-->
-			<jvmarg value="-Djava.util.logging.config.file=logging.properties"/>
+			<!--<jvmarg value="-Djava.util.logging.config.file=logging.properties"/>-->
 						<!--<jvmarg value="-verbose:gc"/>-->
 						<!--<jvmarg value="-XX:+ShowMessageBoxOnError"/>-->
 						<!--<jvmarg value="-Xincgc"/>-->
-			<jvmarg value="-Dsun.java2d.opengl=True"/>
+			<!--<jvmarg value="-Dsun.java2d.opengl=True"/>-->
 			<jvmarg value="-Djava.library.path=deptree/main-deptree/jars:deptree/test-deptree/jars"/>
 			<formatter type="plain" usefile="false"/>
 			<classpath>
@@ -261,7 +261,7 @@
 				<fileset dir="deptree/test-deptree/jars" includes="*.jar"/>
 			</classpath>
 			<batchtest>
-				<fileset dir="src/test/java" includes="**/*Test.class" excludes="**/*Tests.class **/demo/*Test.class **/multiAwt/*Test.class **/ScreenPenOwnerTest.class"/>
+				<fileset dir="src/test/java" includes="**/ProfilingTest.class" excludes="**/*Tests.class **/demo/*Test.class **/multiAwt/*Test.class **/ScreenPenOwnerTest.class"/>
 			</batchtest>
 		</junit>
 	</target>
@@ -377,7 +377,7 @@ java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 	<target name="javadoc" description="Prepares and generates Javadoc" depends="init" unless="disable.javadoc">
 		<delete dir="product/javadoc"/>
 		<mkdir dir="product/javadoc"/>
-		<javadoc WindowTitle="${module.id-fullVer}" DocTitle="${module.commercialId}-${module.version}" destdir="product/javadoc" classpathref="module.depclasspath" linksource="yes" stylesheetfile="/home/nicarran/boxes/latex2html/latex2html.css" bottom="&lt;div class=&quot;bottom&quot;&gt; Copyright &#169; ${copyright.years} &lt;a target=&quot;_blank&quot; href=&quot;${module.url}&quot;&gt;${module.commercialId}&lt;/a&gt;. &lt;/div&gt;">
+		<javadoc WindowTitle="${module.id-fullVer}" DocTitle="${module.commercialId}-${module.version}" destdir="product/javadoc" classpathref="module.depclasspath" linksource="yes" bottom="&lt;div class=&quot;bottom&quot;&gt; Copyright &#169; ${copyright.years} &lt;a target=&quot;_blank&quot; href=&quot;${module.url}&quot;&gt;${module.commercialId}&lt;/a&gt;. &lt;/div&gt;">
 		<!--
 		bottom="&lt;div class=&quot;bottom&quot;&gt; Copyright &#169; ${copyright.years} ${module.author} and individual contributors. &lt;a href=&quot;${module.url}&quot;&gt;${module.commercialId}&lt;/a&gt; is licensed under the &lt;a href=&quot;http://www.gnu.org/licenses/lgpl.html&quot;&gt;GNU LGPL&lt;/a&gt;. &lt;/div&gt;"
 		-->
@@ -391,6 +391,11 @@ java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 			<package name="jpen.demo"/>
 			-->
 		</javadoc>
+		<exec executable="ln" os="Linux">
+			<arg value="-sfT"/>
+			<arg value="/home/nicarran/boxes/javadoc/stylesheet-nicarran.css"/>
+			<arg value="product/javadoc/stylesheet.css"/>
+		</exec>
 	</target>
 
 	<target name="javadocUml" description="Prepares and generates Javadoc" depends="init" unless="disable.javadoc">

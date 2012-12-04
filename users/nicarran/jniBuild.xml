@@ -11,6 +11,8 @@
 		<property name="linux_jniHeadersPath" value="/opt/sun-jdk-1.5.0.22/include"/>
 		<property name="windows_jniHeadersPath" value="/home/nicarran/aux/distributions/jdk-6_23-windows-include"/>
 		
+		<property name="java.extDir" value="/opt/sun-jdk-1.6.0.27/jre/lib/ext"/>
+		
 		<property name="module.windowsGccExtraLib" value="-Llib -lWintab32 "/>
 		<property name="module.windowsGccExtraLib-64" value="-Llib-64 -lWintab64"/>
 		
@@ -255,6 +257,18 @@
 	</target>
 	
 	<target name="lib" depends="updateNativeBuildHeaders, libLinux, libWin, libOsx"/>
+	
+	<target name="installExtension" depends="init">
+		<copy toDir="${java.extDir}" overwrite="yes">
+			<fileset dir="product" includes="lib*${module.artifactId}*.so,*${module.artifactId}*.jar" />
+		</copy>
+	</target>
+	
+	<target name="uninstallExtension" depends="init">
+		<delete>
+			<fileset dir="${java.extDir}" includes="lib*${module.artifactId}*.so,*${module.artifactId}*.jar" />
+		</delete>
+	</target>
 	
 	<target name="all" depends="clean, lib, javaBuild.all"/>
 
