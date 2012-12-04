@@ -195,7 +195,6 @@ MultiAwtPenOwner(){}
 
 	//@Override
 	public void componentRemoved(Component component){
-		System.out.println(Thread.currentThread().holdsLock(component.getTreeLock()));
 		stopDraggingOutAndPause(component);
 	}
 
