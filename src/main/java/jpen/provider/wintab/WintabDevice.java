@@ -44,6 +44,10 @@ class WintabDevice
 	extends AbstractPenDevice {
 	private static final Logger L=Logger.getLogger(WintabDevice.class.getName());
 	//static { L.setLevel(Level.ALL);	}
+	
+	private static final String PRINT_ALTITUDE_AND_AZIMUTH_SYSTEM_PROPERTY="jpen.provider.wintab.WintabDevice.printAltitudeAndAzimuth";
+	private static final boolean PRINT_ALTITUDE_AND_AZIMUTH=Boolean.valueOf(
+				System.getProperty(PRINT_ALTITUDE_AND_AZIMUTH_SYSTEM_PROPERTY));
 
 	final WintabProvider wintabProvider;
 	public final int cursor;
@@ -75,13 +79,13 @@ class WintabDevice
 
 	@Override
 	protected String evalPhysicalId(){
-		return  wintabProvider.wintabAccess.getRawCursorType(cursor)+"."
-						+wintabProvider.wintabAccess.getPhysicalId(cursor)+"@"
+		return  WintabAccess.getRawCursorType(cursor)+"."
+						+WintabAccess.getPhysicalId(cursor)+"@"
 						+wintabProvider.getConstructor().getName();
 	}
 
 	private int getDefaultKindTypeNumber() {
-		WintabAccess.CursorType cursorType=wintabProvider.wintabAccess.getCursorType(cursor);
+		WintabAccess.CursorType cursorType=WintabAccess.getCursorType(cursor);
 		switch(cursorType) {
 		case PENTIP:
 			return PKind.Type.STYLUS.ordinal();
@@ -103,7 +107,7 @@ class WintabDevice
 	}
 
 	public String getName() {
-		return wintabProvider.wintabAccess.getCursorName(cursor).trim();
+		return WintabAccess.getCursorName(cursor).trim();
 	}
 
 	void scheduleEvents() {
@@ -143,7 +147,6 @@ class WintabDevice
 			float value=getMultRangedValue(levelType);
 			changedLevels.add(new PLevel(levelType, value));
 		}
-
 		getPenManager().scheduleLevelEvent(this, wintabProvider.wintabAccess.getTime(), changedLevels, true);
 		changedLevels.clear();
 	}
@@ -154,17 +157,24 @@ class WintabDevice
 
 	private float getMultRangedValue(PLevel.Type type) {
 		if(PLevel.Type.TILT_TYPES.contains(type)) {
-			// see tiltOnWintab.xoj
-			int altitude=wintabProvider.wintabAccess.getValue(PLevel.Type.TILT_Y);
+			double altitude=wintabProvider.wintabAccess.getValue(PLevel.Type.TILT_Y);
 			if(altitude<0)
-				altitude=-altitude; // when using the eraser the altitude is upside down
-			if(altitude==900) // altitude values are given (in deg) multiplied by 10. Always 900 when tilt is not supported by the tablet.
+				altitude=-altitude; // when using the eraser the altitude is upside down.
+			double rangedAltitude=altitude/wintabProvider.getLevelRange(PLevel.Type.TILT_Y).max; // 0 (0deg) <= rangedAltitude <= 1 (90deg)
+			if(rangedAltitude==1){ // optimization
+				if(PRINT_ALTITUDE_AND_AZIMUTH)
+					System.out.println("rangedAlt: 1");
 				return 0;
-			double betha=
-				altitude*PI_over_2_over_900;
-			double theta=
-				wintabProvider.wintabAccess.getValue(PLevel.Type.TILT_X)*PI_over_2_over_900
-				-PI_over_2;
+			}
+			double betha=rangedAltitude*PI_over_2; // see tiltOnWintab.xoj to understand the meaning of betha and theta
+			
+			double azimuth=wintabProvider.wintabAccess.getValue(PLevel.Type.TILT_X);
+			double rangedAzimuth=azimuth/getCorrectAzimuthRangeMax(); // 0 (0deg) <= rangedAzimuth < 1 (360deg)
+			double theta=rangedAzimuth*PI_2-PI_over_2;
+			
+			if(PRINT_ALTITUDE_AND_AZIMUTH)
+				System.out.printf("alt: %4.0f - az: %4.0f | rangedAlt: %1.3f - rangedAz: %1.3f \n", altitude, azimuth, rangedAltitude, rangedAzimuth);
+			
 			switch(type) {
 			case TILT_X:
 				return (float)atan(cos(theta)/tan(betha));
@@ -190,4 +200,19 @@ class WintabDevice
 
 		return rangedValue;
 	}
+	
+	/**
+	The maximum value for the azimuth must be corrected to be the equivalent of 360deg. On Wacom Intuos the values is the corresponding Range.max but on other tablet it is assumed that the value could less than  360 (1 less than 360 given its resolution). So we simply add to the Range.max until we get a multiple of 360. See bug https://sourceforge.net/tracker/?func=detail&aid=3603044&group_id=209997&atid=1011964 . 
+	*/
+	private float getCorrectAzimuthRangeMax(){
+		if(correctAzimuthRangeMax!=-1)
+			return correctAzimuthRangeMax;
+		correctAzimuthRangeMax=wintabProvider.getLevelRange(PLevel.Type.TILT_X).max;
+		while(correctAzimuthRangeMax%360!=0)
+			correctAzimuthRangeMax++;
+		//System.out.println("correctAzimuthRangeMax=" + ( correctAzimuthRangeMax ));
+		return correctAzimuthRangeMax;
+	}
+	
+	private float correctAzimuthRangeMax=-1;
 }
