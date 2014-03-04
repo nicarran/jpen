@@ -1,18 +1,18 @@
 /* [{
 Copyright 2007, 2008 Nicolas Carranza <nicarran at gmail.com>
-
+ 
 This file is part of jpen.
-
+ 
 jpen is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
-
+ 
 jpen is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Lesser General Public License for more details.
-
+ 
 You should have received a copy of the GNU Lesser General Public License
 along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
@@ -28,8 +28,10 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Set;
+
 import jpen.event.PenManagerListener;
 import jpen.internal.BuildInfo;
+import jpen.internal.ObjectUtils;
 import jpen.owner.awt.AwtPenOwner;
 import jpen.owner.PenOwner;
 import jpen.provider.system.MouseDevice;
@@ -39,23 +41,23 @@ Create a {@code PenManager} to start using JPen, {@link jpen.owner.multiAwt.AwtP
 public final class PenManager {
 	private static final Logger L=Logger.getLogger(PenManager.class.getName());
 
-	public static String getJPenFullVersion(){
+	public static String getJPenFullVersion() {
 		return BuildInfo.getFullVersion();
 	}
 
 	private static int instanceCount;
 	private static boolean singletonMode;
 
-	private synchronized static void incrementInstanceCount(){
+	private synchronized static void incrementInstanceCount() {
 		if(singletonMode && instanceCount!=0)
 			throw new IllegalStateException("can't create more than one PenManager when in singleton mode");
 		instanceCount++;
 	}
-	
+
 	/**
 	See {@link PenOwner#enforceSinglePenManager()}.
 	*/
-	private synchronized static void setSingletonMode(boolean singletonMode){
+	private synchronized static void setSingletonMode(boolean singletonMode) {
 		if(singletonMode && instanceCount>1)
 			throw new IllegalStateException("can't change singleton mode to true when many PenManagers has already being created");
 		PenManager.singletonMode=singletonMode;
@@ -63,7 +65,7 @@ public final class PenManager {
 
 	public final Pen  pen=new Pen(this);
 	public final PenOwner penOwner;
-	private final Set<PenProvider.Constructor> providerConstructors=new HashSet<PenProvider.Constructor>();
+	private final Set<PenProvider.Constructor> providerConstructors=Collections.synchronizedSet(new HashSet<PenProvider.Constructor>());
 	private final Set<PenProvider.Constructor> providerConstructorsA=Collections.unmodifiableSet(providerConstructors);
 	private final Map<Byte, PenDevice> deviceIdToDevice=new HashMap<Byte, PenDevice>(Byte.MAX_VALUE, 1f);
 	private final Collection<PenDevice> devicesA=Collections.unmodifiableCollection(deviceIdToDevice.values());
@@ -81,50 +83,77 @@ public final class PenManager {
 		this(new AwtPenOwner(component));
 	}
 
-	public PenManager(PenOwner penOwner){
+	public PenManager(PenOwner penOwner) {
 		if(penOwner.enforceSinglePenManager())
 			setSingletonMode(true);
 		incrementInstanceCount();
 		this.penOwner=penOwner;
-		synchronized(pen.scheduler){
+		synchronized(pen.scheduler) {
 			PenProvider.Constructor emulationProviderConstructor=new EmulationProvider.Constructor();
 			addProvider(emulationProviderConstructor);
 			@SuppressWarnings("unchecked")
 			EmulationProvider emulationProvider=(EmulationProvider)emulationProviderConstructor.getConstructed();
 			emulationDevice=emulationProvider.device;
 
-			for(PenProvider.Constructor penProviderConstructor: penOwner.getPenProviderConstructors())
-				addProvider(penProviderConstructor);
-			penOwner.setPenManagerHandle(new PenOwner.PenManagerHandle(){
-						//@Override
-						public PenManager getPenManager(){
-							return PenManager.this;
-						}
-						//@Override
-						public Object getPenSchedulerLock(){
-							return pen.scheduler;
-						}
-						//@Override
-						public void setPenManagerPaused(boolean paused){
-							PenManager.this.setPaused(paused);
-						}
-						//@Override
-						public Object retrievePenEventTag(PenEvent ev){
-							return ev.getPenOwnerTag();
-						}
-					});
+			penOwner.setPenManagerHandle(new PenOwner.PenManagerHandle() {
+				    //@Override
+				    public PenManager getPenManager() {
+					    return PenManager.this;
+				    }
+				    //@Override
+				    public Object getPenSchedulerLock() {
+					    return pen.scheduler;
+				    }
+				    //@Override
+				    public void setPenManagerPaused(boolean paused) {
+					    PenManager.this.setPaused(paused);
+				    }
+				    //@Override
+				    public Object retrievePenEventTag(PenEvent ev) {
+					    return ev.getPenOwnerTag();
+				    }
+			    }
+			                            );
 		}
+		addPenOwnerProviders();
+	}
+
+	/**
+	In some cases, constructing providers takes considerable time (wintab), so we add them in a new thread.
+	*/
+	private void addPenOwnerProviders() {
+		Thread thread=new Thread("jpen-PenManager-addPenOwnerProviders") {
+			    @Override
+			    public void run() {
+				    synchronized(pen.scheduler) {
+					    for(PenProvider.Constructor penProviderConstructor: PenManager.this.penOwner.getPenProviderConstructors())
+						    addProvider(penProviderConstructor);
+				    }
+				    synchronized(PenManager.this) {
+					    providerConstructorsInitialized=true;
+					    PenManager.this.notifyAll();
+				    }
+			    }
+		    };
+		thread.setPriority(Thread.MIN_PRIORITY);
+		thread.start();
+	}
+	private volatile boolean providerConstructorsInitialized=false;
+
+	private synchronized void waitForProviderConstructorsInitialization() {
+		while(!providerConstructorsInitialized)
+			ObjectUtils.waitUninterrupted(this);
 	}
 
 	/**
 	@return the mouse PenProvider or {@code null} if no mouse provider has been added.
 	@see #addProvider(PenProvider.Constructor)
 	*/
-	public PenProvider getSystemMouseProvider(){
+	public PenProvider getSystemMouseProvider() {
 		return systemMouseDevice==null? null: systemMouseDevice.getProvider();
 	}
 
-	public boolean isSystemMouseDevice(PenDevice device){
+	public boolean isSystemMouseDevice(PenDevice device) {
 		return device!=null && device==systemMouseDevice;
 	}
 
@@ -136,8 +165,10 @@ public final class PenManager {
 		if(providerConstructor.constructable(this)) {
 			if(!this.providerConstructors.add(providerConstructor))
 				throw new IllegalArgumentException("constructor already added");
-			if(providerConstructor.construct(this)){
+			if(providerConstructor.construct(this)) {
 				PenProvider provider=providerConstructor.getConstructed();
+				if(!getPaused())
+					provider.penManagerPaused(false);// the provider is paused after construction, so it is not necessary to call when true
 				for(PenDevice device:provider.getDevices())
 					firePenDeviceAdded(providerConstructor, device);
 				return provider;
@@ -160,8 +191,8 @@ public final class PenManager {
 		}
 	}
 
-	PenManagerListener[] getListenersArray(){
-		synchronized(listeners){
+	PenManagerListener[] getListenersArray() {
+		synchronized(listeners) {
 			if(listenersArray==null)
 				listenersArray=listeners.toArray(new PenManagerListener[listeners.size()]);
 			return listenersArray;
@@ -175,12 +206,12 @@ public final class PenManager {
 			throw new AssertionError();
 		if(systemMouseDevice==null && device instanceof MouseDevice)
 			this.systemMouseDevice=device;
-		for(PenManagerListener l: getListenersArray()){
+		for(PenManagerListener l: getListenersArray()) {
 			l.penDeviceAdded(constructor, device);
 		}
 	}
 
-	private byte getNextDeviceId(){
+	private byte getNextDeviceId() {
 		Set<Byte> deviceIds=deviceIdToDevice.keySet();
 		while(deviceIds.contains(Byte.valueOf(nextDeviceId)))
 			nextDeviceId++;
@@ -198,11 +229,11 @@ public final class PenManager {
 			this.systemMouseDevice=null;
 	}
 
-	public PenDevice getDevice(byte deviceId){
+	public PenDevice getDevice(byte deviceId) {
 		return deviceIdToDevice.get(Byte.valueOf(deviceId));
 	}
 
-	public Collection<PenDevice> getDevices(){
+	public Collection<PenDevice> getDevices() {
 		return devicesA;
 	}
 
@@ -211,10 +242,11 @@ public final class PenManager {
 	*/
 	@Deprecated
 	public Set<PenProvider.Constructor> getConstructors() {
-		return providerConstructorsA;
+		return getProviderConstructors();
 	}
 
 	public Set<PenProvider.Constructor> getProviderConstructors() {
+		waitForProviderConstructorsInitialization();
 		return providerConstructorsA;
 	}
 
@@ -223,7 +255,8 @@ public final class PenManager {
 			return;
 		pen.scheduler.setPaused(paused);
 		this.paused=paused;
-		for(PenProvider.Constructor providerConstructor: providerConstructors){
+		PenProvider.Constructor[] providerConstructorsArray=providerConstructors.toArray(new PenProvider.Constructor[0]); // I don't want to wait for the providerConstructors initialization so I do a copy.
+		for(PenProvider.Constructor providerConstructor: providerConstructorsArray) {
 			PenProvider penProvider=providerConstructor.getConstructed();
 			if(penProvider!=null)
 				penProvider.penManagerPaused(paused);
@@ -268,8 +301,8 @@ public final class PenManager {
 	/**
 	Uses reflection to get the first provider of the given class.
 	*/
-	public <T extends PenProvider> T getProvider(Class<T> providerClass){
-		for(PenProvider.Constructor constructor: getProviderConstructors()){
+	public <T extends PenProvider> T getProvider(Class<T> providerClass) {
+		for(PenProvider.Constructor constructor: getProviderConstructors()) {
 			PenProvider penProvider=constructor.getConstructed();
 			if(providerClass.isInstance(penProvider))
 				return providerClass.cast(penProvider);
