@@ -127,7 +127,6 @@ final class PenScheduler{
 	private final RelativeLocationFilter relativeLocationFilter=new RelativeLocationFilter();
 
 	synchronized boolean scheduleLevelEvent(PenDevice device, long deviceTime, Collection<PLevel> levels, boolean levelsOnScreen) {
-
 		if(device.getProvider().getUseRelativeLocationFilter()){
 			if(relativeLocationFilter.filter(lastScheduledState, device, levels, levelsOnScreen))
 				switch(relativeLocationFilter.getState()){
@@ -267,6 +266,7 @@ final class PenScheduler{
 
 	private void schedule(PenEvent ev) {
 		ev.time=System.currentTimeMillis();
+		//System.out.println("*** scheduled event *** "+System.currentTimeMillis()+", ev.time="+ev.time);
 		ev.setPenOwnerTag(pen.penManager.penOwner.evalPenEventTag(ev));
 		lastScheduledEvent.next=ev;
 		lastScheduledEvent=ev;
