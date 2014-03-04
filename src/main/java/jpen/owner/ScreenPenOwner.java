@@ -40,6 +40,8 @@ public class ScreenPenOwner implements PenOwner {
 		return instance==null? instance=new ScreenPenOwner():
 					 instance;
 	}
+	
+	private ScreenPenOwner(){}
 
 	//@Override
 	public Collection<PenProvider.Constructor> getPenProviderConstructors(){
