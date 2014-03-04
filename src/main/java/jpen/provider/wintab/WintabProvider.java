@@ -18,24 +18,30 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
 }] */
 package jpen.provider.wintab;
 
+import java.awt.AWTEvent;
+import java.awt.event.AWTEventListener;
+import java.awt.event.InputEvent;
+import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
+import java.awt.Window;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
+import jpen.internal.BuildInfo;
+import jpen.internal.ObjectUtils;
+import jpen.internal.Range;
 import jpen.PenManager;
 import jpen.PenProvider;
 import jpen.PLevel;
 import jpen.provider.AbstractPenProvider;
 import jpen.provider.NativeLibraryLoader;
 import jpen.provider.VirtualScreenBounds;
-import jpen.internal.BuildInfo;
-import jpen.internal.ObjectUtils;
-import jpen.internal.Range;
 
 public class WintabProvider
 	extends AbstractPenProvider {
 	private static final Logger L=Logger.getLogger(WintabProvider.class.getName());
-	public static final int PERIOD=10;
+
 	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""},
 			new String[]{"64"},
 			Integer.valueOf(BuildInfo.getProperties().getString("jpen.provider.wintab.nativeVersion")));
@@ -44,6 +50,36 @@ public class WintabProvider
 	static void loadLibrary(){
 		LIB_LOADER.load();
 	}
+
+	/**
+	When this system property is set to true then the provider stops sending events if no AWT events are received after one second.
+	*/
+	public static final String WAIT_AWT_ACTIVITY_SYSTEM_PROPERTY="jpen.provider.wintab.waitAwtActivity";
+	private static final boolean WAIT_AWT_ACTIVITY=Boolean.valueOf(
+				System.getProperty(WAIT_AWT_ACTIVITY_SYSTEM_PROPERTY));
+	static{
+		if(WAIT_AWT_ACTIVITY)
+			L.info("WAIT_AWT_ACTIVITY set to true");
+	}
+
+	public static final String PERIOD_SYSTEM_PROPERTY="jpen.provider.wintab.period";
+	public static final int PERIOD;
+	static{
+		String periodString=System.getProperty(PERIOD_SYSTEM_PROPERTY, null);
+		int periodValue=10;
+		if(periodString!=null)
+			try{
+				periodValue=Integer.valueOf(periodString);
+				if(periodValue<=0){
+					L.severe("ignored illegal PERIOD value "+periodValue+", period value must be >= 0");
+					periodValue=10;
+				}else
+					L.info("PERIOD set to "+periodValue);
+			}catch(NumberFormatException ex){
+			}
+		PERIOD=periodValue;
+	}
+
 
 	public final WintabAccess wintabAccess;
 	private final Map<Integer, WintabDevice> cursorToDevice=new HashMap<Integer, WintabDevice>();
@@ -85,7 +121,78 @@ public class WintabProvider
 		}
 	}
 
+	class MyThread
+		extends Thread implements AWTEventListener{
 
+		private long scheduleTime;
+		private long awtEventTime;
+		private boolean waitingAwtEvent;
+		private int inputEventModifiers;
+		private boolean awtSleep;
+		private final Object awtLock=new Object();
+
+		{
+			setName("jpen-WintabProvider");
+			setDaemon(true);
+			setPriority(Thread.MAX_PRIORITY);
+			if(WAIT_AWT_ACTIVITY)
+				Toolkit.getDefaultToolkit().addAWTEventListener(this, ~0);
+		}
+
+		public void run() {
+			try{
+				KeyboardFocusManager keyboardFocusManager=KeyboardFocusManager.getCurrentKeyboardFocusManager();
+				long processingTime;
+				long correctPeriod;
+				boolean waited=true;
+				while(true) {
+					processingTime=waited? System.currentTimeMillis(): scheduleTime;
+					schedule();
+					processingTime=scheduleTime-processingTime;
+					correctPeriod=PERIOD-processingTime;
+					waited=false;
+					synchronized(this){
+						if(correctPeriod>0){
+							wait(correctPeriod);
+							waited=true;
+						}
+						if(WAIT_AWT_ACTIVITY){
+							waitingAwtEvent=scheduleTime-awtEventTime>1000 &&
+															(inputEventModifiers==0 || keyboardFocusManager.getActiveWindow()==null);
+							if(waitingAwtEvent){
+								wait(500);
+								waited=true;
+							}
+						}
+						while(paused){
+							L.fine("going to wait...");
+							wait();
+							L.fine("notified");
+							waited=true;
+						}
+					}
+				}
+			}catch(InterruptedException ex){
+				throw new AssertionError(ex);
+			}
+		}
+
+		private void schedule(){
+			processQueuedEvents();
+			scheduleTime=System.currentTimeMillis();
+		}
+		//@Override
+		public synchronized void eventDispatched(AWTEvent ev){
+			InputEvent inputEvent=ev instanceof InputEvent? (InputEvent)ev: null;
+			synchronized(this){
+				awtEventTime=System.currentTimeMillis();
+				if(inputEvent!=null)
+					inputEventModifiers=inputEvent.getModifiersEx();
+				if(!paused && waitingAwtEvent)
+					notify();
+			}
+		}
+	}
 
 	private WintabProvider(Constructor constructor, WintabAccess wintabAccess) {
 		super(constructor);
@@ -97,29 +204,9 @@ public class WintabProvider
 			levelRanges[levelType.ordinal()]=wintabAccess.getLevelRange(levelType);
 		}
 
-		thread=new Thread("jpen-WintabProvider") {
-						 private long getPeriod(){
-							 return PERIOD;
-							 //return Math.max(10,
-							 //						 getConstructor().getPenManager().pen.getPeriodMillis()/2);
-						 }
-						 public void run() {
-							 while(true) {
-								 processQuedEvents();
-								 ObjectUtils.synchronizedWait(this, getPeriod());
-								 while(getPaused()){
-									 L.fine("going to wait...");
-									 ObjectUtils.synchronizedWait(this, 0);
-									 L.fine("notified");
-								 }
-							 }
-						 }
-					 }
-					 ;
-		thread.setDaemon(true);
-		thread.setPriority(Thread.MAX_PRIORITY);
+		thread=new MyThread();
 		thread.start();
-
+		//System.out.println("wintabAccess=" + ( wintabAccess ));
 		L.fine("end");
 	}
 
@@ -127,9 +214,11 @@ public class WintabProvider
 		return levelRanges[type.ordinal()];
 	}
 
-	private void processQuedEvents() {
-		L.finer("start");
-		while(wintabAccess.nextPacket()) {
+	private void processQueuedEvents() {
+		//L.finer("start");
+		//boolean gotPacket=false;
+		while(wintabAccess.nextPacket() && !paused) {
+			//gotPacket=true;
 			WintabDevice device=getDevice(wintabAccess.getCursor());
 			if(L.isLoggable(Level.FINE)){
 				L.finer("device: ");
@@ -137,7 +226,8 @@ public class WintabProvider
 			}
 			device.scheduleEvents();
 		}
-		L.finer("end");
+		//System.out.println("gotPacket=" + ( gotPacket ));
+		//L.finer("end");
 	}
 
 	private WintabDevice getDevice(int cursor) {
@@ -154,10 +244,6 @@ public class WintabProvider
 	//@Override
 	public void penManagerPaused(boolean paused) {
 		setPaused(paused);
-	}
-
-	private synchronized boolean getPaused(){
-		return paused;
 	}
 
 	synchronized void setPaused(boolean paused) {
