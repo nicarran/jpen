@@ -30,7 +30,7 @@ public class PenState
 	public static class Levels implements java.io.Serializable {
 		public static final long serialVersionUID=1l;
 		private final float[] values=new float[PLevel.Type.VALUES.size()]; // CUSTOM type does not store value but VALUES does not have the CUSTOM
-		private final Map<Integer, Float> extTypeNumberToValue=new HashMap<Integer, Float>();
+		private final Map<Integer, Float> extTypeNumberToValue=new HashMap<Integer, Float>(2, 1); 
 
 		public void setValues(PenState penState){
 			setValues(penState.levels);
@@ -41,7 +41,7 @@ public class PenState
 				values[i]=levels.values[i];
 			extTypeNumberToValue.clear();
 			extTypeNumberToValue.putAll(levels.extTypeNumberToValue);
-			for(int i=levels.values.length; i<values.length; i++){ // If a new PLevel.Type is added then transform the ext to this newer type
+			for(int i=levels.values.length; i<values.length; i++){ // If a new PLevel.Type is added then transform the ext to this newer type (library backwards compat.)
 				Float value=extTypeNumberToValue.remove(i);
 				if(value!=null)
 					values[i]=value;
@@ -77,25 +77,33 @@ public class PenState
 			else
 				setExtValue(levelTypeNumber, value);
 		}
+		
+		private final void setExtValue(int levelTypeNumber, float value){
+			extTypeNumberToValue.put(levelTypeNumber, value);
+		}
+		
+		public float getValue(PLevel.Type levelType){
+			return getValue(levelType.ordinal()); 
+		}
 
 		public float getValue(int levelTypeNumber) {
 			return levelTypeNumber<values.length ?
 						 values[levelTypeNumber]: getExtValue(levelTypeNumber);
 		}
-
-		public float getValue(PLevel.Type levelType){
-			return getValue(levelType.ordinal());
-		}
-
+		
 		private float getExtValue(int extLevelTypeNumber) {
 			Float value=extTypeNumberToValue.get(extLevelTypeNumber);
 			return value==null? 0f: value;
 		}
-
-		private final void setExtValue(int levelTypeNumber, float value){
-			extTypeNumberToValue.put(levelTypeNumber, value);
-		}
 		
+		/**
+		Set all values to their defaults: 0f.
+		*/
+		public void clearValues(){
+			Arrays.fill(values, 0); 
+			extTypeNumberToValue.clear();
+		}
+
 		@Override
 		public String toString(){
 			return "(values="+Arrays.toString(values)+", extTypeNumberToValue="+extTypeNumberToValue+")";
