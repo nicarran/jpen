@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<project name="javaBuild" default="prepare">
+<project name="javaBuild" default="prepare" xmlns:if="ant:if"
+    xmlns:unless="ant:unless">
 	<import  file="commonBuild.xml"/>
 
 	<target name="init" depends="readBuildProperties">
@@ -87,7 +88,12 @@
 
 	<target name="updateManifest" depends="init" unless="module.is3rdParty">
 		<property name="module.mainClass" value="UNDEFINED"/>
-	
+		<manifest mode="replace" file="src/main/java/META-INF/MANIFEST.MF">
+			<!-- Version 1.2 allows extensions (Class-path tag). In client apps I prefer using the -Djava.ext.dirs dynamic property.-->
+			<attribute name="Manifest-Version" value="1.2"/>
+			<attribute name="Created-By" value="${module.author} (See ${module.url})"/>
+			<attribute name="Main-Class" value="${module.mainClass}"/>
+		</manifest>
 		<path id="_lib">
 			<fileset dir="dependencies">
 				<include name="main-jars/*.jar"/>
@@ -98,13 +104,10 @@
 		<pathconvert pathsep=" " dirsep="/" property="_classpath" refid="_lib">
 			<mapper type="flatten"/>
 		</pathconvert>
-		<echo>Manifest classpath: ${_classpath}</echo>
-		<manifest mode="update" file="src/main/java/META-INF/MANIFEST.MF">
+		<echo>Manifest classpath: "${_classpath}"</echo>
+		<manifest unless:blank="${_classpath}" mode="update" file="src/main/java/META-INF/MANIFEST.MF">
 			<!-- Version 1.2 allows extensions (Class-path tag). In client apps I prefer using the -Djava.ext.dirs dynamic property.-->
-			<attribute name="Manifest-Version" value="1.2"/>
-			<attribute name="Created-By" value="${module.author} (See ${module.url})"/>
 			<attribute name="Class-path" value="${_classpath}"/>
-			<attribute name="Main-Class" value="${module.mainClass}"/>
 		</manifest>
 		<path id="_lib">
 			<fileset dir="dependencies">
@@ -114,14 +117,14 @@
 		<pathconvert pathsep=" " dirsep="/" property="_classpath2" refid="_lib">
 			<mapper type="flatten"/>
 		</pathconvert>
-		<echo>Test Manifest extra classpath: ${_classpath2}</echo>
-		<manifest mode="update" file="src/test/java/META-INF/MANIFEST.MF">
+		<echo>Test Manifest extra classpath: "${_classpath2}"</echo>
+		<manifest mode="replace" file="src/test/java/META-INF/MANIFEST.MF">
 			<attribute name="Manifest-Version" value="1.2"/>
 			<attribute name="Created-By" value="${module.author}"/>
 			<attribute name="Class-path" value="${module.package-ver}.jar ${_classpath2}"/>
 		</manifest>
 	</target>
-
+	
 	<!-- This is an antipattern: use tests.
 	<target name="run" depends="init">
 		<java classname="${module.mainClass}">
@@ -244,7 +247,7 @@
 	</target>
 
 	<target name="test" description="Does JUnit tests" depends="compile, deptree">
-		<junit haltonfailure="yes" fork="yes" showoutput="yes" forkmode="perTest">
+		<junit haltonfailure="yes" fork="yes" showoutput="yes" forkmode="once" jvm="/opt/sun-jdk-1.6.0.30-x86/bin/java">
 			<!--jvm="${java.command}" test on the current vm!-->
 			<jvmarg value="-Xmx512M"/>
 						<!--<jvmarg value="-Xms256M"/>-->
@@ -261,7 +264,7 @@
 				<fileset dir="deptree/test-deptree/jars" includes="*.jar"/>
 			</classpath>
 			<batchtest>
-				<fileset dir="src/test/java" includes="**/ProfilingTest.class" excludes="**/*Tests.class **/demo/*Test.class **/multiAwt/*Test.class **/ScreenPenOwnerTest.class"/>
+				<fileset dir="src/test/java" includes="**/*Test.class" excludes="**/*Tests.class **/demo/*Test.class"/>
 			</batchtest>
 		</junit>
 	</target>
@@ -391,11 +394,13 @@ java -cp "${_unixClasspath}" junit.textui.TestRunner $1</echo>
 			<package name="jpen.demo"/>
 			-->
 		</javadoc>
+		<!--
 		<exec executable="ln" os="Linux">
 			<arg value="-sfT"/>
 			<arg value="/home/nicarran/boxes/javadoc/stylesheet-nicarran.css"/>
 			<arg value="product/javadoc/stylesheet.css"/>
 		</exec>
+		-->
 	</target>
 
 	<target name="javadocUml" description="Prepares and generates Javadoc" depends="init" unless="disable.javadoc">
