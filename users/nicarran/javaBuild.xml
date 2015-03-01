@@ -241,7 +241,7 @@
 	</target>
 
 	<target name="deptree">
-		<exec executable="antProject-deptree" os="Linux">
+		<exec executable="antProject-module-deptree" os="Linux">
 			<arg value="--cksum"/>
 		</exec>
 	</target>
