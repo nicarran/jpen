@@ -34,13 +34,14 @@ import jpen.internal.BuildInfo;
 
 public final class XinputProvider
 	extends AbstractPenProvider {
+
 	private static final Logger L=Logger.getLogger(XinputProvider.class.getName());
 
-	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[]{""},
-			new String[]{"x86_64"},
+	private static final NativeLibraryLoader LIB_LOADER=new NativeLibraryLoader(new String[] {""},
+			new String[] {"x86_64"},
 			Integer.valueOf(BuildInfo.getProperties().getString("jpen.provider.xinput.nativeVersion")));
 
-	static void loadLibrary(){
+	static void loadLibrary() {
 		LIB_LOADER.load();
 	}
 
@@ -48,14 +49,16 @@ public final class XinputProvider
 	final VirtualScreenBounds screenBounds=VirtualScreenBounds.getInstance();
 
 	public static class Constructor
-		extends AbstractPenProvider.AbstractConstructor{
+		extends AbstractPenProvider.AbstractConstructor {
+
 		//@Override
 		public String getName() {
 			return "XInput";
 		}
 		//@Override
 		public boolean constructable(PenManager penManager) {
-			return System.getProperty("os.name").toLowerCase().contains("linux");
+			String os = System.getProperty("os.name").toLowerCase();
+			return os.contains("linux") || os.contains("bsd");
 		}
 
 		@Override
@@ -64,16 +67,16 @@ public final class XinputProvider
 			return new XinputProvider(this);
 		}
 		@Override
-		public int getNativeVersion(){
+		public int getNativeVersion() {
 			return LIB_LOADER.nativeVersion;
 		}
 		@Override
-		public int getNativeBuild(){
+		public int getNativeBuild() {
 			loadLibrary();
 			return XiBus.getNativeBuild();
 		}
 		@Override
-		public int getExpectedNativeBuild(){
+		public int getExpectedNativeBuild() {
 			return Integer.valueOf(BuildInfo.getProperties().getString("jpen.provider.xinput.nativeBuild"));
 		}
 	}
@@ -96,18 +99,18 @@ public final class XinputProvider
 		}
 
 		xinputDevices=devices.toArray(new XinputDevice[devices.size()]);
-		if(devices.size()==1){
+		if(devices.size()==1) {
 			xinputDevices[0].setKindTypeNumber(PKind.Type.STYLUS.ordinal());
 		}
 		L.fine("end");
 	}
 
-	private void resetXinputDevices(){
+	private void resetXinputDevices() {
 		for(int i=xinputDevices.length; --i>=0;)
 			xinputDevices[i].reset();
 	}
 
-	private void pauseXinputDevices(boolean paused){
+	private void pauseXinputDevices(boolean paused) {
 		for(int i=xinputDevices.length; --i>=0;)
 			xinputDevices[i].setIsListening(!paused);
 	}
@@ -115,7 +118,7 @@ public final class XinputProvider
 	//@Override
 	public void penManagerPaused(boolean paused) {
 		pauseXinputDevices(paused);
-		if(!paused){
+		if(!paused) {
 			screenBounds.reset();
 			resetXinputDevices();
 		}
@@ -126,7 +129,7 @@ public final class XinputProvider
 	@Override
 	public boolean getUseRelativeLocationFilter(){
 		return true;
-}
+	}
 	//^
 	*/
 }
