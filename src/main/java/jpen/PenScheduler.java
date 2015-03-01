@@ -207,8 +207,7 @@ final class PenScheduler{
 			return false;
 
 		if(scheduledMovement){
-			if(penOwner!=null && !penOwner.getPenClip().contains(scheduledLocation)
-				 && !penOwner.isDraggingOut())
+			if(penOwner!=null &&  !penOwner.isDraggingOut() && !penOwner.getPenClip().contains(scheduledLocation))
 				return false;
 		}
 
