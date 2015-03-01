@@ -270,7 +270,7 @@ public class WintabProvider
 	}
 
 	/**
-	@param systemCursorEnabled If <code>false<code> then tablet movement on Wintab devices doesn't cause movement on the system mouse pointer. If <code>true<code> then tablet movement on Wintab devices cause movement on the system mouse pointer, this is the default value. 
+	@param systemCursorEnabled If {@code false} then tablet movement on Wintab devices doesn't cause movement on the system mouse pointer. {@code true} then tablet movement on Wintab devices cause movement on the system mouse pointer, this is the default value. 
 	*/
 	public synchronized void setSystemCursorEnabled(boolean systemCursorEnabled){
 		if(this.systemCursorEnabled==systemCursorEnabled)
