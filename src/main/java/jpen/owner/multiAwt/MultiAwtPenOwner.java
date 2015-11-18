@@ -187,7 +187,7 @@ MultiAwtPenOwner(){}
 							throw new AssertionError();
 				}else{
 					activeComponentInfo=new ActiveComponentInfo(component, componentPool.getPenListeners(component));
-					unpauser.enable();
+					unpause();
 				}
 			}
 		}

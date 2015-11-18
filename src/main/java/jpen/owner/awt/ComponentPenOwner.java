@@ -37,98 +37,100 @@ import jpen.provider.wintab.WintabProvider;
 import jpen.provider.xinput.XinputProvider;
 
 public abstract class ComponentPenOwner
-	extends AbstractPenOwner{
+	extends AbstractPenOwner {
 
 	private final ComponentPenClip componentPenClip=new ComponentPenClip(this);
 
 	public abstract Component getActiveComponent();
 
 	//@Override
-	public final Collection<PenProvider.Constructor> getPenProviderConstructors(){
+	public final Collection<PenProvider.Constructor> getPenProviderConstructors() {
 		return Arrays.asList(
-						 new PenProvider.Constructor[]{
-							 new SystemProvider.Constructor(),
-							 new XinputProvider.Constructor(),
-							 new WintabProvider.Constructor(),
-							 new CocoaProvider.Constructor(),
-						 }
-					 );
+				   new PenProvider.Constructor[] {
+					   new SystemProvider.Constructor(),
+					   new XinputProvider.Constructor(),
+					   new WintabProvider.Constructor(),
+					   new CocoaProvider.Constructor(),
+				   }
+			   );
 	}
 
 	//@Override
-	public final PenClip getPenClip(){
+	public final PenClip getPenClip() {
 		return componentPenClip;
 	}
 
+	@Deprecated // make this private
 	protected final Unpauser unpauser=new Unpauser();
 
+	@Deprecated // make this private and change name to OnMotionUnpauser
 	protected final class Unpauser
-		implements MouseMotionListener{
+		implements MouseMotionListener {
 
 		private volatile boolean enabled;
 		private WeakReference<Component> myActiveComponentRef;
 
-		public synchronized void enable(){
+		public synchronized void enable() {
 			if(enabled)
 				return;
 			Component myActiveComponent=getActiveComponent();
 			myActiveComponentRef=new WeakReference<Component>(myActiveComponent);
-			myActiveComponent.addMouseMotionListener(unpauser); // unpauses only when mouse motion is detected.
+			myActiveComponent.addMouseMotionListener(this); // unpauses only when mouse motion is detected.
 			enabled=true;
 		}
 
-		synchronized void disable(){
+		synchronized void disable() {
 			if(!enabled)
 				return;
 			Component myActiveComponent=myActiveComponentRef.get();
-			if(myActiveComponent!=null){
-				myActiveComponent.removeMouseMotionListener(unpauser);
+			if(myActiveComponent!=null) {
+				myActiveComponent.removeMouseMotionListener(this);
 				myActiveComponent=null;
 			}
 			enabled=false;
 		}
 
 		//@Override
-		public void mouseMoved(MouseEvent ev){
-			//L.fine("v");
-			unpause();
+		public void mouseMoved(MouseEvent ev) {
+			if(enabled) {
+				unpause();
+				disable();
+			}
 		}
 
 		//@Override
-		public void mouseDragged(MouseEvent ev){
+		public void mouseDragged(MouseEvent ev) {
 		}
 
-		void unpause(){
-			synchronized(penManagerHandle.getPenSchedulerLock()){
-				if(enabled){
-					activeWindowPL.setEnabled(true);
-					penManagerHandle.setPenManagerPaused(false);
-					disable();
-				}
-			}
+	}
+
+	protected final void unpause() {
+		synchronized(penManagerHandle.getPenSchedulerLock()) {
+			activeWindowPL.setEnabled(true);
+			penManagerHandle.setPenManagerPaused(false);
 		}
 	}
 
 	private final ActiveWindowPL activeWindowPL=new ActiveWindowPL();
 
 	private class ActiveWindowPL
-		implements ActiveWindowProperty.Listener{
+		implements ActiveWindowProperty.Listener {
 
 		private boolean enabled;
 		private ActiveWindowProperty activeWindowP;
 
-		void setEnabled(boolean enabled){
+		void setEnabled(boolean enabled) {
 			if(activeWindowP==null)
 				activeWindowP=new ActiveWindowProperty(this);
 			this.enabled=enabled;
 		}
 
 		//@Override
-		public void activeWindowChanged(Window activeWindow){
+		public void activeWindowChanged(Window activeWindow) {
 			if(!enabled)
 				return;
-			synchronized(getPenSchedulerLock(activeWindow)){
-				if(activeWindow==null){
+			synchronized(getPenSchedulerLock(activeWindow)) {
+				if(activeWindow==null) {
 					// if there is no active window on this application, on MS Windows the mouse stops sending events.
 					pauseAMoment();
 					return;
@@ -137,7 +139,7 @@ public abstract class ComponentPenOwner
 				if(componentWindow==null)
 					return;
 				if(activeWindow!=componentWindow &&
-					 activeWindow instanceof Dialog){
+						activeWindow instanceof Dialog) {
 					//	A modal dialog stops sending events from other windows when shown... then here we honor this behavior
 					Dialog activeDialog=(Dialog)activeWindow;
 					if(activeDialog.isModal())
@@ -146,27 +148,27 @@ public abstract class ComponentPenOwner
 			}
 		}
 
-		private void pauseAMoment(){
+		private void pauseAMoment() {
 			pause();
 			unpauser.enable();
 		}
 	}
 
-	protected final void pause(){
+	protected final void pause() {
 		unpauser.disable();
 		activeWindowPL.setEnabled(false);
 		penManagerHandle.setPenManagerPaused(true);
 	}
 
 	@Override
-	protected void draggingOutDisengaged(){
+	protected void draggingOutDisengaged() {
 		pause();
 	}
 
 	/**
 	Checks if the given {@link Component} holds the {@link Component#getTreeLock()} before actually getting and returning the {@link jpen.owner.PenOwner.PenManagerHandle#getPenSchedulerLock()}. Prefer using this method instead of {@link jpen.owner.PenOwner.PenManagerHandle#getPenSchedulerLock()} to be shure you  aren't causing deadlocks because the {@link ComponentPenClip} methods hold the {@link Component#getTreeLock()}.
 	*/
-	protected Object getPenSchedulerLock(Component component){
+	protected Object getPenSchedulerLock(Component component) {
 		if(component!=null && Thread.currentThread().holdsLock(component.getTreeLock()))
 			throw new AssertionError("tryed to hold penSchedulerLock while holding Component's treeLock");
 		return penManagerHandle.getPenSchedulerLock();

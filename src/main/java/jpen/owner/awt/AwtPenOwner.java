@@ -36,43 +36,68 @@ import jpen.owner.PenClip;
 import jpen.PenProvider;
 import jpen.internal.ActiveWindowProperty;
 
+/**
+<b>Warning:</b> This class is not suitable for use on multiple {@link java.awt.components}, use {@link jpen.owner.multiAwt.AwtPenToolkit} instead. When using multiple instances of this class, the following problems will arise:
+<ul>
+<li>
+Button and scroll events actioned before moving the pointer on the component (see http://sourceforge.net/p/jpen/discussion/753961/thread/71cb3b82/ ) will be lost.
+</li>
+<li>
+The Mac OS X (osx) provider will go berserk.
+</li>
+</ul>
+
+@deprecated use {@link jpen.owner.multiAwt.AwtPenToolkit}
+*/
+@Deprecated
 public final class AwtPenOwner
-	extends ComponentPenOwner{
+	extends ComponentPenOwner {
+
+	private static int instanceCount=0;
+
+	private synchronized static  void increaseInstanceCount() {
+		instanceCount++;
+	}
+	
+	private synchronized static int getInstanceCount(){
+		return instanceCount;
+	}
 
 	public final Component component;
-	private final MouseListener mouseListener=new MouseAdapter(){
-				@Override
-				public void mouseExited(MouseEvent ev) {
-					synchronized(getPenSchedulerLock(ev.getComponent())){
-						if(!startDraggingOut())
-							pause();
-					}
-				}
+	private final MouseListener mouseListener=new MouseAdapter() {
+		@Override
+		public void mouseExited(MouseEvent ev) {
+			synchronized(getPenSchedulerLock(ev.getComponent())) {
+				if(!startDraggingOut())
+					pause();
+			}
+		}
 
-				@Override
-				public void mouseEntered(MouseEvent ev) {
-					synchronized(getPenSchedulerLock(ev.getComponent())){
-						if(!stopDraggingOut()){
-							unpauser.enable(); // unpauses when mouse motion is detected.
-						}
-					}
+		@Override
+		public void mouseEntered(MouseEvent ev) {
+			synchronized(getPenSchedulerLock(ev.getComponent())) {
+				if(!stopDraggingOut()) {
+					if(getInstanceCount()>1)
+						unpauser.enable(); // unpauses when mouse motion is detected
+					else
+						unpause();
 				}
-			};
+			}
+		}
+	};
 
-	/**
-	<b>Warning:</b> the Mac OS X provider doesn't work when creating multiple {@code AwtPenOwner}s. If you need to use JPen on multiple AWT components use {@link jpen.owner.multiAwt.AwtPenToolkit} instead.
-	*/
-	public AwtPenOwner(Component component){
+	public AwtPenOwner(Component component) {
+		increaseInstanceCount();
 		this.component=component;
 	}
 
 	@Override
-	public Component getActiveComponent(){
+	public Component getActiveComponent() {
 		return component;
 	}
 
 	@Override
-	protected void init(){
+	protected void init() {
 		component.addMouseListener(mouseListener);
 	}
 }
