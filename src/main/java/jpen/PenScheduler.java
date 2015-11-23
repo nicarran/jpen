@@ -81,15 +81,23 @@ final class PenScheduler {
 				if(time-firstInSecuenceTime<=THRESHOLD_PERIOD) {
 					return nonSystemMouseDevicePresent;
 				}
-			} else{
+			} else {
+				if(penManager.getSystemMouseProvider()!=null) {// filter out level events when coming dragging from another AWT component.
+					if(!nonSystemMouseDevicePresent && !filteredFirstInSecuence) 
+						return true;
+				}
 				filteredFirstInSecuence=false;
 				nonSystemMouseDevicePresent=true;
 			}
 			return false;
 		}
-
+		
 		void setLastLevelEvent(PLevelEvent lastLevelEvent) {
 			this.lastLevelEvent=lastLevelEvent;
+		}
+		
+		void setFirstFilteringAfterPause(){
+			nonSystemMouseDevicePresent=false;
 		}
 	}
 
@@ -99,6 +107,7 @@ final class PenScheduler {
 		if(paused) {
 			scheduleEmulatedZeroPressureEvent();
 			scheduleButtonReleasedEvents();
+			systemMouseFilter.setFirstFilteringAfterPause();
 		} else {
 			firstScheduleAfterPause=true;
 			relativeLocationFilter.reset();

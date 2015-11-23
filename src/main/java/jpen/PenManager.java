@@ -60,8 +60,8 @@ public final class PenManager {
 	See {@link PenOwner#enforceSinglePenManager()}.
 	*/
 	private synchronized static void setSingletonMode(boolean singletonMode) {
-		if(singletonMode && instanceCount>1)
-			throw new IllegalStateException("can't change singleton mode to true when many PenManagers has already being created");
+		if(singletonMode && instanceCount!=0)
+			throw new IllegalStateException("can't change singleton mode to true when another PenManager has already been created");
 		PenManager.singletonMode=singletonMode;
 	}
 
@@ -79,7 +79,7 @@ public final class PenManager {
 	private PenDevice systemMouseDevice; // may be null
 
 	/**
-	Creates an {@code AwtPenOwner} and calls the {@link #PenManager(PenOwner)} constructor. <b>Warning:</b> see {@link jpen.owner.awt.AwtPenOwner#AwtPenOwner(Component)}.
+	Creates an {@code AwtPenOwner} and calls the {@link #PenManager(PenOwner)} constructor. <b>Warning:</b> see {@link jpen.owner.awt.AwtPenOwner}.
 	*/
 	public PenManager(Component component) {
 		this(new AwtPenOwner(component));

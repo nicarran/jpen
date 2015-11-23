@@ -37,31 +37,10 @@ import jpen.PenProvider;
 import jpen.internal.ActiveWindowProperty;
 
 /**
-<b>Warning:</b> This class is not suitable for use on multiple {@link java.awt.components}, use {@link jpen.owner.multiAwt.AwtPenToolkit} instead. When using multiple instances of this class, the following problems will arise:
-<ul>
-<li>
-Button and scroll events actioned before moving the pointer on the component (see http://sourceforge.net/p/jpen/discussion/753961/thread/71cb3b82/ ) will be lost.
-</li>
-<li>
-The Mac OS X (osx) provider will go berserk.
-</li>
-</ul>
-
-@deprecated use {@link jpen.owner.multiAwt.AwtPenToolkit}
+<b>Warning:</b> This class can be used only once (as a singleton instance). Creating more than one will result on an {@link java.lang.IllegalStateException} thrown by the {@link jpen.PenManager}. If you need to listen on multiple AWT components then use only the the {@link AwtPenToolkit} class. Usage of {@code AwtPenToolkit} and {@code AwtPenOwner} is exclusive, that is you can not use {@code AwtPenToolkit} once you use {@code AwtPenOwner} and vice versa.
 */
-@Deprecated
 public final class AwtPenOwner
 	extends ComponentPenOwner {
-
-	private static int instanceCount=0;
-
-	private synchronized static  void increaseInstanceCount() {
-		instanceCount++;
-	}
-	
-	private synchronized static int getInstanceCount(){
-		return instanceCount;
-	}
 
 	public final Component component;
 	private final MouseListener mouseListener=new MouseAdapter() {
@@ -76,18 +55,15 @@ public final class AwtPenOwner
 		@Override
 		public void mouseEntered(MouseEvent ev) {
 			synchronized(getPenSchedulerLock(ev.getComponent())) {
-				if(!stopDraggingOut()) {
-					if(getInstanceCount()>1)
-						unpauser.enable(); // unpauses when mouse motion is detected
-					else
-						unpause();
-				}
+				if(!stopDraggingOut())
+					unpause();
 			}
 		}
 	};
-
+	/**
+	<b>Warning:</b> See {@link AwtPenOwner}.
+	*/
 	public AwtPenOwner(Component component) {
-		increaseInstanceCount();
 		this.component=component;
 	}
 
@@ -99,5 +75,10 @@ public final class AwtPenOwner
 	@Override
 	protected void init() {
 		component.addMouseListener(mouseListener);
+	}
+	
+	@Override
+	public boolean enforceSinglePenManager(){
+		return true;
 	}
 }
