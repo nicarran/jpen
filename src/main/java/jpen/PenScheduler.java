@@ -57,7 +57,9 @@ final class PenScheduler {
 		private PLevelEvent lastLevelEvent; // last level event scheduled (not filtered)
 		boolean filteredFirstInSecuence;
 		private long firstInSecuenceTime;
+		boolean systemMouseDevicePresent;
 		boolean nonSystemMouseDevicePresent;
+		private int preferredKindTypeNumber=PKind.Type.IGNORE.ordinal();
 
 		SystemMouseFilter(PenManager penManager) {
 			this.penManager=penManager;
@@ -66,13 +68,17 @@ final class PenScheduler {
 		@return {@code true} if the device is the system mouse and other device has already scheduled level events
 		*/
 		boolean filterOut(PenDevice device) {
+			if(device==penManager.emulationDevice)
+				return false;
 			if(penManager.isSystemMouseDevice(device)) {
+				systemMouseDevicePresent=true;
 				long time=System.currentTimeMillis();
 				if(lastLevelEvent!=null &&
 						lastLevelEvent.getDeviceId()!=device.getId() &&
 						time-lastLevelEvent.time<=THRESHOLD_PERIOD
-				  )
+				  ) {
 					return true;
+				}
 				if(!filteredFirstInSecuence) {
 					filteredFirstInSecuence=true;
 					firstInSecuenceTime=time;
@@ -81,23 +87,33 @@ final class PenScheduler {
 				if(time-firstInSecuenceTime<=THRESHOLD_PERIOD) {
 					return nonSystemMouseDevicePresent;
 				}
+				preferredKindTypeNumber=device.getKindTypeNumber();
 			} else {
+				preferredKindTypeNumber=device.getKindTypeNumber();
 				if(penManager.getSystemMouseProvider()!=null) {// filter out level events when coming dragging from another AWT component.
-					if(!nonSystemMouseDevicePresent && !filteredFirstInSecuence) 
+					if(!nonSystemMouseDevicePresent && !systemMouseDevicePresent)
 						return true;
 				}
-				filteredFirstInSecuence=false;
 				nonSystemMouseDevicePresent=true;
+				filteredFirstInSecuence=false;
 			}
 			return false;
 		}
-		
+
 		void setLastLevelEvent(PLevelEvent lastLevelEvent) {
+			if(lastLevelEvent.getDeviceId()==penManager.emulationDevice.getId())
+				return;
 			this.lastLevelEvent=lastLevelEvent;
 		}
-		
-		void setFirstFilteringAfterPause(){
+
+		void setFirstTimeFilteringAfterPause() {
 			nonSystemMouseDevicePresent=false;
+			systemMouseDevicePresent=false;
+			filteredFirstInSecuence=false;
+		}
+
+		int getPreferredKindTypeNumber() {
+			return preferredKindTypeNumber;
 		}
 	}
 
@@ -107,7 +123,7 @@ final class PenScheduler {
 		if(paused) {
 			scheduleEmulatedZeroPressureEvent();
 			scheduleButtonReleasedEvents();
-			systemMouseFilter.setFirstFilteringAfterPause();
+			systemMouseFilter.setFirstTimeFilteringAfterPause();
 		} else {
 			firstScheduleAfterPause=true;
 			relativeLocationFilter.reset();
@@ -143,14 +159,14 @@ final class PenScheduler {
 				}
 		}
 
-		if(getEmulationDevice()!=device // the emulation device must not cause filtering of system mouse events
-				&& systemMouseFilter.filterOut(device)
-		  )
+		if(systemMouseFilter.filterOut(device))
 			return false;
 
-		if(device.getKindTypeNumber()!=PKind.Type.IGNORE.ordinal() &&
-				device.getKindTypeNumber() !=lastScheduledState.getKind().typeNumber) {
-			PKind newKind=PKind.valueOf(device.getKindTypeNumber());
+		int kindTypeNumber=systemMouseFilter.getPreferredKindTypeNumber();
+		if(kindTypeNumber!=PKind.Type.IGNORE.ordinal() &&
+				kindTypeNumber!=lastScheduledState.getKind().typeNumber &&
+				!lastScheduledState.hasPressedButtons()) {
+			PKind newKind=PKind.valueOf(kindTypeNumber);
 			if(L.isLoggable(Level.FINE)) {
 				L.fine("changing kind to:"+newKind);
 				L.fine("scheduledLevels: "+scheduledLevels);
