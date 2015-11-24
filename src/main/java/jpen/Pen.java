@@ -207,7 +207,9 @@ public class Pen extends PenState {
 	/**
 	Changes the event firing frequency. The pen collects device (tablet) data points and stores them in a buffer. The data  points are taken from this buffer and fired as {@link PenEvent}s at this frequency.<p> 
 
-	This method returns immediately, the change of frequency will happen after all the pending events are processed.
+	This method returns immediately, the change of frequency will happen after all the pending buffered events are processed.
+	
+	If frequency is greater than {@code 1000} then pen events will be fired as soon as possible (no buffering).
 
 	@see #addListener(PenListener) 
 	@see #removeListener(PenListener)

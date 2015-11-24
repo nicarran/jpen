@@ -37,7 +37,7 @@ import jpen.PenProvider;
 import jpen.internal.ActiveWindowProperty;
 
 /**
-<b>Warning:</b> This class can be used only once (as a singleton instance). Creating more than one will result on an {@link java.lang.IllegalStateException} thrown by the {@link jpen.PenManager}. If you need to listen on multiple AWT components then use only the the {@link AwtPenToolkit} class. Usage of {@code AwtPenToolkit} and {@code AwtPenOwner} is exclusive, that is you can not use {@code AwtPenToolkit} once you use {@code AwtPenOwner} and vice versa.
+<b>Warning:</b> This class can be used only once (as a singleton instance). Creating more than one will result on an {@link java.lang.IllegalStateException} thrown by the {@link jpen.PenManager}. If you need to listen on multiple AWT components then use only the the {@link jpen.owner.multiAwt.AwtPenToolkit} class. Usage of {@code jpen.owner.multiAwt.AwtPenToolkit} and {@code AwtPenOwner} is exclusive, you can not use {@code jpen.owner.multiAwt.AwtPenToolkit} once you have used {@code AwtPenOwner} and vice versa.
 */
 public final class AwtPenOwner
 	extends ComponentPenOwner {
