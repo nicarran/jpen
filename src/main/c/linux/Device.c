@@ -163,11 +163,14 @@ int Device_init(SDevice *pDevice, SBus *pBus, int deviceIndex) {
 
 
 static void Device_refreshValuatorValues(struct Device *pDevice, char first_axis, char axis_count, int *axisData) {
-	register int i=first_axis;
+	// first_axis corresponds to the first axis on valuatorValues
+	// axis_count is the amount of data on axisData (not the corresponding last axis on valuatorValues as thought)
+	register int i=0, valuatorValuesIndex;
 	for(; i<axis_count; i++) {
-		if(i==E_Valuators_size)
+		valuatorValuesIndex=first_axis+i;
+		if(valuatorValuesIndex==E_Valuators_size)
 			break;
-		pDevice->valuatorValues[i]=axisData[i];
+		pDevice->valuatorValues[valuatorValuesIndex]=axisData[i];
 	}
 }
 
@@ -192,7 +195,7 @@ int Device_waitNextEvent(struct Device *pDevice) {
 	struct Bus *pBus=Bus_getP(pDevice->busCellIndex);
 
 	XNextEvent(pBus->pDisplay, &pDevice->lastEvent);
-
+	
 	register int i;
 	for(i=E_EventType_size; --i>=0;) {
 		if(pDevice->eventTypeIds[i]==pDevice->lastEvent.type){
