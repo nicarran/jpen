@@ -57,9 +57,9 @@ final class PenScheduler {
 		private PLevelEvent lastLevelEvent; // last level event scheduled (not filtered)
 		boolean filteredFirstInSecuence;
 		private long firstInSecuenceTime;
-		boolean systemMouseDevicePresent;
 		boolean nonSystemMouseDevicePresent;
 		private int preferredKindTypeNumber=PKind.Type.IGNORE.ordinal();
+		boolean mayBeDraggingIn=true;
 
 		SystemMouseFilter(PenManager penManager) {
 			this.penManager=penManager;
@@ -71,7 +71,7 @@ final class PenScheduler {
 			if(device==penManager.emulationDevice)
 				return false;
 			if(penManager.isSystemMouseDevice(device)) {
-				systemMouseDevicePresent=true;
+				mayBeDraggingIn=false;
 				long time=System.currentTimeMillis();
 				if(lastLevelEvent!=null &&
 						lastLevelEvent.getDeviceId()!=device.getId() &&
@@ -90,8 +90,8 @@ final class PenScheduler {
 				preferredKindTypeNumber=device.getKindTypeNumber();
 			} else {
 				preferredKindTypeNumber=device.getKindTypeNumber();
-				if(penManager.getSystemMouseProvider()!=null) {// filter out level events when coming dragging from another AWT component.
-					if(!nonSystemMouseDevicePresent && !systemMouseDevicePresent)
+				if(penManager.getSystemMouseProvider()!=null) {// filter out level events when coming dragging in from another AWT component.
+					if(mayBeDraggingIn)
 						return true;
 				}
 				nonSystemMouseDevicePresent=true;
@@ -108,8 +108,8 @@ final class PenScheduler {
 
 		void setFirstTimeFilteringAfterPause() {
 			nonSystemMouseDevicePresent=false;
-			systemMouseDevicePresent=false;
 			filteredFirstInSecuence=false;
+			mayBeDraggingIn=true;
 		}
 
 		int getPreferredKindTypeNumber() {
@@ -123,22 +123,16 @@ final class PenScheduler {
 		if(paused) {
 			scheduleEmulatedZeroPressureEvent();
 			scheduleButtonReleasedEvents();
-			systemMouseFilter.setFirstTimeFilteringAfterPause();
 		} else {
 			firstScheduleAfterPause=true;
 			relativeLocationFilter.reset();
+			systemMouseFilter.setFirstTimeFilteringAfterPause();
 		}
 	}
 
 	private synchronized void scheduleEmulatedZeroPressureEvent() {
 		if(lastScheduledState.levels.getValue(PLevel.Type.PRESSURE)>0)
 			scheduleLevelEvent(new PLevelEvent(getEmulationDevice(), System.currentTimeMillis(),new PLevel[] {new PLevel(PLevel.Type.PRESSURE, 0)}));
-	}
-
-	private void scheduleLevelEvent(PLevelEvent levelEvent) {
-		lastScheduledState.levels.setValues(levelEvent);
-		schedule(levelEvent);
-		systemMouseFilter.setLastLevelEvent(levelEvent);
 	}
 
 	private final Point clipLocationOnScreen=new Point();
@@ -158,7 +152,7 @@ final class PenScheduler {
 				default:
 				}
 		}
-
+		
 		if(systemMouseFilter.filterOut(device))
 			return false;
 
@@ -180,9 +174,9 @@ final class PenScheduler {
 		scheduledLevels.clear();
 		float scheduledPressure=-1;
 		boolean scheduledMovement=false;
-		scheduledLocation.x=lastScheduledState.levels.getValue(PLevel.Type.X);
-		scheduledLocation.y=lastScheduledState.levels.getValue(PLevel.Type.Y);
-		PenOwner penOwner=pen.penManager==null? null:pen.penManager.penOwner; // pen.penManager can be null when testing
+		scheduledLocation.x=lastScheduledState.getLevelValue(PLevel.Type.X);
+		scheduledLocation.y=lastScheduledState.getLevelValue(PLevel.Type.Y);
+		PenOwner penOwner=pen.penManager==null? null:pen.penManager.penOwner; // pen.penManager can be null when running tests
 		if(penOwner!=null && levelsOnScreen)
 			penOwner.getPenClip().evalLocationOnScreen(clipLocationOnScreen);
 		for(PLevel level:levels) {
@@ -208,9 +202,14 @@ final class PenScheduler {
 				default:
 					throw new AssertionError();
 				}
+				if(!firstScheduleAfterPause) {
+					float lastLevelValue=lastScheduledState.getLevelValue(level.typeNumber);
+					if(levelValue==lastLevelValue)
+						continue;
+					if(pen.penManager.isSystemMouseDevice(device) && Math.abs(levelValue-lastLevelValue)<1)
+						continue;
+				}
 				level.value=levelValue;
-				if(!firstScheduleAfterPause && level.value==lastScheduledState.getLevelValue(level.typeNumber))
-					continue;
 				scheduledMovement=true;
 			} else {
 				if(!firstScheduleAfterPause && level.value==lastScheduledState.getLevelValue(level.typeNumber))
@@ -240,6 +239,12 @@ final class PenScheduler {
 		firstScheduleAfterPause=false;
 
 		return true;
+	}
+
+	private void scheduleLevelEvent(PLevelEvent levelEvent) {
+		lastScheduledState.levels.setValues(levelEvent);
+		schedule(levelEvent);
+		systemMouseFilter.setLastLevelEvent(levelEvent);
 	}
 
 	private void scheduleOnPressureButtonEvent(float scheduledPressure) {
