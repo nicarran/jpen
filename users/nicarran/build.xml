@@ -1,3 +1,0 @@
-<project name="Standard" default="prepare" >
-	<import  file="jniBuild.xml"/>
-</project>
