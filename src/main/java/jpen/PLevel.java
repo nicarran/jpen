@@ -116,6 +116,14 @@ public class PLevel
 		}
 
 		private static final double PI_over_2=PI/2;
+		
+		public boolean isMovement(){
+			return MOVEMENT_TYPES.contains(this);
+		}
+		
+		public boolean isTilt(){
+			return TILT_TYPES.contains(this);
+		}
 	}
 
 	public PLevel(PLevel level){
@@ -136,6 +144,6 @@ public class PLevel
 	}
 
 	public boolean isMovement() {
-		return Type.MOVEMENT_TYPES.contains(getType());
+		return getType().isMovement();
 	}
 }
