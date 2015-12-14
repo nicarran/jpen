@@ -176,6 +176,8 @@ final class XinputDevice extends AbstractPenDevice {
 				//scheduleButtonEvent(xiDevice.getLastEventButton(), false);
 				break;
 			*/
+		case PROXIMITY_IN:
+		case PROXIMITY_OUT:
 		case MOTION_NOTIFY:
 			scheduleLevelEvent();
 			break;
@@ -224,7 +226,7 @@ final class XinputDevice extends AbstractPenDevice {
 		float devValue=xiDevice.getValue(levelType);
 		// nicarran: TODO: ignore rotation or SIDE_PRESSURE depending on the name of the device? wait feedback
 
-		if(PLevel.Type.TILT_TYPES.contains(levelType))
+		if(levelType.isTilt())
 			return devValue*RADS_PER_DEG;
 
 		devValue=levelRanges[levelType.ordinal()].getRangedValue(devValue);
@@ -232,7 +234,7 @@ final class XinputDevice extends AbstractPenDevice {
 		if(isRotation)
 			return devValue*PI_2;
 
-		if(PLevel.Type.MOVEMENT_TYPES.contains(levelType))
+		if(levelType.isMovement())
 			devValue=xinputProvider.screenBounds.getLevelRangeOffset(levelType)+
 						devValue*xinputProvider.screenBounds.getLevelRangeMult(levelType);
 
