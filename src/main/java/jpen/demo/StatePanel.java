@@ -26,20 +26,21 @@ import jpen.owner.multiAwt.AwtPenToolkit;
 import jpen.Pen;
 import jpen.PenManager;
 
-class StatePanel{
+class StatePanel {
+
 	final Box panel=Box.createVerticalBox();
 
-	StatePanel(){
+	StatePanel() {
 		Pen pen=AwtPenToolkit.getPenManager().pen;
-		
+
 		ButtonsPanel2 buttonsPanel=new ButtonsPanel2(pen);
 		ScrollsPanel scrollsPanel=new ScrollsPanel(pen);
 		KindPanel kindPanel=new KindPanel(pen);
 		LevelsPanel levelsPanel=new LevelsPanel(pen);
 		SampleRatePanel sampleRatePanel=new SampleRatePanel(pen);
-		// --- the last listener to measure the time still available: 
-		AvailableTimePanel availableTimePanel=new AvailableTimePanel(pen); 
-		
+		// --- the last listener to measure the time still available:
+		AvailableTimePanel availableTimePanel=new AvailableTimePanel(pen);
+
 		Box mainLine=Box.createHorizontalBox();
 		panel.add(Utils.alignTopLeft(mainLine));
 
@@ -53,7 +54,7 @@ class StatePanel{
 		Box line=Box.createHorizontalBox();
 		buttonsPanel.panel.setBorder(BorderFactory.createTitledBorder("Pressed Buttons"));
 		line.add(Utils.alignTopLeft(buttonsPanel.panel));
-		
+
 		Box column2=Box.createVerticalBox();
 		scrollsPanel.panel.setBorder(BorderFactory.createTitledBorder("Scrolls"));
 		column2.add(Utils.alignTopLeft(scrollsPanel.panel));
@@ -62,22 +63,23 @@ class StatePanel{
 		column2.add(Utils.alignTopLeft(kindPanel.panel));
 		line.add(Utils.createHorizontalStrut());
 		line.add(Utils.alignTopLeft(column2));
-		
+
 		column.add(Utils.alignTopLeft(line));
-		
+
 		column.add(Utils.createVerticalStrut());
-		
+
 		column.add(Utils.labelComponent(
-		             "Available Millis:", availableTimePanel.panel
-		           ));
+					   "Available Millis:", availableTimePanel.panel
+				   ));
 		column.add(Utils.labelComponent(
-																		"Sample Period:", sampleRatePanel.panel
-																		));
+					   "Sample Period:", sampleRatePanel.panel
+				   ));
+
 		column.add(Utils.labelComponent(
-		             "JPen Version:", new JLabel(AwtPenToolkit.getPenManager().getJPenFullVersion())
-		           ));
-		
-		column.add(Box.createVerticalGlue());		
+					   "JPen Version:", new JLabel(PenManager.getJPenFullVersion())
+				   ));
+
+		column.add(Box.createVerticalGlue());
 
 		mainLine.add(Utils.createHorizontalStrut());
 		mainLine.add(Utils.alignTopLeft(column));
