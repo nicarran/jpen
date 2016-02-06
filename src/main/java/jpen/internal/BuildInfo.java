@@ -37,15 +37,11 @@ public final class BuildInfo{
 		return getProperties().getString("module.id");
 	}
 
-	public static String getFullVersion(){
-		return getVersion()+"-"+getDistVersion();
-	}
-
 	public static String getVersion(){
 		return getProperties().getString("module.version");
 	}
 
-	public static String getDistVersion(){
-		return getProperties().getString("module.distVersion");
+	public static String getFullVersion(){
+		return getProperties().getString("module.fullVersion");
 	}
 }
