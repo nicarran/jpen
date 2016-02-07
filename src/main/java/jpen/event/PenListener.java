@@ -30,6 +30,7 @@ public interface PenListener {
 	The pen fires queued events at a given frequency (by default {@link jpen.Pen#DEFAULT_FREQUENCY}) in its own thread. Each cycle, after firing and processing the events, the pen calls jpen.event.PenListener.penTock(long availableMillis), where availableMillis is the time left of the period: {@code availableMillis=period-firingTime }, {@code period=1000/frequency}, and {@code firingTime} is the time spent in firing and processing events in the cycle.<p>
 	This method is called from the event dispatch thread if {@link Pen#getFirePenTockOnSwing()} is {@code true}.
 	
+	@param availableMillis time of period left after processing events in milliseconds
 	@see Pen#setFirePenTockOnSwing(boolean)
 	*/
 	void penTock(long availableMillis); // TODO: Pen parameter??

@@ -61,7 +61,7 @@ public interface PenDevice {
 	/**
 	Don't call this method. It is only for use by the {@link PenManager}. This method is called when the provider {@link PenProvider#getUseRelativeLocationFilter()} is {@code true} and this {@code PenDevice} must change its {@code useFractionalMovement} mode.
 	
-	@see #getUseFractionalMovements()
+	@param useFractionalMovements new value of {@code useFractionalMovements} to be set, see {@link #getUseFractionalMovements()}
 	*/
 	void penManagerSetUseFractionalMovements(boolean useFractionalMovements);
 	

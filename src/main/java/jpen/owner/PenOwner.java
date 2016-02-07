@@ -30,11 +30,15 @@ A PenOwner defines the available {@link PenProvider}s and unpauses/pauses the {@
 public interface PenOwner{
 	/**
 	Called once by the {@link PenManager#PenManager(PenOwner)} constructor to get the available {@link jpen.PenProvider.Constructor}s and use them to setup the {@link PenProvider}s.
+	
+	@return the available {@link PenProvider.Constructor}s 
 	*/
 	Collection<PenProvider.Constructor> getPenProviderConstructors();
 
 	/**
 	Called once by the {@link PenManager#PenManager(PenOwner)} constructor to allow this PenOwner to access the PenManager through the given {@link PenManagerHandle}.
+	
+	@param penManagerHandle value to set as a member if needed
 	*/
 	void setPenManagerHandle(PenManagerHandle penManagerHandle);
 
@@ -49,11 +53,16 @@ public interface PenOwner{
 		Object getPenSchedulerLock();
 		/**
 		Unpause/pause the scheduling of {@link jpen.PenEvent}s done by the {@link PenManager}'s {@link PenProvider}s.
+		
+		@param paused value to set on the {@link PenManager}
 		*/
 		void setPenManagerPaused(boolean paused);
 
 		/**
 		Retrieve the tag stored on the given {@code PenEvent}. See {@link #evalPenEventTag(PenEvent)}.
+		
+		@param ev where the tag is to be retrieved from
+		@return the tag stored on the given {@code ev}
 		*/
 		Object retrievePenEventTag(PenEvent ev);
 	}
@@ -71,7 +80,10 @@ public interface PenOwner{
 	boolean isDraggingOut();
 
 	/**
-	This method is called by the {@code PenManager}'s machinary when creating a {@code PenEvent}. This method returns a tag to be stored on the given {@code PenEvent} or {@code null} if no tagging is needed  (the {@code PenManager} machinary stores this tag on the private {@code PenEvent}'s {@code penOwnerTag} field ). The tag can be later retrieved using {@link PenManagerHandle#retrievePenEventTag(PenEvent)}. 
+	This method is called by the {@code PenManager}'s machinery when creating a {@code PenEvent}. This method returns a tag to be stored on the given {@code PenEvent} or {@code null} if no tagging is needed  (the {@code PenManager} machinery stores this tag on the private {@code PenEvent}'s {@code penOwnerTag} field ). The tag can be later retrieved using {@link PenManagerHandle#retrievePenEventTag(PenEvent)}.
+	
+	@param ev event to be tagged
+	@return the tag to be set on the given {@code ev} or {@code null} if the feature isn't needed
 	*/
 	Object evalPenEventTag(PenEvent ev);
 

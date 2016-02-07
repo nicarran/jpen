@@ -31,14 +31,16 @@ import jpen.PenProvider;
 import jpen.PenState;
 import jpen.PLevel;
 
-public final class RelativeLocationFilter{
+public final class RelativeLocationFilter {
+
 	private static final Logger L=Logger.getLogger(RelativeLocationFilter.class.getName());
 	//static { L.setLevel(Level.ALL); }
 
 
 	private PenDevice penDevice;
 	private State state=State.UNDEFINED;
-	public enum State{
+	public enum State {
+
 		/**
 		The filter tries to see if the values are absolute or relative and sets the state if possible.
 		*/
@@ -59,16 +61,17 @@ public final class RelativeLocationFilter{
 	final Point2D.Float reference=new Point2D.Float();
 	final SamplePoint samplePoint=new SamplePoint();
 	static class SamplePoint
-		implements Cloneable{
+		implements Cloneable {
+
 		PLevel levelX, levelY;
 		boolean isComplete;
 
-		boolean reset(Collection<PLevel> sample){
+		boolean reset(Collection<PLevel> sample) {
 			levelX=levelY=null;
 			int valuesCount=0;
-		out:
-			for(PLevel level: sample){
-				switch(level.getType()){
+			out:
+			for(PLevel level: sample) {
+				switch(level.getType()) {
 				case X:
 					valuesCount++;
 					levelX=level;
@@ -87,11 +90,11 @@ public final class RelativeLocationFilter{
 			return valuesCount>0;
 		}
 
-		private void set(float x, float y){
+		private void set(float x, float y) {
 			set(x, y, null);
 		}
 
-		private void set(float x, float y, Collection<PLevel> sample){
+		private void set(float x, float y, Collection<PLevel> sample) {
 			if(levelX!=null)
 				levelX.value=x;
 			else if(sample!=null)
@@ -103,13 +106,13 @@ public final class RelativeLocationFilter{
 		}
 
 		@Override
-		public SamplePoint clone(){
-			try{
+		public SamplePoint clone() {
+			try {
 				SamplePoint clone=(SamplePoint)super.clone();
 				clone.levelX=new PLevel(levelX);
 				clone.levelY=new PLevel(levelY);
 				return clone;
-			}catch(CloneNotSupportedException ex){
+			} catch(CloneNotSupportedException ex) {
 				throw new AssertionError(ex);
 			}
 		}
@@ -117,37 +120,42 @@ public final class RelativeLocationFilter{
 
 	final Point2D.Float deviation=new Point2D.Float();
 	final Point2D.Float absDeviation=new Point2D.Float();
-	private final Rule[] rules=new Rule[]{
-				//new LogToFileRule(),
-				new AbsoluteLocationRule(),
-				new AbsoluteOnARowRule(),
-				new RelativeOnSlopesRule(),
-			};
-	interface Rule{
+	private final Rule[] rules=new Rule[] {
+		//new LogToFileRule(),
+		new AbsoluteLocationRule(),
+		new AbsoluteOnARowRule(),
+		new RelativeOnSlopesRule(),
+	};
+	interface Rule {
+
 		void reset();
 		State evalFilterNextState(RelativeLocationFilter filter);
 	}
 
-	public void reset(){
+	public void reset() {
 		penDevice=null;
 		resetRules();
 	}
 
-	private void resetRules(){
-		for(Rule rule: rules){
+	private void resetRules() {
+		for(Rule rule: rules) {
 			rule.reset();
 		}
 	}
 
 	/**
-	@return {@code true} if the state changed to a definitive value.
+	@param penState the current pen values
+	@param penDevice where the {@code sample} levels are coming from
+	@param sample level values to be filtered/changed according to the {@code state} of this {@code RelativeLocationFilter}
+	@param levelsOnScreen {@code true} if the given {@code sample} levels are on the screen coordinate system
+	@return {@code true} if the state of this {@code RelativeLocationFilter} changed to a definitive value.
 	*/
-	public boolean filter(PenState penState, PenDevice penDevice, Collection<PLevel> sample, boolean levelsOnScreen){
-		if(!levelsOnScreen) // only levelsOnScreen is supported
+	public boolean filter(PenState penState, PenDevice penDevice, Collection<PLevel> sample, boolean levelsOnScreen) {
+		if(!levelsOnScreen) // only levelsOnScreen are supported
 			return false;
 		if(state.equals(State.OFF))
 			return false;
-		if(this.penDevice!=penDevice){
+		if(this.penDevice!=penDevice) {
 			this.penDevice=penDevice;
 			state=State.UNDEFINED;
 			resetRules();
@@ -162,11 +170,11 @@ public final class RelativeLocationFilter{
 			return true;
 
 		boolean stateChanged=false;
-		if(state.equals(State.UNDEFINED)){
+		if(state.equals(State.UNDEFINED)) {
 			setupDeviation();
 			stateChanged=evalStateFromRules();
 		}
-		switch(state){
+		switch(state) {
 		case ABSOLUTE:
 			break;
 		case RELATIVE:
@@ -174,20 +182,20 @@ public final class RelativeLocationFilter{
 			break;
 		case UNDEFINED:
 			samplePoint.set(penState.getLevelValue(PLevel.Type.X),
-											penState.getLevelValue(PLevel.Type.Y)); // then it won't cause a level event because movement
+							penState.getLevelValue(PLevel.Type.Y)); // then it won't cause a level event because of movement
 			break;
 		default:
 		}
 		return stateChanged;
 	}
 
-	private static boolean evalIsSystemMouseDevice(PenDevice device){
+	private static boolean evalIsSystemMouseDevice(PenDevice device) {
 		return device.getProvider().getConstructor().getPenManager().isSystemMouseDevice(device);
 	}
 
-	private boolean setupReference(){
+	private boolean setupReference() {
 		PointerInfo pointerInfo=AccessController.doPrivileged(getPointerInfoAction);
-		if(pointerInfo==null){
+		if(pointerInfo==null) {
 			L.warning("No mouse found. Can not correct devices on relative (mouse) mode.");
 			state=State.OFF;
 			return false;
@@ -196,28 +204,28 @@ public final class RelativeLocationFilter{
 		return true;
 	}
 
-	private final PrivilegedAction<PointerInfo> getPointerInfoAction=new PrivilegedAction<PointerInfo>(){
-				//@Override
-				public PointerInfo run(){
-					return MouseInfo.getPointerInfo();
-				}
-			};
+	private final PrivilegedAction<PointerInfo> getPointerInfoAction=new PrivilegedAction<PointerInfo>() {
+		//@Override
+		public PointerInfo run() {
+			return MouseInfo.getPointerInfo();
+		}
+	};
 
-	private void setupDeviation(){
-		if(samplePoint.levelX!=null){
+	private void setupDeviation() {
+		if(samplePoint.levelX!=null) {
 			deviation.x=samplePoint.levelX.value-reference.x;
 			absDeviation.x=Math.abs(deviation.x);
 		}
-		if(samplePoint.levelY!=null){
+		if(samplePoint.levelY!=null) {
 			deviation.y=samplePoint.levelY.value-reference.y;
 			absDeviation.y=Math.abs(deviation.y);
 		}
 	}
 
-	private boolean evalStateFromRules(){
-		for(Rule rule: rules){
+	private boolean evalStateFromRules() {
+		for(Rule rule: rules) {
 			State nextState=rule.evalFilterNextState(this);
-			if(nextState!=null){
+			if(nextState!=null) {
 				this.state=nextState;
 				return true;
 			}
@@ -225,7 +233,7 @@ public final class RelativeLocationFilter{
 		return false;
 	}
 
-	public State getState(){
+	public State getState() {
 		return state;
 	}
 }

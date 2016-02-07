@@ -62,7 +62,10 @@ public final class AwtPenOwner
 	};
 	/**
 	<b>Warning:</b> See {@link AwtPenOwner}.
+	
+	@param component to be based on
 	*/
+	@SuppressWarnings("javadoc")
 	public AwtPenOwner(Component component) {
 		this.component=component;
 	}

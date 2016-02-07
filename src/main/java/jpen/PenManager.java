@@ -79,7 +79,9 @@ public final class PenManager {
 	private PenDevice systemMouseDevice; // may be null
 
 	/**
-	Creates an {@code AwtPenOwner} and calls the {@link #PenManager(PenOwner)} constructor. <b>Warning:</b> see {@link jpen.owner.awt.AwtPenOwner}.
+	Creates an {@code AwtPenOwner} and calls the {@link #PenManager(PenOwner)} constructor. <b>Warning:</b> see {@link AwtPenOwner}.
+	
+	@param component where {@code PenEvent}s are going to be listened
 	*/
 	public PenManager(Component component) {
 		this(new AwtPenOwner(component));
@@ -267,6 +269,9 @@ public final class PenManager {
 
 	/**
 	Schedules button events. You must construct a new {@code PButton} each time you call this method (do not reuse).
+	@param device source device
+	@param deviceTime time of event creation on device
+	@param button button value
 	*/
 	public void scheduleButtonEvent(PenDevice device, long deviceTime, PButton button) {
 		if(paused)
@@ -276,6 +281,10 @@ public final class PenManager {
 
 	/**
 	Schedules scroll events. You must construct a new {@code PScroll} each time you call this method (do not reuse).
+	
+	@param device source device
+	@param deviceTime time of event creation on device
+	@param scroll scroll value
 	*/
 	public void scheduleScrollEvent(PenDevice device, long deviceTime, PScroll scroll) {
 		if(paused)
@@ -289,6 +298,12 @@ public final class PenManager {
 
 	/**
 	Schedules level events. You can reuse the levels {@code Collection} but you must construct new {@code PLevel}s each time you call this method.
+	
+	@param device source device
+	@param deviceTime time of even creation on device
+	@param levels level values
+	@param levelsOnScreen {@code true} if the level movement values are on the screen coordinate system, {@code false} otherwise
+	@return {@code true} if an event was scheduled, {@code false} false if it was filter out
 	*/
 	public boolean scheduleLevelEvent(PenDevice device, long deviceTime, Collection<PLevel> levels, boolean levelsOnScreen) {
 		if(paused)
@@ -298,6 +313,10 @@ public final class PenManager {
 
 	/**
 	Uses reflection to get the first provider of the given class.
+	
+	@param providerClass class of {@link PenProvider} to search for
+	@param <T> {@code providerClass} parametrization
+	@return the first {@link PenProvider} matching
 	*/
 	public <T extends PenProvider> T getProvider(Class<T> providerClass) {
 		for(PenProvider.Constructor constructor: getProviderConstructors()) {

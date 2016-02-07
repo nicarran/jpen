@@ -31,13 +31,15 @@ import java.util.Set;
 import static java.lang.Math.*;
 
 public class PLevel
-			extends TypedValuedClass<PLevel.Type, Float>
+	extends TypedValuedClass<PLevel.Type, Float>
 	implements java.io.Serializable {
+
 	private static final Logger L=Logger.getLogger(PLevel.class.getName());
 	//static{L.setLevel(Level.FINE);}
 	public static final long serialVersionUID=1l;
 
-	public enum Type{
+	public enum Type {
+
 		/**
 		X axis value in pixels. The X axis points to the right of the screen. It's a left handed coordinate system: the Z axis points upside.
 		*/
@@ -86,23 +88,28 @@ public class PLevel
 		public static final Set<Type> TILT_TYPES=Collections.unmodifiableSet(EnumSet.of(TILT_X, TILT_Y));
 
 		/**
-		Evaluates the azimuthX and altitude given the tilt values of the pen.
+		Evaluates the azimuthX and altitude given the tilt values of the pen, see {@link #evalAzimuthXAndAltitude(double[], double tiltX, double tiltY)}.
 
-		@see #evalAzimuthXAndAltitude(double[], double tiltX, double tiltY)
+		@param azimuthXAndAltitude array where the values (result) are going to be put in
+		@param pen where the necessary values to do the calculation (tilt values) are read from 
 		*/
-		public static void evalAzimuthXAndAltitude(double[] azimuthXAndAltitude, PenState pen){
+		public static void evalAzimuthXAndAltitude(double[] azimuthXAndAltitude, PenState pen) {
 			evalAzimuthXAndAltitude(azimuthXAndAltitude, pen.getLevelValue(TILT_X), pen.getLevelValue(TILT_Y));
 		}
 
 		/**
 		Evaluates the azimuthX and the altitude given the tilt ({@link #TILT_X}, {@link #TILT_Y}) values. Where:<p>
-	{@code azimuthX} is the angle between the X axis and the projection of the pen against the X-Y plane. Clockwise direction. Range: -pi/2 and 3*pi/2 <p>
+		{@code azimuthX} is the angle between the X axis and the projection of the pen against the X-Y plane. Clockwise direction. Range: -pi/2 and 3*pi/2 <p>
 		And {@code altitude} is the angle between the pen and the projection of the pen against the X-Y plane. Range: 0 to pi/2.
+		
+		@param azimuthXAndAltitude array where the values (result) are going to be put in
+		@param tiltX tilt value
+		@param tiltY tilt value
 		*/
-		public static void evalAzimuthXAndAltitude(double[] azimuthXAndAltitude, double tiltX, double tiltY){
+		public static void evalAzimuthXAndAltitude(double[] azimuthXAndAltitude, double tiltX, double tiltY) {
 			if(tiltX<0)
 				azimuthXAndAltitude[0]=PI;
-			else if(tiltX==0 && tiltY==0){
+			else if(tiltX==0 && tiltY==0) {
 				azimuthXAndAltitude[0]=0;
 				azimuthXAndAltitude[1]=PI_over_2;
 				return;
@@ -111,26 +118,26 @@ public class PLevel
 			double tanTiltY=tan(tiltY);
 			azimuthXAndAltitude[0]+=atan(tanTiltY/tan(tiltX));
 			azimuthXAndAltitude[1]=azimuthXAndAltitude[0]==0?
-					PI_over_2-tiltX:
-					Math.abs(atan(sin(azimuthXAndAltitude[0])/tanTiltY));
+								   PI_over_2-tiltX:
+								   Math.abs(atan(sin(azimuthXAndAltitude[0])/tanTiltY));
 		}
 
 		private static final double PI_over_2=PI/2;
-		
-		public boolean isMovement(){
+
+		public boolean isMovement() {
 			return MOVEMENT_TYPES.contains(this);
 		}
-		
-		public boolean isTilt(){
+
+		public boolean isTilt() {
 			return TILT_TYPES.contains(this);
 		}
 	}
 
-	public PLevel(PLevel level){
+	public PLevel(PLevel level) {
 		this(level.typeNumber, level.value);
 	}
 
-	public PLevel(Type type, float value){
+	public PLevel(Type type, float value) {
 		this(type.ordinal(), value);
 	}
 

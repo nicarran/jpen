@@ -38,12 +38,14 @@ public interface PenProvider {
 		*/
 		String getName();
 		/**
+		@param pm where the construction is being requested
 		@return {@code true} if the {@code PenProvider} can be constructed on this system, {@code false} otherwise.This method usually test for the name of the operating system and returns {@code true} if it matches an operating system in which this provider can run.
 		*/
 		boolean constructable(PenManager pm);
 		/**
 		This method constructs the {@code PenProvider}. It is called only when {@link #constructable(PenManager)} returns {@code true}.  When this methods completes, it is expected that the {@link #getConstructed()} method returns the {@code PenProvider} constructed. If the {@code PenProvider} couldn't be constructed due to some condition (e.g. the required native drivers are not present) then the {@link #getConstructionException()} method is expected to return an exception describing the condition.
 		
+		@param pm where the construction is being requested
 		@return {@code true} if the {@code PenProvider} was constructed. {@code false} if the {@code PenProvider} couldn't be constructed.
 		*/
 		boolean construct(PenManager pm);

@@ -167,9 +167,12 @@ public abstract class ComponentPenOwner
 
 	/**
 	Checks if the given {@link Component} holds the {@link Component#getTreeLock()} before actually getting and returning the {@link jpen.owner.PenOwner.PenManagerHandle#getPenSchedulerLock()}. Prefer using this method instead of {@link jpen.owner.PenOwner.PenManagerHandle#getPenSchedulerLock()} to be shure you  aren't causing deadlocks because the {@link ComponentPenClip} methods hold the {@link Component#getTreeLock()}.
+
+	@param component to check if the AWT component tree lock is being held and avoid deadlock, may be null
+	@return the pen scheduler even synchronization lock
 	*/
 	protected Object getPenSchedulerLock(Component component) {
-		if(component!=null && Thread.currentThread().holdsLock(component.getTreeLock()))
+		if(component!=null && Thread.holdsLock(component.getTreeLock()))
 			throw new AssertionError("tryed to hold penSchedulerLock while holding Component's treeLock");
 		return penManagerHandle.getPenSchedulerLock();
 	}
