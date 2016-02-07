@@ -59,7 +59,7 @@ public abstract class PenEvent
 	}
 
 	/**
-	Returns the time in milliseconds of when this event was scheduled by the {@link Pen}.
+	@return the time in milliseconds of when this event was scheduled by the {@link Pen}
 	*/
 	public long getTime() {
 		return time;
@@ -70,7 +70,7 @@ public abstract class PenEvent
 	abstract void dispatch();
 
 	/**
-	Returns the id of the {@link PenDevice} which generated this event.
+	@return the id of the {@link PenDevice} which generated this event
 
 	@see #getDevice()
 	@see PenManager#getDevice(byte)
@@ -80,6 +80,7 @@ public abstract class PenEvent
 	}
 
 	/**
+	@return the device that caused this {@code PenEvent}
 	@throws IllegalStateException if the {@link #pen} is null. {@code pen} is null after deserialization.
 	*/
 	public PenDevice getDevice(){
@@ -89,7 +90,7 @@ public abstract class PenEvent
 	}
 
 	/**
-	Returns the timestamp in milliseconds of when this event ocurred in the {@link PenDevice}. The value returned was measured since some fixed but arbitrary time imposed by the {@link PenDevice}.
+	@return The timestamp in milliseconds of when this event ocurred in the {@link PenDevice}. The value returned was measured since some fixed but arbitrary time imposed by the {@link PenDevice}.
 
 	@see #getDeviceId()
 	@see #getTime()

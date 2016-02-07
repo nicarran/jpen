@@ -43,6 +43,7 @@ public interface PenDevice {
 	/**
 	Don't call this method. It is only for use by the {@link PenManager}. This method is called when the device is being constructed to set a meaningful {@code id}.
 	
+	@param id id for this {@code PenDevice}
 	@see PLevelEvent#getDeviceId()
 	*/
 	void penManagerSetId(byte id);

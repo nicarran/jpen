@@ -239,14 +239,6 @@ public final class PenManager {
 		return devicesA;
 	}
 
-	/**
-	@deprecated replacement: #getProviderConstructors().
-	*/
-	@Deprecated
-	public Set<PenProvider.Constructor> getConstructors() {
-		return getProviderConstructors();
-	}
-
 	public Set<PenProvider.Constructor> getProviderConstructors() {
 		waitForProviderConstructorsInitialization();
 		return providerConstructorsA;

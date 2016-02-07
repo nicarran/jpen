@@ -142,13 +142,4 @@ public class JPenDemoControl{
 		f.setVisible(true);
 		f.setDefaultCloseOperation(f.EXIT_ON_CLOSE);
 	}
-
-	@Deprecated
-	public void showDialog(JComponent parent, String title){
-		String closeOption="Close";
-		Object[] options=new Object[]{statusReportButton, closeOption};
-		JOptionPane.showOptionDialog(null, getMainPanelComponent(), title,
-				JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
-				null, options, closeOption);
-	}
 }

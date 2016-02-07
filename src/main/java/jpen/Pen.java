@@ -209,7 +209,7 @@ public class Pen extends PenState {
 
 	This method returns immediately, the change of frequency will happen after all the pending buffered events are processed.
 	
-	If frequency is greater than {@code 1000} then pen events will be fired as soon as possible (no buffering).
+	@param frequency event firing frequency. If frequency is greater than {@code 1000} then pen events will be fired as soon as possible (no buffering).
 
 	@see #addListener(PenListener) 
 	@see #removeListener(PenListener)
@@ -250,6 +250,8 @@ public class Pen extends PenState {
 
 	/**
 	Adds a {@link PenListener} for {@link PenEvent}s fired by this pen.
+	
+	@param l the listener to be added
 	*/
 	public void addListener(PenListener l) {
 		synchronized(listeners) {
@@ -260,6 +262,8 @@ public class Pen extends PenState {
 
 	/**
 	Removes a {@link PenListener} previously added using {@link #addListener(PenListener)}.
+	
+	@param l the listener to be removed
 	*/
 	public void removeListener(PenListener l) {
 		synchronized(listeners) {
