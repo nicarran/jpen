@@ -52,7 +52,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
             </goals>
             <configuration>
               <files>
-                <file>module.properties</file>
+                <file>build.properties</file>
               </files>
             </configuration>
           </execution>
