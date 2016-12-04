@@ -52,7 +52,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
             </goals>
             <configuration>
               <files>
-                <file>module.properties</file>
+                <file>build.properties</file>
               </files>
             </configuration>
           </execution>
@@ -199,6 +199,8 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
                       <arg value="-o"/>
                       <arg value="libjpen-${module.version}-${jpen.provider.xinput.nativeVersion}.so"/>
                       <arg value="-LXi"/>
+                      <arg value="-I${JAVA_HOME}/include/"/>
+                      <arg value="-I${JAVA_HOME}/include/linux/"/>
                       <arg value="../../../../../src/main/c/linux/Bus.c"/>
                       <arg value="../../../../../src/main/c/linux/Device.c"/>
                       <arg value="../../../../../src/main/c/linux/jpen_cFramework_TestType.c"/>
