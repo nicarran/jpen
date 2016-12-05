@@ -1,3 +1,0 @@
-<project default="updateNativeBuildHeaders">
-	<import  file="build-properties.xml"/>
-</project>
