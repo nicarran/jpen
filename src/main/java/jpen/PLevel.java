@@ -61,7 +61,7 @@ public class PLevel
 		*/
 		TILT_Y,
 		/**
-		Barrel button or wheel. Range: 0 to 1 towards the pen tip.<p>
+		Barrel button or wheel. Range: 0 to 1 towards the back of the pen.<p>
 		<b>Warning:</b> Testing needed. The development team does not have an airbrush to test on all platforms. Please help us giving feedback (<a href="http://sourceforge.net/projects/jpen/forums/forum/753961">start a topic on the help forum</a>):
 			<ul>
 				<li>Which operating system are you using?</li>
