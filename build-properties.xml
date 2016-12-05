@@ -24,7 +24,7 @@ WARNING: This Ant build file works right only on Linux.
 <!-- 
 This Ant build file contains tasks for loading/creating/writing build properties.
 -->
-<project name="properties-build" default="updateNativeBuildHeaders">
+<project name="build-properties" default="updateNativeBuildHeaders">
 	
 	<target name="updateNativeBuildProperties" description="updates the nativeBuild.properties file">
 		<exec executable="bash">
