@@ -4,6 +4,6 @@ We are currently migrating development from [Sourceforge](http://sourceforge.net
 
 * **Comments and bug reports** are now welcome [here](https://github.com/nicarran/jpen/issues). The [forum](https://sourceforge.net/p/jpen/discussion/753961/) and [ticket system](https://sourceforge.net/p/jpen/_list/tickets) on Sourceforge will be readonly when the migration is complete.
 
-The [main documentation page](http://jpen.sf.net) is pending to be updated is a good starting point to learn about JPen.
+The [main documentation page](http://jpen.sf.net), although being somewhat outdated, is a good starting point to learn about JPen.
 
 Thank you!
