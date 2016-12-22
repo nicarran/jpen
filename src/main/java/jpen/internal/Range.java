@@ -22,13 +22,13 @@ public class Range {
 	public final float min;
 	public final float max;
 	private final float range;
-
+        
 	public Range(float min, float max) {
-		if(min<0 && max>0 && Math.abs(max+min)==1){ // trick to avoid loosing the tool center
+        	if(min<0 && max>0 && Math.abs(max+min)==1){ // trick to avoid loosing the tool center
 			if(max>-min)
-				min=-max;
+                                max--; // limits the range by 1 step, making max == -min
 			else
-				max=-min;
+                                min++;
 		}
 		this.min=min;
 		this.max=max;
@@ -36,6 +36,8 @@ public class Range {
 	}
 	
 	public final float getRangedValue(float value) {
+                if (value <= min) return 0.0f;
+                if (value >= max) return 1.0f;
 		return (value-min)/range;
 	}
 
