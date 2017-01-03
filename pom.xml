@@ -224,12 +224,68 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
       <id>osx</id>
       <activation>
         <os>
-          <name>mac os x</name>
+          <name>mac os x</name>          
         </os>
+        <file>
+            <exists>/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers/</exists>
+        </file>    
       </activation>
       <properties>
         <source.dir>src/main/c/osx</source.dir>
       </properties>
+      <build>
+          <plugins>
+              <plugin>
+                  <groupId>com.github.maven-nar</groupId>
+                  <artifactId>nar-maven-plugin</artifactId>
+                  <configuration>
+                      <output>jpen-${module.version}-${jpen.provider.osx.nativeVersion}</output>
+                      <c>
+                          <name>gcc</name>
+                          <options>
+                              <option>-mmacosx-version-min=10.7</option>
+                              <option>-arch</option>
+                              <option>x86_64</option>     
+                              <option>-arch</option>
+                              <option>i386</option>                             
+                          </options>
+                      </c>
+                      <linker>
+                          <options>
+                              <option>-mmacosx-version-min=10.7</option>
+                              <option>-arch</option>
+                              <option>x86_64</option>
+                              <option>-arch</option>
+                              <option>i386</option>
+                              <option>-framework</option>
+                              <option>Cocoa</option>
+                              <option>-framework</option>
+                              <option>Carbon</option>
+                              <option>-framework</option>
+                              <option>JavaVM</option>
+                          </options>
+                      </linker>
+                  </configuration>
+              </plugin>
+              <!-- Workaround for nar-integration-test not setting java.library.path on macOS 10.12 -->
+              <plugin>
+                  <artifactId>maven-antrun-plugin</artifactId>
+                  <executions>
+                      <execution>
+                          <phase>pre-integration-test</phase>
+                          <configuration>
+                              <tasks>
+                                 <copy file="${project.basedir}/target/nar/${module.id-fullVer}-x86_64-MacOSX-gpp-jni/lib/x86_64-MacOSX-gpp/jni/libjpen-${module.version}-${jpen.provider.osx.nativeVersion}.jnilib" todir="${project.basedir}"/>
+                              </tasks>
+                          </configuration>
+                          <goals>
+                              <goal>run</goal>
+                          </goals>
+                      </execution>
+                  </executions>
+              </plugin>
+          </plugins>
+      </build>
     </profile>
     <profile>
       <id>win</id>
