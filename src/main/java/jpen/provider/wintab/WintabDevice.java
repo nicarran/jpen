@@ -195,8 +195,10 @@ class WintabDevice
 									rangedValue*wintabProvider.screenBounds.getLevelRangeMult(type);
 		}
 
-		if(PLevel.Type.ROTATION.equals(type))
-			rangedValue*=PI_2;
+		if(PLevel.Type.ROTATION.equals(type)){			
+                        rangedValue= 1 - rangedValue; // invert direction to be the same as on linux and like written in the PLevel javadoc
+                        rangedValue*=PI_2;
+                }
 
 		return rangedValue;
 	}
