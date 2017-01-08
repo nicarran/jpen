@@ -153,7 +153,6 @@ class WintabDevice
 
 	private static final float PI_2=(float)(Math.PI*2);
 	private static final double PI_over_2=Math.PI/2;
-	private static final double PI_over_2_over_900=PI_over_2/900; // (/10) and (/90)
 
 	private float getMultRangedValue(PLevel.Type type) {
 		if(PLevel.Type.TILT_TYPES.contains(type)) {
