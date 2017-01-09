@@ -53,7 +53,5 @@ getCombinedRevision "src/main/c/linux" "src/main/c/utils"
 echo jpen.provider.xinput.nativeBuild=$combinedRevision >> $propertyFile
 getCombinedRevision "src/main/c/windows" "src/main/c/utils"
 echo jpen.provider.wintab.nativeBuild=$combinedRevision >> $propertyFile
-# nicarran: disable to set it manually because the osx native files are being provided by marcello:
-# getCombinedRevision "src/main/c/osx"
-combinedRevision=201
+getCombinedRevision "src/main/c/osx"
 echo jpen.provider.osx.nativeBuild=$combinedRevision >> $propertyFile

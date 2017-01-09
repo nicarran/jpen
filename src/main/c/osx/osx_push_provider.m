@@ -217,6 +217,12 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 						// I discovered that you can get the underlying Carbon event that the Cocoa event maps to,
 						// and it can be checked for being of type "kEventMouseScroll" to determine whether deviceDeltaX
 						// is actually available.
+                        
+                        /* leads to compilation error on macOS 10.12:
+                        _eventRef not found and
+                        deviceDelta replaced by scrollingDelta (Available since 10.7)
+                         left here as a comment if assertion error happens again
+                        
 						if ([event respondsToSelector:@selector(_eventRef)] && 
 							[event respondsToSelector:@selector(deviceDeltaX)]) {
 							EventRef theCarbonEvent = [event _eventRef];
@@ -229,6 +235,19 @@ static void postProximityEvent(JNIEnv *env, NSEvent* event) {
 							dx = [event deltaX];
 							dy = [event deltaY];
 						}
+                        */
+                        
+                        // inspiration from https://dxr.mozilla.org/mozilla-b2g28_v1_3/source/widget/cocoa/nsChildView.mm
+                        
+                        if ([event respondsToSelector:@selector(scrollingDeltaX)]) { // Available since macOS 10.7
+                            dx = [event scrollingDeltaX];
+                            dy = [event scrollingDeltaY];
+                            useDeviceDelta=true;
+                        } else {
+                            dx = [event deltaX];
+                            dy = [event deltaY];
+                        }
+                        
 						if (dx != 0 || dy != 0) {
 							NSPoint location = getLocation(event);
 							(*env)->CallVoidMethod(env, g_object, g_methodID_scroll,
