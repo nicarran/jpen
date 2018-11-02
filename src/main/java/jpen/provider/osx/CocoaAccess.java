@@ -321,7 +321,13 @@ final class CocoaAccess {
 				levels.add(new PLevel(PLevel.Type.PRESSURE, pressure));
 				levels.add(new PLevel(PLevel.Type.SIDE_PRESSURE, tangentialPressure));
 				// Cocoa tablet rotation is in degrees
-				levels.add(new PLevel(PLevel.Type.ROTATION, rotation*RADIANS_PER_DEGREE));
+                                 float invertedRotation ;
+                                 if (rotation == 0.0f) { 
+                                    invertedRotation = 0.0f ; 
+                                 } else {
+                                    invertedRotation = 360f - rotation;
+                                 }
+				levels.add(new PLevel(PLevel.Type.ROTATION, invertedRotation*RADIANS_PER_DEGREE));
 				cocoaProvider.getPenManager().scheduleLevelEvent(device, deviceTime, levels, true);
 			}
 		});
