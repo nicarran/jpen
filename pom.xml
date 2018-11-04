@@ -243,20 +243,16 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
                       <c>
                           <name>gcc</name>
                           <options>
-                              <option>-mmacosx-version-min=10.7</option>
+                              <option>-mmacosx-version-min=10.9</option>
                               <option>-arch</option>
-                              <option>x86_64</option>     
-                              <option>-arch</option>
-                              <option>i386</option>                             
+                              <option>x86_64</option>
                           </options>
                       </c>
                       <linker>
                           <options>
-                              <option>-mmacosx-version-min=10.7</option>
+                              <option>-mmacosx-version-min=10.9</option>
                               <option>-arch</option>
                               <option>x86_64</option>
-                              <option>-arch</option>
-                              <option>i386</option>
                               <option>-framework</option>
                               <option>Cocoa</option>
                               <option>-framework</option>
@@ -266,6 +262,13 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
                           </options>
                       </linker>
                   </configuration>
+                  <!-- workaround : javah was deprecated and superseded by javac -h -->
+                  <executions>
+                    <execution>
+                        <id>default-nar-javah</id>
+                        <phase>none</phase>
+                    </execution>
+                  </executions>
               </plugin>
               <!-- Workaround for nar-integration-test not setting java.library.path on macOS 10.12 -->
               <plugin>
@@ -276,6 +279,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
                           <configuration>
                               <tasks>
                                  <copy file="${project.basedir}/target/nar/${module.id-fullVer}-x86_64-MacOSX-gpp-jni/lib/x86_64-MacOSX-gpp/jni/libjpen-${module.version}-${jpen.provider.osx.nativeVersion}.jnilib" todir="${project.basedir}"/>
+                                 <copy file="${project.basedir}/target/nar/${module.id-fullVer}-x86_64-MacOSX-gpp-jni/lib/x86_64-MacOSX-gpp/jni/libjpen-${module.version}-${jpen.provider.osx.nativeVersion}.jnilib" todir="${project.basedir}/target"/>
                               </tasks>
                           </configuration>
                           <goals>
