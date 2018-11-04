@@ -99,6 +99,13 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
             <excludes>
               <exclude>**/WintabAccess.class</exclude>
             </excludes>
+            <!-- cmd.exe /X /C ""C:\Program Files\Java\jdk\bin\javah" -classpath "C:\Users\path\jpen\target\classes" -d "C:\Users\path\jpen\target\nar\javah-include" jpen.NarSystem jpen.provider.xinput.XiDevice jpen.provider.osx.CocoaAccess jpen.provider.xinput.XiBus -->
+            <!-- javah is deprecated and the c headers are in src/main/c/
+                 it should be ok to disable javah execution ; 
+                 except that target/nar/nar-generated/NarSystem.java is not processed.
+                 May be it's necessary to run javac -h on NarSystem.java
+             -->
+
           </javah>
           <output>jpen-${module.version}</output>
           <libraries>
@@ -147,6 +154,7 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
       <activation>
         <os>
           <arch>amd64</arch>
+          <family>unix</family>
         </os>
       </activation>
       <build>
@@ -175,6 +183,10 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
     <profile>
       <id>i386-on-amd64</id>
       <activation>
+        <os>
+          <arch>amd64</arch>
+          <family>unix</family>
+        </os>
         <file>
           <exists>/usr/include/gnu/stubs-32.h</exists>
         </file>
@@ -292,10 +304,12 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
       </build>
     </profile>
     <profile>
-      <id>win</id>
+      <id>win-64</id>
+      <!-- Compilable with x86_64 toolchain from https://sourceforge.net/projects/mingw-w64/ -->
       <activation>
         <os>
           <family>windows</family>
+          <arch>amd64</arch>
         </os>
       </activation>
       <properties>
@@ -307,22 +321,31 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
             <groupId>com.github.maven-nar</groupId>
             <artifactId>nar-maven-plugin</artifactId>
             <configuration>
+              <output>jpen-${module.version}-${jpen.provider.wintab.nativeVersion}-64</output>
               <linker>
                 <name>g++</name>
                 <libs>
                   <lib>
-                    <name>WINTAB32</name>
+                    <name>WINTAB64</name>
                     <type>shared</type>
-                    <directory>src/main/c/windows/lib</directory>
+                    <directory>src/main/c/windows/lib-64</directory>
                   </lib>
                 </libs>
+                <sysLibs>
+                </sysLibs>
               </linker>
             </configuration>
+            <executions>
+                <execution>
+                    <id>default-nar-javah</id>
+                    <phase>none</phase>
+                </execution>
+            </executions>
           </plugin>
           <plugin>
             <!--
     For whatever reason the NAR plugin fails to link this properly under
-    Win32.
+    Win32. (and Win64)
     
     What it should do:
     use the -Wl,-kill-at switch as below
@@ -338,17 +361,109 @@ along with jpen.  If not, see <http://www.gnu.org/licenses/>.
                 <phase>process-classes</phase>
                 <configuration>
                   <tasks>
-                    <exec executable="gcc" dir="target/nar/lib/x86-Windows-g++/jni/">
+                    <mkdir dir="target/nar/lib/amd64-Windows-gpp/jni/"/>
+                    <exec executable="gcc" dir="target/nar/lib/amd64-Windows-gpp/jni/">
+                      <arg value="-shared"/>
+                      <arg value="-o"/>
+                      <arg value="jpen-${module.version}-${jpen.provider.wintab.nativeVersion}-64.dll"/>
+                      <arg value="../../../obj/amd64-Windows-gpp/jpen_provider_wintab_WintabAccess.o"/>
+                      <arg value="../../../obj/amd64-Windows-gpp/Access.o"/>
+                      <arg value="../../../obj/amd64-Windows-gpp/macros.o"/>
+                      <arg value="-L../../../../../src/main/c/windows/lib-64"/>
+                      <arg value="-Wl,-kill-at"/>
+                      <arg value="-lWINTAB64"/>
+                    </exec>
+                    <copy file="${project.basedir}/target/nar/lib/amd64-Windows-gpp/jni/jpen-${module.version}-${jpen.provider.wintab.nativeVersion}-64.dll" todir="${project.basedir}/target"/>
+                  </tasks>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>win-32</id>
+      <!-- Compilable with i686 toolchain from https://sourceforge.net/projects/mingw-w64/ -->
+      <!-- SmokeTest will fail om 64bit Windows but the 32bit dll is created -->
+      <activation>
+        <os>
+          <family>windows</family>
+          <arch>x86</arch>
+        </os>
+      </activation>
+      <properties>
+        <source.dir>src/main/c/windows</source.dir>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.github.maven-nar</groupId>
+            <artifactId>nar-maven-plugin</artifactId>
+            <configuration>
+              <architecture>x86</architecture>
+              <output>jpen-${module.version}-${jpen.provider.wintab.nativeVersion}</output>
+              <linker>
+                <name>g++</name>
+                <!--
+                <options>
+                    <option>-m32</option>
+                </options>
+                -->
+                <libs>
+                  <lib>
+                    <name>WINTAB32</name>
+                    <type>shared</type>
+                    <directory>src/main/c/windows/lib</directory>
+                  </lib>
+                </libs>
+                <sysLibs>
+                </sysLibs>
+              </linker>
+            </configuration>
+            <executions>
+                <execution>
+                    <id>default-nar-javah</id>
+                    <phase>none</phase>
+                </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <!--
+    For whatever reason the NAR plugin fails to link this properly under
+    Win32. (and Win64)
+    
+    What it should do:
+    use the -Wl,-kill-at switch as below
+    
+    What it does:
+    use a -Wl,-Bdynamic switch
+    
+    Therefore, we have to re-link using the proper command line.
+  -->
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>process-classes</phase>
+                <configuration>
+                  <tasks>
+                    <mkdir dir="target/nar/lib/x86-Windows-gpp/jni/"/>
+                    <exec executable="gcc" dir="target/nar/lib/x86-Windows-gpp/jni/">
+                      <!-- <arg value="-m32"/> -->
                       <arg value="-shared"/>
                       <arg value="-o"/>
                       <arg value="jpen-${module.version}-${jpen.provider.wintab.nativeVersion}.dll"/>
-                      <arg value="../../../obj/x86-Windows-g++/jpen_provider_wintab_WintabAccess.o"/>
-                      <arg value="../../../obj/x86-Windows-g++/Access.o"/>
-                      <arg value="../../../obj/x86-Windows-g++/macros.o"/>
+                      <arg value="../../../obj/x86-Windows-gpp/jpen_provider_wintab_WintabAccess.o"/>
+                      <arg value="../../../obj/x86-Windows-gpp/Access.o"/>
+                      <arg value="../../../obj/x86-Windows-gpp/macros.o"/>
                       <arg value="-L../../../../../src/main/c/windows/lib"/>
                       <arg value="-Wl,-kill-at"/>
                       <arg value="-lWINTAB32"/>
                     </exec>
+                    <copy file="${project.basedir}/target/nar/lib/x86-Windows-gpp/jni/jpen-${module.version}-${jpen.provider.wintab.nativeVersion}.dll" todir="${project.basedir}/target"/>
                   </tasks>
                 </configuration>
                 <goals>
